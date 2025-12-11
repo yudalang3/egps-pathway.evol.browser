@@ -71,6 +71,7 @@ public class BuilderBootstrapTree4MSA<E extends DistParameterLevel1> extends Boo
 		super(sequences, seqNames);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize() throws Exception {
 		evoPairwiseDistMethod = (EvoPairwiseDistMethod<E>) alignmentDists.getPairEvoDistance().getEvopairDistMethod();

@@ -8,7 +8,7 @@ import module.evoldist.operator.disAlgo.TajimaNeiModel;
 import module.evoldist.operator.disAlgo.Tamura3ParamModel;
 import module.evoldist.operator.disAlgo.TamuraNeiModel;
 import module.evoldist.operator.disAlgo.TheTransversionRate;
-import module.evoltrepipline.PairEvoDistance;
+import module.evoltrepipline.IPairwiseEvolutionaryDistance;
 
 public class AlignmentEvoDistance <T extends DistParameterLevel1>{
 
@@ -29,35 +29,35 @@ public class AlignmentEvoDistance <T extends DistParameterLevel1>{
 	private void initialize(String distName, boolean ifAB) {
 		switch (distName) {
 
-		case PairEvoDistance.NUM_OF_DIFF:
+		case IPairwiseEvolutionaryDistance.NUM_OF_DIFF:
 			Class<DistParameterLevel1> kind = (Class<DistParameterLevel1>) DistParameterLevel1.class;
 			evoDistance = new DefaultPairDistance<>( kind, ifAB, new NumOfDifferences<DistParameterLevel1>());
 			break;
-		case PairEvoDistance.P_DISTANCE:
+		case IPairwiseEvolutionaryDistance.P_DISTANCE:
 			Class<DistParameterLevel1> kind2 = (Class<DistParameterLevel1>) DistParameterLevel1.class;
 			evoDistance = new DefaultPairDistance<>(kind2, ifAB, new SimplePDistance<DistParameterLevel1>());
 			break;
-		case PairEvoDistance.JC69_MODEL:
+		case IPairwiseEvolutionaryDistance.JC69_MODEL:
 			Class<DistParameterLevel1> kind3 = (Class<DistParameterLevel1>) DistParameterLevel1.class;
 			evoDistance = new DefaultPairDistance<>(kind3, ifAB, new JukesCantorModel<DistParameterLevel1>());
 			break;
-		case PairEvoDistance.K2P_MODEL:
+		case IPairwiseEvolutionaryDistance.K2P_MODEL:
 			Class<DistParameterLevel2> kind4 = (Class<DistParameterLevel2>) DistParameterLevel2.class;
 			evoDistance = new DefaultPairDistance<>(kind4, ifAB, new Kimura2ParamModel<DistParameterLevel2>());
 			break;
-		case PairEvoDistance.T3P_MODEL:
+		case IPairwiseEvolutionaryDistance.T3P_MODEL:
 			Class<DistParameterLevel3> kind5 = (Class<DistParameterLevel3>) DistParameterLevel3.class;
 			evoDistance = new DefaultPairDistance<>(kind5, ifAB, new Tamura3ParamModel<DistParameterLevel3>());
 			break;
-		case PairEvoDistance.TAM_NEI_MODEL:
+		case IPairwiseEvolutionaryDistance.TAM_NEI_MODEL:
 			Class<DistParameterLevel41> kind6 = (Class<DistParameterLevel41>) DistParameterLevel41.class;
 			evoDistance = new DefaultPairDistance<>(kind6, ifAB, new TamuraNeiModel<DistParameterLevel41>());
 			break;
-		case PairEvoDistance.TAJ_NEI_MODEL:
+		case IPairwiseEvolutionaryDistance.TAJ_NEI_MODEL:
 			Class<DistParameterLevel42> kind7 = (Class<DistParameterLevel42>) DistParameterLevel42.class;
 			evoDistance = new DefaultPairDistance<>(kind7, ifAB, new TajimaNeiModel<DistParameterLevel42>());
 			break;
-		case PairEvoDistance.RATE_OF_TRANS:
+		case IPairwiseEvolutionaryDistance.RATE_OF_TRANS:
 			Class<DistParameterLevel2> kind8 = (Class<DistParameterLevel2>) DistParameterLevel2.class;
 			evoDistance = new DefaultPairDistance<>(kind8, ifAB, new TheTransversionRate<DistParameterLevel2>());
 			break;
@@ -131,7 +131,7 @@ public class AlignmentEvoDistance <T extends DistParameterLevel1>{
 	}
 	
 	public static void main(String[] args) {
-		AlignmentEvoDistance<DistParameterLevel1> tt = new AlignmentEvoDistance<DistParameterLevel1>(PairEvoDistance.JC69_MODEL, false);
+		AlignmentEvoDistance<DistParameterLevel1> tt = new AlignmentEvoDistance<DistParameterLevel1>(IPairwiseEvolutionaryDistance.JC69_MODEL, false);
 		
 		
 		tt.reSetSeqs(new String[] {"ACT","ACG"});

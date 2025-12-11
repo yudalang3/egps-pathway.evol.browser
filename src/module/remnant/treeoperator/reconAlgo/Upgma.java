@@ -44,10 +44,10 @@ public class Upgma implements TreeReconMethod{
             for (int j = 0; j < length; j ++) {
             	targetRow[j] = sourceRow[j];
             }
-        } 	
-        
-        List currentLeaves = new ArrayList(n);
-        
+        }
+
+        List<NodeEGPSv1> currentLeaves = new ArrayList<>(n);
+
         for(int i = 0; i < n; i ++) {
             DefaultNode node = new DefaultNode();
             node.setSize(1);
@@ -203,7 +203,7 @@ public class Upgma implements TreeReconMethod{
     	}
     }
     
-    public double getJoin(int size, double[][] dis, int[] join, List currentLeaves) {
+    public double getJoin(int size, double[][] dis, int[] join, List<NodeEGPSv1> currentLeaves) {
         double xmin = Double.MAX_VALUE;
         
 		if (listOfJoints.isEmpty()) {

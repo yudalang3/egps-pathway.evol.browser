@@ -15,7 +15,7 @@ import javax.swing.table.JTableHeader;
 
 import egps2.UnifiedAccessPoint;
 
-public abstract class AbstractTableBasedArea extends AbstactInformationArea{
+public abstract class AbstractTableBasedArea extends AbstractInformationArea{
 	private static final long serialVersionUID = 1481963980351932821L;
 	
 	protected DefaultTableModel tableModel;

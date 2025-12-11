@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
-import module.evoldist.operator.pairdist.DistParameterPareparerABEqualPos;
+import module.evoldist.operator.pairdist.DistParameterPreparerABEqualPos;
 import module.evoldist.operator.pairdist.SimpleObj;
 
 import java.util.Set;
@@ -44,7 +44,7 @@ public class QuickDistUtil {
 
 	private final static int[][] nucleotidesHashSet;
 
-	private static DistParameterPareparerABEqualPos calculatorWithAB = new DistParameterPareparerABEqualPos();
+	private static DistParameterPreparerABEqualPos calculatorWithAB = new DistParameterPreparerABEqualPos();
 
 	static final HashMap<Character, Set<Character>> oneChar2presentationsMap;
 

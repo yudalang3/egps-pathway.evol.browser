@@ -23,7 +23,7 @@ import org.jdesktop.swingx.JXTaskPaneContainer;
 import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.ComputationalModuleFace;
-import module.multiseq.alignment.view.gui.AbstructSequenceColor;
+import module.multiseq.alignment.view.gui.AbstractSequenceColor;
 import module.multiseq.alignment.view.gui.AlignmentViewContinuousRightPanel;
 import module.multiseq.alignment.view.gui.AlignmentViewInterLeavedPanel;
 import module.multiseq.alignment.view.gui.UserSelectedViewElement;
@@ -242,7 +242,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 //
 //					SequenceDataForAViewer sequenceData = getAlignmentViewPort().getSequenceData();
 //
-//					PLMSA2DistMatrix plmsa2DistMatrix = new PLMSA2DistMatrix();
+//					PipelineMSAToDistanceMatrix plmsa2DistMatrix = new PipelineMSAToDistanceMatrix();
 //					plmsa2DistMatrix.setSeqs(sequenceData.getSequences());
 //					plmsa2DistMatrix.setSeq_names(sequenceData.getSequenceNames());
 //					plmsa2DistMatrix.setTabName(tabName);
@@ -310,7 +310,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 
 	@Override
 	public void importData() {
-		VOICM4AlignmentView inputViewPanel = new VOICM4AlignmentView(this);
+		VOICE4AlignmentView inputViewPanel = new VOICE4AlignmentView(this);
 		SwingDialog.QuickWrapperJCompWithDialog(inputViewPanel, "Data Import Dialog", 1000, 800);
 	}
 
@@ -445,7 +445,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 		stringBuilder.append("The eGPS desktop software was employed to visualize the alignmnet of *. The layout is ");
 		stringBuilder.append(myLayout);
 		
-		AbstructSequenceColor sequenceBackgroundColor = alignmentDrawProperties2.getSequenceBackgroundColor();
+		AbstractSequenceColor sequenceBackgroundColor = alignmentDrawProperties2.getSequenceBackgroundColor();
 		stringBuilder.append(". The rendering color scheme is ");
 		stringBuilder.append(sequenceBackgroundColor.toString());
 		stringBuilder.append(".");

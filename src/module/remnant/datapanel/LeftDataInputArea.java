@@ -151,9 +151,10 @@ public class LeftDataInputArea extends JPanel {
 					}
 					if (event.getClickCount() == 2) {
 						try {
-							Runtime.getRuntime().exec(
-							        "rundll32 SHELL32.DLL,ShellExec_RunDLL " +
-							        "Explorer.exe /select," + file.getAbsolutePath());
+							Runtime.getRuntime().exec(new String[]{
+									"rundll32", "SHELL32.DLL,ShellExec_RunDLL",
+									"Explorer.exe", "/select," + file.getAbsolutePath()
+							});
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

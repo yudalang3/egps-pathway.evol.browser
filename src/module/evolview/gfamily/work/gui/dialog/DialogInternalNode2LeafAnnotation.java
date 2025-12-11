@@ -24,7 +24,7 @@ import module.evolview.model.tree.AnnotationsProperties;
 import module.evolview.model.tree.GraphicsNode;
 
 @SuppressWarnings("serial")
-public class DialogInternalNode2LeafAnnotation extends AbstarctShowAnnotationDialog {
+public class DialogInternalNode2LeafAnnotation extends AbstractShowAnnotationDialog {
 
 	private JPanel parameterPanel;
 	private JButton colorChangeButton;

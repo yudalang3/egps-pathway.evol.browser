@@ -43,24 +43,26 @@ public class IndependentModuleLoader extends TabModuleFaceOfVoice {
 
 	@Override
 	protected void setParameter(AbstractParamsAssignerAndParser4VOICE mapProducer) {
-		mapProducer.addKeyValueEntryBean("input.fasta.path", "",
-				"The file path has the ambiguous nucleotide sequence, in fasta format. Necessary");
-		mapProducer.addKeyValueEntryBean("input.ambuguous.sequence", "CTTTGWWS;AGAWAW",
-				"Directly input the ambiguous nucleotide sequence, with ; as splitter. If user both set the input.fasta.path and input.ambuguous.sequence, only take this one.");
-	}
+
+		mapProducer.addKeyValueEntryBean("input.ambiguous.sequence", "CTTTGWWS;AGAWAW",
+				"Directly input the ambiguous nucleotide sequence, with ; as splitter. If user both set the input.fasta.path and input.ambiguous.sequence, only take this one.");
+
+        mapProducer.addKeyValueEntryBean("input.alternative.fasta.path", "",
+                "The file path has the ambiguous nucleotide sequence, in fasta format. Necessary");
+    }
 
 	@Override
 	protected void execute(OrganizedParameterGetter o) throws Exception {
 		String inputFilePath = null;
 		String inputAmbuguousSeq = null;
 
-		String string = o.getSimplifiedStringWithDefault("input.fasta.path");
+		String string = o.getSimplifiedStringWithDefault("input.alternative.fasta.path");
 		if (Strings.isNullOrEmpty(string)) {
 
 		} else {
 			inputFilePath = string;
 		}
-		string = o.getSimplifiedStringWithDefault("input.ambuguous.sequence");
+		string = o.getSimplifiedStringWithDefault("input.ambiguous.sequence");
 		if (Strings.isNullOrEmpty(string)) {
 
 		} else {
@@ -87,7 +89,6 @@ public class IndependentModuleLoader extends TabModuleFaceOfVoice {
 		}else {
 			throw new IllegalArgumentException("Please input at last one parameter");
 		}
-		
 
 		
 		for (Entry<String, String> entry : fastaDNASequence.entrySet()) {

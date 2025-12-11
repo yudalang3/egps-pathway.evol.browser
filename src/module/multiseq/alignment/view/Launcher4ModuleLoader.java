@@ -19,12 +19,12 @@ public class Launcher4ModuleLoader implements IModuleLoader{
 
 	@Override
 	public String getTabName() {
-		return "Alignmnet view";
+		return "Alignment view";
 	}
 
 	@Override
 	public String getShortDescription() {
-		return "A convenient remnant to view the multiple sequence alignment.";
+		return "A convenient graphic tool to view the multiple sequence alignment.";
 	}
 
 	@Override

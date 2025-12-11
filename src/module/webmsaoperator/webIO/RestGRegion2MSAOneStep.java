@@ -7,7 +7,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,7 +129,12 @@ public class RestGRegion2MSAOneStep {
 		System.out.println(server + ext + ";content-type=application/json");
 		// when primate species set group, seq names error happen
 		//http://rest.ensembl.org/alignment/region/homo_sapiens/8:144449582-144465677:-1?content-type=application/json;species_set_group=primates
-		URL url = new URL(server + ext);
+		URL url;
+		try {
+			url = new URI(server + ext).toURL();
+		} catch (URISyntaxException e) {
+			throw new IOException("Invalid URL: " + server + ext, e);
+		}
 
 		URLConnection connection = url.openConnection();
 		HttpURLConnection httpConnection = (HttpURLConnection) connection;

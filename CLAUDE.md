@@ -153,6 +153,42 @@ User configuration stored in `~/.egps/`:
 
 ## Development Patterns
 
+### Logging
+
+**IMPORTANT: Always use SLF4J Logger for logging, NEVER use `System.out.println()` or `System.err.println()`.**
+
+The project uses SLF4J for logging. All classes should use proper logging instead of console output.
+
+**Correct usage:**
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MyClass {
+    private static final Logger log = LoggerFactory.getLogger(MyClass.class);
+
+    public void myMethod() {
+        log.info("Informational message: {}", value);
+        log.warn("Warning message: {}", issue);
+        log.error("Error occurred: {}", e.getMessage());
+        log.debug("Debug info: {}", debugData);
+    }
+}
+```
+
+**WRONG - Never do this:**
+```java
+System.out.println("Some message");  // ❌ WRONG
+System.err.println("Error");         // ❌ WRONG
+e.printStackTrace();                 // ❌ WRONG - use log.error() instead
+```
+
+**Why:**
+- Logger output can be configured (level, format, destination)
+- Console output cannot be controlled or filtered
+- Logger supports parameterized messages (better performance)
+- Professional applications use proper logging frameworks
+
 ### Creating a New Module
 
 1. Implement `IModuleLoader` interface

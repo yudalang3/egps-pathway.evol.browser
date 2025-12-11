@@ -34,7 +34,7 @@ public class MSA2DistanceMatrixViewerMain extends DistanceMatrixParameterMain {
 
 	@Override
 	public void importData() {
-		VOICM4MSA2EvolDist voicm4EvolDist = new VOICM4MSA2EvolDist(this);
+		VOICE4MSA2EvolDist voicm4EvolDist = new VOICE4MSA2EvolDist(this);
 		voicm4EvolDist.doUserImportAction();
 	}
 

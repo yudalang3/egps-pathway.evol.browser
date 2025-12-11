@@ -28,7 +28,7 @@ public class NJ implements TreeReconMethod {
 		double[] branch = new double[maxOTU * 2]; /* branch length of each node */
 
 		final int n = dist.length + 1;
-		List newTree = new ArrayList();
+		List<NodeEGPSv1> newTree = new ArrayList<>();
 
 		String otu_node_i, otu_node_j; /* node or OTU designation */
 		int[] node_id = new int[maxOTU]; /* node ID starting from nOTU+1 */

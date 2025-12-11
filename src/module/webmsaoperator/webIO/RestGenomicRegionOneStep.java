@@ -7,7 +7,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -111,7 +115,12 @@ public class RestGenomicRegionOneStep {
 	private String getJsonString() throws IOException {
 		String server = "http://rest.ensembl.org";
 		String ext = "/lookup/symbol/" + speciesName + "/" + geneSymbol + "?expand=0";
-		URL url = new URL(server + ext);
+		URL url;
+		try {
+			url = new URI(server + ext).toURL();
+		} catch (URISyntaxException e) {
+			throw new IOException("Invalid URL: " + server + ext, e);
+		}
 
 		URLConnection connection = url.openConnection();
 		HttpURLConnection httpConnection = (HttpURLConnection) connection;

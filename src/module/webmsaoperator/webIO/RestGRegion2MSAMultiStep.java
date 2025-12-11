@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.string.EGPSStringUtil;
 import module.webmsaoperator.webIO.jsonBean.EnsemblRestAlignmentJsonModel;
 import module.webmsaoperator.webIO.jsonBean.RestAlignments;
@@ -45,8 +49,9 @@ import module.webmsaoperator.webIO.jsonBean.RestAlignments;
 public class RestGRegion2MSAMultiStep {
 
 	public final static int neededTotalSteps = 250;
-	
-	private int processIndex = 1;
+    private static final Logger log = LoggerFactory.getLogger(RestGRegion2MSAMultiStep.class);
+
+    private int processIndex = 1;
 	protected Reader reader;
 	protected StringBuilder builder = new StringBuilder(16384);
 	private long TOTALCHARS;
@@ -158,7 +163,11 @@ public class RestGRegion2MSAMultiStep {
 			String httpStr = "http://bigd.big.ac.cn/egpscloudREST/ws/alignment/chr" + strs[0] + ":" + strs[1]
 					+ "?species=" + species;
 			System.out.println(httpStr);
-			url = new URL(httpStr);
+			try {
+				url = new URI(httpStr).toURL();
+			} catch (URISyntaxException e) {
+				log.error("Invalid URL: " + httpStr, e);
+			}
 		}else {
 			// It's better to use http service, instead of https service
 			//String server = EnsemblAlignmentRestAPICheck.getEnsemblServer();
@@ -182,7 +191,11 @@ public class RestGRegion2MSAMultiStep {
 			System.out.println(server + ext + ";content-type=application/json");
 			// when primate species set group, seq names error happen
 			// http://rest.ensembl.org/alignment/region/homo_sapiens/8:144449582-144465677:-1?content-type=application/json;species_set_group=primates
-			url = new URL(server + ext);
+			try {
+				url = new URI(server + ext).toURL();
+			} catch (URISyntaxException e) {
+				log.error("Invalid URL: " + server + ext, e);
+			}
 		}
 		
 		return url;

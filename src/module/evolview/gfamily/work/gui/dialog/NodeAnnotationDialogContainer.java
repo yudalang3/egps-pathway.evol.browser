@@ -163,7 +163,7 @@ public class NodeAnnotationDialogContainer extends JDialog {
 
 		SwingUtilities.invokeLater(() -> {
 			
-			AbstarctShowAnnotationDialog node = (AbstarctShowAnnotationDialog) jTree.getLastSelectedPathComponent();
+			AbstractShowAnnotationDialog node = (AbstractShowAnnotationDialog) jTree.getLastSelectedPathComponent();
 			node.configurateAnnotationProperty2preview();
 			phylogeneticTreePanel.setWidthAndHeight(400, 400);
 			phylogeneticTreePanel.updateViewAccording2TreeLayoutForAnnotationDialog();
@@ -206,7 +206,7 @@ public class NodeAnnotationDialogContainer extends JDialog {
 			}
 
 			private void switchingOptions(JTree jTree) {
-				AbstarctShowAnnotationDialog node = (AbstarctShowAnnotationDialog) jTree.getLastSelectedPathComponent();
+				AbstractShowAnnotationDialog node = (AbstractShowAnnotationDialog) jTree.getLastSelectedPathComponent();
 
 				if (node == null) {
 					return;
@@ -226,7 +226,7 @@ public class NodeAnnotationDialogContainer extends JDialog {
 			JButton cancelAnnotation = new JButton("Cancel");
 
 			applyAnnotation.addActionListener(e -> {
-				AbstarctShowAnnotationDialog node = (AbstarctShowAnnotationDialog) jTree.getLastSelectedPathComponent();
+				AbstractShowAnnotationDialog node = (AbstractShowAnnotationDialog) jTree.getLastSelectedPathComponent();
 				if (node == null) {
 					return;
 				}

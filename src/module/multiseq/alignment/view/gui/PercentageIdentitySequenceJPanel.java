@@ -8,7 +8,7 @@ import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.alignment.sequence.SequenceI;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
 
-public class PercentageIdentitySequenceJPanel extends AbstructSequenceColor {
+public class PercentageIdentitySequenceJPanel extends AbstractSequenceColor {
 
 	/**
 	 * 

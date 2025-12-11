@@ -208,6 +208,7 @@ public class SingleTreePaintingPanel<T extends EvolNode> extends JPanel {
         return frame;
     }
 
+    @SuppressWarnings("unchecked")
     public ReflectGraphicNode<T> getSelectedNode() {
         return (ReflectGraphicNode<T>) singleTreePaintingListener.selectedNode;
     }

@@ -34,7 +34,7 @@ import utils.EGPSGuiUtil;
 import utils.string.EGPSStringUtil;
 import tsv.io.KitTable;
 import tsv.io.TSVReader;
-import module.analysehomogene.gui.CommonProcedureUtil;
+import evoltree.struct.TreeDecoder;
 import evoltree.struct.util.EvolNodeUtil;
 import module.evolview.phylotree.visualization.primary.swing.FastSingleTreeVisualizer;
 import evoltree.swingvis.OneNodeDrawer;
@@ -93,7 +93,17 @@ public class WatchNodeStatesWithChange {
 
 	public void run() throws Exception {
 
-		EvolNode root = CommonProcedureUtil.getRootNode(pathOfPhylogeneticTree);
+		// Inlined from CommonProcedureUtil.getRootNode() - analysehomogene module removed
+		EvolNode root;
+		{
+			final String defaultRootNodeName = "Root";
+			String nwkString = FileUtils.readFileToString(new File(pathOfPhylogeneticTree), StandardCharsets.US_ASCII);
+			TreeDecoder decode = new TreeDecoder();
+			root = decode.decode(nwkString);
+			if (root.getName() == null) {
+				root.setName(defaultRootNodeName);
+			}
+		}
 
 		Map<String, Map<String, String>> position2_name2stateMap_map = new LinkedHashMap<>();
 
@@ -249,7 +259,7 @@ public class WatchNodeStatesWithChange {
 
 		EGPSGuiUtil.universalSimplestIDE(() -> {
 
-			FastSingleTreeVisualizer value = mutableObject.getValue();
+			FastSingleTreeVisualizer value = mutableObject.get();
 			if (value != null) {
 				JFrame frame = value.frame;
 				frame.setVisible(false);

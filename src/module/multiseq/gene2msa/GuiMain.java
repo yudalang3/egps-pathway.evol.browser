@@ -33,7 +33,7 @@ import egps2.modulei.IModuleLoader;
 @SuppressWarnings("serial")
 public class GuiMain extends ComputationalModuleFace {
 
-	private VOICM4gene2MSA voicm4TreeLeafInforObtainer;
+	private VOICE4gene2MSA voicm4TreeLeafInforObtainer;
 	private JTextArea jTextArea;
 
 	Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
@@ -42,7 +42,7 @@ public class GuiMain extends ComputationalModuleFace {
 	protected GuiMain(IModuleLoader moduleLoader) {
 		super(moduleLoader);
 		setLayout(new BorderLayout());
-		voicm4TreeLeafInforObtainer = new VOICM4gene2MSA(this);
+		voicm4TreeLeafInforObtainer = new VOICE4gene2MSA(this);
 	}
 
 	/**
@@ -179,12 +179,12 @@ public class GuiMain extends ComputationalModuleFace {
 		String geneSym = parameterMap.get(constantNameClass_WebQuery.label1_geneSymbol);
 		String genomicRegion = parameterMap.get(constantNameClass_WebQuery.label2_genomicRegion);
 
-		PLWeb2ObtainAlignment plWeb2ObtainAlignment = null;
+		PipelineWebToAlignment plWeb2ObtainAlignment = null;
 
 		if (geneSym.isEmpty()) {
-			plWeb2ObtainAlignment = new PLWeb2ObtainAlignment(parameterMap, genomicRegion, true);
+			plWeb2ObtainAlignment = new PipelineWebToAlignment(parameterMap, genomicRegion, true);
 		} else {
-			plWeb2ObtainAlignment = new PLWeb2ObtainAlignment(parameterMap, geneSym);
+			plWeb2ObtainAlignment = new PipelineWebToAlignment(parameterMap, geneSym);
 		}
 
 		plWeb2ObtainAlignment.setOutputFile(concat);

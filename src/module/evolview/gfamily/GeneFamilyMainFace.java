@@ -290,7 +290,7 @@ public class GeneFamilyMainFace extends ModuleFace {
 	 */
 	public void initializeTheModule(RequiredGeneData geneData, TreeLayoutProperties treeLayoutProperties) {
 
-		// 这个导入过程，如果更改需要注意三处：VOICM4MTV类的execute()；GeneFamilyMainFace类的initialize和MTreeViewMainFace的initializeGraphics()
+		// 这个导入过程，如果更改需要注意三处：VOICE4MTV类的execute()；GeneFamilyMainFace类的initialize和MTreeViewMainFace的initializeGraphics()
 
 		GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
 		PhylogeneticTreePanel phylogeneticTreePanel = new PhylogeneticTreePanel(treeLayoutProperties, root, null, null);

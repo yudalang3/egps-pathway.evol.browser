@@ -13,7 +13,7 @@ import evoltree.phylogeny.DefaultPhyNode;
 import evoltree.phylogeny.NWKInternalCoderDecoder;
 import evoltree.phylogeny.NWKLeafCoderDecoder;
 import evoltree.struct.io.PrimaryNodeTreeDecoder;
-import module.evolview.gfamily.work.NodeUtils;
+import module.evolview.model.tree.NodeUtils;
 
 public class TreeParser4Evoltree {
 

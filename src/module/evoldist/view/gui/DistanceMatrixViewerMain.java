@@ -2,7 +2,7 @@ package module.evoldist.view.gui;
 
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
-import module.evoldist.view.contorl.VOICM4EvolDist;
+import module.evoldist.view.contorl.VOICE4EvolDist;
 import egps2.modulei.IModuleLoader;
 
 /**
@@ -33,7 +33,7 @@ public class DistanceMatrixViewerMain extends DistanceMatrixParameterMain {
 
 	@Override
 	public void importData() {
-		VOICM4EvolDist voicm4EvolDist = new VOICM4EvolDist(this);
+		VOICE4EvolDist voicm4EvolDist = new VOICE4EvolDist(this);
 		voicm4EvolDist.doUserImportAction();
 	}
 

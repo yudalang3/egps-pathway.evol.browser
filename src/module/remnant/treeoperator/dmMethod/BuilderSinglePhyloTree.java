@@ -19,7 +19,7 @@ import module.remnant.treeoperator.reconAlgo.NJ;
 import module.remnant.treeoperator.reconAlgo.TreeReconMethod;
 import module.evoldist.operator.DistanceCalculateor;
 import module.evoldist.operator.EvoDistanceUtil;
-import module.evoltrepipline.PairEvoDistance;
+import module.evoltrepipline.IPairwiseEvolutionaryDistance;
 
 /**
  * <p>
@@ -105,7 +105,7 @@ public class BuilderSinglePhyloTree extends DistanceCalculateor{
 		String[] seqs = {"ACTT","ACGT","AGGT"};
 		String[] seqNames = {"seq1","seq2","seq3"};
 		BuilderSinglePhyloTree tt = new BuilderSinglePhyloTree(seqs, seqNames);
-		tt.initDistance(PairEvoDistance.JC69_MODEL,false);
+		tt.initDistance(IPairwiseEvolutionaryDistance.JC69_MODEL,false);
 		
 		NodeEGPSv1 finalTree = tt.getFinalTree();
 		String code = TreeCoder.code(finalTree);

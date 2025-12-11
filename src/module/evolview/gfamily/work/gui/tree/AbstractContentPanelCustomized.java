@@ -100,7 +100,7 @@ public abstract class AbstractContentPanelCustomized extends BaseContentPanel {
                         try {
                             textArea.setForeground(Color.black);
                             textArea.setText("");
-                            List<String> readLines = FileUtils.readLines(selectedFile);
+                            List<String> readLines = FileUtils.readLines(selectedFile, java.nio.charset.StandardCharsets.UTF_8);
                             StringBuilder stringBuilder = new StringBuilder();
                             readLines.forEach(string -> {
                                 stringBuilder.append(string + "\n");

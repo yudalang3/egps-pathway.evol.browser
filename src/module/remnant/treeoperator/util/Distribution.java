@@ -210,6 +210,7 @@ public class Distribution extends Object implements PropertyChangeListener, java
 	 * its frequency is set to the value of count, otherwise, its frequency is
 	 * increased by count amount.
 	 */
+	@SuppressWarnings("unchecked")
 	public void put(double x, double count) {
 		nEntry++;
 		key.setValue(x);
@@ -246,6 +247,7 @@ public class Distribution extends Object implements PropertyChangeListener, java
 	 * data[0],whose length is equal to size(), and their associated frequency(
 	 * weights) in data[1];
 	 */
+	@SuppressWarnings("unchecked")
 	public double[][] getFrequency() {
 		if (map instanceof TreeMap)
 			treemap = map;

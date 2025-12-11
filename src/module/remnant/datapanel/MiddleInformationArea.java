@@ -7,11 +7,11 @@ import java.io.File;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-import module.remnant.datapanel.informationArea.AbstactInformationArea;
+import module.remnant.datapanel.informationArea.AbstractInformationArea;
 
 public class MiddleInformationArea extends JPanel {
 	
-	private AbstactInformationArea informationArea;
+	private AbstractInformationArea informationArea;
 
 	public MiddleInformationArea() {
 		setLayout(new BorderLayout());
@@ -23,7 +23,7 @@ public class MiddleInformationArea extends JPanel {
 		return informationArea;
 	}
 
-	public void addNewInformationArea(AbstactInformationArea informationArea) {
+	public void addNewInformationArea(AbstractInformationArea informationArea) {
 		this.informationArea = informationArea;
 		
 		if (getComponentCount() > 0) {

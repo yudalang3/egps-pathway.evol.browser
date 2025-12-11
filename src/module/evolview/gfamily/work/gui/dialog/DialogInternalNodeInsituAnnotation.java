@@ -30,7 +30,7 @@ import module.evolview.model.tree.AnnotationsProperties;
 import module.evolview.model.tree.GraphicsNode;
 
 @SuppressWarnings("serial")
-public class DialogInternalNodeInsituAnnotation extends AbstarctShowAnnotationDialog {
+public class DialogInternalNodeInsituAnnotation extends AbstractShowAnnotationDialog {
 
 	private JPanel parameterPanel;
 	private JComboBox<String> shst;
@@ -258,13 +258,13 @@ public class DialogInternalNodeInsituAnnotation extends AbstarctShowAnnotationDi
 		Font textFont = null;
 		if (mrcaFontstyle.getSelectedItem().toString().equals("Plain")) {
 			textFont = new Font((String) fontComboBox.getSelectedItem(), Font.PLAIN,
-					new Integer((String) annoTextFontSize.getSelectedItem()));
+					Integer.parseInt((String) annoTextFontSize.getSelectedItem()));
 		} else if (mrcaFontstyle.getSelectedItem().toString().equals("Bold")) {
 			textFont = new Font((String) fontComboBox.getSelectedItem(), Font.BOLD,
-					new Integer((String) annoTextFontSize.getSelectedItem()));
+					Integer.parseInt((String) annoTextFontSize.getSelectedItem()));
 		} else {
 			textFont = new Font((String) fontComboBox.getSelectedItem(), Font.ITALIC,
-					new Integer((String) annoTextFontSize.getSelectedItem()));
+					Integer.parseInt((String) annoTextFontSize.getSelectedItem()));
 		}
 		
 		Color textColor = ((ColorIcon)annoTextColbtn.getIcon() ).getColor();

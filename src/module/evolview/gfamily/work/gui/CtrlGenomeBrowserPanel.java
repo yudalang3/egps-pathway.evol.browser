@@ -16,7 +16,7 @@ import javax.swing.border.EmptyBorder;
 
 import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
-import module.evolview.genebrowser.GeneBrowserMainFace;
+// import module.evolview.genebrowser.GeneBrowserMainFace; // Removed - genebrowser module not included
 import module.evolview.gfamily.GeneFamilyMainFace;
 import egps2.builtin.modules.IconObtainer;
 import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
@@ -138,11 +138,12 @@ public class CtrlGenomeBrowserPanel extends BaseCtrlPanel {
 			controller.refreshViewGenomeBrowser();
 			reSetValue();
 
-			GeneFamilyMainFace main = controller.getMain();
-			if (main instanceof GeneBrowserMainFace) {
-				GeneBrowserMainFace face = (GeneBrowserMainFace) main;
-				face.invokeTheFeatureMethod(1);
-			}
+			// Genome browser feature removed - genebrowser module not included
+			// GeneFamilyMainFace main = controller.getMain();
+			// if (main instanceof GeneBrowserMainFace) {
+			// 	GeneBrowserMainFace face = (GeneBrowserMainFace) main;
+			// 	face.invokeTheFeatureMethod(1);
+			// }
 		});
 		this.rdbtnProtein = new JRadioButton();
 //		this.rdbtnNeclotide = rdbtnNeclotide;

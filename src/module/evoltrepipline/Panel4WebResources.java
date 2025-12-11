@@ -24,10 +24,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTree;
 import javax.swing.border.TitledBorder;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
+import module.evoltreio.DistanceTreeConfigManager;
+import module.evoltreio.SpeciesProperties;
 
 import egps2.EGPSProperties;
 
@@ -61,11 +59,7 @@ public class Panel4WebResources extends AbstractPrefShowContent {
 
 		this.parameterMap = parameterMap;
 		if (speciesList == null || speciesList.size() == 0) {
-			try {
-				findSpeciesValue();
-			} catch (DocumentException e) {
-				e.printStackTrace();
-			}
+			findSpeciesValue();
 		}
 	}
 
@@ -403,20 +397,12 @@ public class Panel4WebResources extends AbstractPrefShowContent {
 
 	/**
 	 * Read species names from files.
+	 * 已更新为使用JSON格式
 	 */
-	private void findSpeciesValue() throws DocumentException {
-
-		SAXReader reader = new SAXReader();
-		Document document = reader.read(new File(EGPSProperties.PROPERTIES_DIR + "/species_properties.xml"));
-		Element root = document.getRootElement();
-		List<Element> configList = root.elements();
-
-		for (Element e : configList) {
-			for (Iterator<Element> i = e.elementIterator("species_set"); i.hasNext();) {
-				Element element = (Element) i.next();
-				speciesList.add((String) element.getData());
-			}
-		}
+	private void findSpeciesValue() {
+		DistanceTreeConfigManager configManager = new DistanceTreeConfigManager();
+		SpeciesProperties props = configManager.getSpeciesProperties();
+		speciesList.addAll(props.getAllSpecies());
 	}
 
 	@Override

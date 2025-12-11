@@ -59,7 +59,7 @@ public class InformationAreaMultipleSeqs extends AbstractTableBasedArea {
 		String contentType = "";
 		if (currentDataFormat == DataFormat.ALIGNED_FASTA) {
 			try {
-				List<String> readLines = FileUtils.readLines(file);
+				List<String> readLines = FileUtils.readLines(file, java.nio.charset.StandardCharsets.UTF_8);
 				boolean ifThirdLineStartWithSigSymbol = readLines.get(2).startsWith(">");
 				if (ifThirdLineStartWithSigSymbol) {
 					contentType = "Sequential";

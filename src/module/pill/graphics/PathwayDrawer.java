@@ -233,7 +233,7 @@ public class PathwayDrawer {
 	}
 
 	public void drawRelationship(Graphics2D g2d) {
-		ArrowLineDrawerByGPT35 arrowLineDrawerByGPT35 = new ArrowLineDrawerByGPT35();
+		ArrowLineDrawer arrowLineDrawerByGPT35 = new ArrowLineDrawer();
 		// draw relationship
 		List<GraphBaseRelation> proteinProteinRelations = gContainer.getProteinProteinRelations();
 		List<GraphBaseRelation> proteinCompoundRelations = gContainer.getProteinCompoundRelations();

@@ -7,7 +7,7 @@ import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.alignment.view.model.SequenceBaseColor;
 
 
-public class HighlightAllSitesSequenceJPanel extends AbstructSequenceColor {
+public class HighlightAllSitesSequenceJPanel extends AbstractSequenceColor {
 
 	/**
 	 * 

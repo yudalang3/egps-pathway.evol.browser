@@ -45,7 +45,8 @@ public class ClustaW2Alignment {
 
 	public void clustaW(String runExePath) throws Exception {
 
-		Process exec = Runtime.getRuntime().exec(runExePath + command);
+		String fullCommand = runExePath + command;
+		Process exec = Runtime.getRuntime().exec(new String[]{"sh", "-c", fullCommand});
 		// 等待执行结束
 		exec.waitFor();
 		if (exec.exitValue() == 0) {

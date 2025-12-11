@@ -76,6 +76,7 @@ public class NWKGraphicsInternalCoderDecoder<T extends DefaultGraphicsPhyloNode>
 		return sBuilder.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public T createNode() {
 		DefaultGraphicsPhyloNode defaultPhyNode = new DefaultGraphicsPhyloNode();

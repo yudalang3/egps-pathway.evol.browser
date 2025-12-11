@@ -5,7 +5,7 @@ import java.awt.Color;
 import module.evolview.gfamily.work.gui.tree.TreeOperationUtil;
 import module.evolview.model.tree.GraphicsNode;
 
-public class NoColorRender implements ColorRander {
+public class NoColorRender implements IColorRenderer {
 
 	@Override
 	public void renderNodes(GraphicsNode rootNode) {

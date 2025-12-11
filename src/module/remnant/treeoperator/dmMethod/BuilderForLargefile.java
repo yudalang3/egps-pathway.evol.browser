@@ -54,9 +54,10 @@ public class BuilderForLargefile<E extends DistParameterLevel1> extends BuilderB
 		addSeqsForEachBlock(sequences);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void addSeqsForEachBlock(String[] sequences) {
-		
-		
+
+
 		int len = tempWholeSeqsDistanceM.length;
 		if (ifBootstrap) {
 			addToPreCalSegments(sequences);
@@ -73,18 +74,19 @@ public class BuilderForLargefile<E extends DistParameterLevel1> extends BuilderB
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void addToPreCalSegments(String[] temp_seqs) {
 		if (preCalSegmentPairwiseDistIndex == 1000) {
 			preCalSegmentPairwiseDistIndex = 0;
 			fullLoadValues  = true;
 		}
-		
+
 		String[] processedAlignment = dealWithDeletion(temp_seqs);
 		alignmentDists.reSetSeqs(processedAlignment);
-		
+
 		E[][] oneSegmentDistOneBS = (E[][]) alignmentDists.getEvoDistParameters();
-		
+
 		preCalSegmentPairwiseDist[preCalSegmentPairwiseDistIndex] = oneSegmentDistOneBS;
 		preCalSegmentPairwiseDistIndex ++;
 	}
@@ -112,11 +114,14 @@ public class BuilderForLargefile<E extends DistParameterLevel1> extends BuilderB
 //		}
 //	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize() {
 		evoPairwiseDistMethod = (EvoPairwiseDistMethod<E>) alignmentDists.getPairEvoDistance().getEvopairDistMethod();
 		initWholeTempStoreVariable();
 	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void initWholeTempStoreVariable() {
 		super.initWholeTempStoreVariable();

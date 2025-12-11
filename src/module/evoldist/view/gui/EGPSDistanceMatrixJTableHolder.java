@@ -58,6 +58,11 @@ public class EGPSDistanceMatrixJTableHolder extends JPanel {
 	
 	public EGPSDistanceMatrixJTableHolder(double[][] valueMatrix,String[] realColumnNames) {
 		
+		// Null check for realColumnNames
+		if (realColumnNames == null) {
+			throw new IllegalArgumentException("realColumnNames cannot be null");
+		}
+		
 		displayedColumnNames = new String[realColumnNames.length + 1];
 		displayedColumnNames[0] = "  ";
 		

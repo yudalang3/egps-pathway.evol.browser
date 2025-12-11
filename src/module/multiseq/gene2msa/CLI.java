@@ -16,7 +16,7 @@ public class CLI {
 		
 //		IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
 //		GuiMain guiMain = (GuiMain) independentModuleLoader.getFace();
-//		VOICM4TreeLeafInforObtainer voicm4TreeLeafInforObtainer = new VOICM4TreeLeafInforObtainer(guiMain);
+//		VOICE4TreeLeafInforObtainer voicm4TreeLeafInforObtainer = new VOICE4TreeLeafInforObtainer(guiMain);
 //		
 //		String path = args[0];
 //		System.out.println("The input path is: " + path);

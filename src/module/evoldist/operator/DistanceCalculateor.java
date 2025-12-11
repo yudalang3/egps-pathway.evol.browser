@@ -5,7 +5,7 @@ import java.util.List;
 
 import egps2.panels.dialog.SwingDialog;
 import module.evoldist.operator.pairdist.AlignmentEvoDistance;
-import module.evoltrepipline.PairEvoDistance;
+import module.evoltrepipline.IPairwiseEvolutionaryDistance;
 import msaoperator.alignment.AlignmentPreprocesser;
 
 /**
@@ -14,7 +14,7 @@ import msaoperator.alignment.AlignmentPreprocesser;
  * String[] seqs = {"ACT","ACG"};
 		String[] seqNames = {"seq1","seq2"};
 		DistanceCalculateor distanceCalculateor = new DistanceCalculateor(seqs, seqNames);
-		distanceCalculateor.initDistance(PairEvoDistance.JC69_MODEL);
+		distanceCalculateor.initDistance(IPairwiseEvolutionaryDistance.JC69_MODEL);
  * </pre>
  * 
  * @author yudalang
@@ -62,7 +62,7 @@ public class DistanceCalculateor extends AlignmentPreprocesser{
 		String[] seqs = {"ACT","ACG"};
 		String[] seqNames = {"seq1","seq2"};
 		DistanceCalculateor distanceCalculateor = new DistanceCalculateor(seqs, seqNames);
-		distanceCalculateor.initDistance(PairEvoDistance.JC69_MODEL,false);
+		distanceCalculateor.initDistance(IPairwiseEvolutionaryDistance.JC69_MODEL,false);
 		double[][] d = distanceCalculateor.getFinalDistance();
 		for (double[] es : d) {
 			System.err.println(Arrays.toString(es));

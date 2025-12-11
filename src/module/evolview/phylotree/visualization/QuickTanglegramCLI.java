@@ -86,8 +86,8 @@ public class QuickTanglegramCLI {
 		/**
 		 * 用括号标记法可以编码一个进化树，标准的nwk(nh)格式并没有定义内节点的名字，我们这里可以定义，并且传递给name属性
 		 */
-		String line1 = FileUtils.readFileToString(new File(string));
-		String line2 = FileUtils.readFileToString(new File(string2));
+		String line1 = FileUtils.readFileToString(new File(string), java.nio.charset.StandardCharsets.UTF_8);
+		String line2 = FileUtils.readFileToString(new File(string2), java.nio.charset.StandardCharsets.UTF_8);
 		EvolNode rootNode = treeDecoder.decode(line1);
 		EvolNode rootNode2 = treeDecoder.decode(line2);
 

@@ -8,7 +8,7 @@ import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.alignment.view.model.SequenceBaseColor;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
 
-public class HighlightMonomorphicSitesSequenceJPanel extends AbstructSequenceColor {
+public class HighlightMonomorphicSitesSequenceJPanel extends AbstractSequenceColor {
 
 	/**
 	 * 

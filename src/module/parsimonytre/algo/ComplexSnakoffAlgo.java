@@ -67,6 +67,7 @@ public class ComplexSnakoffAlgo {
 
 		for (int i = 0; i < this.TOTAL_STATES; i++) {
 
+			@SuppressWarnings("unchecked")
 			ArrayList<Integer>[] arrayOfArrayList = new ArrayList[childCount];
 			int sum = 0;
 

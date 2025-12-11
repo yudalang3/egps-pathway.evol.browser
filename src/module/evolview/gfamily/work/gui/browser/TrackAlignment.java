@@ -120,7 +120,7 @@ public class TrackAlignment extends AbstractTrackPanel {
                             nucleotideIndex = storedGenomeIndex - startPosOfWindow;
                         } else {
                             // 使用新的索引，并且更新原来存储的索引
-                            this.lastStoredGenomeIndex.set(pixelIndex, new Integer(nucleotideIndex + startPosOfWindow));
+                            this.lastStoredGenomeIndex.set(pixelIndex, Integer.valueOf(nucleotideIndex + startPosOfWindow));
                         }
                     } else {
                         this.lastStoredGenomeIndex.add(nucleotideIndex + startPosOfWindow);

@@ -32,7 +32,7 @@ import egps2.frame.MainFrameProperties;
 import evoltree.struct.util.EvolNodeUtil;
 import module.evoltre.mutation.IMutation4Rec;
 import egps2.builtin.modules.IconObtainer;
-import module.evolview.gfamily.work.NodeUtils;
+import module.evolview.model.tree.NodeUtils;
 import module.evolview.gfamily.work.gui.tree.CollapseDialog;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.gui.tree.TreeOperationUtil;

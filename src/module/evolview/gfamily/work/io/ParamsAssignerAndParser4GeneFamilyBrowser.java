@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import egps2.EGPSProperties;
-import module.evolview.genebrowser.io.MapperOfGeneBrowser;
+// import module.evolview.genebrowser.io.MapperOfGeneBrowser; // Removed - genebrowser module not included
 import module.evolview.gfamily.work.beans.RequiredGeneData;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
@@ -19,7 +19,8 @@ public class ParamsAssignerAndParser4GeneFamilyBrowser extends ParamsAssignerAnd
 
 	private RequiredGeneData requiredGeneData;
 
-	private MapperOfGeneBrowser mapperOfGeneBrowser = new MapperOfGeneBrowser();
+	// Genome browser mapper removed - genebrowser module not included
+	// private MapperOfGeneBrowser mapperOfGeneBrowser = new MapperOfGeneBrowser();
 
 	public ParamsAssignerAndParser4GeneFamilyBrowser() {
 		super();
@@ -36,19 +37,19 @@ public class ParamsAssignerAndParser4GeneFamilyBrowser extends ParamsAssignerAnd
 		addKeyValueEntryBean("input.nwk.path", propertiesDir + "/bioData/gfamily/input.tree.nwk",
 				"Input the nwk file path.");
 
-		// 假如 gBrowser的参数
-		Map<String, VoiceValueParameterBean> parserMapBean2 = mapperOfGeneBrowser.getRequiredParams();
-		VoiceValueParameterBean voiceValueParameterBean = parserMapBean2.get("browser.struct.annotation.path");
-		voiceValueParameterBean.setValue(propertiesDir + "/bioData/gfamily/refGenomeInfor.txt");
-		voiceValueParameterBean = parserMapBean2.get("alignment.file.path");
-		voiceValueParameterBean.setValue(propertiesDir + "/bioData/gfamily/aligned.seq.fas");
-		voiceValueParameterBean = parserMapBean2.get("browser.input.type");
-		voiceValueParameterBean.setValue("1");
+		// Genome browser parameters removed - genebrowser module not included
+		// Map<String, VoiceValueParameterBean> parserMapBean2 = mapperOfGeneBrowser.getRequiredParams();
+		// VoiceValueParameterBean voiceValueParameterBean = parserMapBean2.get("browser.struct.annotation.path");
+		// voiceValueParameterBean.setValue(propertiesDir + "/bioData/gfamily/refGenomeInfor.txt");
+		// voiceValueParameterBean = parserMapBean2.get("alignment.file.path");
+		// voiceValueParameterBean.setValue(propertiesDir + "/bioData/gfamily/aligned.seq.fas");
+		// voiceValueParameterBean = parserMapBean2.get("browser.input.type");
+		// voiceValueParameterBean.setValue("1");
 
 		VoiceValueParameterBean bean = new VoiceValueParameterBean();
 		bean.setValue("Modern Tree View");
 		requiredParams.put("@", bean);
-		requiredParams.putAll(parserMapBean2);
+		// requiredParams.putAll(parserMapBean2); // Commented out - genome browser params removed
 
 		addKeyValueEntryBean("remove.whitespace", "F",
 				"Whether remove whitespace (spaces, tabs, carriage returns, and linefeeds)");
@@ -73,7 +74,9 @@ public class ParamsAssignerAndParser4GeneFamilyBrowser extends ParamsAssignerAnd
 
 	public void obtainData(OrganizedParameterGetter str) {
 		mtvImportInforBean = generateTreeFromKeyValue(str);
-		requiredGeneData = mapperOfGeneBrowser.parseImportedData(str);
+		// Genome browser data parsing removed - genebrowser module not included
+		// requiredGeneData = mapperOfGeneBrowser.parseImportedData(str);
+		requiredGeneData = null; // Stub - genome browser feature not available
 	}
 
 	public MTVImportInforBean getMTVImportInfo() {

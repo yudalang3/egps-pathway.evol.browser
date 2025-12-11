@@ -1,6 +1,6 @@
 package module.evolview.gfamily.work.gui.tree;
 
-public abstract class RectObj implements RectAdjustMent{
+public abstract class RectObj implements IRectangleAdjustment{
 	public double x;
 	public double y;
 	public double w;

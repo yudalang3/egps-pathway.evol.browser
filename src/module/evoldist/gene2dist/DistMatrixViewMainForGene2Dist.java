@@ -170,14 +170,14 @@ public class DistMatrixViewMainForGene2Dist extends DistanceMatrixParameterMain 
 			int decimalPlacesValue = (int) decimalJSpinner.getValue();
 			String userEnteredString = null;
 			HashMap<String, String> settingMap = (HashMap<String, String>) new TreeParameterHandler().getBuildTreeParametersMap();
-			PLWeb2GeneticDist geneToGeneTreeAndJump = null;
+			PipelineWebToGeneticDistance geneToGeneTreeAndJump = null;
 			if (geneSymbolJRadioButton.isSelected()) {
 				userEnteredString = geneSymbolJTextField.getText();
-				geneToGeneTreeAndJump = new PLWeb2GeneticDist(settingMap, userEnteredString);
+				geneToGeneTreeAndJump = new PipelineWebToGeneticDistance(settingMap, userEnteredString);
 
 			} else {
 				userEnteredString = chrRegionJTextField.getText();
-				geneToGeneTreeAndJump = new PLWeb2GeneticDist(settingMap, userEnteredString, true);
+				geneToGeneTreeAndJump = new PipelineWebToGeneticDistance(settingMap, userEnteredString, true);
 
 			}
 			geneToGeneTreeAndJump.setGeneToGeneticDistMain(this);

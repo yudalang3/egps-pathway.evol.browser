@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.alignment.sequence.SequenceI;
 
-public class NoColorSequenceJPanel extends AbstructSequenceColor {
+public class NoColorSequenceJPanel extends AbstractSequenceColor {
 
 	/**
 	 * 

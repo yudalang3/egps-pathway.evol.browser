@@ -254,10 +254,12 @@ public class GenealogyAnalyzer implements java.io.Serializable, Cloneable {
      *
      * If size == -1, all of nodes will be given.
      */
+    @SuppressWarnings("unchecked")
     public List<NodeEGPSv1> getNodesWithSize(int size) {
         return getBranchsWithSize(size);
     }
-    
+
+    @SuppressWarnings("unchecked")
     public List<NodeEGPSv1> getNodes() {
         return getBranchsWithSize(-1);
     }

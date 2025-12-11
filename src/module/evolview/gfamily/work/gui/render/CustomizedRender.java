@@ -21,7 +21,7 @@ import graphic.engine.colors.EGPSColors;
  * 
  *
  */
-public class CustomizedRender implements ColorRander {
+public class CustomizedRender implements IColorRenderer {
 
 	private static int INDEX_OF_NAME = 0;
 	private static int INDEX_OF_TYPE = 1;

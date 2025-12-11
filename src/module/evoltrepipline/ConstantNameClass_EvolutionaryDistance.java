@@ -18,7 +18,7 @@ public class ConstantNameClass_EvolutionaryDistance {
 	public final String substitutionType_value1_nuc = "Nucleotide";
 	public final String label1_modelOrMethod = "Model/Method";
 	public final String label1_modelOrMethod_index = "Model/Method_Index";
-	public final String[] modelOrMethod_values = PairEvoDistance.METHOD_NAMES;
+	public final String[] modelOrMethod_values = IPairwiseEvolutionaryDistance.METHOD_NAMES;
 	public final String label1_substitutionToInclude = "Substitutions To Include";
 	public final String substitutionToInclude_value1_two = "Transitions + Transversions";
 	

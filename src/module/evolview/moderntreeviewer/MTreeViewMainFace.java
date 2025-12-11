@@ -72,7 +72,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 	private JSplitPane mainSplitPane;
 	private final String dividerKey = "mtv.divider.location";
 
-	private VOICM4MTV importHandler = new VOICM4MTV(this);
+	private VOICE4MTV importHandler = new VOICE4MTV(this);
 
 	private final String[] FEATURES = new String[] { "Convenient Operation", "Adjust graphics effects",
 			"Display tree information", "Utilize differenct tree layout", "Toggle creative mode", };
@@ -294,7 +294,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 		importHandler.doUserImportAction();
 	}
 
-	public VOICM4MTV getImportHandler() {
+	public VOICE4MTV getImportHandler() {
 		return importHandler;
 	}
 
@@ -352,7 +352,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 		} else {
 
 			// 这个导入过程，如果更改需要注意三处：
-			// VOICM4MTV类的execute()；
+			// VOICE4MTV类的execute()；
 			// GeneFamilyMainFace类的initialize
 			// 和MTreeViewMainFace的initializeGraphics()
 			TreeLayoutProperties treeLayoutProperties = moduleLoader2.treeLayoutProperties;

@@ -435,7 +435,6 @@ public class CGBNodeUtil {
 	 * @author yjn
 	 * @since 1.7
 	 * 
-	 * @param innerVirusRoot
 	 * @param node
 	 * @param threshold4ZeroBranch
 	 * @return void
@@ -572,7 +571,7 @@ public class CGBNodeUtil {
 			}
 		});
 
-		return Optional.ofNullable(ret.getValue());
+		return Optional.ofNullable(ret.get());
 	}
 
 	public static Optional<NodeWithCGBID> pickOneNodeAccording2AccOrCGB(NodeWithCGBID root, String targetCGBID) {
@@ -587,8 +586,8 @@ public class CGBNodeUtil {
 			}
 		});
 
-		if (ret.getValue() != null) {
-			return Optional.ofNullable(ret.getValue());
+		if (ret.get() != null) {
+			return Optional.ofNullable(ret.get());
 		}
 
 		if (targetCGBID.startsWith("CGB")) {
@@ -609,7 +608,7 @@ public class CGBNodeUtil {
 
 		}
 
-		return Optional.ofNullable(ret.getValue());
+		return Optional.ofNullable(ret.get());
 	}
 
 	/**
@@ -626,7 +625,6 @@ public class CGBNodeUtil {
 	 * @author yudalang
 	 * @since 1.7
 	 * 
-	 * @param node2remove
 	 * @return void
 	 */
 
@@ -746,9 +744,9 @@ public class CGBNodeUtil {
 	public static Pair<Integer, Integer> splitCGBIDString(String str) {
 		int indexOf = str.indexOf('.');
 		if (indexOf > -1) {
-			return Pair.of(new Integer(str.substring(3, indexOf)), new Integer(str.substring(indexOf + 1)));
+			return Pair.of(Integer.valueOf(str.substring(3, indexOf)), Integer.valueOf(str.substring(indexOf + 1)));
 		} else {
-			return Pair.of(new Integer(str.substring(3)), CGBID.DEFAULT_CGBID_INDEX);
+			return Pair.of(Integer.valueOf(str.substring(3)), CGBID.DEFAULT_CGBID_INDEX);
 		}
 	}
 

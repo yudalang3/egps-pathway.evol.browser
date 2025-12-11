@@ -28,7 +28,7 @@ import javax.swing.table.TableRowSorter;
 
 import egps2.UnifiedAccessPoint;
 
-public class InformationAreaMAF extends AbstactInformationArea {
+public class InformationAreaMAF extends AbstractInformationArea {
 	private static final long serialVersionUID = 7973199616728274869L;
 	
 	private JTextField searchTextField;

@@ -31,7 +31,7 @@ import module.evolview.model.tree.AnnotationsProperties;
 import module.evolview.model.tree.GraphicsNode;
 
 @SuppressWarnings("serial")
-public class DialogSidewardAnnotation extends AbstarctShowAnnotationDialog {
+public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 
 	private JComboBox<String> lineWidthComboBox;
 	private JButton lineColorButton;
@@ -294,13 +294,13 @@ public class DialogSidewardAnnotation extends AbstarctShowAnnotationDialog {
 		Font textFont = null;
 		if (rdTFFontStyle.getSelectedItem().toString().equals("Plain")) {
 			textFont = new Font((String) rdTFfont.getSelectedItem(), Font.PLAIN,
-					new Integer((String) rdTFFontsize.getSelectedItem()));
+					Integer.parseInt((String) rdTFFontsize.getSelectedItem()));
 		} else if (rdTFFontStyle.getSelectedItem().toString().equals("Bold")) {
 			textFont = new Font((String) rdTFfont.getSelectedItem(), Font.BOLD,
-					new Integer((String) rdTFFontsize.getSelectedItem()));
+					Integer.parseInt((String) rdTFFontsize.getSelectedItem()));
 		} else {
 			textFont = new Font((String) rdTFfont.getSelectedItem(), Font.ITALIC,
-					new Integer((String) rdTFFontsize.getSelectedItem()));
+					Integer.parseInt((String) rdTFFontsize.getSelectedItem()));
 		}
 
 		nodeAnno.setTextFont(textFont);

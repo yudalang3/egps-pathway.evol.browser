@@ -62,6 +62,7 @@ public class BootstrapDistCalculator<E extends DistParameterLevel1> extends Dist
 		this.bootTimes = bootTimes;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void initialize() throws Exception {
 		evoPairwiseDistMethod = (EvoPairwiseDistMethod<E>) alignmentDists.getPairEvoDistance().getEvopairDistMethod();
 		preprocessAlignment();
@@ -81,6 +82,7 @@ public class BootstrapDistCalculator<E extends DistParameterLevel1> extends Dist
 		tempWholeSeqsDistanceM = iniTwoDimArray();
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected E[][]	iniTwoDimArray() {
 		E[][] ret = (E[][]) new DistParameterLevel1[seqNames.length - 1][];
 		for (int i = 0; i < ret.length; i++) {
@@ -88,14 +90,14 @@ public class BootstrapDistCalculator<E extends DistParameterLevel1> extends Dist
 
 			for (int j = 0; j <= i; j++) {
 				try {
-					aRow[j] = (E) alignmentDists.getPairEvoDistance().getKind().newInstance();
-				} catch (InstantiationException | IllegalAccessException e) {
+					aRow[j] = (E) alignmentDists.getPairEvoDistance().getKind().getDeclaredConstructor().newInstance();
+				} catch ( ReflectiveOperationException e) {
 					e.printStackTrace();
 				}
 			}
 			ret[i] = aRow;
 		}
-		
+
 		return ret;
 	}
 	
@@ -108,10 +110,11 @@ public class BootstrapDistCalculator<E extends DistParameterLevel1> extends Dist
 	/**
 	 * Form seqs to create a list which contains the segment distance matrix. If num
 	 * of seqs'site is no more than 1000, we directly divid them into parts(col
-	 * 
+	 *
 	 * @author yudalang
 	 * @date 2018-7-27
 	 */
+	@SuppressWarnings("unchecked")
 	protected void createPreCalulatedDisMList() {
 
 		preCalSegmentPairwiseDist = (E[][][]) new DistParameterLevel1[1000][][];
@@ -170,17 +173,18 @@ public class BootstrapDistCalculator<E extends DistParameterLevel1> extends Dist
 		addToPreCalSegments(sequenceStrings);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void addToPreCalSegments(String[] temp_seqs) {
 		if (preCalSegmentPairwiseDistIndex == 1000) {
 			System.err.println(getClass()+"Impossible to get 1000!!");
 			return;
 		}
-		
+
 		String[] processedAlignment = dealWithDeletion(temp_seqs);
 		alignmentDists.reSetSeqs(processedAlignment);
-		
+
 		E[][] oneSegmentDistOneBS = (E[][]) alignmentDists.getEvoDistParameters();
-		
+
 		preCalSegmentPairwiseDist[preCalSegmentPairwiseDistIndex] = oneSegmentDistOneBS;
 		preCalSegmentPairwiseDistIndex ++;
 	}

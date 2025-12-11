@@ -65,6 +65,7 @@ public class BuilderBootstrapTree4Dist<E extends DistParameterLevel1> extends Bu
 		super(sequences, seqNames);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize() throws Exception {
 		evoPairwiseDistMethod = (EvoPairwiseDistMethod<E>) alignmentDists.getPairEvoDistance().getEvopairDistMethod();

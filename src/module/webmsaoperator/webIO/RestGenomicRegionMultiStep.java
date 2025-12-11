@@ -8,6 +8,8 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -174,7 +176,12 @@ public class RestGenomicRegionMultiStep {
 		String server = "http://rest.ensembl.org";
 		String ext = "/lookup/symbol/" + speciesName + "/" + geneSymbol + "?expand=" + queryIndex;
 		String urlAddress = server + ext;
-		URL url = new URL(urlAddress);
+		URL url;
+		try {
+			url = new URI(urlAddress).toURL();
+		} catch (URISyntaxException e) {
+			throw new IOException("Invalid URL: " + urlAddress, e);
+		}
 		System.out.println("URL for genomic region:\n" + urlAddress);
 
 		URLConnection connection = url.openConnection();

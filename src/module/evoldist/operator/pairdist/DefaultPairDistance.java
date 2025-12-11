@@ -5,16 +5,16 @@ import module.evoldist.operator.disAlgo.SimplePDistance;
 public class DefaultPairDistance<E extends DistParameterLevel1>{
 	private Class<E> kind;
 	
-	private final DistParameterPareparer pareparer;
+	private final DistParameterPreparer pareparer;
 	private EvoPairwiseDistMethod<E> evopairDistMethod;
 	
 	public DefaultPairDistance(Class<E> kind,boolean ifAmbiguous,EvoPairwiseDistMethod<E> m){
 		this.kind = kind;
 		this.evopairDistMethod = m;
 		if (ifAmbiguous) {
-			this.pareparer = new DistParameterPareparerABEqualPos();
+			this.pareparer = new DistParameterPreparerABEqualPos();
 		}else {
-			this.pareparer = new DistParameterPareparerABAsGap();
+			this.pareparer = new DistParameterPreparerABAsGap();
 		}
 		
 	}
