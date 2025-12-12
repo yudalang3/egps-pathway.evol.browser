@@ -1,6 +1,3 @@
-/**
- * 
- */
 package module.evoltrepipline;
 
 import java.awt.Color;
@@ -23,6 +20,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JTree;
 import javax.swing.border.TitledBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author YFQ
  * @date 2019-11-21 13:12:37
@@ -39,6 +39,7 @@ import javax.swing.border.TitledBorder;
 public class Panel4BiologyCodesPanel extends AbstractPrefShowContent {
 
 	private static final long serialVersionUID = -7862050211960918866L;
+	private static final Logger log = LoggerFactory.getLogger(Panel4BiologyCodesPanel.class);
 
 	private ConstantNameClass_GeneticCode ccgc = new ConstantNameClass_GeneticCode();
 
@@ -95,11 +96,24 @@ public class Panel4BiologyCodesPanel extends AbstractPrefShowContent {
 		codeComboBox.setRenderer(new EGPSComboBoxRenderer());
 		codeComboBox.setFont(defaultFont);
 
-		int geneticCodeIndex = Integer.parseInt(parameterMap.get(ccgc.label1_geneticCodeTable_index));
+		String geneticCodeIndexStr = parameterMap.get(ccgc.label1_geneticCodeTable_index);
+		int geneticCodeIndex = 0; // default
+
+		if (geneticCodeIndexStr != null && !geneticCodeIndexStr.isEmpty()) {
+			try {
+				geneticCodeIndex = Integer.parseInt(geneticCodeIndexStr);
+			} catch (NumberFormatException e) {
+				log.error("Invalid genetic code index value '{}', using default 0", geneticCodeIndexStr);
+				geneticCodeIndex = 0;
+			}
+		} else {
+			log.debug("No genetic code index configured, using default 0");
+		}
 
 		if (geneticCodeIndex >= 0 && geneticCodeIndex <= 8) {
 			codeComboBox.setSelectedIndex(geneticCodeIndex);
 		} else {
+			log.warn("Genetic code index {} out of range, using default 0", geneticCodeIndex);
 			codeComboBox.setSelectedIndex(0);
 		}
 

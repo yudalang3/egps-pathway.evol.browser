@@ -27,6 +27,9 @@ import javax.swing.border.TitledBorder;
 import module.evoltreio.DistanceTreeConfigManager;
 import module.evoltreio.SpeciesProperties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import egps2.EGPSProperties;
 
 /**
@@ -44,6 +47,7 @@ import egps2.EGPSProperties;
 public class Panel4WebResources extends AbstractPrefShowContent {
 
 	private static final long serialVersionUID = 4996980493559252105L;
+	private static final Logger log = LoggerFactory.getLogger(Panel4WebResources.class);
 
 	private List<String> speciesList = new ArrayList<String>(100);
 	private Map<String, String> parameterMap;
@@ -266,33 +270,19 @@ public class Panel4WebResources extends AbstractPrefShowContent {
 				referenceComboBox.removeAllItems();
 
 				if (button.indexOf(cc.ensembl_value4_rep) >= 0) {
-					for (int i = 0; i < 4; i++) {
-						referenceComboBox.addItem(speciesList.get(i));
-					}
+					addSpeciesToComboBox(0, 4);
 				} else if (button.indexOf(cc.ensembl_value3_fish) >= 0) {
-					for (int i = 4; i < 9; i++) {
-						referenceComboBox.addItem(speciesList.get(i));
-					}
+					addSpeciesToComboBox(4, 9);
 				} else if (button.indexOf(cc.ensembl_value2_prim) >= 0) {
-					for (int i = 9; i < 21; i++) {
-						referenceComboBox.addItem(speciesList.get(i));
-					}
+					addSpeciesToComboBox(9, 21);
 				} else if (button.indexOf(cc.ensembl_value1_mammals) >= 0) {
-					for (int i = 21; i < 53; i++) {
-						referenceComboBox.addItem(speciesList.get(i));
-					}
+					addSpeciesToComboBox(21, 53);
 				} else if (button.indexOf(cc.ensembl_value5_amn) >= 0) {
-					for (int i = 53; i < 85; i++) {
-						referenceComboBox.addItem(speciesList.get(i));
-					}
+					addSpeciesToComboBox(53, 85);
 				} else if (button.indexOf(cc.egpsCloud_value1_1000species) >= 0) {
-					for (int i = 85; i < 185; i++) {
-						referenceComboBox.addItem(speciesList.get(i));
-					}
+					addSpeciesToComboBox(85, 185);
 				} else {
-					for (int i = 0; i < 4; i++) {
-						referenceComboBox.addItem(speciesList.get(i));
-					}
+					addSpeciesToComboBox(0, 4);
 				}
 			}
 		};
@@ -310,51 +300,49 @@ public class Panel4WebResources extends AbstractPrefShowContent {
 		if (parameter != null && !parameter.equals("")) {
 			if (cc.ensembl_value1_mammals.equals(parameter)) {
 				mammalsRadio.setSelected(true);
-				for (int i = 21; i < 53; i++) {
-					referenceComboBox.addItem(speciesList.get(i));
-				}
+				addSpeciesToComboBox(21, 53);
 			} else if (cc.ensembl_value2_prim.equals(parameter)) {
 				primatesRadio.setSelected(true);
-				for (int i = 9; i < 21; i++) {
-					referenceComboBox.addItem(speciesList.get(i));
-				}
+				addSpeciesToComboBox(9, 21);
 			} else if (cc.ensembl_value3_fish.equals(parameter)) {
 				fishRadio.setSelected(true);
-				for (int i = 4; i < 9; i++) {
-					referenceComboBox.addItem(speciesList.get(i));
-				}
+				addSpeciesToComboBox(4, 9);
 			} else if (cc.ensembl_value4_rep.equals(parameter)) {
 				sauropsidsRadio.setSelected(true);
-				for (int i = 0; i < 4; i++) {
-					referenceComboBox.addItem(speciesList.get(i));
-				}
+				addSpeciesToComboBox(0, 4);
 			} else if (cc.ensembl_value5_amn.equals(parameter)) {
 				amniotesRadio.setSelected(true);
-				for (int i = 53; i < 85; i++) {
-					referenceComboBox.addItem(speciesList.get(i));
-				}
+				addSpeciesToComboBox(53, 85);
 			} else if (cc.egpsCloud_value1_1000species.equals(parameter)) {
 				speciesRadio.setSelected(true);
-				for (int i = 85; i < 185; i++) {
-					referenceComboBox.addItem(speciesList.get(i));
-				}
+				addSpeciesToComboBox(85, 185);
 			} else {
 				mammalsRadio.setSelected(true);
-				for (int i = 21; i < 53; i++) {
-					referenceComboBox.addItem(speciesList.get(i));
-				}
+				addSpeciesToComboBox(21, 53);
 			}
 		} else {
 			mammalsRadio.setSelected(true);
-			for (int i = 21; i < 53; i++) {
-				referenceComboBox.addItem(speciesList.get(i));
-			}
+			addSpeciesToComboBox(21, 53);
 		}
 
 		if (reference != null && !reference.equals("")) {
-			referenceComboBox.setSelectedIndex(Integer.valueOf(reference));
+			try {
+				int refIndex = Integer.valueOf(reference);
+				if (refIndex >= 0 && refIndex < referenceComboBox.getItemCount()) {
+					referenceComboBox.setSelectedIndex(refIndex);
+				} else {
+					log.warn("Saved reference index {} is out of bounds (combo box has {} items). Using default.",
+							refIndex, referenceComboBox.getItemCount());
+					referenceComboBox.setSelectedIndex(0);
+				}
+			} catch (NumberFormatException e) {
+				log.error("Invalid reference index value: {}", reference);
+				referenceComboBox.setSelectedIndex(0);
+			}
 		} else {
-			referenceComboBox.setSelectedIndex(0);
+			if (referenceComboBox.getItemCount() > 0) {
+				referenceComboBox.setSelectedIndex(0);
+			}
 		}
 
 		speciesSetPanel.add(eGPSTitle, gridBagConstraints);
@@ -403,6 +391,38 @@ public class Panel4WebResources extends AbstractPrefShowContent {
 		DistanceTreeConfigManager configManager = new DistanceTreeConfigManager();
 		SpeciesProperties props = configManager.getSpeciesProperties();
 		speciesList.addAll(props.getAllSpecies());
+	}
+
+	/**
+	 * Safely add species to combo box with bounds checking
+	 * @param startIndex inclusive start index
+	 * @param endIndex exclusive end index
+	 */
+	private void addSpeciesToComboBox(int startIndex, int endIndex) {
+		if (speciesList == null || speciesList.isEmpty()) {
+			log.error("Species list is empty. Cannot populate combo box.");
+			referenceComboBox.addItem("Error: No species data available");
+			return;
+		}
+
+		int actualEnd = Math.min(endIndex, speciesList.size());
+		if (startIndex >= speciesList.size()) {
+			log.error("Species list too short. Expected at least {} species but only have {}. " +
+					"Please check species_properties.json configuration.",
+					endIndex, speciesList.size());
+			referenceComboBox.addItem("Error: Incomplete species data");
+			return;
+		}
+
+		if (actualEnd < endIndex) {
+			log.warn("Species list shorter than expected. Expected {} species but only have {}. " +
+					"Loading available species from index {} to {}.",
+					endIndex, speciesList.size(), startIndex, actualEnd);
+		}
+
+		for (int i = startIndex; i < actualEnd; i++) {
+			referenceComboBox.addItem(speciesList.get(i));
+		}
 	}
 
 	@Override

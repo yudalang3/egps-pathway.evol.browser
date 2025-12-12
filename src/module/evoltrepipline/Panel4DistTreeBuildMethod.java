@@ -14,6 +14,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 
  * @Package: egps.core.preferences
@@ -31,6 +34,8 @@ import javax.swing.JTree;
 public class Panel4DistTreeBuildMethod extends AbstractPrefShowContent {
 
 	private static final long serialVersionUID = 5562371735380833299L;
+	private static final Logger log = LoggerFactory.getLogger(Panel4DistTreeBuildMethod.class);
+
 	private Map<String, String> parameterMap;
 	protected ConstantNameClass_TreeBuildMethod cctm = new ConstantNameClass_TreeBuildMethod();
 	private ButtonGroup treeButtonGroup;
@@ -88,7 +93,7 @@ public class Panel4DistTreeBuildMethod extends AbstractPrefShowContent {
 
 		String parameter = parameterMap.get(cctm.label1_treeBuildMethod);
 
-		if (!parameter.equals("") && parameter != null) {
+		if (parameter != null && !parameter.equals("")) {
 			if (cctm.treeBuildMethod_value1_NJ.equals(parameter)) {
 				neighborRadio.setSelected(true);
 			} else if (cctm.treeBuildMethod_value2_SNJ.equals(parameter)) {
@@ -96,9 +101,11 @@ public class Panel4DistTreeBuildMethod extends AbstractPrefShowContent {
 			} else if (cctm.treeBuildMethod_value3_UPGMA.equals(parameter)) {
 				upRadio.setSelected(true);
 			} else {
+				log.warn("Unknown tree build method '{}', using default Neighbor-Joining", parameter);
 				neighborRadio.setSelected(true);
 			}
 		} else {
+			log.debug("No tree build method configured, using default Neighbor-Joining");
 			neighborRadio.setSelected(true);
 		}
 
