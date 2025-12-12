@@ -17,7 +17,7 @@ import msaoperator.io.seqFormat.parser.MEGAParser;
 import msaoperator.io.seqFormat.parser.NEXUSParser;
 import msaoperator.io.seqFormat.parser.PAMLParser;
 import msaoperator.io.seqFormat.parser.PHYParser;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import egps2.panels.dialog.SwingDialog;
 
 

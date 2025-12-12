@@ -25,7 +25,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import egps.preferences.gui.PreferenceTree;
 import egps2.UnifiedAccessPoint;
-import module.evoltre.pipline.TreeParameterHandler;
+import module.evoltrepipline.TreeParameterHandler;
 
 /**
  * 这是图形界面设置参数的类

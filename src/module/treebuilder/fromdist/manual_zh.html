@@ -4,25 +4,40 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>low volume text editor</title>
 </head>
-
 <body>
+
 	<blockquote>
 		<h1>进化树构建器：从进化距离矩阵</h1>
 
 		<h3>解决的问题</h3>
-		<p>从进化距离矩阵构建进化树</p>
+		<p>本模块用于根据已计算好的进化距离矩阵重建系统发育树。支持三种距离法构树算法（Neighbor‑Joining、Swift Neighbor‑Joining、UPGMA），并在构树后自动用 mid‑point 方法定根。结果会在 Modern Tree Viewer 中打开。</p>
+
+		<h3>输入格式</h3>
+		<p>输入文件为 eGPS 距离矩阵文本格式（下三角含对角线）。空行或以 <code>#</code> 开头的注释行会被忽略。</p>
+		<pre>
+# 物种/序列个数
+3
+sp1 0
+sp2 0.12 0
+sp3 0.20 0.18 0
+		</pre>
+		<p>第一行是物种/序列数量 N。之后每行是名称 + 本行的下三角距离值（含对角线）。矩阵必须为数字、不能包含 NaN，且至少有一个非零距离，否则会报错。</p>
+
+		<h3>参数说明</h3>
+		<ol>
+			<li><b>Input：</b>进化距离文件路径。</li>
+			<li><b>Distance based method：</b>距离法构树算法：Neighbor‑Joining（默认）、Swift Neighbor‑Joining 或 UPGMA。</li>
+			<li><b>Genetic code / IUPAC treatment：</b>与其它距离计算模块共享的全局设置；本模块使用预先计算好的距离矩阵，通常不受该选项影响。</li>
+		</ol>
 
 		<h3>快速开始</h3>
 		<p>所有操作都比较直观、易懂。请按照图形用户界面的指示进行操作。</p>
-		<p>详情见：https://www.yuque.com/u21499046/egpsdoc/bmfueh8i1hxa62bb</p>
 
 		<ol>
 			<li>在参数输入区域查看所需输入数据。</li>
-      <li>用户输入所需参数。</li>
+			<li>用户输入所需参数。</li>
 			<li>点击执行按钮查看结果。</li>
 		</ol>
-		
 	</blockquote>
 </body>
-
 </html>

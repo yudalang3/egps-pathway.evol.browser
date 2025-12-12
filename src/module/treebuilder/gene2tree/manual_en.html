@@ -7,20 +7,37 @@
 <body>
 
 	<blockquote>
-	<h1>Gene to Gene Tree</h1><h3>Task to resolve</h3>
-		<p>Quick obtain the Multiple Sequence alignment from the web database, then build the gene phylogenetic tree.</p>
+		<h1>Gene to Gene Tree</h1>
+		<h3>Task to resolve</h3>
+		<p>This pipeline retrieves orthologous sequences from Ensembl/UCSC/eGPS cloud using a gene symbol or genomic region, builds a multiple sequence alignment, computes evolutionary distances, and reconstructs a phylogenetic tree. Tree reconstruction supports Neighbor‑Joining, Swift Neighbor‑Joining, and UPGMA with optional bootstrap. The final tree opens in the Modern Tree Viewer.</p>
+
+		<h3>Inputs</h3>
+		<ol>
+			<li><b>Web query gene symbol:</b> a gene name such as <code>TP53</code>.</li>
+			<li><b>Web query genomic region:</b> an interval such as <code>17:7661779-7687550</code> (chr:start-end). Either gene symbol or region is required.</li>
+		</ol>
+
+		<h3>Parameters</h3>
+		<ol>
+			<li><b>Species set for MSA:</b> choose the ortholog set (e.g., Mammals, Primates, Fish, Sauropsids, Amniotes, or eGPS Cloud 1000 species) and a reference genome from the dropdown.</li>
+			<li><b>Considered gene regions:</b> align Exon, Intron, CDS, 4‑fold sites, or Whole gene.</li>
+			<li><b>Web connection:</b> set REST timeout (3–60 seconds).</li>
+			<li><b>Substitution model / Gaps &amp; missing data:</b> choose Model/Method and deletion strategy for distance calculation.</li>
+			<li><b>Variance estimation:</b> enable <i>Bootstrap method</i> and set <i>No. of Bootstrap replications</i> for support values.</li>
+			<li><b>Distance based method:</b> Neighbor‑Joining (default), Swift Neighbor‑Joining, or UPGMA.</li>
+			<li><b>Genetic code / IUPAC treatment:</b> controls ambiguous base handling.</li>
+		</ol>
+		<p>Note: this module requires network access to the selected web resources.</p>
 
 		<h3>Quick start</h3>
 		<p>Any actions are straightforward. Please follow the GUI instructions.</p>
 
-
-				<ol>
-			<li>View the required input data in the parameter input area.</li>
-      <li>The user enters the required parameters.</li>
+		<ol>
+			<li>Enter a gene symbol or genomic region.</li>
+			<li>Select a species set and reference genome.</li>
+			<li>Adjust distance/tree/bootstrapping settings if needed.</li>
 			<li>Click the Execute button to see the results.</li>
 		</ol>
-
-
 	</blockquote>
 </body>
 </html>

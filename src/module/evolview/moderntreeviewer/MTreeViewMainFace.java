@@ -43,7 +43,7 @@ import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import egps2.frame.gui.EGPSMainGuiUtil;
 import module.evolview.moderntreeviewer.gui.CreativeModeTaskPanel;
 import module.evolview.phylotree.visualization.graphics.struct.AdvancedParametersBean;

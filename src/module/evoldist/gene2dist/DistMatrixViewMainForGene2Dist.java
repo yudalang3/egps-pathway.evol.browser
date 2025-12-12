@@ -35,7 +35,7 @@ import com.jidesoft.swing.JideSplitPane;
 
 import egps.preferences.gui.PreferenceTree;
 import module.evoldist.view.gui.DistanceMatrixParameterMain;
-import module.evoltre.pipline.TreeParameterHandler;
+import module.evoltrepipline.TreeParameterHandler;
 import module.evoltrepipline.Panel4BiologyCodesPanel;
 import module.evoltrepipline.Panel4EvolutionaryDistancePanel;
 import module.evoltrepipline.Panel4WebResources;

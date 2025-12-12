@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.moderntreeviewer.io.TreeParser4MTV;
 import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
 import module.evolview.pathwaybrowser.PathwayFamilyMainFace;

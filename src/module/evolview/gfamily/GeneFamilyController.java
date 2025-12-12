@@ -23,17 +23,17 @@ import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
 import module.evolview.gfamily.work.gui.TreeLayoutSwitcher;
 import module.evolview.gfamily.work.gui.render.CustomizedSaveBean;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.gfamily.work.gui.tree.TreeOperationUtil;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropInternalNode2LeafAnno;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropInternalNodeInsituAnno;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropLeafNameAnno;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropOutterSidewardAnno;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
+import module.evolview.phylotree.visualization.annotation.DrawPropInternalNode2LeafAnno;
+import module.evolview.phylotree.visualization.annotation.DrawPropInternalNodeInsituAnno;
+import module.evolview.phylotree.visualization.annotation.DrawPropLeafNameAnno;
+import module.evolview.phylotree.visualization.annotation.DrawPropOutterSidewardAnno;
 import module.evolview.model.enums.BranchLengthType;
 import module.evolview.model.enums.ColorScheme;
-import module.evolview.model.tree.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.layout.BaseLayout;
 
 public class GeneFamilyController {

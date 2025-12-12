@@ -33,7 +33,7 @@ import module.multiseq.alignment.view.gui.leftcontrol.AlignmentLayoutLeftPanel;
 import module.multiseq.alignment.view.gui.leftcontrol.LeftPanelMarker;
 import module.multiseq.alignment.view.io.AlignmentSaver;
 import module.multiseq.alignment.view.model.AlignmentDrawProperties;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.multiseq.alignment.view.model.SequenceLayout;
 import egps2.modulei.AdjusterFillAndLine;
 import egps2.modulei.IInformation;

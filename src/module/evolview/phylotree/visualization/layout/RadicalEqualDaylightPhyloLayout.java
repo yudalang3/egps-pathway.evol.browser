@@ -4,11 +4,11 @@ import java.util.List;
 
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.gfamily.work.gui.DrawUtil;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public class RadicalEqualDaylightPhyloLayout extends RadialPhyloLayout {
 
@@ -16,7 +16,7 @@ public class RadicalEqualDaylightPhyloLayout extends RadialPhyloLayout {
 	private List<GraphicsNode> leaves;
 
 	public RadicalEqualDaylightPhyloLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

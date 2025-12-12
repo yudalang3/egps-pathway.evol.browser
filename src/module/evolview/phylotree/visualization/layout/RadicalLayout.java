@@ -3,15 +3,15 @@ package module.evolview.phylotree.visualization.layout;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public abstract class RadicalLayout extends CicularLayout {
 
 
 	public RadicalLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

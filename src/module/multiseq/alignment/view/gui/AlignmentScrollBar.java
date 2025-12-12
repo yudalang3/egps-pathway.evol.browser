@@ -9,7 +9,7 @@ import javax.swing.JScrollBar;
 
 import module.multiseq.alignment.view.AlignmentViewExecutor;
 import module.multiseq.alignment.view.AlignmentViewMain;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class AlignmentScrollBar extends JScrollBar implements AdjustmentListener {
 

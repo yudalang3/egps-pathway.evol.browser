@@ -78,8 +78,9 @@ This project contains **18 modules** implementing the `IModuleLoader` interface,
 
 - The module list matches all `IModuleLoader` implementations in `src/module/**` (18 loaders).
 - `src/module/treebuilder/fromvcf/` exists but is currently empty and not counted as a module.
-- The “DAG / no circular dependencies” note is only accurate if excluding a few demo/UI cross‑imports:
-  - `parsimonytre` imports `evolview.phylotree` and `evolview.gfamily.*` in helper/demo classes.
-  - `evoldist` imports shared viewer models from `multiseq.alignment.view` and uses `evoltre.pipline.TreeParameterHandler`.
+- Strict DAG now holds in the current source:
+  - `parsimonytre` visualization demos live in `module.evolview.demo.parsimonytre`.
+  - Shared alignment models were moved to `module.evoltrepipline.alignment`.
+  - `TreeParameterHandler` was moved to `module.evoltrepipline`.
 
 *Last updated: 2025-12-12*

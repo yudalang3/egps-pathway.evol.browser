@@ -33,6 +33,7 @@ import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
 import module.evoltrepipline.ParameterAssigner;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
 
 /**
  * <p>
@@ -237,7 +238,7 @@ public class PLMAF2PhyloTreeBenchMode extends AbstractDistanceBasedTreePipeline 
 				return;
 			}
 			
-			final GraphicsNode ret = convertTheTree4visualization(finalTree);
+			final GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(finalTree);
 
 			IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
 			String name = inputFiles.get(0).getName();

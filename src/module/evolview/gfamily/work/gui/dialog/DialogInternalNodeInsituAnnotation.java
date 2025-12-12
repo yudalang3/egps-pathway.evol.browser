@@ -24,9 +24,9 @@ import javax.swing.event.DocumentListener;
 import graphic.engine.guibean.ColorIcon;
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.gfamily.work.gui.tree.annotation.CommonShape;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropInternalNodeInsituAnno;
-import module.evolview.model.tree.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.CommonShape;
+import module.evolview.phylotree.visualization.annotation.DrawPropInternalNodeInsituAnno;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
 import module.evolview.model.tree.GraphicsNode;
 
 @SuppressWarnings("serial")

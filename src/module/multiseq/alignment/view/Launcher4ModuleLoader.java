@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import egps2.modulei.IModuleLoader;
 import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;

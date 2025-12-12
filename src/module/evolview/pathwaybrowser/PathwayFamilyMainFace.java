@@ -30,7 +30,7 @@ import module.evolview.gfamily.work.gui.browser.BrowserPanel;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.listener.TreeListener;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.pathwaybrowser.gui.EvoSelectionPressurePanel;
 import module.evolview.pathwaybrowser.gui.PathwayDetailsPanel;
 import module.evolview.pathwaybrowser.gui.PathwayStatisticsPanel;

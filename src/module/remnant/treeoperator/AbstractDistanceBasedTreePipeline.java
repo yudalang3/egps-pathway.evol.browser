@@ -18,7 +18,6 @@ import module.remnant.treeoperator.reconAlgo.TreeReconMethod;
 import module.remnant.treeoperator.reconAlgo.Upgma;
 import module.evoldist.operator.AbstractCalculateGeneticDistancePipeline;
 import module.evoldist.operator.DistanceParameterConfigurer;
-import module.evolview.model.tree.GraphicsNode;
 import module.evoltrepipline.ConstantNameClass_TreeBuildMethod;
 
 /**
@@ -102,9 +101,4 @@ public abstract class AbstractDistanceBasedTreePipeline extends AbstractCalculat
 		return treeBuild_instance_BS.getFinalTree();
 	}
 	
-	
-	protected GraphicsNode convertTheTree4visualization(NodeEGPSv1 tempTree) {
-		GraphicsNode ret = new TreeUtility().node4eGPSToGraphicsNode(tempTree);
-		return ret;
-	}
 }

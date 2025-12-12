@@ -1,6 +1,6 @@
 package module.evoldist.msa2distview;
 
-import module.multiseq.alignment.view.io.AlignmentImportBean;
+import module.evoltrepipline.alignment.AlignmentImportBean;
 
 public class MSA2DistImportBean extends AlignmentImportBean {
 	

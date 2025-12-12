@@ -15,7 +15,7 @@ import egps2.panels.dialog.SwingDialog;
 import module.evoltrepipline.ConstantNameClass_GeneticCode;
 import module.evoltrepipline.ConstantNameClass_SpeciesSet;
 import module.evoltrepipline.ConstantNameClass_WebConnection;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.webmsaoperator.webIO.RestGRegion2MSAMultiStep;
 import module.webmsaoperator.webIO.RestGenomicRegionMultiStep;
 import module.webmsaoperator.webIO.RestWeb2AlignmentMultiStep;

@@ -31,13 +31,13 @@ import egps2.frame.MyFrame;
 import evoltree.struct.util.EvolNodeUtil;
 import evoltree.struct.EvolNode;
 import module.evolview.gfamily.work.gui.ScaleBarRectObject;
-import module.evolview.phylotree.visualization.graphics.large.interactive.TreePopupMenu;
+import module.evolview.gfamily.work.gui.tree.TreePopupMenu;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.gui.tree.RectObj;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.model.tree.ScaleBarProperty;
 import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 
 public class TreeListener extends MouseAdapter implements KeyListener {

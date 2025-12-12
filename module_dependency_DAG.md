@@ -14,24 +14,21 @@
 - **包数量：18个** (8个包含模块 + 10个工具包)
 - **总共打破的循环依赖：5个（100%）**
 
-1. ✅ analysehomogene ↔ parsimonytre - **已打破**（删除模块）
-2. ✅ gfamily ↔ genebrowser - **已打破**（删除模块）
-3. ✅ evolview ↔ evoltreio - **已打破**（移动NodeUtils）
-4. ✅ evoltrepipline ↔ remnant - **已打破**（内联树配置逻辑）
-5. ✅ evoldist ↔ evoltrepipline - **已打破**（提取配置类）
 
-**编译状态：** 成功（0错误，825个.class文件）
+**编译状态：** 成功（0错误，857个.class文件）
 
 ---
 
 ## Agent Review (2025-12-12)
 
-- 模块数量与清单准确：共 18 个 `IModuleLoader` 实现；`src/module/treebuilder/fromvcf` 目前为空目录，不算模块。
-- 当前源码仍存在上层依赖，使“严格 DAG/分层”描述不完全成立：
-  - `parsimonytre/WatchNodeStatesWithChange.java`、`parsimonytre/CLI.java`、`parsimonytre/demo/Demos1.java` 导入 `module.evolview.phylotree` 和/或 `module.evolview.gfamily.*`，形成 `parsimonytre → evolview.*`，与 `gfamily → evoltre → parsimonytre` 构成三包循环。
-  - `evoldist` 导入 `module.multiseq.alignment.view.*`（共享 viewer 数据模型）以及 `module.evoltre.pipline.TreeParameterHandler`，因此存在 `evoldist → multiseq` 与 `evoldist → evoltre` 依赖边。
-  - `remnant` 导入 `module.evolview.model.tree.GraphicsNode`，存在 `remnant → evolview.model` 依赖边。
-- 建议：若希望保持严格 DAG，可将上述 UI/演示类迁移到独立 demo 模块/包，或移除对上层包的引用；否则需在图中显式标注这些例外依赖。
+- 模块清单与源码一致：共 18 个 `IModuleLoader` 实现；`src/module/treebuilder/fromvcf` 仍为空目录，不算模块。
+- 已完成额外清理以维持严格 DAG：
+  - `parsimonytre` 的 GUI/demo/CLI 可视化被移至 `module.evolview.demo.parsimonytre`，核心算法包不再依赖 evolview。
+  - 抽取共享 MSA viewer 数据模型到 `module.evoltrepipline.alignment`，移除 `evoldist → multiseq` 依赖边。
+  - 将 `TreeParameterHandler` 上移到 `module.evoltrepipline`，移除 `evoldist → evoltre` 依赖边。
+  - `evolview.phylotree` 通过 `TreeLayoutHost` 与下移的注释/绘图工具完全与 `gfamily` 解耦。
+  - `remnant` 侧的可视化树转换下移至 `TreeConversionUtil`，不再依赖 evolview.model。
+- 当前源代码与下方 DAG 图一致，可按分层顺序编译。
 
 ---
 

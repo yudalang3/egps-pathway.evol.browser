@@ -17,7 +17,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import module.multiseq.alignment.view.io.AlignmentImportBean;
+import module.evoltrepipline.alignment.AlignmentImportBean;
 import egps2.panels.dialog.SwingDialog;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -45,7 +45,7 @@ import msaoperator.io.seqFormat.parser.NEXUSParser;
 import msaoperator.io.seqFormat.parser.PAMLParser;
 import msaoperator.io.seqFormat.parser.PHYParser;
 import module.multiseq.alignment.view.io.VOICE4AlignmentViewIO;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 @SuppressWarnings("serial")
 public class VOICE4AlignmentView extends JPanel {

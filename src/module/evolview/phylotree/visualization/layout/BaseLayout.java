@@ -5,9 +5,8 @@ import egps2.utils.common.model.datatransfer.TwoTuple;
 import evoltree.txtdisplay.TreeDrawUnit;
 import graphic.engine.AxisTickCalculator;
 import graphic.engine.guicalculator.BlankArea;
-import module.evolview.gfamily.work.gui.DrawUtil;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.gfamily.work.gui.tree.annotation.*;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+import module.evolview.phylotree.visualization.annotation.*;
 import module.evolview.model.enums.BranchLengthType;
 import module.evolview.model.tree.*;
 import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
@@ -35,7 +34,7 @@ import java.util.function.Function;
  */
 public abstract class BaseLayout implements ITreeLayout {
     protected final TreeLayoutProperties treeLayoutProperties;
-    protected final PhylogeneticTreePanel phylogeneticTreePanel;
+    protected final TreeLayoutHost phylogeneticTreePanel;
     protected final ScaleBarProperty scaleBarProperty;
 
     protected ButtomScaleBarDrawProperty buttomScaleBarDrawProperty = new ButtomScaleBarDrawProperty();
@@ -74,7 +73,7 @@ public abstract class BaseLayout implements ITreeLayout {
     private BranchLengthType branchLengthType = BranchLengthType.DIVERGENCE;
 
     public BaseLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-                      PhylogeneticTreePanel phylogeneticTreePanel) {
+                      TreeLayoutHost phylogeneticTreePanel) {
 
         this.treeLayoutProperties = controller;
         this.blankArea = controller.getBlankArea();
@@ -346,7 +345,7 @@ public abstract class BaseLayout implements ITreeLayout {
         int xx = (int) x;
         int yy = (int) y;
         Component selpan = LineLabel.getInstance().getRendLabel();
-        treeLayoutProperties.getLeafLabelPan().paintComponent(g2d, selpan, phylogeneticTreePanel, xx - 7, yy - 7, 14,
+        treeLayoutProperties.getLeafLabelPan().paintComponent(g2d, selpan, phylogeneticTreePanel.getHostComponent(), xx - 7, yy - 7, 14,
                 14, false);
     }
 
@@ -363,7 +362,8 @@ public abstract class BaseLayout implements ITreeLayout {
      * @return int
      */
     protected int getMaxLengthLeafNameWidthAccording2CurrentFont() {
-        FontMetrics fontMetrics = phylogeneticTreePanel.getFontMetrics(treeLayoutProperties.getGlobalFont());
+        FontMetrics fontMetrics = phylogeneticTreePanel.getHostComponent()
+                .getFontMetrics(treeLayoutProperties.getGlobalFont());
         int stringWidth = fontMetrics.stringWidth(maxLengthLeafName);
         return stringWidth;
     }

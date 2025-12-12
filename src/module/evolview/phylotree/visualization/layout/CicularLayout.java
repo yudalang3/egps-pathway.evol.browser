@@ -5,14 +5,14 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.model.tree.GraphicsNode;
 import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public abstract class CicularLayout extends BaseLayout {
 	public CicularLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

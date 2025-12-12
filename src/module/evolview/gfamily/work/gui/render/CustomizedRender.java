@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import module.evolview.gfamily.GeneFamilyController;
-import module.evolview.gfamily.work.gui.tree.TreeOperationUtil;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import module.evolview.model.enums.ColorScheme;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;

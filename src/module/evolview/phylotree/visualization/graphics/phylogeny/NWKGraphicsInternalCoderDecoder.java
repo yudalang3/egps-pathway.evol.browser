@@ -3,6 +3,7 @@ package module.evolview.phylotree.visualization.graphics.phylogeny;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Doubles;
 import evoltree.struct.io.AbstractNodeCoderDecoder;
+import module.evolview.model.tree.DefaultGraphicsPhyloNode;
 import utils.string.EGPSStringUtil;
 
 import java.util.InputMismatchException;

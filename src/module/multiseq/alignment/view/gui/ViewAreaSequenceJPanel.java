@@ -18,7 +18,7 @@ import egps2.frame.gui.EGPSMainGuiUtil;
 import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.model.AlignmentDrawProperties;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class ViewAreaSequenceJPanel extends JPanel implements MouseListener, MouseMotionListener {
 

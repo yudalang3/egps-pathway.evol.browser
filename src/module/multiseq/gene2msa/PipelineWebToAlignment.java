@@ -19,7 +19,7 @@ import msaoperator.alignment.sequence.Sequence;
 import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.alignment.view.Launcher4ModuleLoader;
 import module.multiseq.alignment.view.MS2AlignmentUtil;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.webmsaoperator.webIO.RestGRegion2MSAMultiStep;
 import module.webmsaoperator.webIO.RestGenomicRegionMultiStep;
 import module.webmsaoperator.webIO.RestWeb2AlignmentMultiStep;

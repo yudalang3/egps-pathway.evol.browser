@@ -15,7 +15,7 @@ import egps2.EGPSProperties;
 import module.evoltreio.EvolTreeImportInfoBean;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 import module.evolview.moderntreeviewer.io.TreeParser4MTV;

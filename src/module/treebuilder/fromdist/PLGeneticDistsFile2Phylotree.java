@@ -19,6 +19,7 @@ import egps2.frame.MainFrameProperties;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
 import module.webmsaoperator.webIO.DistMatrixTextInput;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
 
 /**
  * <p>
@@ -109,7 +110,7 @@ public class PLGeneticDistsFile2Phylotree extends AbstractDistanceBasedTreePipel
 			return;
 		}
 		
-		final GraphicsNode ret = convertTheTree4visualization(finalTree);
+		final GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(finalTree);
 
 		IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
 		independentModuleLoader.setHowModuleLaunchedWithData("Module launched by pipline evolutionary distance to construct the phylogenetic tree.", 

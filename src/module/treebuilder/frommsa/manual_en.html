@@ -9,20 +9,30 @@
 	<blockquote>
 		<h1>Tree builder: from MSA</h1>
 		<h3>Task to resolve</h3>
-		<p>Quick build the gene phylogenetic tree from Multiple Sequence
-			alignment.</p>
+		<p>This module reconstructs a phylogenetic tree from a multiple sequence alignment (MSA) file. It computes evolutionary distances from the alignment using the selected substitution model and gap/missing‑data treatment, then builds a distance‑based tree (Neighbor‑Joining, Swift Neighbor‑Joining, or UPGMA). The tree is mid‑point rooted and opened in the Modern Tree Viewer.</p>
 
-		<h3>Quick start</h3>
-		<p>Any actions are straightforward. Please follow the GUI
-			instructions.</p>
+		<h3>Input format</h3>
+		<p>Provide an aligned MSA file. Choose the matching format in <b>Data type</b> (the dropdown lists all supported formats). Sequences should be aligned to equal length and may contain gaps (<code>-</code>).</p>
 
-
+		<h3>Parameters</h3>
 		<ol>
-			<li>View the required input data in the parameter input area.</li>
-      <li>The user enters the required parameters.</li>
-			<li>Click the Execute button to see the results.</li>
+			<li><b>Input:</b> path to the MSA file.</li>
+			<li><b>Data type:</b> select the file format (e.g., aligned FASTA, CLUSTAL, PHYLIP, etc.).</li>
+			<li><b>Substitution model:</b> choose Model/Method for evolutionary distance.</li>
+			<li><b>Gaps/Missing Data Treatment:</b> Complete deletion, Pairwise deletion, or Partial deletion (with Site Coverage Cutoff).</li>
+			<li><b>Variance Estimation Method:</b> set to <i>Bootstrap method</i> and specify <i>No. of Bootstrap replications</i> to get bootstrap supports on internal nodes.</li>
+			<li><b>Distance based method:</b> Neighbor‑Joining (default), Swift Neighbor‑Joining, or UPGMA.</li>
+			<li><b>Genetic code / IUPAC treatment:</b> controls how ambiguous bases are handled during distance calculation.</li>
 		</ol>
 
+		<h3>Quick start</h3>
+		<p>Any actions are straightforward. Please follow the GUI instructions.</p>
+
+		<ol>
+			<li>Load your aligned MSA file and select its format.</li>
+			<li>Adjust distance and tree parameters if needed.</li>
+			<li>Click the Execute button to see the results.</li>
+		</ol>
 	</blockquote>
 </body>
 </html>

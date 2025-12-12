@@ -22,7 +22,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.model.tree.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
 import module.evolview.model.tree.GraphicsNode;
 
 /**

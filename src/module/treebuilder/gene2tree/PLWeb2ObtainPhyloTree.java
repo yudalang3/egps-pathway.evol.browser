@@ -18,6 +18,7 @@ import module.evoltrepipline.ConstantNameClass_TreeBuildMethod;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
 import module.multiseq.gene2msa.PipelineWebToAlignment;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
 
 /**
   *
@@ -125,7 +126,7 @@ public class PLWeb2ObtainPhyloTree extends PipelineWebToAlignment{
 	}
 
 	private GraphicsNode transferTheTree(NodeEGPSv1 tempTree) {
-		GraphicsNode ret = new TreeUtility().node4eGPSToGraphicsNode(tempTree);
+		GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(tempTree);
 		return ret;
 	}
 

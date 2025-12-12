@@ -1,6 +1,5 @@
 package module.parsimonytre;
 
-import java.awt.Dimension;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -30,11 +29,9 @@ import org.apache.commons.io.FileUtils;
 import utils.string.EGPSStringUtil;
 import utils.EGPSUtil;
 import tsv.io.TSVReader;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.phylotree.visualization.primary.swing.FastSingleTreeVisualizer;
-import evoltree.swingvis.OneNodeDrawer;
 import evoltree.struct.EvolNode;
 import evoltree.struct.TreeDecoder;
+import evoltree.struct.util.EvolNodeUtil;
 import module.parsimonytre.algo.Node4SankoffAlgo;
 import module.parsimonytre.algo.SankoffAlgoRunner;
 import module.parsimonytre.algo.StateAfterMutation;
@@ -43,7 +40,7 @@ import module.parsimonytre.algo.StateAfterMutation;
  * <pre>
  * 请你帮我用JAVA的库 commons-cli，编写一个命令行的启动类。
  * 我有三个参数，第一个是 -t    --tree 意义是 必需参数，内容为进化树的路径；
- * 第二个是 -ls  --leafStates 意义是 必需参数，叶子节点的状态，输入格式为一个tsv文件，详见<a href="https://www.yuque.com/u21499046/egpsdoc/pr5qx32gnxa53p36">...</a>；
+ * 第二个是 -ls  --leafStates 意义是 必需参数，叶子节点的状态，输入格式为一个tsv文件，详见用户手册；
  * 第三个是 -p --preferStateOfRoot 意义是 可选参数，当出现多个相同score的简约分数时优先选取的状态
  * 第四个是 -o --output 意义是 必需参数，输出进化树文件的路径
  * 帮我写一个这样的命令行参数解析类。
@@ -77,11 +74,7 @@ public class CLI {
 		output.setRequired(true);
 		options.addOption(output);
 
-		{
-			Option display = new Option("d", "display", false, "Whether display the results in the GUI.");
-			display.setRequired(false);
-			options.addOption(display);
-		}
+		// Display/GUI option intentionally removed to keep core algorithms UI-free.
 
 		{
 			Option display = new Option("ln", "leafName", true, "The Column name for the phylogenetic tree leaf name.");
@@ -103,7 +96,6 @@ public class CLI {
 			String preferStateOfRootValue = cmd.getOptionValue("preferStateOfRoot");
 			String outputFilePath = cmd.getOptionValue("output");
 			String leafName = cmd.getOptionValue("leafName");
-			boolean displayOption = cmd.hasOption("display");
 
 			// 打印参数值
 			System.out.println("Tree file: " + new File(treeFilePath).getName());
@@ -114,7 +106,7 @@ public class CLI {
 			System.out.println("Output file: " + outputFilePath);
 			System.out.println("--------------------------------------------------------------------");
 
-			List<String> outputs = run(treeFilePath, leafStatesFilePath, outputFilePath, preferStateOfRootValue, displayOption, leafName, Collections.emptySet());
+			List<String> outputs = run(treeFilePath, leafStatesFilePath, outputFilePath, preferStateOfRootValue, leafName, Collections.emptySet());
 			for (String s : outputs) {
 				System.out.println(s);
 			}
@@ -127,7 +119,7 @@ public class CLI {
 	}
 
 	public static List<String> run(String treeFilePath, String leafStatesFilePath, String outputFilePath,
-			String preferStateOfRootValue, boolean display, String leafID,Set<String> excludeStatesFileCols) throws Exception {
+			String preferStateOfRootValue, String leafID,Set<String> excludeStatesFileCols) throws Exception {
 
 		List<String> outputs = new ArrayList<>();
 
@@ -267,9 +259,7 @@ public class CLI {
 			writer.write(position);
 			EvolNodeUtil.iterateByLevelTraverse(rootRet, writeInternalNodeStatesConsumer);
 
-			if (display) {
-				displayTheNode(rootRet);
-			}
+			// GUI display removed to keep strict DAG.
 
 			writer.write("\t");
 			int[] minParsimonyScore = rootRet.getMinParsimonyScore();
@@ -322,18 +312,5 @@ public class CLI {
 
 	private static StateAfterMutation generateState(String string) {
 		return new StateAfterMutation(string.charAt(0), 1);
-	}
-
-	private static void displayTheNode(Node4SankoffAlgo root) {
-		EvolNodeUtil.recursiveIterateTreeIF(root, node -> {node.setLength(1);});
-
-		OneNodeDrawer<Node4SankoffAlgo> drawer = (g2d, grNode) -> {
-			int xSelf = (int) grNode.getXSelf();
-			int ySelf = (int) grNode.getYSelf();
-			g2d.fillRect(xSelf, ySelf, 2, 2);
-			Node4SankoffAlgo reflectNode = grNode.getReflectNode();
-			g2d.drawString(reflectNode.getChosenChar().getStringOfOneStateAfterMutation(), xSelf + 5, ySelf);
-		};
-		new FastSingleTreeVisualizer().plotTree(root, "Title", new Dimension(1200, 600), drawer);
 	}
 }

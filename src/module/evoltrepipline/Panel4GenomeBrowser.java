@@ -21,7 +21,7 @@ import javax.swing.border.TitledBorder;
 
 import org.dom4j.DocumentException;
 
-import module.evoltre.pipline.TreeParameterHandler;
+import module.evoltrepipline.TreeParameterHandler;
 
 /**
  * 

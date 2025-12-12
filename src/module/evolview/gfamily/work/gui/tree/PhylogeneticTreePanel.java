@@ -15,11 +15,11 @@ import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.work.listener.TreeListener;
 import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
-import module.evolview.model.tree.AnnotationsProperties;
-import module.evolview.model.tree.AnnotationsProperties4LinageType;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.model.tree.ScaleBarProperty;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.layout.BaseLayout;
 import module.evolview.phylotree.visualization.layout.CircularCladoAlign2Tip;
 import module.evolview.phylotree.visualization.layout.CircularCladoEqual;
@@ -41,13 +41,14 @@ import module.evolview.phylotree.visualization.layout.SpiralCladoAlignedWithBeta
 import module.evolview.phylotree.visualization.layout.SpiralPhyloWithAlpha;
 import module.evolview.phylotree.visualization.layout.SpiralPhyloWithBeta;
 import module.evolview.phylotree.visualization.layout.SprialCladoAlignedWithAlpha;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import egps2.frame.gui.EGPSMainGuiUtil;
 import graphic.engine.guicalculator.BlankArea;
 
 /**
  * This class is the "Phylogenetic Tree" tab.
  */
-public class PhylogeneticTreePanel extends JPanel {
+public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	private static final Logger logger = LoggerFactory.getLogger(PhylogeneticTreePanel.class);
 
 	protected TreeLayoutProperties layoutProp;
@@ -473,6 +474,11 @@ public class PhylogeneticTreePanel extends JPanel {
 
 	public AnnotationsProperties4LinageType getLinageTypeAnnotationsProperties() {
 		return linageTypeAnnotationsProperties;
+	}
+
+	@Override
+	public Container getHostComponent() {
+		return this;
 	}
 
 	public void setLinageTypeAnnotationsProperties(AnnotationsProperties4LinageType linageTypeAnnotationsProperties) {

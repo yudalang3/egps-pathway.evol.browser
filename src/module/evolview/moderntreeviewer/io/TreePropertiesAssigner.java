@@ -20,7 +20,7 @@ import evoltree.struct.util.EvolNodeUtil;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import graphic.engine.colors.EGPSColors;
 
 public class TreePropertiesAssigner {

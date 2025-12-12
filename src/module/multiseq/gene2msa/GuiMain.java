@@ -23,7 +23,7 @@ import egps2.panels.dialog.EGPSFileChooser;
 import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.ComputationalModuleFace;
-import module.evoltre.pipline.TreeParameterHandler;
+import module.evoltrepipline.TreeParameterHandler;
 import module.evoltrepipline.BuildTreeAllRelatedParametersConfigGUI;
 import module.evoltrepipline.ConstantNameClass_WebQuery;
 import module.multiseq.alignment.view.io.SaveFilterFasta;

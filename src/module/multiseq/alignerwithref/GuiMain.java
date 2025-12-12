@@ -40,7 +40,7 @@ import msaoperator.alignment.sequence.Sequence;
 import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.aligner.cli.MafftAlignerAutoMode;
 import module.multiseq.alignment.view.Launcher4ModuleLoader;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import egps2.modulei.IModuleLoader;
 import egps2.modulei.RunningTask;
 

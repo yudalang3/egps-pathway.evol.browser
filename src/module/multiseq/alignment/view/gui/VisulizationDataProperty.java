@@ -9,7 +9,7 @@ import java.util.List;
 
 import egps2.UnifiedAccessPoint;
 import msaoperator.alignment.sequence.SequenceI;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 /**
  * Copyright (c) 2019 Chinese Academy of Sciences. All rights reserved.

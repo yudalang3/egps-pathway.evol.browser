@@ -48,7 +48,7 @@ import egps2.UnifiedAccessPoint;
 import egps2.frame.ComputationalModuleFace;
 import egps2.frame.MainFrameProperties;
 import egps2.frame.MyFrame;
-import module.evoltre.pipline.TreeParameterHandler;
+import module.evoltrepipline.TreeParameterHandler;
 import module.evoltrepipline.AbstractPrefShowContent;
 import module.evoltrepipline.Panel4BiologyCodesPanel;
 import module.evoltrepipline.Panel4EvolutionaryDistancePanel;

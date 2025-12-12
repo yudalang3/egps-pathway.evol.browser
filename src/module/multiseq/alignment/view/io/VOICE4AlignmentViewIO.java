@@ -10,7 +10,8 @@ import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;
 import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
 import module.multiseq.alignment.view.VOICE4AlignmentView;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.AlignmentImportBean;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class VOICE4AlignmentViewIO extends AbstractGuiBaseVoiceFeaturedPanel {
 

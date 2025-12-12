@@ -5,9 +5,9 @@ import java.util.List;
 import org.apache.commons.math3.util.FastMath;
 
 import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public class RectPhyloInnerYAxis extends RectPhyloLayout {
 
@@ -15,7 +15,7 @@ public class RectPhyloInnerYAxis extends RectPhyloLayout {
 	private List<GraphicsNode> allLeaves;
 
 	public RectPhyloInnerYAxis(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

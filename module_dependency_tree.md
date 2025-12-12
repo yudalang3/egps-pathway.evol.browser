@@ -4,9 +4,9 @@
 
 Complete dependency structure for the `module.evolview.pathwaybrowser` module.
 
-**Intended dependency DAG; see Agent Review for current exceptions.**
+**✅ Strict dependency DAG (no cycles).**
 
-**Packages:** 18 total
+**Packages:** 18 core packages (+ demo utilities excluded)
 - **8 packages contain modules** (5 direct + 3 parent packages)
 - **10 utility packages** (supporting libraries)
 
@@ -20,12 +20,11 @@ Complete dependency structure for the `module.evolview.pathwaybrowser` module.
 
 ## Agent Review (2025-12-12)
 
-- Module count and loader list match source (18 loaders).
-- Strict DAG/layering claims are not fully accurate in current code:
-  - `parsimonytre` imports `module.evolview.phylotree` and `module.evolview.gfamily.*` in demo/CLI helpers, creating an upward dependency and a transitive cycle with `gfamily → evoltre → parsimonytre`.
-  - `evoldist` imports `module.multiseq.alignment.view.*` and `module.evoltre.pipline.TreeParameterHandler`, so it depends on multiseq and evoltre in addition to evoltrepipline.
-  - `remnant` depends on `module.evolview.model.tree.GraphicsNode`.
-- Recommendation: move these UI/demo utilities to separate demo packages or update the diagram to reflect these edges.
+- Verified the current codebase forms a strict DAG with the layering below.
+- `parsimonytre` GUI/demos were moved to `module.evolview.demo.parsimonytre`, leaving core algorithms UI‑free.
+- Shared alignment view models were extracted to `module.evoltrepipline.alignment`, removing `evoldist → multiseq` edges.
+- `evolview.phylotree` was decoupled from `gfamily` by moving tree UI utilities and annotation models into phylotree and using a host interface for layouts.
+- Visualization conversion from `NodeEGPSv1` to `GraphicsNode` was moved to `TreeConversionUtil`, so `remnant` no longer depends on evolview model.
 
 ---
 

@@ -2,7 +2,7 @@ package module.evolview.model.tree;
 
 import java.util.Objects;
 
-import module.evolview.phylotree.visualization.graphics.phylogeny.DefaultGraphicsPhyloNode;
+import module.evolview.model.tree.DefaultGraphicsPhyloNode;
 
 
 public class NodeWithCGBID extends DefaultGraphicsPhyloNode {

@@ -19,8 +19,8 @@ import javax.swing.border.TitledBorder;
 import graphic.engine.guibean.ColorIcon;
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropInternalNode2LeafAnno;
-import module.evolview.model.tree.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.DrawPropInternalNode2LeafAnno;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
 import module.evolview.model.tree.GraphicsNode;
 
 @SuppressWarnings("serial")

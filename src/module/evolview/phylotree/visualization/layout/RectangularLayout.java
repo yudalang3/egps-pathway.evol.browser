@@ -4,10 +4,10 @@ import java.awt.Graphics2D;
 import java.awt.geom.CubicCurve2D;
 import java.util.List;
 
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.RectangularLayoutProperty;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public abstract class RectangularLayout extends BaseLayout {
 
@@ -17,7 +17,7 @@ public abstract class RectangularLayout extends BaseLayout {
 	private CubicCurve2D.Double cubicDouble = new CubicCurve2D.Double();
 
 	public RectangularLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

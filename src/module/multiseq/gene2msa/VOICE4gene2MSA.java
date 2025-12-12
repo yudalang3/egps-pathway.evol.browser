@@ -2,7 +2,7 @@ package module.multiseq.gene2msa;
 
 import java.util.Map;
 
-import module.evoltre.pipline.TreeParameterHandler;
+import module.evoltrepipline.TreeParameterHandler;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;

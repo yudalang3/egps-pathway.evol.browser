@@ -9,19 +9,36 @@
 	<blockquote>
 		<h1>Tree builder: from MAF</h1>
 		<h3>Task to resolve</h3>
-		<p>Quick build the gene phylogenetic tree from MAF format files.</p>
+		<p>This module reconstructs a phylogenetic tree from UCSC MAF (Multiple Alignment Format) blocks. It parses all MAF blocks, computes pairwise evolutionary distances across blocks, then builds a distance‑based tree (Neighbor‑Joining, Swift Neighbor‑Joining, or UPGMA). The final tree is rooted by the mid‑point method and opened in the Modern Tree Viewer.</p>
 
-		<h3>Quick start</h3>
-		<p>Any actions are straightforward. Please follow the GUI
-			instructions.</p>
+		<h3>Input format</h3>
+		<p><b>Input</b> should be a directory containing MAF files. The module loads all files ending with <code>.maf</code> (or <code>.maf.gz</code> if <b>Is Gzip</b> is checked). Each file must be standard MAF with blocks separated by a blank line and sequence lines starting with <code>s</code>:</p>
+		<pre>
+a score=...
+s hg38.chr1  ... ACTG--A...
+s panTro4.chr1 ... ACTG--A...
+s ponAbe2.chr1 ... ACTG--A...
+		</pre>
+		<p>Only blocks that contain all required assemblies are used. In the current GUI, the assemblies are fixed to <code>panTro4</code>, <code>hg38</code>, and <code>ponAbe2</code>.</p>
 
-
+		<h3>Parameters</h3>
 		<ol>
-			<li>View the required input data in the parameter input area.</li>
-      <li>The user enters the required parameters.</li>
-			<li>Click the Execute button to see the results.</li>
+			<li><b>Input:</b> folder path containing MAF files.</li>
+			<li><b>Is Gzip:</b> check if files end with <code>.maf.gz</code>.</li>
+			<li><b>Substitution model / Gaps &amp; missing data:</b> choose the evolutionary distance model (Model/Method) and deletion strategy (Complete/Pairwise/Partial deletion).</li>
+			<li><b>Variance estimation:</b> set <i>Variance Estimation Method</i> to <i>Bootstrap method</i> and choose <i>No. of Bootstrap replications</i> to obtain bootstrap supports.</li>
+			<li><b>Distance based method:</b> Neighbor‑Joining (default), Swift Neighbor‑Joining, or UPGMA.</li>
+			<li><b>Genetic code / IUPAC treatment:</b> controls how ambiguous bases are treated when distances are computed from blocks.</li>
 		</ol>
 
+		<h3>Quick start</h3>
+		<p>Any actions are straightforward. Please follow the GUI instructions.</p>
+
+		<ol>
+			<li>Select the folder that contains your MAF (or MAF.GZ) files.</li>
+			<li>Adjust distance and tree reconstruction parameters if needed.</li>
+			<li>Click the Execute button to see the results.</li>
+		</ol>
 	</blockquote>
 </body>
 </html>

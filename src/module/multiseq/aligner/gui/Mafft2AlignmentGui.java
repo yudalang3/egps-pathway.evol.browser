@@ -11,7 +11,7 @@ import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.aligner.MultipleSeqAlignerMain;
 import module.multiseq.aligner.cli.Mafft2AlignmentCli;
 import module.multiseq.alignment.view.Launcher4ModuleLoader;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import egps2.modulei.RunningTask;
 
 /**

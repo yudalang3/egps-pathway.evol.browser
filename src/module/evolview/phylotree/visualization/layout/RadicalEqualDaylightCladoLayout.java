@@ -1,14 +1,14 @@
 package module.evolview.phylotree.visualization.layout;
 
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.gfamily.work.gui.tree.TreeOperationUtil;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public class RadicalEqualDaylightCladoLayout extends RadicalEqualDaylightPhyloLayout {
 
 	public RadicalEqualDaylightCladoLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

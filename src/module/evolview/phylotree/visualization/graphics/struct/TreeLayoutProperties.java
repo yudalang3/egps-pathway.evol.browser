@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import evoltree.txtdisplay.BaseGraphicNode;
 import graphic.engine.guicalculator.BlankArea;
-import module.evolview.phylotree.visualization.graphics.large.interactive.TreePopupMenu;
 import evoltree.struct.util.EvolNodeUtil;
 
 import javax.swing.*;
@@ -68,7 +67,7 @@ public class TreeLayoutProperties {
 
     // Render utils
     private CellRendererPane leafLabelRendererPane = null;
-    private TreePopupMenu treePopupMenu;
+    private JPopupMenu treePopupMenu;
 
     private AdvancedParametersBean advancedPara = new AdvancedParametersBean();
 
@@ -276,11 +275,11 @@ public class TreeLayoutProperties {
         return branchLabelIndex;
     }
 
-    public TreePopupMenu getTreePopupMenu() {
+    public JPopupMenu getTreePopupMenu() {
         return treePopupMenu;
     }
 
-    public void setTreePopupMenu(TreePopupMenu leafLabelPopupMenu) {
+    public void setTreePopupMenu(JPopupMenu leafLabelPopupMenu) {
         this.treePopupMenu = leafLabelPopupMenu;
     }
 

@@ -11,11 +11,11 @@ import java.awt.geom.Rectangle2D;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import org.apache.commons.math3.util.FastMath;
 
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
 
@@ -39,7 +39,7 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 	Arc2D.Double arc2d = new Arc2D.Double();
 
 	public RectHalfCircleLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

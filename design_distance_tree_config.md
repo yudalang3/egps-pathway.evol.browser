@@ -146,7 +146,7 @@ String json = props.toJson();  // Pretty-printed
 
 ### 3. TreeParameterHandler
 
-**Location:** `module.evoltre.pipline.TreeParameterHandler`
+**Location:** `module.evoltrepipline.TreeParameterHandler`
 
 **Purpose:** High-level API for tree parameter operations
 
@@ -357,7 +357,7 @@ public void testCustomDirectory() {
 3. `src/module/evoltreio/default_configs/` - Default JSON configs (4 files)
 
 ### Refactored (1 file)
-4. `src/module/evoltre/pipline/TreeParameterHandler.java` - Simplified using manager
+4. `src/module/evoltrepipline/TreeParameterHandler.java` - Simplified using manager
 
 ### Total Impact
 - **New code:** ~450 lines (manager + model + tests)

@@ -19,7 +19,7 @@ import msaoperator.io.seqFormat.writer.NEXUSWriter;
 import msaoperator.io.seqFormat.writer.PAMLWriter;
 import msaoperator.io.seqFormat.writer.PHYLIPWriter;
 import module.multiseq.alignment.DataFileSuffixNames;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class MS2AlignmentUtil {
 	// input or out put

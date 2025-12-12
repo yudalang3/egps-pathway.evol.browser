@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D.Double;
 
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.SprialLayoutProperty;
 import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import graphic.engine.guicalculator.GuiCalculator;
 
@@ -44,7 +44,7 @@ public abstract class SprialLayout extends BaseLayout {
 	}
 
 	public SprialLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

@@ -13,18 +13,18 @@ import java.util.function.Function;
 
 import com.google.common.base.Strings;
 
-import module.evolview.gfamily.work.gui.DrawUtil;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropInternalNode2LeafAnno;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropInternalNodeInsituAnno;
-import module.evolview.gfamily.work.gui.tree.annotation.DrawPropOutterSidewardAnno;
-import module.evolview.gfamily.work.gui.tree.annotation.OutterSidewardLocation;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
+import module.evolview.phylotree.visualization.annotation.DrawPropInternalNode2LeafAnno;
+import module.evolview.phylotree.visualization.annotation.DrawPropInternalNodeInsituAnno;
+import module.evolview.phylotree.visualization.annotation.DrawPropOutterSidewardAnno;
+import module.evolview.phylotree.visualization.annotation.OutterSidewardLocation;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.model.tree.AnnotationsProperties;
-import module.evolview.model.tree.AnnotationsProperties4LinageType;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
@@ -32,7 +32,7 @@ import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 public class RectPhyloLayout extends RectangularLayout {
 
 	public RectPhyloLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			PhylogeneticTreePanel phylogeneticTreePanel) {
+			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);
 	}
 

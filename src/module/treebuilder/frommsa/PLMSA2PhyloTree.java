@@ -8,6 +8,7 @@ import module.remnant.treeoperator.NodeEGPSv1;
 import egps2.frame.MainFrameProperties;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
 
 public class PLMSA2PhyloTree extends AbstractDistanceBasedTreePipeline {
 	protected int processIndex = 1;
@@ -87,7 +88,7 @@ public class PLMSA2PhyloTree extends AbstractDistanceBasedTreePipeline {
 			SwingDialog.showErrorMSGDialog("Error", "The tree is null! Please check the input file!");
 			return;
 		}
-		final GraphicsNode ret = convertTheTree4visualization(finalTree);
+		final GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(finalTree);
 
 		IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
 		independentModuleLoader.setHowModuleLaunchedWithData("Module launched by pipline multiple sequence alignment to construct the phylogenetic tree.", 

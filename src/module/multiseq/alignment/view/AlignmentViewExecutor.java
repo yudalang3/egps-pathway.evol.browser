@@ -4,7 +4,7 @@ import java.awt.Adjustable;
 
 import module.multiseq.alignment.view.gui.ViewAreaSequenceJPanel;
 import module.multiseq.alignment.view.gui.VisulizationDataProperty;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class AlignmentViewExecutor {
 

@@ -26,7 +26,7 @@ import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.MS2AlignmentUtil;
 import module.multiseq.alignment.view.gui.AlignmentViewContinuousRightPanel;
 import module.multiseq.alignment.view.gui.AlignmentViewInterLeavedPanel;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class AlignmentSaver extends SaveUtil {
 

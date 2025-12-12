@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import egps2.frame.MainFrameProperties;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class ModuleLauncher4MSA2AlignmentView {
 

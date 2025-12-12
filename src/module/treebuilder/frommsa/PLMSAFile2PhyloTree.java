@@ -21,6 +21,7 @@ import module.evolview.moderntreeviewer.IndependentModuleLoader;
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.io.MSAFileParser;
 import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
 
 /**
  * <p>
@@ -105,7 +106,7 @@ public class PLMSAFile2PhyloTree extends PLMSA2PhyloTree {
 			SwingDialog.showErrorMSGDialog("Error", "The tree is null! Please check the input file!");
 			return;
 		}
-		final GraphicsNode ret = convertTheTree4visualization(finalTree);
+		final GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(finalTree);
 
 		IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
 		independentModuleLoader.setHowModuleLaunchedWithData("Module launched by reading pipline multiple sequence alignment to construct the phylogenetic tree.", 

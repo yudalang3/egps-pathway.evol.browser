@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import module.remnant.treeoperator.util.GenealogyAnalyzer;
-import module.evolview.model.tree.GraphicsNode;
 
 /**
  *
@@ -332,33 +331,4 @@ public class TreeUtility {
 		return ret;
 	}
 	
-	public GraphicsNode node4eGPSToGraphicsNode(NodeEGPSv1 node) {
-		GraphicsNode ret = new GraphicsNode();
-		
-		int childCount = node.getChildCount();
-		//------------------------------------
-		if (childCount == 0) {
-			ret.setName(node.getLeafName());
-		}else {
-			ret.setName(node.getName());
-		}
-		// branch length
-		ret.setRealBranchLength(node.getBranch().getLength());
-		// bootstrap
-		if (node.getBs() < 1) {
-			ret.setBootstrap( (int) (node.getBs() * 100));
-		}else {
-			ret.setBootstrap( (int) (node.getBs()));
-		}
-		//------------------------------------
-		
-		
-		for (int i = 0; i < childCount; i++) {
-			NodeEGPSv1 child = node.getChildAt(i);
-			GraphicsNode child4graphics = node4eGPSToGraphicsNode(child);
-			ret.addChild(child4graphics);
-		}
-		
-		return ret;
-	}
 }

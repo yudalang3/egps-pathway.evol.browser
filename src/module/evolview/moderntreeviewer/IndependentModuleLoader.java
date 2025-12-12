@@ -5,7 +5,7 @@ import java.io.InputStream;
 import egps2.frame.ModuleFace;
 import egps2.EGPSProperties;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import egps2.modulei.IModuleLoader;
 import egps2.modulei.ModuleVersion;
 import egps2.EGPSProperties;

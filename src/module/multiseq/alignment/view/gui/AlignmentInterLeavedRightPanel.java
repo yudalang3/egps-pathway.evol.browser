@@ -12,7 +12,7 @@ import egps2.frame.gui.EGPSMainGuiUtil;
 import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.model.AlignmentDrawProperties;
-import module.multiseq.alignment.view.model.SequenceDataForAViewer;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
 
 public class AlignmentInterLeavedRightPanel extends JPanel {
