@@ -1,4 +1,4 @@
-package module.multiseq.aligner.gui;
+package module.multiseq.aligner.notuse;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 
+import module.multiseq.aligner.gui.AbstractAlignmentPanel;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 

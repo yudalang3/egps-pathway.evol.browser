@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 
 import module.evoltrepipline.alignment.AlignmentImportBean;
 import egps2.panels.dialog.SwingDialog;
+import module.multiseq.alignment.view.io.AlignmentSaver;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -97,7 +98,7 @@ public class VOICE4AlignmentView extends JPanel {
                 "Hedges SB, Kumar S, Tamura K, & Stoneking M (1992). Human origins and analysis of mitochondrial DNA sequences. Science 255:737-739."));
 
 
-        InputStream resourceAsStream = AlignmentImportBean.class.getResourceAsStream("mtCDNA.fas");
+        InputStream resourceAsStream = AlignmentSaver.class.getResourceAsStream("mtCDNA.fas");
 
         List<String> lines = IOUtils.readLines(resourceAsStream, StandardCharsets.UTF_8);
         dataImportPanel.setContentsOfDirectArea(lines);

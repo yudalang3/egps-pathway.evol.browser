@@ -23,16 +23,13 @@ import egps2.modulei.RunningTask;
  * @Date Created on:2019-06-05 13:23
  * 
  */
-public class Mafft2AlignmentGui extends Mafft2AlignmentCli implements RunningTask {
+public class PipelineDoAlignByMafftThenToAlignmentView extends Mafft2AlignmentCli implements RunningTask {
 
-	private MultipleSeqAlignerMain alignmentMain;
-
-	public Mafft2AlignmentGui(List<String> parameters, MultipleSeqAlignerMain alignmentMain) {
+	public PipelineDoAlignByMafftThenToAlignmentView(List<String> parameters, MultipleSeqAlignerMain alignmentMain) {
 		this(parameters);
-		this.alignmentMain = alignmentMain;
 	}
 
-	public Mafft2AlignmentGui(List<String> parameters) {
+	private PipelineDoAlignByMafftThenToAlignmentView(List<String> parameters) {
 		super(parameters);
 	}
 

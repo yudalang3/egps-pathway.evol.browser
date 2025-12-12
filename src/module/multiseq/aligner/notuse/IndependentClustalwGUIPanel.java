@@ -1,4 +1,4 @@
-package module.multiseq.aligner.gui;
+package module.multiseq.aligner.notuse;
 
 import java.io.File;
 import java.util.Arrays;

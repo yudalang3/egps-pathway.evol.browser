@@ -32,6 +32,33 @@ import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
 import egps2.UnifiedAccessPoint;
 import module.multiseq.aligner.MultipleSeqAlignerMain;
 
+/**
+ * MAFFT多序列比对工具的GUI面板基类。
+ * 
+ * <p>本类是一个抽象基类，提供了MAFFT算法的完整参数配置界面，包括：
+ * <ul>
+ *   <li>策略选择：自动模式、渐进式方法（FFT-NS-1、FFT-NS-2、G-INS-1）、迭代优化方法（FFT-NS-i、E-INS-i、L-INS-i、G-INS-i）</li>
+ *   <li>参数配置：gap opening penalty、offset值、序列顺序保持选项</li>
+ *   <li>序列比对执行：支持批量文件处理</li>
+ * </ul>
+ * 
+ * <p><b>设计模式</b>：模板方法模式
+ * <ul>
+ *   <li>{@link #cofigurateInputFiles()} 是一个钩子方法，由子类实现以提供输入文件</li>
+ *   <li>{@link #setInputFiles(List)} 允许外部或子类设置输入文件</li>
+ * </ul>
+ * 
+ * <p><b>使用场景</b>：
+ * <ul>
+ *   <li>作为独立模块使用时，需要子类实现文件导入功能（参见 {@link IndependentMafftGUIPanel}）</li>
+ *   <li>作为嵌入式模块使用时，由父组件通过 {@link #setInputFiles(List)} 直接设置文件</li>
+ * </ul>
+ * 
+ * @author yudalang
+ * @since 1.7
+ * @see IndependentMafftGUIPanel 独立模块的具体实现，包含文件导入面板
+ * @see AbstractAlignmentPanel 比对面板的抽象父类
+ */
 public class MafftGUIPanel extends AbstractAlignmentPanel {
 
 	private static final long serialVersionUID = -2908588357598487831L;
@@ -56,7 +83,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 	private JRadioButton strategy_E_INS_i_JRadioButton;
 	private JRadioButton strategy_L_INS_i_JRadioButton;
 	private JRadioButton strategy_G_INS_i_JRadioButton;
-//	private JRadioButton strategy_Q_INS_i_JRadioButton;
 	private JRadioButton alignUnrelatedSegmentsAlignGappyRegionsJRadioButton;
 	private JRadioButton alignUnrelatedSegmentsLeaveGappyRegionsJRadioButton;
 	private JXTaskPane parametersJXTaskPane;
@@ -117,9 +143,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 	protected void configTaskPanes(JXTaskPaneContainer taskPaneContainer) {
 
 		taskPaneContainer.add(getStrategyJPanel());
-		// taskPaneContainer.add(getAlignUnrelatedSegmentsJPanel());
 		taskPaneContainer.add(getParametersJPanel());
-		// taskPaneContainer.add(getGuideTreeJPanel());
 		taskPaneContainer.add(getAlignSequencesJButton());
 		
 	}
@@ -240,44 +264,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 		return strategyJXTaskPane;
 	}
 
-	private JXTaskPane getAlignUnrelatedSegmentsJPanel() {
-		if (alignUnrelatedSegmentsJXTaskPane == null) {
-			alignUnrelatedSegmentsJXTaskPane = new JXTaskPane();
-			alignUnrelatedSegmentsJXTaskPane.setTitle("Align unrelated segments, too?");
-			alignUnrelatedSegmentsJXTaskPane.setFont(titleFont);
-
-			alignUnrelatedSegmentsAlignGappyRegionsJRadioButton = new JRadioButton("Try to align gappy regions anyway");
-			alignUnrelatedSegmentsAlignGappyRegionsJRadioButton.setFont(defaultFont);
-			alignUnrelatedSegmentsAlignGappyRegionsJRadioButton.setSelected(true);
-
-			alignUnrelatedSegmentsLeaveGappyRegionsJRadioButton = new JRadioButton(
-					"Leave gappy regions (Not recommended for >=1,000 sequences)");
-			alignUnrelatedSegmentsLeaveGappyRegionsJRadioButton.setFont(defaultFont);
-
-			ButtonGroup alignUnrelatedSegmentsButtonGroup = new ButtonGroup();
-			alignUnrelatedSegmentsButtonGroup.add(alignUnrelatedSegmentsAlignGappyRegionsJRadioButton);
-			alignUnrelatedSegmentsButtonGroup.add(alignUnrelatedSegmentsLeaveGappyRegionsJRadioButton);
-
-			gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.insets = new Insets(3, 0, 3, 0);
-			gridBagConstraints.anchor = GridBagConstraints.WEST;
-
-			JPanel alignUnrelatedSegmentsJPane = new JPanel(new GridBagLayout());
-
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 0;
-			alignUnrelatedSegmentsJPane.add(alignUnrelatedSegmentsAlignGappyRegionsJRadioButton, gridBagConstraints);
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 1;
-			alignUnrelatedSegmentsJPane.add(alignUnrelatedSegmentsLeaveGappyRegionsJRadioButton, gridBagConstraints);
-
-			JPanel alignUnrelatedSegmentsJPane1 = new JPanel();
-			alignUnrelatedSegmentsJPane1.setLayout(new BorderLayout());
-			alignUnrelatedSegmentsJPane1.add(alignUnrelatedSegmentsJPane, BorderLayout.WEST);
-			alignUnrelatedSegmentsJXTaskPane.add(alignUnrelatedSegmentsJPane1);
-		}
-		return alignUnrelatedSegmentsJXTaskPane;
-	}
 
 	private JXTaskPane getParametersJPanel() {
 		if (parametersJXTaskPane == null) {
@@ -447,52 +433,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 		return parametersJXTaskPane;
 	}
 
-	private JXTaskPane getGuideTreeJPanel() {
-		if (guideTreeJXTaskPane == null) {
-			guideTreeJXTaskPane = new JXTaskPane();
-			guideTreeJXTaskPane.setTitle("Guide tree");
-			guideTreeJXTaskPane.setFont(titleFont);
-
-			guideTreeDefaultJRadioButton = new JRadioButton("Default");
-			guideTreeDefaultJRadioButton.setFont(defaultFont);
-			guideTreeDefaultJRadioButton.setSelected(true);
-
-			guideTreeUpgmaJRadioButton = new JRadioButton("UPGMA");
-			guideTreeUpgmaJRadioButton.setFont(defaultFont);
-
-			ButtonGroup guideTreeUpButtonGroup = new ButtonGroup();
-			guideTreeUpButtonGroup.add(guideTreeDefaultJRadioButton);
-			guideTreeUpButtonGroup.add(guideTreeUpgmaJRadioButton);
-
-			guideTreeOutputJCheckBox = new JCheckBox("Output guide tree ");
-
-			gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.insets = new Insets(3, 0, 3, 0);
-			gridBagConstraints.anchor = GridBagConstraints.WEST;
-
-			JPanel guideTreeJPane = new JPanel(new GridBagLayout());
-
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 0;
-			guideTreeJPane.add(guideTreeDefaultJRadioButton, gridBagConstraints);
-			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 0;
-			guideTreeJPane.add(guideTreeUpgmaJRadioButton, gridBagConstraints);
-			gridBagConstraints.weightx = 0.0;
-			gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 1;
-			guideTreeJPane.add(guideTreeOutputJCheckBox, gridBagConstraints);
-
-			JPanel guideTreeJPane1 = new JPanel();
-			guideTreeJPane1.setLayout(new BorderLayout());
-			guideTreeJPane1.add(guideTreeJPane, BorderLayout.WEST);
-
-			guideTreeJXTaskPane.add(guideTreeJPane1);
-		}
-		return guideTreeJXTaskPane;
-	}
-
 	/**
 	 * 
 	 * 说明：这里没有调用对inputFiles进行赋值。他的独立的子类应该继承这个方法，然后对其进行赋值。
@@ -506,7 +446,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 	 *   
 	 * @return void
 	 */
-	protected void obtainInputFiles() {
+	protected void cofigurateInputFiles() {
 		
 	}
 	
@@ -521,8 +461,8 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 			alignSequencesJButton = new JButton("Align sequences");
 			alignSequencesJButton.setFont(defaultFont);
 			alignSequencesJButton.addActionListener(e -> {
-				List<Mafft2AlignmentGui> tasks = new ArrayList<>();
-				obtainInputFiles();
+				List<PipelineDoAlignByMafftThenToAlignmentView> tasks = new ArrayList<>();
+				cofigurateInputFiles();
 				
 				if (!DataImportPanel_OneTypeOneFile.checkFile(inputFiles)) {
 					return;
@@ -556,7 +496,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				// }
 				
 				alignmentMain.invokeTheFeatureMethod(0);
-				for (Mafft2AlignmentGui mafft2AlignmentGui : tasks) {
+				for (PipelineDoAlignByMafftThenToAlignmentView mafft2AlignmentGui : tasks) {
 					alignmentMain.registerRunningTask(mafft2AlignmentGui);
 				}
 			});
@@ -564,7 +504,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 		return alignSequencesJButton;
 	}
 
-	private void runGINSi(List<Mafft2AlignmentGui> tasks) {
+	private void runGINSi(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 
@@ -580,7 +520,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 				// parameters.stream().collect(collector)
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			} else {
 				String parametersKeepOriginal = "--reorder";
@@ -595,14 +535,14 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			}
 		}
 
 	}
 
-	private void runLINSi(List<Mafft2AlignmentGui> tasks) {
+	private void runLINSi(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 
@@ -618,7 +558,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 
 				tasks.add(alignment);
 			} else {
@@ -634,7 +574,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 
 				tasks.add(alignment);
 			}
@@ -642,7 +582,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 
 	}
 
-	private void runEINSi(List<Mafft2AlignmentGui> tasks) {
+	private void runEINSi(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 
@@ -658,7 +598,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			} else {
 				String parametersKeepOriginal = "--reorder";
@@ -677,14 +617,14 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 
 				tasks.add(alignment);
 			}
 		}
 	}
 
-	private void runGINS1(List<Mafft2AlignmentGui> tasks) {
+	private void runGINS1(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 
@@ -700,7 +640,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			} else {
 				String parametersKeepOriginal = "--reorder";
@@ -715,13 +655,13 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			}
 		}
 	}
 
-	private void runFFTNS1(List<Mafft2AlignmentGui> tasks) {
+	private void runFFTNS1(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 
@@ -738,7 +678,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			} else {
 				String parametersKeepOriginal = "--reorder";
@@ -754,14 +694,14 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			}
 		}
 
 	}
 
-	private void runFFTNSi(List<Mafft2AlignmentGui> tasks) {
+	private void runFFTNSi(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 
@@ -778,7 +718,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			} else {
 				String parametersKeepOriginal = "--reorder";
@@ -794,7 +734,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 
 			}
@@ -802,7 +742,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 
 	}
 
-	private void runFFTNS2(List<Mafft2AlignmentGui> tasks) {
+	private void runFFTNS2(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 		
@@ -815,7 +755,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			} else {
 				String parametersKeepOriginal = "--reorder";
@@ -828,7 +768,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 
 			}
@@ -836,7 +776,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 
 	}
 
-	private void runAutoSelection(List<Mafft2AlignmentGui> tasks) {
+	private void runAutoSelection(List<PipelineDoAlignByMafftThenToAlignmentView> tasks) {
 		String parametersGap = String.valueOf(parametersGapJSpinner.getValue());
 		String parametersOffset = String.valueOf(parametersOffsetJSpinner.getValue());
 
@@ -849,7 +789,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add(parametersOffset);
 				parameters.add("--auto");
 				parameters.add(file.getAbsolutePath());
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			} else {
 				String parametersKeepOriginal = "--reorder";
@@ -862,7 +802,7 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 				parameters.add("--auto");
 				parameters.add(file.getAbsolutePath());
 
-				Mafft2AlignmentGui alignment = new Mafft2AlignmentGui(parameters, alignmentMain);
+				PipelineDoAlignByMafftThenToAlignmentView alignment = new PipelineDoAlignByMafftThenToAlignmentView(parameters, alignmentMain);
 				tasks.add(alignment);
 			}
 

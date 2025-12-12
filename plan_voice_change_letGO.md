@@ -5,6 +5,14 @@ Generated 2025-12-12
 
 # VOICE Change Plan
 
+问题：
+
+ambigbse 模块 已经改成了VOICE的方式了，其它的模块也改一下，帮我查看 modules_we_have 这18个模块，如果可以改就改造
+参考：module_dev_references/VOICE_MODULE_ARCHITECTURE.md整个VOICE的架构，module_dev_references/module_plugin_course目录下的开发教程。
+以及module_dev_references/voice
+先帮我生成plan，生成 voice_change_plan.md，把需求和解决方法以及评估都写好
+
+
 ## Background
 
 The `ambigbse` module has been migrated to the **VOICE** framework (`TabModuleFaceOfVoice`). VOICE (Versatile Open Input Click Execute) is the standard parameter‑driven module UX in eGPS v2.1+, offering:

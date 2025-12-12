@@ -2,11 +2,13 @@ package module.multiseq.alignerwithref;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ItemEvent;
+import net.miginfocom.swing.MigLayout;
+import javax.swing.BorderFactory;
+import javax.swing.border.TitledBorder;
+import javax.swing.JSeparator;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -22,6 +24,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -36,6 +39,7 @@ import egps2.Authors;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.ComputationalModuleFace;
 import egps2.frame.MainFrameProperties;
+import module.config.externalprograms.ExternalProgramConfigManager;
 import msaoperator.alignment.sequence.Sequence;
 import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.aligner.cli.MafftAlignerAutoMode;
@@ -48,6 +52,10 @@ import egps2.modulei.RunningTask;
 public class GuiMain extends ComputationalModuleFace {
 
 	private JTextField refSequenceFilePathTextField;
+	private JTextField mafftPathTextField;
+	private JButton mafftPathBrowseButton;
+	private JButton mafftPathTestButton;
+	private JLabel mafftPathStatusLabel;
 
 	private JTextAreaWithDefaultContent_MouseAdapter otherSequencesJTextArea;
 
@@ -62,48 +70,97 @@ public class GuiMain extends ComputationalModuleFace {
 	private JPanel otherSequenceImportJPanel;
 
 	private Preferences userNodeForPackage;
+	private ExternalProgramConfigManager configManager;
 	Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
 
 	protected GuiMain(IModuleLoader moduleLoader) {
 		super(moduleLoader);
 
-		setBorder(new EmptyBorder(15, 10, 6, 10));
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
-		setLayout(gridBagLayout);
-
-		JLabel lblNewLabel = new JLabel("Reference sequence (one sequence in fasta file)");
-		lblNewLabel.setFont(defaultFont);
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 0;
-		add(lblNewLabel, gbc_lblNewLabel);
-
+		// Initialize config manager and preferences
+		configManager = ExternalProgramConfigManager.getInstance();
 		userNodeForPackage = Preferences.userNodeForPackage(getClass());
 
+		setBorder(new EmptyBorder(10, 10, 10, 10));
+
+		// Use MigLayout: wrap layout for better organization
+		setLayout(new MigLayout(
+			"fill, insets 0",
+			"[grow,fill]",
+			"[][grow,fill][]"
+		));
+
+		// ========== MAFFT Configuration Panel ==========
+		JPanel mafftConfigPanel = new JPanel(new MigLayout(
+			"insets 10, gap 5",
+			"[right][grow,fill][right]",
+			"[]5[]"
+		));
+		TitledBorder mafftBorder = BorderFactory.createTitledBorder(
+			BorderFactory.createEtchedBorder(),
+			"MAFFT Configuration"
+		);
+		mafftBorder.setTitleFont(defaultFont.deriveFont(Font.BOLD, 12f));
+		mafftConfigPanel.setBorder(mafftBorder);
+
+		JLabel mafftPathLabel = new JLabel("Executable path:");
+		mafftPathLabel.setFont(defaultFont);
+		mafftConfigPanel.add(mafftPathLabel, "cell 0 0");
+
+		// Load MAFFT path from config manager only
+		String savedMafftPath = configManager.getProgramPath("MAFFT");
+		if (savedMafftPath == null) {
+			savedMafftPath = "";
+		}
+
+		mafftPathTextField = new JTextField(savedMafftPath);
+		mafftConfigPanel.add(mafftPathTextField, "cell 1 0");
+
+		mafftPathBrowseButton = new JButton("Browse...");
+		mafftPathBrowseButton.setFont(defaultFont);
+		mafftPathBrowseButton.addActionListener(e -> browseMafftPath());
+
+		mafftPathTestButton = new JButton("Test");
+		mafftPathTestButton.setFont(defaultFont);
+		mafftPathTestButton.addActionListener(e -> testMafftPath());
+
+		JPanel mafftButtonPanel = new JPanel(new MigLayout("insets 0, gap 5", "[][]", ""));
+		mafftButtonPanel.add(mafftPathBrowseButton);
+		mafftButtonPanel.add(mafftPathTestButton);
+		mafftConfigPanel.add(mafftButtonPanel, "cell 2 0");
+
+		// MAFFT status label
+		mafftPathStatusLabel = new JLabel(" ");
+		mafftPathStatusLabel.setFont(defaultFont.deriveFont(Font.ITALIC, 11f));
+		mafftConfigPanel.add(mafftPathStatusLabel, "cell 1 1, span 2");
+
+		updateMafftPathStatus();
+
+		add(mafftConfigPanel, "wrap, growx");
+
+		// ========== Alignment Input Panel ==========
+		JPanel alignmentInputPanel = new JPanel(new MigLayout(
+			"fill, insets 10, gap 5",
+			"[right][grow,fill][right]",
+			"[]5[]5[]5[grow,fill]"
+		));
+		TitledBorder inputBorder = BorderFactory.createTitledBorder(
+			BorderFactory.createEtchedBorder(),
+			"Alignment Input"
+		);
+		inputBorder.setTitleFont(defaultFont.deriveFont(Font.BOLD, 12f));
+		alignmentInputPanel.setBorder(inputBorder);
+
+		// Reference Sequence
+		JLabel lblRefSequence = new JLabel("Reference sequence:");
+		lblRefSequence.setFont(defaultFont);
+		alignmentInputPanel.add(lblRefSequence, "cell 0 0");
+
 		refSequenceFilePathTextField = new JTextField(userNodeForPackage.get(PREVIOUS_REFERENCE_SEQ_FILE_PATH, ""));
+		alignmentInputPanel.add(refSequenceFilePathTextField, "cell 1 0");
 
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.insets = new Insets(0, 0, 5, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 1;
-		gbc_textField.gridy = 0;
-		add(refSequenceFilePathTextField, gbc_textField);
-		refSequenceFilePathTextField.setColumns(10);
-
-		JButton btnNewButton = new JButton("load");
-		btnNewButton.setFont(defaultFont);
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton.gridx = 2;
-		gbc_btnNewButton.gridy = 0;
-		add(btnNewButton, gbc_btnNewButton);
-		btnNewButton.addActionListener(e -> {
+		JButton btnLoadRef = new JButton("Browse");
+		btnLoadRef.setFont(defaultFont);
+		btnLoadRef.addActionListener(e -> {
 			JFileChooser jFileChooser = new JFileChooser(refSequenceFilePathTextField.getText());
 			jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			int showOpenDialog = jFileChooser.showOpenDialog(this);
@@ -113,15 +170,15 @@ public class GuiMain extends ComputationalModuleFace {
 				userNodeForPackage.put(PREVIOUS_REFERENCE_SEQ_FILE_PATH, absolutePath);
 			}
 		});
+		alignmentInputPanel.add(btnLoadRef, "cell 2 0");
 
-		JLabel lblNewLabel_1 = new JLabel("Other sequences");
-		lblNewLabel_1.setFont(defaultFont);
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 1;
-		add(lblNewLabel_1, gbc_lblNewLabel_1);
+		// Separator
+		alignmentInputPanel.add(new JSeparator(), "cell 0 1, span 3, growx, gaptop 5, gapbottom 5");
+
+		// Other Sequences
+		JLabel lblOtherSequences = new JLabel("Other sequences:");
+		lblOtherSequences.setFont(defaultFont.deriveFont(Font.BOLD));
+		alignmentInputPanel.add(lblOtherSequences, "cell 0 2");
 
 		JRadioButton rdbtnImportFromTextArea = new JRadioButton("Direct import from text panel");
 		rdbtnImportFromTextArea.setFont(defaultFont);
@@ -131,50 +188,31 @@ public class GuiMain extends ComputationalModuleFace {
 				swithCard(TEXT_AREA_STRING);
 			}
 		});
-
-		GridBagConstraints gbc_rdbtnImportFromTextArea = new GridBagConstraints();
-		gbc_rdbtnImportFromTextArea.fill = GridBagConstraints.HORIZONTAL;
-		gbc_rdbtnImportFromTextArea.insets = new Insets(0, 0, 5, 5);
-		gbc_rdbtnImportFromTextArea.gridx = 1;
-		gbc_rdbtnImportFromTextArea.gridy = 1;
-		add(rdbtnImportFromTextArea, gbc_rdbtnImportFromTextArea);
+		alignmentInputPanel.add(rdbtnImportFromTextArea, "cell 1 2");
 
 		rdbtnImportFromFastaFile = new JRadioButton("Import from fasta file");
 		rdbtnImportFromFastaFile.setFont(defaultFont);
-
 		rdbtnImportFromFastaFile.addItemListener(e -> {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
 				swithCard(LOADING_PATH_STRING);
 			}
 		});
-
-		GridBagConstraints gbc_rdbtnImportFromFastaFile = new GridBagConstraints();
-		gbc_rdbtnImportFromFastaFile.fill = GridBagConstraints.HORIZONTAL;
-		gbc_rdbtnImportFromFastaFile.insets = new Insets(0, 0, 5, 5);
-		gbc_rdbtnImportFromFastaFile.gridx = 1;
-		gbc_rdbtnImportFromFastaFile.gridy = 2;
-		add(rdbtnImportFromFastaFile, gbc_rdbtnImportFromFastaFile);
+		alignmentInputPanel.add(rdbtnImportFromFastaFile, "cell 1 3");
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 		buttonGroup.add(rdbtnImportFromTextArea);
 		buttonGroup.add(rdbtnImportFromFastaFile);
 
+		// Import panel (CardLayout for text area or file path) - fills remaining space
 		JPanel importPanel = getImportPanel();
-		GridBagConstraints gbc_importPanel = new GridBagConstraints();
-		gbc_importPanel.insets = new Insets(0, 0, 5, 0);
-		gbc_importPanel.gridwidth = 3;
-		gbc_importPanel.fill = GridBagConstraints.BOTH;
-		gbc_importPanel.gridx = 0;
-		gbc_importPanel.gridy = 3;
-		add(importPanel, gbc_importPanel);
+		alignmentInputPanel.add(importPanel, "cell 0 4, span 3, grow, pushy");
 
-		JButton runButton = new JButton("Run and show in anther tab");
-		runButton.setFont(defaultFont);
-		GridBagConstraints gbc_runButton = new GridBagConstraints();
-		gbc_runButton.gridwidth = 3;
-		gbc_runButton.gridx = 0;
-		gbc_runButton.gridy = 4;
-		add(runButton, gbc_runButton);
+		add(alignmentInputPanel, "wrap, grow, push");
+
+		// ========== Run Button ==========
+		JButton runButton = new JButton("Run and show in another tab");
+		runButton.setFont(defaultFont.deriveFont(Font.BOLD, 14f));
+		add(runButton, "growx, h 40!");
 
 		// 定义一个计算任务
 		final RunningTask runningTask = new RunningTask() {
@@ -235,6 +273,15 @@ public class GuiMain extends ComputationalModuleFace {
 	}
 
 	private void runAlignProcedure(String string) {
+		// Validate MAFFT path before running
+		try {
+			String mafftPath = getValidatedMafftPath();
+			// Path is valid, proceed
+		} catch (Exception e) {
+			SwingDialog.showErrorMSGDialog("MAFFT Path Error", e.getMessage());
+			return;
+		}
+
 		MafftAlignerAutoMode mode = new MafftAlignerAutoMode();
 
 		try {
@@ -270,23 +317,25 @@ public class GuiMain extends ComputationalModuleFace {
 	}
 
 	private JPanel getImportPanel() {
-		layout = new CardLayout(10, 10);
+		layout = new CardLayout(0, 0);
 		otherSequenceImportJPanel = new JPanel(layout);
 
+		// Text area panel - fills all available space
 		otherSequencesJTextArea = new JTextAreaWithDefaultContent_MouseAdapter();
 		otherSequencesJTextArea.setFont(defaultFont);
 		otherSequencesJTextArea.setTextContents(Arrays.asList(">other_seq1", "ATCGTCAGTCGATCGATCGATCGATGATTCATTCGTACGATCGACGATCGATCGACTAGCATCTATCAGCTACAGCTA"));
 
 		otherSequenceImportJPanel.add(TEXT_AREA_STRING, otherSequencesJTextArea);
 
-		JPanel fileImportJPanel = new JPanel(new BorderLayout(10, 10));
+		// File import panel - also fills available space
+		JPanel fileImportJPanel = new JPanel(new MigLayout("fill, insets 5", "[grow,fill][]", "[]"));
 		String string = userNodeForPackage.get(PREVIOUS_OTHERS_SEQ_FILE_PATH, "");
-		otherSequencesFilePathJTextField = new JTextField(string, 60);
+		otherSequencesFilePathJTextField = new JTextField(string);
 		otherSequencesFilePathJTextField.setFont(defaultFont);
-		JButton jButton = new JButton("Load");
+
+		JButton jButton = new JButton("Browse");
 		jButton.setFont(defaultFont);
 		jButton.addActionListener(e -> {
-
 			JFileChooser jFileChooser = new JFileChooser(otherSequencesFilePathJTextField.getText());
 			jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			int showOpenDialog = jFileChooser.showOpenDialog(this);
@@ -297,12 +346,10 @@ public class GuiMain extends ComputationalModuleFace {
 			}
 		});
 
-		fileImportJPanel.add(otherSequencesFilePathJTextField, BorderLayout.CENTER);
-		fileImportJPanel.add(jButton, BorderLayout.EAST);
+		fileImportJPanel.add(otherSequencesFilePathJTextField, "growx");
+		fileImportJPanel.add(jButton, "");
 
-		JPanel fileImportJPanelContaner = new JPanel(new BorderLayout());
-		fileImportJPanelContaner.add(fileImportJPanel, BorderLayout.NORTH);
-		otherSequenceImportJPanel.add(LOADING_PATH_STRING, fileImportJPanelContaner);
+		otherSequenceImportJPanel.add(LOADING_PATH_STRING, fileImportJPanel);
 
 		return otherSequenceImportJPanel;
 	}
@@ -354,6 +401,108 @@ public class GuiMain extends ComputationalModuleFace {
 	@Override
 	public void exportData() {
 
+	}
+
+	/**
+	 * Browse for MAFFT executable
+	 */
+	private void browseMafftPath() {
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle("Select MAFFT Executable");
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+		String currentPath = mafftPathTextField.getText();
+		if (!currentPath.isEmpty()) {
+			File currentFile = new File(currentPath);
+			if (currentFile.getParentFile() != null && currentFile.getParentFile().exists()) {
+				fileChooser.setCurrentDirectory(currentFile.getParentFile());
+			}
+		}
+
+		int result = fileChooser.showOpenDialog(this);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = fileChooser.getSelectedFile();
+			String newPath = selectedFile.getAbsolutePath();
+			mafftPathTextField.setText(newPath);
+			saveMafftPath(newPath);
+			updateMafftPathStatus();
+		}
+	}
+
+	/**
+	 * Test if MAFFT path is valid
+	 */
+	private void testMafftPath() {
+		String path = mafftPathTextField.getText();
+		ExternalProgramConfigManager.ValidationResult result = configManager.validatePath(path);
+
+		if (result.isValid()) {
+			mafftPathStatusLabel.setText("✓ Valid and executable");
+			mafftPathStatusLabel.setForeground(new Color(0, 128, 0));
+			JOptionPane.showMessageDialog(this,
+				"MAFFT path is valid and executable!",
+				"Path Valid",
+				JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			mafftPathStatusLabel.setText("✗ " + result.getMessage());
+			mafftPathStatusLabel.setForeground(Color.RED);
+			JOptionPane.showMessageDialog(this,
+				result.getMessage(),
+				"Invalid Path",
+				JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	/**
+	 * Save MAFFT path to config manager only
+	 */
+	private void saveMafftPath(String path) {
+		configManager.setProgramPath("MAFFT", path);
+		configManager.saveConfig();
+	}
+
+	/**
+	 * Update status label based on current path
+	 */
+	private void updateMafftPathStatus() {
+		String path = mafftPathTextField.getText();
+		if (path == null || path.trim().isEmpty()) {
+			mafftPathStatusLabel.setText("Not configured");
+			mafftPathStatusLabel.setForeground(Color.GRAY);
+			return;
+		}
+
+		ExternalProgramConfigManager.ValidationResult result = configManager.validatePath(path);
+
+		if (result.isValid()) {
+			mafftPathStatusLabel.setText("✓ Configured and executable");
+			mafftPathStatusLabel.setForeground(new Color(0, 128, 0));
+		} else {
+			mafftPathStatusLabel.setText("✗ " + result.getMessage());
+			mafftPathStatusLabel.setForeground(Color.RED);
+		}
+	}
+
+	/**
+	 * Get configured MAFFT path, throws exception if not valid
+	 */
+	private String getValidatedMafftPath() throws Exception {
+		String path = mafftPathTextField.getText();
+		if (path == null || path.trim().isEmpty()) {
+			throw new Exception("MAFFT path is not configured.\nPlease configure it in the 'MAFFT executable path' field at the top.");
+		}
+
+		ExternalProgramConfigManager.ValidationResult result = configManager.validatePath(path);
+
+		if (!result.isValid()) {
+			throw new Exception("MAFFT path is invalid: " + result.getMessage() +
+				"\nPlease configure a valid path in the 'MAFFT executable path' field at the top.");
+		}
+
+		// Save to config manager for other modules
+		saveMafftPath(path);
+
+		return path;
 	}
 
 	@Override
