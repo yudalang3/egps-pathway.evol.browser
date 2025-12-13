@@ -23,9 +23,12 @@ import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
 import module.multiseq.deversitydescriptor.SimpleModuleController;
 import fasta.io.FastaReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParametersPanel extends JPanel {
 
+	private static final Logger log = LoggerFactory.getLogger(ParametersPanel.class);
 	private JComboBox<String> refNameList;
 
 	/**
@@ -70,7 +73,8 @@ public class ParametersPanel extends JPanel {
 					map = FastaReader.readFastaDNASequence(new File(path));
 				} catch (IOException e1) {
 					SwingDialog.showErrorMSGDialog("Input error", "Please check your input sequence, the sequence should be aligned.");
-					e1.printStackTrace();
+					log.error("Please check your input sequence, the sequence should be aligned.",e1);
+					return;
 				}
 
 				String refSequenceName = controller.getRefSequenceName();

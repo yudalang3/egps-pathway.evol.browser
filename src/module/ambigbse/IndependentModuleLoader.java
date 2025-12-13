@@ -1,6 +1,7 @@
 package module.ambigbse;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -12,6 +13,7 @@ import egps2.EGPSProperties;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.fastmodvoice.TabModuleFaceOfVoice;
+import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
 import fasta.io.FastaReader;
@@ -29,6 +31,14 @@ public class IndependentModuleLoader extends TabModuleFaceOfVoice {
 		return "A convenient graphic tool to make the nucleotide sequence to concrete sequence.";
 	}
 
+	@Override
+	public IconBean getIcon() {
+		InputStream resourceAsStream = getClass().getResourceAsStream("images/ambigbse.svg");
+		IconBean iconBean = new IconBean();
+		iconBean.setSVG(true);
+		iconBean.setInputStream(resourceAsStream);
+		return iconBean;
+	}
 
 	@Override
 	public int[] getCategory() {

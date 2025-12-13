@@ -1,3 +1,5 @@
+此为 MIGLAYOUT 进行GUI界面设计的一次实践记录总结，这个设计风格是我喜欢的界面风格。
+
 # 界面层次感和填充改进
 
 ## 修改时间
@@ -239,3 +241,11 @@ javac -d ./out/production/egps-pathway.evol.browser \
 - 确保可变内容区域填充所有可用空间
 - 保持界面元素的一致性（按钮文本、字体大小等）
 - 重要操作（Run 按钮）应该醒目
+
+## 参考资料
+
+- MigLayout Quick Start: http://www.miglayout.com/QuickStart.pdf
+- MigLayout Cheat Sheet: http://www.miglayout.com/cheatsheet.html
+- MigLayout White Paper: http://www.miglayout.com/whitepaper.html
+
+---

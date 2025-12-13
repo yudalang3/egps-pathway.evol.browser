@@ -1,8 +1,11 @@
 package module.evoldist.msa2distview;
 
+import java.io.InputStream;
+
 import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
 import egps2.modulei.IModuleLoader;
+import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
 
@@ -23,6 +26,15 @@ public class ModuleLoader4MSA2EvolDistMain implements IModuleLoader{
 	@Override
 	public String getShortDescription() {
 		return "Compute the evolutionary distance from the MSA.";
+	}
+
+	@Override
+	public IconBean getIcon() {
+		InputStream resourceAsStream = getClass().getResourceAsStream("images/msa2dist.svg");
+		IconBean iconBean = new IconBean();
+		iconBean.setSVG(true);
+		iconBean.setInputStream(resourceAsStream);
+		return iconBean;
 	}
 
 	@Override

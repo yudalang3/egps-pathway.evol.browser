@@ -1,10 +1,13 @@
 package module.multiseq.deversitydescriptor;
 
+import java.io.InputStream;
+
 import egps2.frame.ModuleFace;
 import egps2.EGPSProperties;
 import egps2.modulei.IModuleLoader;
 import egps2.modulei.ModuleVersion;
 import egps2.EGPSProperties;
+import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
 import egps2.EGPSProperties;
@@ -21,6 +24,14 @@ public class IndependentModuleLoader implements IModuleLoader{
 		return "Quick text display the diversity of each alignment. (inheritance from eGPS 1)";
 	}
 
+	@Override
+	public IconBean getIcon() {
+		InputStream resourceAsStream = getClass().getResourceAsStream("images/diversityDescriptor.svg");
+		IconBean iconBean = new IconBean();
+		iconBean.setSVG(true);
+		iconBean.setInputStream(resourceAsStream);
+		return iconBean;
+	}
 
 	@Override
 	public ModuleFace getFace() {

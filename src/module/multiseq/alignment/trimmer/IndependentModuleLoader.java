@@ -1,8 +1,11 @@
 package module.multiseq.alignment.trimmer;
 
+import java.io.InputStream;
+
 import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
 import egps2.modulei.IModuleLoader;
+import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
 
@@ -16,6 +19,15 @@ public class IndependentModuleLoader implements IModuleLoader {
 	@Override
 	public String getShortDescription() {
 		return "Trim the alignment at both terminals.  (inheritance from eGPS 1)";
+	}
+
+	@Override
+	public IconBean getIcon() {
+		InputStream resourceAsStream = getClass().getResourceAsStream("images/alignmentTrimmer.svg");
+		IconBean iconBean = new IconBean();
+		iconBean.setSVG(true);
+		iconBean.setInputStream(resourceAsStream);
+		return iconBean;
 	}
 
 	@Override

@@ -1,7 +1,10 @@
 package module.evoldist.view;
 
+import java.io.InputStream;
+
 import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
+import egps2.modulei.IconBean;
 import egps2.modulei.ModuleVersion;
 import module.evoldist.view.gui.DistanceMatrixViewerMain;
 import egps2.modulei.IModuleLoader;
@@ -24,6 +27,15 @@ public class ModuleLoader4EvolDistMain implements IModuleLoader{
 	@Override
 	public String getShortDescription() {
 		return "Visualize the trigangle distance matirx.";
+	}
+
+	@Override
+	public IconBean getIcon() {
+		InputStream resourceAsStream = getClass().getResourceAsStream("images/evolDistView.svg");
+		IconBean iconBean = new IconBean();
+		iconBean.setSVG(true);
+		iconBean.setInputStream(resourceAsStream);
+		return iconBean;
 	}
 
 	@Override

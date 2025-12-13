@@ -1,8 +1,11 @@
 package module.multiseq.gene2msa;
 
+import java.io.InputStream;
+
 import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
 import egps2.modulei.IModuleLoader;
+import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
 
@@ -21,6 +24,15 @@ public class ModuleLoader4WebGene2MSAMain implements IModuleLoader {
 	@Override
 	public String getShortDescription() {
 		return "Obtain the MSA from the Ensembel or UCSC RESTful service.";
+	}
+
+	@Override
+	public IconBean getIcon() {
+		InputStream resourceAsStream = getClass().getResourceAsStream("images/gene2msa.svg");
+		IconBean iconBean = new IconBean();
+		iconBean.setSVG(true);
+		iconBean.setInputStream(resourceAsStream);
+		return iconBean;
 	}
 
 	@Override
