@@ -6,4 +6,5 @@ jar -cf $destination \
  
 
 #echo "cp to 1"
-#cp $destination /mnt/c//Users/yudal/Documents/project/eGPS2/jars/egps-pathway.evol.browser/dependency-egps/
+cp $destination /mnt/c//Users/yudal/Documents/project/eGPS2/eGPS_v2.1_windows_64bit/dependency-egps/
+cp $destination /mnt/c//Users/yudal/Documents/project/eGPS2/eGPS_v2.1_windows_64bit_selfTest/dependency-egps/
