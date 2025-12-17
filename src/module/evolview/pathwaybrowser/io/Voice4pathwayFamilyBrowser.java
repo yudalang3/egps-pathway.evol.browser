@@ -12,8 +12,11 @@ import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPanel {
+	private static final Logger log = LoggerFactory.getLogger(Voice4pathwayFamilyBrowser.class);
 	private final PathwayFamilyMainFace pathwayFamilyMainFace;
 	private final ParamsAssignerAndParser4pathwayFamBrowser paramsAssignerAndParser4pathwayFamBrowser = new ParamsAssignerAndParser4pathwayFamBrowser();
 
@@ -31,7 +34,8 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 
 	@Override
 	protected void execute(OrganizedParameterGetter o) throws Exception {
-		PathwayFamilyBrowserImportInfoBean importBeanInfo = paramsAssignerAndParser4pathwayFamBrowser
+
+		ImporterBean4PathwayFamilyBrowser importBeanInfo = paramsAssignerAndParser4pathwayFamBrowser
 				.getImportBeanInfo(o);
 		pathwayFamilyMainFace.invokeTheFeatureMethod(0);
 
@@ -45,7 +49,11 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 
 		TreePropertiesAssigner treePropertiesAssigner = new TreePropertiesAssigner();
 		treePropertiesAssigner.assign(treeLayoutProperties, importBeanInfo);
-		pathwayFamilyMainFace.initializeTheModule(importBeanInfo, treeLayoutProperties);
+
+
+		pathwayFamilyMainFace.loadingDataInitializeGraphics(importBeanInfo, treeLayoutProperties);
+
+		log.info("Finish xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 	}
 
 }

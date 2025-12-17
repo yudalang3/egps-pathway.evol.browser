@@ -5,11 +5,13 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
@@ -29,6 +31,10 @@ public class PathwayStatisticsPanel extends JPanel {
 	private Map<String, List<Short>> species2geneCountMap;
 	private String categoryColumnName;
 	Map<String, Integer> cat2countMap = new HashMap<>();
+	
+	// Double buffering cache
+	private volatile BufferedImage cachedSlideImage;
+	private volatile boolean isRendering = false;
 
 	public PathwayStatisticsPanel(String path, String categoryColumnName) {
 		this.categoryColumnName = categoryColumnName;
@@ -59,10 +65,9 @@ public class PathwayStatisticsPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		{
-			Graphics2D g2d = (Graphics2D) g.create();
-			EGPSMainGuiUtil.setupHighQualityRendering(g2d);
-			firstSlide.draw(g2d);
+		// Draw cached slide image
+		if (cachedSlideImage != null) {
+			g.drawImage(cachedSlideImage, 0, 0, null);
 		}
 
 		{
@@ -89,9 +94,50 @@ public class PathwayStatisticsPanel extends JPanel {
 			g2d.setFont(deriveFont);
 			int stringWidth = g2d.getFontMetrics().stringWidth(OUTname);
 			g2d.drawString(OUTname, (int) (this.getWidth() - 30 - stringWidth), 30);
-
+			g2d.dispose();
 		}
 
+	}
+
+	/**
+	 * Render the slide to a BufferedImage in a background thread.
+	 * This method should NOT be called on the EDT.
+	 */
+	public void renderSlideImageAsync() {
+		if (isRendering || pageSize == null) {
+			return;
+		}
+		
+		isRendering = true;
+		
+		new SwingWorker<BufferedImage, Void>() {
+			@Override
+			protected BufferedImage doInBackground() throws Exception {
+				// Create and render image in background thread
+				BufferedImage image = new BufferedImage(
+						pageSize.width,
+						pageSize.height,
+						BufferedImage.TYPE_INT_ARGB
+				);
+				Graphics2D g2d = image.createGraphics();
+				EGPSMainGuiUtil.setupHighQualityRendering(g2d);
+				firstSlide.draw(g2d);
+				g2d.dispose();
+				return image;
+			}
+			
+			@Override
+			protected void done() {
+				try {
+					cachedSlideImage = get();
+					repaint();
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					isRendering = false;
+				}
+			}
+		}.execute();
 	}
 
 	public void clickToSpecies(String name) {
@@ -108,7 +154,8 @@ public class PathwayStatisticsPanel extends JPanel {
 			cat2countMap.put(cat, cat2countMap.getOrDefault(cat, 0) + value);
 		}
 
-		repaint();
+		// Render the slide image in background thread
+		renderSlideImageAsync();
 
 	}
 

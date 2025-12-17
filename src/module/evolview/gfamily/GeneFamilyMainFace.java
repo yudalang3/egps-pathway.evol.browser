@@ -172,7 +172,7 @@ public class GeneFamilyMainFace extends ModuleFace {
 
 	@Override
 	public void initializeGraphics() {
-		initializeTheModule();
+		initializeTheModule(true);
 		importData();
 	}
 
@@ -185,13 +185,13 @@ public class GeneFamilyMainFace extends ModuleFace {
 		return controller;
 	}
 
-	protected void initializeTheModule() {
+	protected void initializeTheModule(boolean loadBrowserControlPanel) {
 		controller = new GeneFamilyController(this);
 
 		mainSplitPane = getMainSplitPane();
 		mainSplitPane.setBorder(null);
 
-		controlPanelContainner = new ControlPanelContainner(controller);
+		controlPanelContainner = new ControlPanelContainner(controller,loadBrowserControlPanel);
 		mainSplitPane.setLeftComponent(controlPanelContainner);
 
 		getRightSplitPane();

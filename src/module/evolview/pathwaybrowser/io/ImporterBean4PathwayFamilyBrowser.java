@@ -2,7 +2,7 @@ package module.evolview.pathwaybrowser.io;
 
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 
-public class PathwayFamilyBrowserImportInfoBean extends MTVImportInforBean {
+public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
 
 	String geneNameSeparater;
 	String componentsInfoPath;
@@ -13,7 +13,7 @@ public class PathwayFamilyBrowserImportInfoBean extends MTVImportInforBean {
 	String evolutionarySelectionFigurePath;
 
 
-    public PathwayFamilyBrowserImportInfoBean(MTVImportInforBean object) {
+    public ImporterBean4PathwayFamilyBrowser(MTVImportInforBean object) {
 
         this.setInput_nwk_path(object.getInput_nwk_path());
         this.setShowLeafLabel(object.isShowLeafLabel());

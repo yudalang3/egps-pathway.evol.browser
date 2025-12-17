@@ -248,6 +248,36 @@ e.printStackTrace();                 // ❌ WRONG - use log.error() instead
 - Background tasks should not block EDT
 - Post-initialization actions registered via `UnifiedAccessPoint.registerActionAfterMainFrame()`
 
+**CRITICAL RULE: Never perform time-consuming operations on the EDT thread.**
+
+The Event Dispatch Thread (EDT) is responsible for handling all GUI events and rendering. Blocking the EDT causes the UI to freeze and creates a poor user experience.
+
+**What must run on EDT:**
+- All GUI component creation and modification (setText, setEnabled, addComponent, etc.)
+- Showing dialogs (JOptionPane, JDialog, etc.)
+- Updating table models, list models, or any Swing model
+- Repainting and revalidating components
+- Any Swing component method calls
+
+**What must NOT run on EDT:**
+- File I/O operations (reading/writing files)
+- Network operations (HTTP requests, socket operations)
+- Database queries
+- Complex computations or data processing
+- Module scanning, class loading, or reflection operations
+- Any operation that takes more than ~100ms
+
+**Checking if you're on EDT:**
+```java
+if (SwingUtilities.isEventDispatchThread()) {
+    // Safe to update GUI directly
+    label.setText("Updated");
+} else {
+    // Must dispatch to EDT
+    SwingUtilities.invokeLater(() -> label.setText("Updated"));
+}
+```
+
 ## Important Notes
 
 - The codebase contains both English and Chinese comments

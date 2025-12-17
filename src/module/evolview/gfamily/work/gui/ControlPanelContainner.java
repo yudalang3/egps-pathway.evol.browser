@@ -23,120 +23,125 @@ import module.evolview.model.enums.ColorScheme;
 
 @SuppressWarnings("serial")
 public class ControlPanelContainner extends JPanel {
-	protected GeneFamilyController controller;
+    protected GeneFamilyController controller;
 
-	private String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/gfamily_control_panel.json");
-	private JXTaskPaneContainer taskPaneContainer;
+    private String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/gfamily_control_panel.json");
+    private JXTaskPaneContainer taskPaneContainer;
 
-	private CtrlTreeOperationPanelByMiglayout leftOparetionPanel;
-	private CtrlColorSchemePanel colorSchemePanel;
-	private CtrlTreeLayoutPanel treeLayoutPanel;
-	private JPanel leftDataOperationPanel;
+    private CtrlTreeOperationPanelByMiglayout leftOparetionPanel;
+    private CtrlColorSchemePanel colorSchemePanel;
+    private CtrlTreeLayoutPanel treeLayoutPanel;
+    private JPanel leftDataOperationPanel;
 
-	protected ControlPanelContainner() {
-		
-	}
-	/**
-	 * Create the panel.
-	 *
-	 * @param controller
-	 */
-	public ControlPanelContainner(GeneFamilyController controller) {
-		setLayout(new BorderLayout());
+    protected ControlPanelContainner() {
 
-		this.controller = controller;
-		controller.setLeftControlPanelContainner(this);
+    }
 
-		taskPaneContainer = new JXTaskPaneContainer();
+    /**
+     * Create the panel.
+     *
+     * @param controller
+     */
+    public ControlPanelContainner(GeneFamilyController controller) {
+        this(controller, true);
+    }
 
-		taskPaneContainer.setBackground(Color.WHITE);
-		taskPaneContainer.setBackgroundPainter(null);
+    public ControlPanelContainner(GeneFamilyController controller, boolean loadBrowserControlPanel) {
+        setLayout(new BorderLayout());
 
-		addJXTaskPanels(taskPaneContainer);
+        this.controller = controller;
+        controller.setLeftControlPanelContainner(this);
 
-		add(new JScrollPane(taskPaneContainer), BorderLayout.CENTER);
+        taskPaneContainer = new JXTaskPaneContainer();
+
+        taskPaneContainer.setBackground(Color.WHITE);
+        taskPaneContainer.setBackgroundPainter(null);
+
+        addJXTaskPanels(taskPaneContainer, loadBrowserControlPanel);
+
+        add(new JScrollPane(taskPaneContainer), BorderLayout.CENTER);
 //		jLabel.setBackground(Color.white);
 //		Border createRaisedSoftBevelBorder = BorderFactory.createRaisedSoftBevelBorder();
 //		jLabel.setOpaque(true);
 //		jLabel.setBorder(createRaisedSoftBevelBorder);
-	}
+    }
 
-	protected void addJXTaskPanels(JXTaskPaneContainer taskPaneContainer) {
-		List<JXTaskPane> listOfJxTaskPanes = new LinkedList<>();
-
-
+    protected void addJXTaskPanels(JXTaskPaneContainer taskPaneContainer, boolean loadBrowserControlPanel) {
+        List<JXTaskPane> listOfJxTaskPanes = new LinkedList<>();
 //		listOfJxTaskPanes.add(getDataInfoTaskPanel());
 
 //		listOfJxTaskPanes.add(getDataOperationTaskPanel());
 
 //		listOfJxTaskPanes.add(getColorSchemeTaskPanel());
-		
-		listOfJxTaskPanes.add(getTreeOperation());
+
+        listOfJxTaskPanes.add(getTreeOperation());
 //		listOfJxTaskPanes.add(getBranchDisplayTaskPanel());
-		listOfJxTaskPanes.add(getTreeLayoutTaskPanel());
-		listOfJxTaskPanes.add(getGenomeBrowserTaskPanel());
+        listOfJxTaskPanes.add(getTreeLayoutTaskPanel());
+        if (loadBrowserControlPanel) {
+            listOfJxTaskPanes.add(getGenomeBrowserTaskPanel());
+        }
 
-		File jsonFile = new File(PERSISTENT_STORE_PATH);
-		LefControlPanelCollapseProperties bean = null;
-		if (jsonFile.exists()) {
-			try {
-				bean = EGPSObjectsUtil.obtainJavaBeanByFastaJSON(LefControlPanelCollapseProperties.class, jsonFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (bean == null) {
-			bean = new LefControlPanelCollapseProperties();
-		}
+        File jsonFile = new File(PERSISTENT_STORE_PATH);
+        LefControlPanelCollapseProperties bean = null;
+        if (jsonFile.exists()) {
+            try {
+                bean = EGPSObjectsUtil.obtainJavaBeanByFastaJSON(LefControlPanelCollapseProperties.class, jsonFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (bean == null) {
+            bean = new LefControlPanelCollapseProperties();
+        }
 
-		boolean[] isCollapseArray = bean.getIsCollapseArray();
-		int size = listOfJxTaskPanes.size();
-		for (int i = 0; i < size; i++) {
-			boolean b = isCollapseArray[i];
-			JXTaskPane jxTaskPane = listOfJxTaskPanes.get(i);
-			jxTaskPane.setCollapsed(b);
+        boolean[] isCollapseArray = bean.getIsCollapseArray();
+        int size = listOfJxTaskPanes.size();
+        for (int i = 0; i < size; i++) {
+            boolean b = isCollapseArray[i];
+            JXTaskPane jxTaskPane = listOfJxTaskPanes.get(i);
+            jxTaskPane.setCollapsed(b);
 
-			taskPaneContainer.add(jxTaskPane);
-		}
+            taskPaneContainer.add(jxTaskPane);
+        }
 
-	}
+    }
 
-	public void actionForSaveFile() {
-		Component[] components = taskPaneContainer.getComponents();
+    public void actionForSaveFile() {
+        Component[] components = taskPaneContainer.getComponents();
 
-		List<Boolean> temp = new LinkedList<>();
-		for (Component component : components) {
-			if (component instanceof JXTaskPane) {
-				JXTaskPane cc = (JXTaskPane) component;
-				boolean collapsed = cc.isCollapsed();
-				temp.add(collapsed);
-			}
-		}
+        List<Boolean> temp = new LinkedList<>();
+        for (Component component : components) {
+            if (component instanceof JXTaskPane) {
+                JXTaskPane cc = (JXTaskPane) component;
+                boolean collapsed = cc.isCollapsed();
+                temp.add(collapsed);
+            }
+        }
 
-		LefControlPanelCollapseProperties bean = new LefControlPanelCollapseProperties();
-		boolean[] arrary = new boolean[temp.size()];
-		for (int i = 0; i < arrary.length; i++) {
-			arrary[i] = temp.get(i);
-		}
-		bean.setIsCollapseArray(arrary);
-		try {
-			EGPSObjectsUtil.persistentSaveJavaBeanByFastaJSON(bean, new File(PERSISTENT_STORE_PATH));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        LefControlPanelCollapseProperties bean = new LefControlPanelCollapseProperties();
+        boolean[] arrary = new boolean[temp.size()];
+        for (int i = 0; i < arrary.length; i++) {
+            arrary[i] = temp.get(i);
+        }
+        bean.setIsCollapseArray(arrary);
+        try {
+            EGPSObjectsUtil.persistentSaveJavaBeanByFastaJSON(bean, new File(PERSISTENT_STORE_PATH));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	protected JXTaskPane getGenomeBrowserTaskPanel() {
-		JXTaskPane taskPane = new JXTaskPane();
-		taskPane.setFont(getTitleFont());
-		taskPane.setTitle("Genome browser");
-		CtrlGenomeBrowserPanel panel = new CtrlGenomeBrowserPanel();
-		panel.setController(controller);
+    protected JXTaskPane getGenomeBrowserTaskPanel() {
+        JXTaskPane taskPane = new JXTaskPane();
+        taskPane.setFont(getTitleFont());
+        taskPane.setTitle("Genome browser");
+        CtrlGenomeBrowserPanel panel = new CtrlGenomeBrowserPanel();
+        panel.setController(controller);
 
-		controller.setLeftGenomeBrowser(panel);
-		taskPane.add(new JScrollPane(panel));
-		return taskPane;
-	}
+        controller.setLeftGenomeBrowser(panel);
+        taskPane.add(new JScrollPane(panel));
+        return taskPane;
+    }
 
 //	protected JXTaskPane getCustomizedBrowserTracksTaskPanel() {
 //		JXTaskPane taskPane = new JXTaskPane();
@@ -148,18 +153,18 @@ public class ControlPanelContainner extends JPanel {
 //		return taskPane;
 //	}
 
-	private JXTaskPane getComponentsPanel() {
-		JXTaskPane taskPane = new JXTaskPane();
-		taskPane.setCollapsed(false);
-		taskPane.setFont(getTitleFont());
-		taskPane.setTitle("Signaling pathway components");
+    private JXTaskPane getComponentsPanel() {
+        JXTaskPane taskPane = new JXTaskPane();
+        taskPane.setCollapsed(false);
+        taskPane.setFont(getTitleFont());
+        taskPane.setTitle("Signaling pathway components");
 
-		CtrlSignalingComps debugPanel = new CtrlSignalingComps();
-		debugPanel.setController(controller);
-		taskPane.add(new JScrollPane(debugPanel));
+        CtrlSignalingComps debugPanel = new CtrlSignalingComps();
+        debugPanel.setController(controller);
+        taskPane.add(new JScrollPane(debugPanel));
 
-		return taskPane;
-	}
+        return taskPane;
+    }
 //	private JXTaskPane getDebugLayoutPanel() {
 //		JXTaskPane taskPane = new JXTaskPane();
 //		taskPane.setCollapsed(false);
@@ -173,19 +178,19 @@ public class ControlPanelContainner extends JPanel {
 //		return taskPane;
 //	}
 
-	protected JXTaskPane getTreeOperation() {
-		JXTaskPane taskPane = new JXTaskPane();
-		taskPane.setFont(getTitleFont());
-		taskPane.setTitle("Tree operation");
+    protected JXTaskPane getTreeOperation() {
+        JXTaskPane taskPane = new JXTaskPane();
+        taskPane.setFont(getTitleFont());
+        taskPane.setTitle("Tree operation");
 //		JPanel jPanel = new JPanel(new BorderLayout());
-		leftOparetionPanel = new CtrlTreeOperationPanelByMiglayout();
-		leftOparetionPanel.setController(controller);
+        leftOparetionPanel = new CtrlTreeOperationPanelByMiglayout();
+        leftOparetionPanel.setController(controller);
 
 //		jPanel.add(leftOparetionPanel, BorderLayout.CENTER);
 
-		taskPane.add(new JScrollPane(leftOparetionPanel));
-		return taskPane;
-	}
+        taskPane.add(new JScrollPane(leftOparetionPanel));
+        return taskPane;
+    }
 
 //	protected JXTaskPane getDataInfoTaskPanel() {
 //
@@ -199,22 +204,22 @@ public class ControlPanelContainner extends JPanel {
 //		return taskPane;
 //	}
 
-	private JXTaskPane getColorSchemeTaskPanel() {
+    private JXTaskPane getColorSchemeTaskPanel() {
 
-		JXTaskPane taskPane = new JXTaskPane();
+        JXTaskPane taskPane = new JXTaskPane();
 
-		taskPane.setFont(getTitleFont());
-		taskPane.setTitle("Color scheme");
-		JPanel jPanel = new JPanel(new BorderLayout());
+        taskPane.setFont(getTitleFont());
+        taskPane.setTitle("Color scheme");
+        JPanel jPanel = new JPanel(new BorderLayout());
 
-		colorSchemePanel = new CtrlColorSchemePanel();
-		colorSchemePanel.setController(controller);
+        colorSchemePanel = new CtrlColorSchemePanel();
+        colorSchemePanel.setController(controller);
 
-		jPanel.add(colorSchemePanel, BorderLayout.WEST);
-		taskPane.add(new JScrollPane(jPanel));
-		return taskPane;
+        jPanel.add(colorSchemePanel, BorderLayout.WEST);
+        taskPane.add(new JScrollPane(jPanel));
+        return taskPane;
 
-	}
+    }
 
 //	protected JXTaskPane getIdentificationNonMutPathTaskPanel() {
 //
@@ -228,49 +233,49 @@ public class ControlPanelContainner extends JPanel {
 //
 //	}
 
-	protected JXTaskPane getDataOperationTaskPanel() {
-		JXTaskPane taskPane = new JXTaskPane();
+    protected JXTaskPane getDataOperationTaskPanel() {
+        JXTaskPane taskPane = new JXTaskPane();
 
-		taskPane.setFont(getTitleFont());
-		taskPane.setTitle("Data operation");
+        taskPane.setFont(getTitleFont());
+        taskPane.setTitle("Data operation");
 //		JPanel jPanel = new JPanel(new BorderLayout());
 
-		CtrlDataOperationPanel filterPanel = new CtrlDataOperationPanel();
-		filterPanel.setController(controller);
-		leftDataOperationPanel = filterPanel;
-		leftDataOperationPanel.setBorder(null);
+        CtrlDataOperationPanel filterPanel = new CtrlDataOperationPanel();
+        filterPanel.setController(controller);
+        leftDataOperationPanel = filterPanel;
+        leftDataOperationPanel.setBorder(null);
 
-		// jPanel.add(leftDataOperationPanel, BorderLayout.WEST);
+        // jPanel.add(leftDataOperationPanel, BorderLayout.WEST);
 
-		JScrollPane comp = new JScrollPane(leftDataOperationPanel);
-		comp.setBorder(null);
-		taskPane.add(comp);
-		return taskPane;
-	}
+        JScrollPane comp = new JScrollPane(leftDataOperationPanel);
+        comp.setBorder(null);
+        taskPane.add(comp);
+        return taskPane;
+    }
 
-	protected JXTaskPane getTreeLayoutTaskPanel() {
-		JXTaskPane taskPane = new JXTaskPane();
+    protected JXTaskPane getTreeLayoutTaskPanel() {
+        JXTaskPane taskPane = new JXTaskPane();
 
-		taskPane.setFont(getTitleFont());
-		taskPane.setTitle("Tree layout");
-		treeLayoutPanel = new CtrlTreeLayoutPanel();
-		treeLayoutPanel.setController(controller);
-		taskPane.add(new JScrollPane(treeLayoutPanel));
+        taskPane.setFont(getTitleFont());
+        taskPane.setTitle("Tree layout");
+        treeLayoutPanel = new CtrlTreeLayoutPanel();
+        treeLayoutPanel.setController(controller);
+        taskPane.add(new JScrollPane(treeLayoutPanel));
 
-		return taskPane;
-	}
+        return taskPane;
+    }
 
-	private JXTaskPane getBranchDisplayTaskPanel() {
-		JXTaskPane taskPane = new JXTaskPane();
+    private JXTaskPane getBranchDisplayTaskPanel() {
+        JXTaskPane taskPane = new JXTaskPane();
 
-		taskPane.setFont(getTitleFont());
-		taskPane.setTitle("Branch display");
+        taskPane.setFont(getTitleFont());
+        taskPane.setTitle("Branch display");
 
-		CtrlBranchDisplayPanel view = new CtrlBranchDisplayPanel();
+        CtrlBranchDisplayPanel view = new CtrlBranchDisplayPanel();
 
-		taskPane.add(new JScrollPane(view));
-		return taskPane;
-	}
+        taskPane.add(new JScrollPane(view));
+        return taskPane;
+    }
 
 //	private JXTaskPane getVisualEffectsTaskPanel() {
 //		JXTaskPane taskPane = new JXTaskPane();
@@ -283,43 +288,43 @@ public class ControlPanelContainner extends JPanel {
 //		return taskPane;
 //	}
 
-	public GeneFamilyController getController() {
-		return controller;
-	}
+    public GeneFamilyController getController() {
+        return controller;
+    }
 
-	public Font getGlobalFont() {
-		return controller.getGlobalFont();
-	}
+    public Font getGlobalFont() {
+        return controller.getGlobalFont();
+    }
 
-	public Font getTitleFont() {
-		return controller.getTitleFont();
-	}
+    public Font getTitleFont() {
+        return controller.getTitleFont();
+    }
 
-	public CtrlTreeOperationPanelByMiglayout getLeftOparetionPanel() {
-		return leftOparetionPanel;
-	}
+    public CtrlTreeOperationPanelByMiglayout getLeftOparetionPanel() {
+        return leftOparetionPanel;
+    }
 
-	public CtrlColorSchemePanel getColorSchemePanel() {
-		return colorSchemePanel;
-	}
+    public CtrlColorSchemePanel getColorSchemePanel() {
+        return colorSchemePanel;
+    }
 
-	public CtrlTreeLayoutPanel getTreeLayoutPanel() {
-		return treeLayoutPanel;
-	}
+    public CtrlTreeLayoutPanel getTreeLayoutPanel() {
+        return treeLayoutPanel;
+    }
 
-	public JPanel getLeftDataOperationPanel() {
-		return leftDataOperationPanel;
-	}
+    public JPanel getLeftDataOperationPanel() {
+        return leftDataOperationPanel;
+    }
 
-	public void setLeftDataOperationPanel(JPanel leftDataOperationPanel) {
-		this.leftDataOperationPanel = leftDataOperationPanel;
-	}
+    public void setLeftDataOperationPanel(JPanel leftDataOperationPanel) {
+        this.leftDataOperationPanel = leftDataOperationPanel;
+    }
 
-	public void setCustomizedRadioButton() {
-		colorSchemePanel.letCustomizedRadioButtonBeSelected();
-	}
+    public void setCustomizedRadioButton() {
+        colorSchemePanel.letCustomizedRadioButtonBeSelected();
+    }
 
-	public void setCustomizedButtonSelected(int beforeRenderingIndex) {
-		colorSchemePanel.setButtonSelected(ColorScheme.getColorSchemeAccording2index(beforeRenderingIndex));
-	}
+    public void setCustomizedButtonSelected(int beforeRenderingIndex) {
+        colorSchemePanel.setButtonSelected(ColorScheme.getColorSchemeAccording2index(beforeRenderingIndex));
+    }
 }

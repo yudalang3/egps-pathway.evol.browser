@@ -27,6 +27,8 @@ import module.evolview.gfamily.work.gui.browser.draw.AlignmentWithDerivedStatist
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimerSet;
 import module.evolview.gfamily.work.gui.browser.draw.GeneStructureInfo;
 import module.evolview.model.AlignmentGetSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Copyright (c) 2019 Chinese Academy of Sciences. All rights reserved.
@@ -36,6 +38,7 @@ import module.evolview.model.AlignmentGetSequence;
  */
 @SuppressWarnings("serial")
 public class BrowserPanel extends JPanel {
+	private static final Logger log = LoggerFactory.getLogger(BrowserPanel.class);
 	protected int moveLocation;// 鼠标的位置x值
 
 	protected TrackGeneStructure virusGeomeStructure;
@@ -88,13 +91,17 @@ public class BrowserPanel extends JPanel {
 	 * @Date Created on: 2020-07-15 14:36
 	 */
 	protected void intitialTracks() {
-
 		try {
 			geneStructureInfo = geneData.getGeneStructComputerStruct();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			log.error("GeneStructureInfo get error: geneData is {}", geneData);
 		}
-		
+
+		if (geneStructureInfo == null) {
+			return;
+		}
+
+
 		Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
 		geneDrawingLengthCursor = new GeneDrawingLengthCursor(defaultFont);
 		geneDrawingLengthCursor.setDrawStart(1);
@@ -184,6 +191,10 @@ public class BrowserPanel extends JPanel {
 
 	@Override
 	public void paint(Graphics g) {
+
+		if (calculatorDataForViewer == null){
+			return;
+		}
 		boolean reCalculator = calculatorDataForViewer.isReCalculator(getWidth(), getHeight());
 
 		if (reCalculator) {

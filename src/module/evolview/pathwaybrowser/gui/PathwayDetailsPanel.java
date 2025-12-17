@@ -6,11 +6,13 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.apache.commons.compress.utils.Lists;
 import org.apache.poi.xslf.usermodel.XSLFShape;
@@ -28,6 +30,10 @@ public class PathwayDetailsPanel extends JPanel {
 	private XSLFSlide firstSlide;
 	private String OUTname = "";
 	private Dimension pageSize;
+	
+	// Double buffering cache
+	private volatile BufferedImage cachedSlideImage;
+	private volatile boolean isRendering = false;
 
 	private List<XSLFShape> skeletonGrobs = Lists.newArrayList();
 	private Map<String, Grobs> name2componentGrobs = Maps.newHashMap();
@@ -84,30 +90,65 @@ public class PathwayDetailsPanel extends JPanel {
 
 	@Override
 	protected void paintComponent(Graphics g) {
+		// 先调用 super.paintComponent 清除背景
 		super.paintComponent(g);
 
-		{
-			Graphics2D g2d = (Graphics2D) g.create();
-
-			EGPSMainGuiUtil.setupHighQualityRendering(g2d);
-
-			firstSlide.draw(g2d);
-
+		// Draw cached image
+		if (cachedSlideImage != null) {
+			g.drawImage(cachedSlideImage, 0, 0, null);
 		}
 
+		// 然后绘制自定义内容
 		{
 			Graphics2D g2d = (Graphics2D) g.create();
 			EGPSMainGuiUtil.setupHighQualityRendering(g2d);
 			Font deriveFont = g2d.getFont().deriveFont(20f);
 			g2d.setFont(deriveFont);
-			String concat = "This is ".concat(OUTname);
 			int stringWidth = g2d.getFontMetrics().stringWidth(OUTname);
 			g2d.drawString(OUTname, (int) (this.getWidth() - 30 - stringWidth), 30);
-
+			g2d.dispose();
 		}
+	}
 
-
-
+	/**
+	 * Render the slide to a BufferedImage in a background thread.
+	 * This method should NOT be called on the EDT.
+	 */
+	public void renderSlideImageAsync() {
+		if (isRendering || pageSize == null) {
+			return;
+		}
+		
+		isRendering = true;
+		
+		new SwingWorker<BufferedImage, Void>() {
+			@Override
+			protected BufferedImage doInBackground() throws Exception {
+				// Create and render image in background thread
+				BufferedImage image = new BufferedImage(
+						pageSize.width,
+						pageSize.height,
+						BufferedImage.TYPE_INT_ARGB
+				);
+				Graphics2D g2d = image.createGraphics();
+				EGPSMainGuiUtil.setupHighQualityRendering(g2d);
+				firstSlide.draw(g2d);
+				g2d.dispose();
+				return image;
+			}
+			
+			@Override
+			protected void done() {
+				try {
+					cachedSlideImage = get();
+					repaint();
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					isRendering = false;
+				}
+			}
+		}.execute();
 	}
 
 	public void clickToSpecies(String name) {
@@ -132,7 +173,8 @@ public class PathwayDetailsPanel extends JPanel {
 			}
 		}
 
-		repaint();
+		// Render the slide image in background thread
+		renderSlideImageAsync();
 
 	}
 

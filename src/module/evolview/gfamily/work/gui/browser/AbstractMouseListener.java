@@ -45,17 +45,20 @@ public class AbstractMouseListener extends MouseAdapter {
         } else {
             genomeMain.setInTheInterface(true);
             genomeMain.setMoveLocation(point.x);
-            
-            //画了东西的宽度
-            double drawLength=maxDrawLocation-LocationCalculator.BLINK_LEFT_SPACE_LENGTH;
-            int posLength=genomeMain.getDrawProperties().getDrawEnd()-genomeMain.getDrawProperties().getDrawStart();
-            double cellwidth=drawLength/(double)posLength;//一个核苷酸所占宽度
-            genomeMain.getDrawProperties().setMousePos((int)(genomeMain.getDrawProperties().getDrawStart()+(point.x-LocationCalculator.BLINK_LEFT_SPACE_LENGTH)/cellwidth));
+
+            GeneDrawingLengthCursor drawProperties = genomeMain.getDrawProperties();
+            if (drawProperties != null){
+                //画了东西的宽度
+                double drawLength = maxDrawLocation - LocationCalculator.BLINK_LEFT_SPACE_LENGTH;
+                int posLength = drawProperties.getDrawEnd() - drawProperties.getDrawStart();
+                double cellwidth = drawLength / (double) posLength;//一个核苷酸所占宽度
+                drawProperties.setMousePos((int) (drawProperties.getDrawStart() + (point.x - LocationCalculator.BLINK_LEFT_SPACE_LENGTH) / cellwidth));
+            }
 
         }
         genomeMain.updateUI();
-        
-        
+
+
     }
 
     @Override

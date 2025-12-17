@@ -34,7 +34,7 @@ import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.pathwaybrowser.gui.EvoSelectionPressurePanel;
 import module.evolview.pathwaybrowser.gui.PathwayDetailsPanel;
 import module.evolview.pathwaybrowser.gui.PathwayStatisticsPanel;
-import module.evolview.pathwaybrowser.io.PathwayFamilyBrowserImportInfoBean;
+import module.evolview.pathwaybrowser.io.ImporterBean4PathwayFamilyBrowser;
 import module.evolview.pathwaybrowser.io.Voice4pathwayFamilyBrowser;
 import egps2.modulei.IInformation;
 import egps2.modulei.IModuleLoader;
@@ -100,15 +100,11 @@ public class PathwayFamilyMainFace extends GeneFamilyMainFace {
 		return new String[]{"Gene family visualization"};
     }
 
-	@Override
 	public void initializeGraphics() {
-		super.initializeGraphics();
+		initializeTheModule(false);
+		importData();
 	}
 
-	@Override
-	public void initializeTheModule() {
-		super.initializeTheModule();
-    }
 
     /**
      * The main frame consist of following elements:
@@ -136,11 +132,10 @@ public class PathwayFamilyMainFace extends GeneFamilyMainFace {
      *
      * </pre>
      */
-	public void initializeTheModule(PathwayFamilyBrowserImportInfoBean geneData,
-			TreeLayoutProperties treeLayoutProperties) {
+	public void loadingDataInitializeGraphics(ImporterBean4PathwayFamilyBrowser geneData,
+											  TreeLayoutProperties treeLayoutProperties) {
 
-        // 这个导入过程，如果更改需要注意三处：VOICE4MTV类的execute()；GeneFamilyMainFace类的initialize和MTreeViewMainFace的initializeGraphics()
-
+        // 这个导入过程，如果更改需要注意三处：VOICE4MTV类的execute()；GeneFamilyMainFace类的initialize和 MTreeViewMainFace的initializeGraphics()
         GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
         PhylogeneticTreePanel phylogeneticTreePanel = new PhylogeneticTreePanel(treeLayoutProperties, root, null, null);
         controller.setGlobalPhylogeneticTreePanel(phylogeneticTreePanel);
@@ -160,7 +155,7 @@ public class PathwayFamilyMainFace extends GeneFamilyMainFace {
 			getTabbedPhylogeneticTreePane().removeAll();
             tabbedAnalysisPanel.removeAll();
         }
-		getTabbedPhylogeneticTreePane().addTab("Phylogeny", imageIcon, jScrollPane, "The referenced phylogentic tree.");
+		getTabbedPhylogeneticTreePane().addTab("Phylogeny", imageIcon, jScrollPane, "The referenced phylogenetic tree.");
 
 		TreeListener treeListener = phylogeneticTreePanel.getTreeListener();
 		List<Consumer<GraphicsNode>> tree2AnalyzingPanelInteractions = treeListener
@@ -181,8 +176,10 @@ public class PathwayFamilyMainFace extends GeneFamilyMainFace {
 		Map<String, List<Short>> species2geneCountMap = Maps.newHashMap();
 		List<String> geneList = tableAsKey2ListMap.remove(geneColumnName);
 		List<String> categoryList = tableAsKey2ListMap.remove(categoryColumnName);
+
+
 		{
-			
+
 			for (Entry<String, List<String>> entry : tableAsKey2ListMap.entrySet()) {
 				List<String> value = entry.getValue();
 				List<Short> array = Lists.newArrayList();
@@ -192,34 +189,37 @@ public class PathwayFamilyMainFace extends GeneFamilyMainFace {
 				species2geneCountMap.put(entry.getKey(), array);
 			}
 		}
-		
 
+
+		PathwayDetailsPanel pathwayDrawDemo = new PathwayDetailsPanel(geneData.getPathwayDetailsFigure(),
+				geneData.getGeneNameSeparater().charAt(0));
 		{
-			PathwayDetailsPanel wntPathwayPanel = new PathwayDetailsPanel(geneData.getPathwayDetailsFigure(),
-					geneData.getGeneNameSeparater().charAt(0));
-			wntPathwayPanel.setSpecies2CompMaps(geneList, species2geneCountMap);
+			pathwayDrawDemo.setSpecies2CompMaps(geneList, species2geneCountMap);
 			tree2AnalyzingPanelInteractions.add(n -> {
-				wntPathwayPanel.clickToSpecies(n.getName());
+				pathwayDrawDemo.clickToSpecies(n.getName());
 			});
-			JScrollPane jScrollPane2 = new JScrollPane(wntPathwayPanel);
+			JScrollPane jScrollPane2 = new JScrollPane(pathwayDrawDemo);
 			jScrollPane2.setBorder(null);
 			tabbedAnalysisPanel.addTab("Pathway Details", IconObtainer.get("dna.png"),jScrollPane2 ,
 					"The Wnt signalling pathway regulation details");
 
+
 		}
+		PathwayStatisticsPanel pathwayStageStatistics = new PathwayStatisticsPanel(geneData.getPathwayStatisticsFigure(),
+				categoryColumnName);
 		{
-			PathwayStatisticsPanel wntPathwayPanel = new PathwayStatisticsPanel(geneData.getPathwayStatisticsFigure(),
-					categoryColumnName);
-			wntPathwayPanel.setSpeciesCategory2CompMaps(categoryList, species2geneCountMap);
+			pathwayStageStatistics.setSpeciesCategory2CompMaps(categoryList, species2geneCountMap);
 			tree2AnalyzingPanelInteractions.add(n -> {
-				wntPathwayPanel.clickToSpecies(n.getName());
+				pathwayStageStatistics.clickToSpecies(n.getName());
 			});
 
-			JScrollPane jScrollPane2 = new JScrollPane(wntPathwayPanel);
+			JScrollPane jScrollPane2 = new JScrollPane(pathwayStageStatistics);
 			jScrollPane2.setBorder(null);
 			tabbedAnalysisPanel.addTab("Pathway Statistics", IconObtainer.get("dna.png"),
 					jScrollPane2,
 					"The Wnt pathway components counts");
+
+
 
 		}
 		{
@@ -227,10 +227,18 @@ public class PathwayFamilyMainFace extends GeneFamilyMainFace {
 					geneData.getEvolutionarySelectionFigurePath());
 			JScrollPane jScrollPane2 = new JScrollPane(wntPathwayPanel);
 			tabbedAnalysisPanel.addTab("Evolutionary selection", IconObtainer.get("dna.png"), jScrollPane2,
-					"The evolutionary selection presseure on the pathway on the genome");
+					"The evolutionary selection pressure on the pathway on the genome");
 
 		}
+
+
+
         SwingUtilities.invokeLater(() -> phylogeneticTreePanel.initializeLeftPanel());
+
+		SwingUtilities.invokeLater(() -> {
+			pathwayDrawDemo.renderSlideImageAsync();
+			pathwayStageStatistics.renderSlideImageAsync();
+		});
 
         // ==========================================================================================================
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import egps2.EGPSProperties;
+import egps2.UnifiedAccessPoint;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
@@ -21,30 +22,30 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 		List<Entry<String, VoiceValueParameterBean>> alreadyMapBean = new LinkedList<>(requiredParams.entrySet());
 
 		requiredParams.clear();
-		String propertiesDir = EGPSProperties.PROPERTIES_DIR;
+		String propertiesDir = UnifiedAccessPoint.getLaunchProperty().getTestDataDir();
 		addKeyValueEntryBean("input.nwk.path",
 				propertiesDir + "/bioData/example/9_model_species_evolution.nwk",
-				"Input the nwk file path.");
-		addKeyValueEntryBean("components.info.path",
+				"Input the Tree nwk file path.");
+		addKeyValueEntryBean("pathway.components.info.path",
 				propertiesDir + "/bioData/pathwayBrowser/components.info.tsv",
 				"Input the file path of the components, tsv format. Must has the gene column and category column.");
 		addKeyValueEntryBean("gene.column.name", "name", "The column name of the gene symbol or ids");
 		addKeyValueEntryBean("category.column.name", "category",
 				"The column name of the category in the tsv file.");
-		addKeyValueEntryBean("pathway.details.figure",
+		addKeyValueEntryBean("pathway.details.figure.path",
 				propertiesDir + "/bioData/pathwayBrowser/wnt_pathway2.pptx",
 				"Input the file path of the components, format is the pptx and the shape id is same as the gene name.");
-		addKeyValueEntryBean("pathway.statistics.figure",
+		addKeyValueEntryBean("pathway.statistics.figure.path",
 				propertiesDir + "/bioData/pathwayBrowser/pathway_counts.pptx",
 				"Input the file path of the category counts, format is the pptx and the shape id is same as the category name.");
-		addKeyValueEntryBean("evolutionary.selection.figure",
-				propertiesDir + "/bioData/pathwayBrowser/demo_selection.pptx",
-				"Input the file path of the evolutionary selection pressure, the figure is pre-culculated, format is the pptx.");
+//		addKeyValueEntryBean("evolutionary.selection.figure",
+//				propertiesDir + "/bioData/pathwayBrowser/demo_selection.pptx",
+//				"Input the file path of the evolutionary selection pressure, the figure is pre-calculated, format is the pptx.");
 
 		addKeyValueEntryBean("^", "", "");
 		addKeyValueEntryBean("@", "The Pathway Family Browser", "");
 		addKeyValueEntryBean("gene.name.separater", "_",
-				"The gene symbol or ids separater, default is _. For different components like arrow, textbox and shape.");
+				"The gene symbol or ids separator, default is _. For different components like arrow, textbox and shape.");
 		addKeyValueEntryBean("blank.space", "20,20,100,20",
 				"The blank area of top,left,bottom,right. Note: right will take effects if divider = 0");
 		addKeyValueEntryBean("need.reverse.axis.bar", "T",
@@ -62,18 +63,18 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 
 	}
 
-	public PathwayFamilyBrowserImportInfoBean getImportBeanInfo(OrganizedParameterGetter str) {
+	public ImporterBean4PathwayFamilyBrowser getImportBeanInfo(OrganizedParameterGetter str) {
 		// 得到进化树的一些设置属性
 		MTVImportInforBean object = this.generateTreeFromKeyValue(str);
-		PathwayFamilyBrowserImportInfoBean bean = new PathwayFamilyBrowserImportInfoBean(object);
+		ImporterBean4PathwayFamilyBrowser bean = new ImporterBean4PathwayFamilyBrowser(object);
 
 		bean.geneNameSeparater = str.getSimplifiedString("gene.name.separater");
-		bean.componentsInfoPath = str.getSimplifiedString("components.info.path");
+		bean.componentsInfoPath = str.getSimplifiedString("pathway.components.info.path");
 		bean.geneColumnName = str.getSimplifiedString("gene.column.name");
 		bean.categoryColumnName = str.getSimplifiedString("category.column.name");
-		bean.pathwayDetailsFigure = str.getSimplifiedString("pathway.details.figure");
-		bean.pathwayStatisticsFigure = str.getSimplifiedString("pathway.statistics.figure");
-		bean.evolutionarySelectionFigurePath = str.getSimplifiedString("evolutionary.selection.figure");
+		bean.pathwayDetailsFigure = str.getSimplifiedString("pathway.details.figure.path");
+		bean.pathwayStatisticsFigure = str.getSimplifiedString("pathway.statistics.figure.path");
+
 
 		return bean;
 	}
