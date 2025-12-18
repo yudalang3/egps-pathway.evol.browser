@@ -16,7 +16,7 @@ import utils.datetime.LocalDateHandler;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.MyFrame;
 import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.gfamily.work.gui.ControlPanelContainner;
+import module.evolview.gfamily.work.gui.ControlPanelContainer;
 import module.evolview.gfamily.work.gui.CtrlGenomeBrowserPanel;
 import module.evolview.gfamily.work.gui.CtrlTreeLayoutPanel;
 import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
@@ -54,7 +54,7 @@ public class GeneFamilyController {
     private LocalDateHandler dateHandler = new LocalDateHandler();
 
     private TreeLayoutSwitcher toplayoutSwither;
-    private ControlPanelContainner leftControlPanelContainner;
+    private ControlPanelContainer leftControlPanelContainner;
 
     private final CustomizedSaveBean customizedSaveBean = new CustomizedSaveBean();
 
@@ -715,12 +715,12 @@ public class GeneFamilyController {
         });
     }
 
-    public void setLeftControlPanelContainner(ControlPanelContainner leftControlPanelContainner) {
+    public void setLeftControlPanelContainner(ControlPanelContainer leftControlPanelContainner) {
         this.leftControlPanelContainner = leftControlPanelContainner;
 
     }
 
-    public ControlPanelContainner getLeftControlPanelContainner() {
+    public ControlPanelContainer getLeftControlPanelContainner() {
         return leftControlPanelContainner;
     }
 

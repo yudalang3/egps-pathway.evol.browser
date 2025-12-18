@@ -21,6 +21,8 @@ import com.jidesoft.swing.JideTabbedPane.GradientColorProvider;
 
 import egps2.builtin.modules.IconObtainer;
 import egps2.panels.dialog.SwingDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.EGPSObjectsUtil;
 import egps2.utils.common.util.SaveUtil;
 import egps2.EGPSProperties;
@@ -28,7 +30,7 @@ import egps2.UnifiedAccessPoint;
 import egps2.frame.ModuleFace;
 import module.evolview.gfamily.work.beans.GeneFamilyMainFaceBean;
 import module.evolview.gfamily.work.beans.RequiredGeneData;
-import module.evolview.gfamily.work.gui.ControlPanelContainner;
+import module.evolview.gfamily.work.gui.ControlPanelContainer;
 import module.evolview.gfamily.work.gui.browser.BrowserPanel;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.io.Voice4geneFamilyBrowser;
@@ -61,18 +63,19 @@ import egps2.modulei.IModuleLoader;
 @SuppressWarnings("serial")
 public class GeneFamilyMainFace extends ModuleFace {
 
+	private static final Logger log = LoggerFactory.getLogger(GeneFamilyMainFace.class);
 	protected GeneFamilyController controller;
 
-	private JideTabbedPane tabbedPhylogeneticTreePane;
-	private JideTabbedPane tabbedAnalysisPanel;
+	protected JideTabbedPane tabbedPhylogeneticTreePane;
+	protected JideTabbedPane tabbedAnalysisPanel;
 
 	protected Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
 	protected JSplitPane mainSplitPane;
-	protected ControlPanelContainner controlPanelContainner;
+	protected ControlPanelContainer controlPanelContainner;
 
-	private JSplitPane rightSplitPanel;
+	protected JSplitPane rightSplitPanel;
 
-	private GradientColorProvider tabColorProvider = new GradientColorProvider() {
+	protected GradientColorProvider tabColorProvider = new GradientColorProvider() {
 		Color TopBackGroundColor = new Color(196, 213, 231);
 		@Override
 		public Color getBackgroundAt(int tabIndex) {
@@ -120,7 +123,7 @@ public class GeneFamilyMainFace extends ModuleFace {
 			bean.setSavedPerOfTreeAndBrowser(aa);
 			EGPSObjectsUtil.persistentSaveJavaBeanByFastaJSON(bean, new File(getSavedPersistentPath()));
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Internal error please tell the developers", e);
 		}
 
 		return false;
@@ -172,7 +175,7 @@ public class GeneFamilyMainFace extends ModuleFace {
 
 	@Override
 	public void initializeGraphics() {
-		initializeTheModule(true);
+		initializeTheModule();
 		importData();
 	}
 
@@ -185,13 +188,13 @@ public class GeneFamilyMainFace extends ModuleFace {
 		return controller;
 	}
 
-	protected void initializeTheModule(boolean loadBrowserControlPanel) {
+	protected void initializeTheModule() {
 		controller = new GeneFamilyController(this);
 
 		mainSplitPane = getMainSplitPane();
 		mainSplitPane.setBorder(null);
 
-		controlPanelContainner = new ControlPanelContainner(controller,loadBrowserControlPanel);
+		controlPanelContainner = new ControlPanelContainer(controller);
 		mainSplitPane.setLeftComponent(controlPanelContainner);
 
 		getRightSplitPane();

@@ -38,9 +38,6 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 		addKeyValueEntryBean("pathway.statistics.figure.path",
 				propertiesDir + "/bioData/pathwayBrowser/pathway_counts.pptx",
 				"Input the file path of the category counts, format is the pptx and the shape id is same as the category name.");
-//		addKeyValueEntryBean("evolutionary.selection.figure",
-//				propertiesDir + "/bioData/pathwayBrowser/demo_selection.pptx",
-//				"Input the file path of the evolutionary selection pressure, the figure is pre-calculated, format is the pptx.");
 
 		addKeyValueEntryBean("^", "", "");
 		addKeyValueEntryBean("@", "The Pathway Family Browser", "");
@@ -69,9 +66,12 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 		ImporterBean4PathwayFamilyBrowser bean = new ImporterBean4PathwayFamilyBrowser(object);
 
 		bean.geneNameSeparater = str.getSimplifiedString("gene.name.separater");
+
 		bean.componentsInfoPath = str.getSimplifiedString("pathway.components.info.path");
 		bean.geneColumnName = str.getSimplifiedString("gene.column.name");
 		bean.categoryColumnName = str.getSimplifiedString("category.column.name");
+
+
 		bean.pathwayDetailsFigure = str.getSimplifiedString("pathway.details.figure.path");
 		bean.pathwayStatisticsFigure = str.getSimplifiedString("pathway.statistics.figure.path");
 

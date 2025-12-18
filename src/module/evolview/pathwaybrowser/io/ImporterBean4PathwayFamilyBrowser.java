@@ -35,7 +35,7 @@ public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
     }
 
 
-	public String getGeneNameSeparater() {
+	public String getGeneNameSeparator() {
 		return geneNameSeparater;
 	}
 

@@ -15,6 +15,8 @@ import javax.swing.JScrollPane;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.EGPSObjectsUtil;
 import egps2.EGPSProperties;
 import module.evolview.gfamily.GeneFamilyController;
@@ -22,10 +24,11 @@ import module.evolview.gfamily.work.beans.LefControlPanelCollapseProperties;
 import module.evolview.model.enums.ColorScheme;
 
 @SuppressWarnings("serial")
-public class ControlPanelContainner extends JPanel {
+public class ControlPanelContainer extends JPanel {
+    private static final Logger log = LoggerFactory.getLogger(ControlPanelContainer.class);
     protected GeneFamilyController controller;
 
-    private String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/gfamily_control_panel.json");
+    protected String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/gfamily_control_panel.json");
     private JXTaskPaneContainer taskPaneContainer;
 
     private CtrlTreeOperationPanelByMiglayout leftOparetionPanel;
@@ -33,7 +36,7 @@ public class ControlPanelContainner extends JPanel {
     private CtrlTreeLayoutPanel treeLayoutPanel;
     private JPanel leftDataOperationPanel;
 
-    protected ControlPanelContainner() {
+    protected ControlPanelContainer() {
 
     }
 
@@ -42,11 +45,7 @@ public class ControlPanelContainner extends JPanel {
      *
      * @param controller
      */
-    public ControlPanelContainner(GeneFamilyController controller) {
-        this(controller, true);
-    }
-
-    public ControlPanelContainner(GeneFamilyController controller, boolean loadBrowserControlPanel) {
+    public ControlPanelContainer(GeneFamilyController controller) {
         setLayout(new BorderLayout());
 
         this.controller = controller;
@@ -57,7 +56,7 @@ public class ControlPanelContainner extends JPanel {
         taskPaneContainer.setBackground(Color.WHITE);
         taskPaneContainer.setBackgroundPainter(null);
 
-        addJXTaskPanels(taskPaneContainer, loadBrowserControlPanel);
+        addJXTaskPanels(taskPaneContainer);
 
         add(new JScrollPane(taskPaneContainer), BorderLayout.CENTER);
 //		jLabel.setBackground(Color.white);
@@ -66,36 +65,39 @@ public class ControlPanelContainner extends JPanel {
 //		jLabel.setBorder(createRaisedSoftBevelBorder);
     }
 
-    protected void addJXTaskPanels(JXTaskPaneContainer taskPaneContainer, boolean loadBrowserControlPanel) {
-        List<JXTaskPane> listOfJxTaskPanes = new LinkedList<>();
-//		listOfJxTaskPanes.add(getDataInfoTaskPanel());
-
-//		listOfJxTaskPanes.add(getDataOperationTaskPanel());
-
-//		listOfJxTaskPanes.add(getColorSchemeTaskPanel());
-
-        listOfJxTaskPanes.add(getTreeOperation());
-//		listOfJxTaskPanes.add(getBranchDisplayTaskPanel());
-        listOfJxTaskPanes.add(getTreeLayoutTaskPanel());
-        if (loadBrowserControlPanel) {
-            listOfJxTaskPanes.add(getGenomeBrowserTaskPanel());
-        }
-
+    protected boolean[] getCollapsePanesArray(int sizeOfJxTaskPanes) {
         File jsonFile = new File(PERSISTENT_STORE_PATH);
         LefControlPanelCollapseProperties bean = null;
         if (jsonFile.exists()) {
             try {
                 bean = EGPSObjectsUtil.obtainJavaBeanByFastaJSON(LefControlPanelCollapseProperties.class, jsonFile);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Error when load control panel properties.", e);
             }
         }
-        if (bean == null) {
+        if (bean == null){
+            bean = new LefControlPanelCollapseProperties();
+        }
+        boolean[] isCollapseArray = bean.getIsCollapseArray();
+        if (isCollapseArray.length != sizeOfJxTaskPanes) {
             bean = new LefControlPanelCollapseProperties();
         }
 
-        boolean[] isCollapseArray = bean.getIsCollapseArray();
+        return bean.getIsCollapseArray();
+    }
+
+    protected void addJXTaskPanels(JXTaskPaneContainer taskPaneContainer) {
+        List<JXTaskPane> listOfJxTaskPanes = new LinkedList<>();
+//		listOfJxTaskPanes.add(getDataInfoTaskPanel());
+//		listOfJxTaskPanes.add(getDataOperationTaskPanel());
+//		listOfJxTaskPanes.add(getColorSchemeTaskPanel());
+        listOfJxTaskPanes.add(getTreeOperation());
+//		listOfJxTaskPanes.add(getBranchDisplayTaskPanel());
+        listOfJxTaskPanes.add(getTreeLayoutTaskPanel());
+        listOfJxTaskPanes.add(getGenomeBrowserTaskPanel());
+
         int size = listOfJxTaskPanes.size();
+        boolean[] isCollapseArray = getCollapsePanesArray(size);
         for (int i = 0; i < size; i++) {
             boolean b = isCollapseArray[i];
             JXTaskPane jxTaskPane = listOfJxTaskPanes.get(i);
@@ -119,15 +121,15 @@ public class ControlPanelContainner extends JPanel {
         }
 
         LefControlPanelCollapseProperties bean = new LefControlPanelCollapseProperties();
-        boolean[] arrary = new boolean[temp.size()];
-        for (int i = 0; i < arrary.length; i++) {
-            arrary[i] = temp.get(i);
+        boolean[] array = new boolean[temp.size()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = temp.get(i);
         }
-        bean.setIsCollapseArray(arrary);
+        bean.setIsCollapseArray(array);
         try {
             EGPSObjectsUtil.persistentSaveJavaBeanByFastaJSON(bean, new File(PERSISTENT_STORE_PATH));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error when save control panel properties.", e);
         }
     }
 

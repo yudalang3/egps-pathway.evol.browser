@@ -53,7 +53,6 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 
 		pathwayFamilyMainFace.loadingDataInitializeGraphics(importBeanInfo, treeLayoutProperties);
 
-		log.info("Finish xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 	}
 
 }

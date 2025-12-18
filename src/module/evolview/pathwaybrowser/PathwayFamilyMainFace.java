@@ -1,278 +1,551 @@
 package module.evolview.pathwaybrowser;
 
-import java.awt.Component;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.Consumer;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-
-import org.apache.commons.compress.utils.Lists;
-
 import com.google.common.collect.Maps;
+import com.jidesoft.swing.JideSplitPane;
 import com.jidesoft.swing.JideTabbedPane;
-
+import com.jidesoft.swing.JideTabbedPane.GradientColorProvider;
+import egps2.EGPSProperties;
+import egps2.UnifiedAccessPoint;
+import egps2.builtin.modules.IconObtainer;
+import egps2.frame.ModuleFace;
+import egps2.modulei.IInformation;
+import egps2.modulei.IModuleLoader;
 import egps2.panels.dialog.SwingDialog;
 import egps2.utils.common.util.SaveUtil;
-import egps2.EGPSProperties;
-import tsv.io.TSVReader;
-import egps2.UnifiedAccessPoint;
-import module.evolview.gfamily.GeneFamilyMainFace;
-import egps2.builtin.modules.IconObtainer;
-import module.evolview.gfamily.work.gui.browser.BrowserPanel;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.listener.TreeListener;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.pathwaybrowser.gui.ControlPanelContainer;
 import module.evolview.pathwaybrowser.gui.EvoSelectionPressurePanel;
 import module.evolview.pathwaybrowser.gui.PathwayDetailsPanel;
 import module.evolview.pathwaybrowser.gui.PathwayStatisticsPanel;
 import module.evolview.pathwaybrowser.io.ImporterBean4PathwayFamilyBrowser;
 import module.evolview.pathwaybrowser.io.Voice4pathwayFamilyBrowser;
-import egps2.modulei.IInformation;
-import egps2.modulei.IModuleLoader;
+import module.evolview.pathwaybrowser.PathwayBrowserController;
+import module.evolview.pathwaybrowser.PathwayBrowserMainFaceBean;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import org.apache.commons.compress.utils.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tsv.io.TSVReader;
+import utils.EGPSObjectsUtil;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+
+/**
+ * Pathway Family Browser Main Face
+ *
+ * This is the main UI controller for the pathway browser module.
+ * It manages the entire interface including control panels, tree visualization, and analysis panels.
+ */
 @SuppressWarnings("serial")
-public class PathwayFamilyMainFace extends GeneFamilyMainFace {
+public class PathwayFamilyMainFace extends ModuleFace {
 
+	private static final Logger log = LoggerFactory.getLogger(PathwayFamilyMainFace.class);
+	private static final String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/pathwayFamilyFace.json");
 
-    private final Voice4pathwayFamilyBrowser voiceDataHandler = new Voice4pathwayFamilyBrowser(this);
+	// Core controller
+	protected PathwayBrowserController controller;
 
-    protected PathwayFamilyMainFace(IModuleLoader moduleLoader) {
-        super(moduleLoader);
-    }
+	// Main panels
+	protected ControlPanelContainer controlPanelContainner;
+	protected JideTabbedPane tabbedPhylogeneticTreePane;  // Top-right: Tree visualization tabs
+	protected JideTabbedPane tabbedAnalysisPanel;         // Bottom-right: Analysis result tabs
 
-	@Override
-	protected String getSavedPersistentPath() {
-		final String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/pathwayFamilyFace.json");
-		return PERSISTENT_STORE_PATH;
+	// Layout components
+	protected JSplitPane mainSplitPane;      // Horizontal split: Control panel | Right area
+	protected JSplitPane rightSplitPanel;    // Vertical split: Tree panel | Analysis panel
+
+	// UI properties
+	protected Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
+
+	// Data handler
+	private final Voice4pathwayFamilyBrowser voiceDataHandler = new Voice4pathwayFamilyBrowser(this);
+
+	// Tab color provider for JIDE tabbed panes
+	protected GradientColorProvider tabColorProvider = new GradientColorProvider() {
+		Color TopBackGroundColor = new Color(196, 213, 231);
+
+		@Override
+		public Color getBackgroundAt(int tabIndex) {
+			return Color.white;
+		}
+
+		@Override
+		public Color getForegroundAt(int tabIndex) {
+			return Color.black;
+		}
+
+		@Override
+		public float getGradientRatio(int tabIndex) {
+			return (float) 0.2;
+		}
+
+		@Override
+		public Color getTopBackgroundAt(int tabIndex) {
+			return TopBackGroundColor;
+		}
+	};
+
+	protected PathwayFamilyMainFace(IModuleLoader moduleLoader) {
+		super(moduleLoader);
 	}
 
+	@Override
+	public boolean canImport() {
+		return true;
+	}
 
-    @Override
-    public boolean canImport() {
-        return true;
-    }
+	@Override
+	public void importData() {
+		voiceDataHandler.doUserImportAction();
+	}
 
-    @Override
-    public void importData() {
-        voiceDataHandler.doUserImportAction();
-    }
+	@Override
+	public boolean canExport() {
+		return true;
+	}
 
-    @Override
-    public boolean canExport() {
-        return true;
-    }
+	@Override
+	public void exportData() {
+		PhylogeneticTreePanel selectedPhylogeneticTreePanel = getSelectedPhylogeneticTreePanel();
 
-    @Override
-    public void exportData() {
-        PhylogeneticTreePanel selectedPhylogeneticTreePanel = getSelectedPhylogeneticTreePanel();
-
-        if (selectedPhylogeneticTreePanel == null) {
-            SwingDialog.showErrorMSGDialog(UnifiedAccessPoint.getInstanceFrame(), "Export error",
-                    "There are no data in the remnant,\nPlease input data first.");
-        } else {
+		if (selectedPhylogeneticTreePanel == null) {
+			SwingDialog.showErrorMSGDialog(UnifiedAccessPoint.getInstanceFrame(), "Export error",
+					"There are no data in the remnant,\nPlease input data first.");
+		} else {
 			JideTabbedPane tabbedAnalysisPanel = getTabbedAnalysisPanel();
-            int tabCount = tabbedAnalysisPanel.getTabCount();
-            if (tabCount > 0) {
-                BrowserPanel selectedBrowserPanel = getSelectedBrowserPanel();
-                SaveUtil saveUtil = new SaveUtil();
-				saveUtil.saveData(selectedBrowserPanel.getContextPanel(), getClass());
-				Optional<File> userSelectedFile = saveUtil.getUserSelectedFile();
-				if (userSelectedFile.isPresent()) {
-					File file = userSelectedFile.get();
-					File parentFile = file.getParentFile();
-
+			int tabCount = tabbedAnalysisPanel.getTabCount();
+			if (tabCount > 0) {
+				// Export the selected analysis panel (PathwayDetailsPanel, etc.)
+				Component selectedComponent = tabbedAnalysisPanel.getSelectedComponent();
+				if (selectedComponent != null) {
+					SaveUtil saveUtil = new SaveUtil();
+//                    saveUtil.saveData(selectedComponent, getClass());
 				}
-            }
-        }
-    }
+			}
+		}
+	}
 
-    @Override
-    public String[] getFeatureNames() {
-		return new String[]{"Gene family visualization"};
-    }
+	@Override
+	public String[] getFeatureNames() {
+		return new String[]{"Pathway family visualization"};
+	}
 
+	@Override
 	public void initializeGraphics() {
-		initializeTheModule(false);
+		initializeTheModule();
 		importData();
 	}
 
+	/**
+	 * Initialize the main UI module structure
+	 *
+	 * UI Layout Structure (界面布局结构):
+	 * <pre>
+	 * ┌─────────────────────────────────────────────────────────────────────────────────┐
+	 * │ PathwayFamilyMainFace (Main Container)                                          │
+	 * │ ┌─────────────────────────────────────────────────────────────────────────────┐ │
+	 * │ │ mainSplitPane (JSplitPane, HORIZONTAL_SPLIT)                                │ │
+	 * │ │ ┌──────────────────────┬───────────────────────────────────────────────────┐│ │
+	 * │ │ │                      │                                                   ││ │
+	 * │ │ │ LEFT AREA            │ RIGHT AREA (rightSplitPanel)                      ││ │
+	 * │ │ │                      │ (JSplitPane, VERTICAL_SPLIT)                      ││ │
+	 * │ │ │ Control Panel        │ ┌───────────────────────────────────────────────┐ ││ │
+	 * │ │ │ Container            │ │ TOP: tabbedPhylogeneticTreePane               │ ││ │
+	 * │ │ │                      │ │ (JideTabbedPane)                              │ ││ │
+	 * │ │ │ ┌──────────────────┐ │ │ ┌─────────────────────────────────────────┐   │ ││ │
+	 * │ │ │ │ JXTaskPane:      │ │ │ │ Tab: "Phylogeny"                        │   │ ││ │
+	 * │ │ │ │ Tree Operation   │ │ │ │ ┌─────────────────────────────────────┐ │   │ ││ │
+	 * │ │ │ │                  │ │ │ │ │ JScrollPane                         │ │   │ ││ │
+	 * │ │ │ │ - Zoom controls  │ │ │ │ │  └─ PhylogeneticTreePanel           │ │   │ ││ │
+	 * │ │ │ │ - Search         │ │ │ │ │     (Tree visualization)            │ │   │ ││ │
+	 * │ │ │ │ - Select         │ │ │ │ │                                     │ │   │ ││ │
+	 * │ │ │ │ - Color/Size     │ │ │ │ └─────────────────────────────────────┘ │   │ ││ │
+	 * │ │ │ └──────────────────┘ │ │ └─────────────────────────────────────────┘   │ ││ │
+	 * │ │ │                      │ └───────────────────────────────────────────────┘ ││ │
+	 * │ │ │ ┌──────────────────┐ │                                                   ││ │
+	 * │ │ │ │ JXTaskPane:      │ │ ════════════════════════════════════════════════ ││ │
+	 * │ │ │ │ Tree Layout      │ │                                                   ││ │
+	 * │ │ │ │                  │ │ ┌───────────────────────────────────────────────┐ ││ │
+	 * │ │ │ │ - Rectangular    │ │ │ BOTTOM: tabbedAnalysisPanel                   │ ││ │
+	 * │ │ │ │ - Circular       │ │ │ (JideTabbedPane)                              │ ││ │
+	 * │ │ │ │ - Radial         │ │ │ ┌─────────────────────────────────────────┐   │ ││ │
+	 * │ │ │ │ - Slope          │ │ │ │ Tab: "Pathway Details"                  │   │ ││ │
+	 * │ │ │ │ - Spiral         │ │ │ │  └─ PathwayDetailsPanel                 │   │ ││ │
+	 * │ │ │ └──────────────────┘ │ │ │     (Pathway component visualization)   │   │ ││ │
+	 * │ │ │                      │ │ └─────────────────────────────────────────┘   │ ││ │
+	 * │ │ │                      │ │ ┌─────────────────────────────────────────┐   │ ││ │
+	 * │ │ │                      │ │ │ Tab: "Pathway Statistics"               │   │ ││ │
+	 * │ │ │                      │ │ │  └─ PathwayStatisticsPanel              │   │ ││ │
+	 * │ │ │                      │ │ │     (Statistical charts)                │   │ ││ │
+	 * │ │ │                      │ │ └─────────────────────────────────────────┘   │ ││ │
+	 * │ │ │                      │ │ ┌─────────────────────────────────────────┐   │ ││ │
+	 * │ │ │                      │ │ │ Tab: "Evolutionary selection"           │   │ ││ │
+	 * │ │ │                      │ │ │  └─ EvoSelectionPressurePanel           │   │ ││ │
+	 * │ │ │                      │ │ │     (Selection pressure visualization)  │   │ ││ │
+	 * │ │ │                      │ │ └─────────────────────────────────────────┘   │ ││ │
+	 * │ │ │                      │ └───────────────────────────────────────────────┘ ││ │
+	 * │ │ └──────────────────────┴───────────────────────────────────────────────────┘│ │
+	 * │ └─────────────────────────────────────────────────────────────────────────────┘ │
+	 * └─────────────────────────────────────────────────────────────────────────────────┘
+	 *
+	 * Component Hierarchy (组件层次结构):
+	 *
+	 * PathwayFamilyMainFace (this)
+	 *  └─ mainSplitPane (JSplitPane, HORIZONTAL)
+	 *      ├─ LEFT: controlPanelContainner (ControlPanelContainer)
+	 *      │    └─ taskPaneContainer (JXTaskPaneContainer)
+	 *      │        ├─ JXTaskPane: "Tree operation"
+	 *      │        │   └─ CtrlTreeOperationPanelByMiglayout
+	 *      │        │       ├─ Search/Select controls
+	 *      │        │       ├─ Node color controls
+	 *      │        │       ├─ Node size controls
+	 *      │        │       └─ Branch thickness controls
+	 *      │        │
+	 *      │        └─ JXTaskPane: "Tree layout"
+	 *      │            └─ CtrlTreeLayoutPanel (TreeLayoutSwitcher)
+	 *      │                ├─ Layout type selector (Rectangular/Circular/Radial/Slope/Spiral)
+	 *      │                └─ GUITreeZoomContainerInTopFixPanel (zoom controls)
+	 *      │
+	 *      └─ RIGHT: rightSplitPanel (JSplitPane, VERTICAL)
+	 *           ├─ TOP: tabbedPhylogeneticTreePane (JideTabbedPane)
+	 *           │    └─ Tab: "Phylogeny"
+	 *           │        └─ JScrollPane
+	 *           │            └─ PhylogeneticTreePanel
+	 *           │                └─ Tree visualization (from gfamily shared component)
+	 *           │
+	 *           └─ BOTTOM: tabbedAnalysisPanel (JideTabbedPane)
+	 *                ├─ Tab: "Pathway Details"
+	 *                │    └─ PathwayDetailsPanel (SVG pathway diagram with gene mapping)
+	 *                │
+	 *                ├─ Tab: "Pathway Statistics"
+	 *                │    └─ PathwayStatisticsPanel (bar charts of component counts)
+	 *                │
+	 *                └─ Tab: "Evolutionary selection"
+	 *                     └─ EvoSelectionPressurePanel (selection pressure heatmap)
+	 *
+	 * Data Flow (数据流):
+	 * 1. User clicks on tree node in PhylogeneticTreePanel
+	 * 2. TreeListener fires event to tree2AnalyzingPanelInteractions
+	 * 3. PathwayDetailsPanel and PathwayStatisticsPanel update to show selected species data
+	 * 4. Analysis panels highlight relevant genes/components for the selected species
+	 *
+	 * </pre>
+	 */
+	protected void initializeTheModule() {
+		// 1. Create controller
+		controller = new PathwayBrowserController(this);
 
-    /**
-     * The main frame consist of following elements:
-     *
-     * <pre>
-     *
-     * 首先是垂直上的构造
-     *
-     *
-     * Shell Panel
-     *
-     * ControlPanel
-     *     |---------------------------------------|
-     *     |                         |             | TreePanel
-     *     |                         |             |
-     *     |                         |             |
-     *     |                         |             |
-     *     |                         | ----------- |
-     *     |                         |             | BrowserPanel
-     *     |                         |             |
-     *     |                         |             |
-     *     |---------------------------------------|
-     *
-     *
-     *
-     * </pre>
-     */
+		// 2. Create main horizontal split pane
+		mainSplitPane = getMainSplitPane();
+		mainSplitPane.setBorder(null);
+
+		// 3. Create left control panel container
+		controlPanelContainner = new ControlPanelContainer(controller);
+		mainSplitPane.setLeftComponent(controlPanelContainner);
+
+		// 4. Create right vertical split pane
+		getRightSplitPane();
+
+		// 5. Load persistent UI state (divider positions)
+		PathwayBrowserMainFaceBean bean = loadPersistentBean();
+		double savedPerOfTreeAndBrowser = bean.getSavedPerOfTreeAndBrowser();
+		int location = (int) (getHeight() * savedPerOfTreeAndBrowser);
+		rightSplitPanel.setDividerLocation(location);
+		mainSplitPane.setDividerLocation(bean.getSavedLocationOfMainSplitPanel());
+
+		// 6. Create top-right tabbed pane for tree visualization
+		tabbedPhylogeneticTreePane = new JideTabbedPane();
+		tabbedPhylogeneticTreePane.setTabShape(JideTabbedPane.SHAPE_OFFICE2003);
+		tabbedPhylogeneticTreePane.setTabPlacement(JideTabbedPane.TOP);
+		tabbedPhylogeneticTreePane.setTabColorProvider(tabColorProvider);
+		tabbedPhylogeneticTreePane.setTabEditingAllowed(true);
+		tabbedPhylogeneticTreePane.setSelectedTabFont(controller.getTitleFont());
+		tabbedPhylogeneticTreePane.setShowCloseButtonOnTab(true);
+		tabbedPhylogeneticTreePane.setBoldActiveTab(true);
+
+		rightSplitPanel.setLeftComponent(tabbedPhylogeneticTreePane);
+
+		// 7. Create bottom-right tabbed pane for analysis panels
+		getTabbedAnalysisPanel();
+		rightSplitPanel.setRightComponent(tabbedAnalysisPanel);
+
+		// 8. Assemble the layout
+		mainSplitPane.setRightComponent(rightSplitPanel);
+		add(mainSplitPane, BorderLayout.CENTER);
+	}
+
+	/**
+	 * Load data and initialize the visualization panels
+	 *
+	 * @param geneData Gene family data including pathway figures and component information
+	 * @param treeLayoutProperties Tree layout configuration and root node
+	 */
 	public void loadingDataInitializeGraphics(ImporterBean4PathwayFamilyBrowser geneData,
 											  TreeLayoutProperties treeLayoutProperties) {
 
-        // 这个导入过程，如果更改需要注意三处：VOICE4MTV类的execute()；GeneFamilyMainFace类的initialize和 MTreeViewMainFace的initializeGraphics()
-        GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
-        PhylogeneticTreePanel phylogeneticTreePanel = new PhylogeneticTreePanel(treeLayoutProperties, root, null, null);
-        controller.setGlobalPhylogeneticTreePanel(phylogeneticTreePanel);
+		// 1. Create and setup the phylogenetic tree panel
+		GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
+		PhylogeneticTreePanel phylogeneticTreePanel = new PhylogeneticTreePanel(treeLayoutProperties, root,
+				null, null);
+		controller.setGlobalPhylogeneticTreePanel(phylogeneticTreePanel);
+		controller.setTreeLayoutProperties(treeLayoutProperties);
 
-        controller.setTreeLayoutProperties(treeLayoutProperties);
-
-        ImageIcon imageIcon = IconObtainer.get("global.png");
-
-        JScrollPane jScrollPane = new JScrollPane(phylogeneticTreePanel);
-        jScrollPane.setBorder(BorderFactory.createEmptyBorder());
+		// 2. Add tree panel to the top-right tabbed pane
+		ImageIcon imageIcon = IconObtainer.get("global.png");
+		JScrollPane jScrollPane = new JScrollPane(phylogeneticTreePanel);
+		jScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
 		List<PhylogeneticTreePanel> existedPhylogeneticTreePanels = getExistedPhylogeneticTreePanels();
-
 		JideTabbedPane tabbedAnalysisPanel = getTabbedAnalysisPanel();
+
+		// Clear existing tabs if any
 		int tabCount = existedPhylogeneticTreePanels.size();
-        if (tabCount > 0) {
+		if (tabCount > 0) {
 			getTabbedPhylogeneticTreePane().removeAll();
-            tabbedAnalysisPanel.removeAll();
-        }
+			tabbedAnalysisPanel.removeAll();
+		}
 		getTabbedPhylogeneticTreePane().addTab("Phylogeny", imageIcon, jScrollPane, "The referenced phylogenetic tree.");
 
+		// 3. Setup tree-to-analysis-panel interactions
 		TreeListener treeListener = phylogeneticTreePanel.getTreeListener();
 		List<Consumer<GraphicsNode>> tree2AnalyzingPanelInteractions = treeListener
 				.getTree2AnalyzingPanelInteractions();
 
+		// 4. Parse component information from TSV file
 		String componentsInfoPath = geneData.getComponentsInfoPath();
-
 		String geneColumnName = geneData.getGeneColumnName();
 		String categoryColumnName = geneData.getCategoryColumnName();
+
 		Map<String, List<String>> tableAsKey2ListMap = null;
 		try {
 			tableAsKey2ListMap = TSVReader.readAsKey2ListMap(componentsInfoPath);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Error reading component info file: {}", componentsInfoPath, e);
 			return;
 		}
 
+		// 5. Convert gene count data to numeric format
 		Map<String, List<Short>> species2geneCountMap = Maps.newHashMap();
 		List<String> geneList = tableAsKey2ListMap.remove(geneColumnName);
 		List<String> categoryList = tableAsKey2ListMap.remove(categoryColumnName);
 
-
-		{
-
-			for (Entry<String, List<String>> entry : tableAsKey2ListMap.entrySet()) {
-				List<String> value = entry.getValue();
-				List<Short> array = Lists.newArrayList();
-				for (String string : value) {
-					array.add(Short.valueOf(string));
-				}
-				species2geneCountMap.put(entry.getKey(), array);
+		for (Entry<String, List<String>> entry : tableAsKey2ListMap.entrySet()) {
+			List<String> value = entry.getValue();
+			List<Short> array = Lists.newArrayList();
+			for (String string : value) {
+				array.add(Short.valueOf(string));
 			}
+			species2geneCountMap.put(entry.getKey(), array);
 		}
 
-
+		// 6. Create Pathway Details panel
 		PathwayDetailsPanel pathwayDrawDemo = new PathwayDetailsPanel(geneData.getPathwayDetailsFigure(),
-				geneData.getGeneNameSeparater().charAt(0));
-		{
-			pathwayDrawDemo.setSpecies2CompMaps(geneList, species2geneCountMap);
-			tree2AnalyzingPanelInteractions.add(n -> {
-				pathwayDrawDemo.clickToSpecies(n.getName());
-			});
-			JScrollPane jScrollPane2 = new JScrollPane(pathwayDrawDemo);
-			jScrollPane2.setBorder(null);
-			tabbedAnalysisPanel.addTab("Pathway Details", IconObtainer.get("dna.png"),jScrollPane2 ,
-					"The Wnt signalling pathway regulation details");
+				geneData.getGeneNameSeparator().charAt(0));
+		pathwayDrawDemo.setSpecies2CompMaps(geneList, species2geneCountMap);
+		tree2AnalyzingPanelInteractions.add(n -> {
+			pathwayDrawDemo.clickToSpecies(n.getName());
+		});
+		JScrollPane detailsScrollPane = new JScrollPane(pathwayDrawDemo);
+		detailsScrollPane.setBorder(null);
+		tabbedAnalysisPanel.addTab("Pathway Details", IconObtainer.get("dna.png"), detailsScrollPane,
+				"The Wnt signalling pathway regulation details");
 
-
-		}
+		// 7. Create Pathway Statistics panel
 		PathwayStatisticsPanel pathwayStageStatistics = new PathwayStatisticsPanel(geneData.getPathwayStatisticsFigure(),
 				categoryColumnName);
-		{
-			pathwayStageStatistics.setSpeciesCategory2CompMaps(categoryList, species2geneCountMap);
-			tree2AnalyzingPanelInteractions.add(n -> {
-				pathwayStageStatistics.clickToSpecies(n.getName());
-			});
+		pathwayStageStatistics.setSpeciesCategory2CompMaps(categoryList, species2geneCountMap);
+		tree2AnalyzingPanelInteractions.add(n -> {
+			pathwayStageStatistics.clickToSpecies(n.getName());
+		});
+		JScrollPane statisticsScrollPane = new JScrollPane(pathwayStageStatistics);
+		statisticsScrollPane.setBorder(null);
+		tabbedAnalysisPanel.addTab("Pathway Statistics", IconObtainer.get("dna.png"),
+				statisticsScrollPane,
+				"The Wnt pathway components counts");
 
-			JScrollPane jScrollPane2 = new JScrollPane(pathwayStageStatistics);
-			jScrollPane2.setBorder(null);
-			tabbedAnalysisPanel.addTab("Pathway Statistics", IconObtainer.get("dna.png"),
-					jScrollPane2,
-					"The Wnt pathway components counts");
+		// 8. Create Evolutionary Selection panel
+		EvoSelectionPressurePanel wntPathwayPanel = new EvoSelectionPressurePanel(
+				geneData.getEvolutionarySelectionFigurePath());
+		JScrollPane selectionScrollPane = new JScrollPane(wntPathwayPanel);
+		tabbedAnalysisPanel.addTab("Evolutionary selection", IconObtainer.get("dna.png"), selectionScrollPane,
+				"The evolutionary selection pressure on the pathway on the genome");
 
-
-
-		}
-		{
-			EvoSelectionPressurePanel wntPathwayPanel = new EvoSelectionPressurePanel(
-					geneData.getEvolutionarySelectionFigurePath());
-			JScrollPane jScrollPane2 = new JScrollPane(wntPathwayPanel);
-			tabbedAnalysisPanel.addTab("Evolutionary selection", IconObtainer.get("dna.png"), jScrollPane2,
-					"The evolutionary selection pressure on the pathway on the genome");
-
-		}
-
-
-
-        SwingUtilities.invokeLater(() -> phylogeneticTreePanel.initializeLeftPanel());
+		// 9. Initialize panels asynchronously
+		SwingUtilities.invokeLater(() -> phylogeneticTreePanel.initializeLeftPanel());
 
 		SwingUtilities.invokeLater(() -> {
 			pathwayDrawDemo.renderSlideImageAsync();
 			pathwayStageStatistics.renderSlideImageAsync();
 		});
+	}
 
-        // ==========================================================================================================
+	@Override
+	public IInformation getModuleInfo() {
+		return new IInformation() {
+			@Override
+			public String getWhatDataInvoked() {
+				return "The data is loading from the import dialog.";
+			}
 
-    }
-
-
-    public BrowserPanel getSelectedBrowserPanel() {
-		JideTabbedPane tabbedAnalysisPanel = getTabbedAnalysisPanel();
-        Component selectedComponent = tabbedAnalysisPanel.getSelectedComponent();
-
-        if (selectedComponent == null) {
-            return null;
-        }
-        BrowserPanel phylogeneticTreePanel = (BrowserPanel) selectedComponent;
-        return phylogeneticTreePanel;
-    }
-
-
-
-    @Override
-    public IInformation getModuleInfo() {
-        IInformation iInformation = new IInformation() {
-
-            @Override
-            public String getWhatDataInvoked() {
-                return "The data is loading from the import dialog.";
-            }
-
-            @Override
-            public String getSummaryOfResults() {
+			@Override
+			public String getSummaryOfResults() {
 				return "The phylogenetic tree with pathway info. is generated by the eGPS software.";
-            }
-        };
-        return iInformation;
-    }
+			}
+		};
+	}
 
+	@Override
+	public boolean closeTab() {
+		// Save control panel state
+		if (controlPanelContainner != null) {
+			controlPanelContainner.actionForSaveFile();
+		}
+
+		// Save split pane positions
+		try {
+			PathwayBrowserMainFaceBean bean = new PathwayBrowserMainFaceBean();
+			if (mainSplitPane != null) {
+				bean.setSavedLocationOfMainSplitPanel(mainSplitPane.getDividerLocation());
+			}
+			if (rightSplitPanel != null && getHeight() > 0) {
+				double ratio = rightSplitPanel.getDividerLocation() / (double) getHeight();
+				bean.setSavedPerOfTreeAndBrowser(ratio);
+			}
+			EGPSObjectsUtil.persistentSaveJavaBeanByFastaJSON(bean, new File(PERSISTENT_STORE_PATH));
+		} catch (IOException e) {
+			log.error("Error saving persistent state", e);
+		}
+
+		return false;
+	}
+
+	@Override
+	public void changeToThisTab() {
+		// Hook for tab change events
+	}
+
+	// ==================== Helper Methods ====================
+
+	protected PathwayBrowserMainFaceBean loadPersistentBean() {
+		PathwayBrowserMainFaceBean bean = null;
+		File jsonFile = new File(PERSISTENT_STORE_PATH);
+		if (jsonFile.exists()) {
+			try {
+				bean = EGPSObjectsUtil.obtainJavaBeanByFastaJSON(PathwayBrowserMainFaceBean.class, jsonFile);
+			} catch (IOException e) {
+				log.error("Error loading persistent state", e);
+			}
+		}
+		if (bean == null) {
+			bean = new PathwayBrowserMainFaceBean();
+		}
+		return bean;
+	}
+
+	public JideTabbedPane getTabbedAnalysisPanel() {
+		if (tabbedAnalysisPanel == null) {
+			tabbedAnalysisPanel = new JideTabbedPane();
+			tabbedAnalysisPanel.setTabShape(JideTabbedPane.SHAPE_OFFICE2003);
+			tabbedAnalysisPanel.setTabPlacement(JideTabbedPane.TOP);
+			tabbedAnalysisPanel.setTabColorProvider(tabColorProvider);
+			tabbedAnalysisPanel.setTabEditingAllowed(true);
+
+			Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
+			tabbedAnalysisPanel.setFont(defaultTitleFont);
+			tabbedAnalysisPanel.setBoldActiveTab(true);
+		}
+		return tabbedAnalysisPanel;
+	}
+
+	public JideTabbedPane getTabbedPhylogeneticTreePane() {
+		return tabbedPhylogeneticTreePane;
+	}
+
+	protected JSplitPane getMainSplitPane() {
+		if (mainSplitPane == null) {
+			mainSplitPane = new JSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
+			mainSplitPane.setDividerSize(7);
+			mainSplitPane.setOneTouchExpandable(true);
+		}
+		return mainSplitPane;
+	}
+
+	protected JSplitPane getRightSplitPane() {
+		if (rightSplitPanel == null) {
+			rightSplitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			rightSplitPanel.setDividerSize(10);
+			rightSplitPanel.setOneTouchExpandable(true);
+		}
+		return rightSplitPanel;
+	}
+
+	public PhylogeneticTreePanel getSelectedPhylogeneticTreePanel() {
+		if (tabbedPhylogeneticTreePane == null) {
+			SwingDialog.showWarningMSGDialog("Not import data",
+					"Sorry, you have not import data yet, Please load the phylogenetic tree.");
+			return null;
+		}
+
+		Component selectedComponent = tabbedPhylogeneticTreePane.getSelectedComponent();
+		if (selectedComponent == null) {
+			return null;
+		}
+
+		PhylogeneticTreePanel phylogeneticTreePanel = null;
+		if (selectedComponent instanceof PhylogeneticTreePanel) {
+			phylogeneticTreePanel = (PhylogeneticTreePanel) selectedComponent;
+		} else if (selectedComponent instanceof JScrollPane) {
+			JScrollPane comp = (JScrollPane) selectedComponent;
+			phylogeneticTreePanel = (PhylogeneticTreePanel) comp.getViewport().getView();
+		}
+
+		return phylogeneticTreePanel;
+	}
+
+	public List<PhylogeneticTreePanel> getExistedPhylogeneticTreePanels() {
+		List<PhylogeneticTreePanel> ret = new ArrayList<>();
+		if (tabbedPhylogeneticTreePane == null) {
+			return ret;
+		}
+
+		Component[] components = tabbedPhylogeneticTreePane.getComponents();
+		for (Component component : components) {
+			PhylogeneticTreePanel phylogeneticTreePanel = null;
+			if (component instanceof PhylogeneticTreePanel) {
+				phylogeneticTreePanel = (PhylogeneticTreePanel) component;
+			} else if (component instanceof JScrollPane) {
+				JScrollPane comp = (JScrollPane) component;
+				Object view = comp.getViewport().getView();
+				if (view instanceof PhylogeneticTreePanel) {
+					phylogeneticTreePanel = (PhylogeneticTreePanel) view;
+				}
+			}
+
+			if (phylogeneticTreePanel != null) {
+				ret.add(phylogeneticTreePanel);
+			}
+		}
+		return ret;
+	}
+
+	public PhylogeneticTreePanel getGlobalPhylogeneticTreePanel() {
+		if (controller != null) {
+			return controller.getGlobalPhylogeneticTreePanel();
+		}
+		return null;
+	}
+
+	public PathwayBrowserController getController() {
+		return controller;
+	}
 }
