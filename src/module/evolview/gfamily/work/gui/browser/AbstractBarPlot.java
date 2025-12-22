@@ -1,11 +1,7 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-
-import javax.swing.JLabel;
-import javax.swing.JToolTip;
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public abstract class AbstractBarPlot extends AbstractTrackPanel {

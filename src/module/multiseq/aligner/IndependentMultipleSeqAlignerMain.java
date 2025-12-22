@@ -1,7 +1,7 @@
 package module.multiseq.aligner;
 
-import module.multiseq.aligner.gui.IndependentMafftGUIPanel;
 import egps2.modulei.IModuleLoader;
+import module.multiseq.aligner.gui.IndependentMafftGUIPanel;
 
 
 /**

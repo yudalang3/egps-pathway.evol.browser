@@ -1,76 +1,99 @@
 package module.evolview.pathwaybrowser.gui.analysis.panel;
 
 import com.google.common.collect.Lists;
-import egps2.frame.gui.EGPSMainGuiUtil;
+import com.jidesoft.swing.JideTabbedPane;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.Collections;
+import java.io.File;
 import java.util.List;
 
-public class PathwayGalleryPanel extends AbstractAnalysisPanel{
-    private final List<String> files;
-    private List<XSLFSlide> slides;
+/**
+ * Gallery panel for displaying multiple PPTX pathway diagrams.
+ * Each PPTX file is shown in a separate tab, displaying only the first slide.
+ */
+public class PathwayGalleryPanel extends AbstractAnalysisPanel {
+    private static final Logger log = LoggerFactory.getLogger(PathwayGalleryPanel.class);
 
-    public PathwayGalleryPanel(PathwayBrowserController controller, List< String> files) {
+    private final List<String> files;
+    private final List<SubSingleSlidePanel> slidesPanel = Lists.newArrayList();
+    private JideTabbedPane tabbedPane;
+
+    public PathwayGalleryPanel(PathwayBrowserController controller, List<String> files) {
         super(controller);
         this.files = files;
+        initializeUI();
+    }
+
+    private void initializeUI() {
+        setLayout(new BorderLayout());
+
+        // Create JideTabbedPane with vertical tab placement (LEFT)
+        tabbedPane = new JideTabbedPane();
+        tabbedPane.setTabShape(JideTabbedPane.SHAPE_OFFICE2003);
+        tabbedPane.setTabPlacement(JideTabbedPane.LEFT);  // Vertical split layout
+
+        tabbedPane.setTabResizeMode(JideTabbedPane.RESIZE_MODE_FIT);
+
+        tabbedPane.setShowTabArea(true);
+        tabbedPane.setShowTabContent(true);
+
+        tabbedPane.setTabEditingAllowed(true);
+        tabbedPane.setShowCloseButtonOnTab(true);
+        tabbedPane.setBoldActiveTab(true);
+
+        add(tabbedPane, BorderLayout.CENTER);
+
+        loadAllSlides();
     }
 
     @Override
     public String getTitle() {
-        return "";
+        return "Pathway Gallery";
     }
 
     @Override
     public void reInitializeGUI() {
-        if (files != null && !files.isEmpty()){
-//            renderSlideImageAsync();
+        if (files != null && !files.isEmpty()) {
+            for (SubSingleSlidePanel slidePanel: slidesPanel){
+                slidePanel.loadSlideAsync();
+            }
         }
     }
 
     @Override
     public void treeNodeClicked(String nodeName) {
-
+        // Handle tree node click if needed
     }
 
-//    private void renderSlideImageAsync() {
-//        if (isRendering || pageSize == null) {
-//            return;
-//        }
-//
-//        isRendering = true;
-//
-//        new SwingWorker<BufferedImage, Void>() {
-//            @Override
-//            protected BufferedImage doInBackground() throws Exception {
-//                // Create and render image in background thread
-//                BufferedImage image = new BufferedImage(
-//                        pageSize.width,
-//                        pageSize.height,
-//                        BufferedImage.TYPE_INT_ARGB
-//                );
-//                Graphics2D g2d = image.createGraphics();
-//                EGPSMainGuiUtil.setupHighQualityRendering(g2d);
-//                firstSlide.draw(g2d);
-//                g2d.dispose();
-//                return image;
-//            }
-//
-//            @Override
-//            protected void done() {
-//                try {
-//                    cachedSlideImage = get();
-//                    repaint();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                } finally {
-//                    isRendering = false;
-//                }
-//            }
-//        }.execute();
-//    }
+    /**
+     * Load all PPTX files and add them as tabs
+     */
+    private void loadAllSlides() {
+        for (int i = 0; i < files.size(); i++) {
+            String filePath = files.get(i);
+            File file = new File(filePath);
+            String tabTitle = file.getName();
+
+            // Create a SubSingleSlidePanel for each PPTX file
+            SubSingleSlidePanel slidePanel = new SubSingleSlidePanel(filePath);
+            JScrollPane scrollPane = new JScrollPane(slidePanel);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            slidesPanel.add(slidePanel);
+
+            // Add as a new tab
+            tabbedPane.addTab(tabTitle, scrollPane);
+            tabbedPane.setFont(controller.getGlobalFont());
+
+            log.debug("Added tab {} for file: {}", i + 1, tabTitle);
+        }
+
+        // Select the first tab
+        if (tabbedPane.getTabCount() > 0) {
+            tabbedPane.setSelectedIndex(0);
+        }
+    }
 }

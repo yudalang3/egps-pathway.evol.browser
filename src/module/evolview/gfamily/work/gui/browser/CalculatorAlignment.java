@@ -1,17 +1,13 @@
 package module.evolview.gfamily.work.gui.browser;
 
+import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
+import module.evolview.gfamily.work.gui.browser.draw.*;
+import module.evolview.model.AlignmentGetSequence;
+import msaoperator.alignment.sequence.SequenceI;
+
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
-import module.evolview.gfamily.work.gui.browser.draw.AlignmentWithDerivedStatistics;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignment;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignmentItem;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignmentNucleotide;
-import module.evolview.gfamily.work.gui.browser.draw.SequenceBaseColorEnum;
-import module.evolview.model.AlignmentGetSequence;
-import msaoperator.alignment.sequence.SequenceI;
 
 public class CalculatorAlignment implements LocationCalculator<DrawingPropertyAlignment> {
 

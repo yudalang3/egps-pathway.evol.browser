@@ -1,9 +1,7 @@
 package module.evolview.phylotree.visualization.layout;
 
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.graphics.struct.CircularLayoutProperty;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.graphics.struct.CircularLayoutProperty;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 
 public class CircularInnerPhylo extends CircularPhylo{

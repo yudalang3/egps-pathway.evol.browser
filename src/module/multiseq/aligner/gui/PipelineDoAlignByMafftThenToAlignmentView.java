@@ -1,18 +1,18 @@
 package module.multiseq.aligner.gui;
 
+import egps2.frame.MainFrameProperties;
+import egps2.modulei.RunningTask;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.cli.Mafft2AlignmentCli;
+import module.multiseq.alignment.view.Launcher4ModuleLoader;
+import msaoperator.alignment.sequence.Sequence;
+import msaoperator.alignment.sequence.SequenceI;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
-
-import egps2.frame.MainFrameProperties;
-import msaoperator.alignment.sequence.Sequence;
-import msaoperator.alignment.sequence.SequenceI;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
-import module.multiseq.aligner.cli.Mafft2AlignmentCli;
-import module.multiseq.alignment.view.Launcher4ModuleLoader;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
-import egps2.modulei.RunningTask;
 
 /**
  * 

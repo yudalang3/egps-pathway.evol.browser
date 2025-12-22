@@ -1,13 +1,11 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.BorderLayout;
+import module.multiseq.alignment.view.AlignmentViewMain;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-
-import module.multiseq.alignment.view.AlignmentViewMain;
 
 public class AlignmentViewInterLeavedPanel extends JPanel implements MouseWheelListener {
 	/**

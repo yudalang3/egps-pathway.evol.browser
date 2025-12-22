@@ -1,31 +1,20 @@
 package module.treebuilder.frommsa;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.ComputationalModuleFace;
+import egps2.modulei.IInformation;
+import egps2.modulei.IModuleLoader;
+import egps2.panels.dialog.SwingDialog;
+import module.evoltrepipline.BuildTreeAllRelatedParametersConfigGUI;
+import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.ComputationalModuleFace;
-import module.evoltrepipline.BuildTreeAllRelatedParametersConfigGUI;
-import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
-import egps2.modulei.IInformation;
-import egps2.modulei.IModuleLoader;
 
 @SuppressWarnings("serial")
 public class GuiMain extends ComputationalModuleFace {

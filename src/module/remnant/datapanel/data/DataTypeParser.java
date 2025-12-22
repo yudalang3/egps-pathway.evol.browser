@@ -1,45 +1,21 @@
 package module.remnant.datapanel.data;
 
 
-import static module.remnant.datapanel.data.DataFileSuffixNames.CIRCUSRNA_FILE_SUFFIX;
-import static module.remnant.datapanel.data.DataFileSuffixNames.CLUSTALW_FILE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.EHEATMAP_FILE_SUFFIX;
-import static module.remnant.datapanel.data.DataFileSuffixNames.FASTA_FILE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.GCGMSF_FILE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.GENETIC_DIST_FILE_SUFFIX;
-import static module.remnant.datapanel.data.DataFileSuffixNames.MAF_FILE_SUFFIX;
-import static module.remnant.datapanel.data.DataFileSuffixNames.MEGA_FILE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.NEXUS_FILE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.PAML_FILE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.PHYLIP_FILE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.SIMULATOR_FILE_SUFFIX;
-import static module.remnant.datapanel.data.DataFileSuffixNames.TREE_FILE_ETREE_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.TREE_FILE_NHX_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.TREE_FILE_NWK_SUFFIX_REG;
-import static module.remnant.datapanel.data.DataFileSuffixNames.VCF_FILE_SUFFIX;
+import egps2.utils.common.model.datatransfer.TwoTuple;
+import module.remnant.datapanel.data.validation.CommonValidate;
+import module.remnant.datapanel.data.validation.ValidateDistance;
+import module.remnant.datapanel.data.validation.ValidateMAF;
+import module.remnant.treeoperator.io.ValidateNEXUS;
+import msaoperator.DataforamtInfo;
+import msaoperator.io.seqFormat.AbstractParser;
+import msaoperator.io.seqFormat.parser.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import egps2.utils.common.model.datatransfer.TwoTuple;
-import module.remnant.datapanel.data.validation.CommonValidate;
-import msaoperator.DataforamtInfo;
-import module.remnant.datapanel.data.validation.ValidateDistance;
-import module.remnant.datapanel.data.validation.ValidateMAF;
-import module.remnant.treeoperator.io.ValidateNEXUS;
-import msaoperator.io.seqFormat.AbstractParser;
-import msaoperator.io.seqFormat.parser.ClustalWParser;
-import msaoperator.io.seqFormat.parser.FastaParser;
-import msaoperator.io.seqFormat.parser.GCGMSFParser;
-import msaoperator.io.seqFormat.parser.MEGAParser;
-import msaoperator.io.seqFormat.parser.PAMLParser;
-import msaoperator.io.seqFormat.parser.PHYParser;
+import static module.remnant.datapanel.data.DataFileSuffixNames.*;
 
 
 /**

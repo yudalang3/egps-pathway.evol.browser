@@ -1,16 +1,11 @@
 package module.multiseq.aligner.cli;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import egps2.UnifiedAccessPoint;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
-
-import egps2.UnifiedAccessPoint;
 
 public class Mafft2AlignmentCli {
 

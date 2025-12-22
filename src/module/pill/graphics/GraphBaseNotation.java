@@ -1,6 +1,6 @@
 package module.pill.graphics;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.geom.RectangularShape;
 
 /**

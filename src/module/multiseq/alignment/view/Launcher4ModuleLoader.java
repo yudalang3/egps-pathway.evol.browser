@@ -1,14 +1,14 @@
 package module.multiseq.alignment.view;
 
-import java.io.InputStream;
-
 import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import egps2.modulei.IModuleLoader;
 import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+
+import java.io.InputStream;
 
 public class Launcher4ModuleLoader implements IModuleLoader{
 

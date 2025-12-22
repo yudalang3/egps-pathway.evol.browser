@@ -1,10 +1,10 @@
 package module.pill.graphics;
 
+import com.google.common.collect.Lists;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.Lists;
 
 /**
  * 根据 symbols, 这个 objects就是 entities objects包括 gene, compound and map groups是

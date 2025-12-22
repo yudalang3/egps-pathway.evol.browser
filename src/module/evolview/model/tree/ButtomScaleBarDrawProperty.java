@@ -1,8 +1,8 @@
 package module.evolview.model.tree;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 /**
  * 这里的 displayDoubles应该是 work space 中的 长度，减少可视化的计算

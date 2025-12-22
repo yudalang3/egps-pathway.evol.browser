@@ -6,7 +6,9 @@ import java.util.List;
 
 public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
 
+	String pathwayComponentCountPath;
 	String speciesInfoPath;
+	String speciesTraitPath;
 	List<String> pathwayGalleryPaths;
 	String geneNameSeparater;
 	String componentsInfoPath;
@@ -73,5 +75,13 @@ public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
 
 	public List<String> getPathwayGalleryPaths() {
 		return pathwayGalleryPaths;
+	}
+
+	public String getPathwayComponentCountPath() {
+		return pathwayComponentCountPath;
+	}
+
+	public String getSpeciesTraitPath() {
+		return speciesTraitPath;
 	}
 }

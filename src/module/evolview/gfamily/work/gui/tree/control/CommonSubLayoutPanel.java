@@ -1,8 +1,8 @@
 package module.evolview.gfamily.work.gui.tree.control;
 
-import javax.swing.JPanel;
-
 import module.evolview.gfamily.GeneFamilyController;
+
+import javax.swing.*;
 
 @SuppressWarnings("serial")
 public abstract class CommonSubLayoutPanel extends JPanel {

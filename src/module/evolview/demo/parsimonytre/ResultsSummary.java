@@ -1,20 +1,14 @@
 package module.evolview.demo.parsimonytre;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.StringJoiner;
-
+import evoltree.struct.EvolNode;
+import evoltree.struct.util.EvolNodeUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import evoltree.struct.util.EvolNodeUtil;
-import evoltree.struct.EvolNode;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ResultsSummary extends WatchNodeStatesWithChange {
 

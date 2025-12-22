@@ -1,13 +1,13 @@
 package module.remnant.treeoperator.reconAlgo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import module.remnant.treeoperator.DefaultNode;
 import module.remnant.treeoperator.NodeEGPSv1;
 import module.remnant.treeoperator.io.TreeCoder;
 import module.remnant.treeoperator.util.GenealogyAnalyzer;
 import org.apache.commons.math3.random.MersenneTwister;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * https://en.wikipedia.org/wiki/UPGMA

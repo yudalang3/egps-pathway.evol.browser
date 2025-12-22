@@ -1,12 +1,6 @@
 package module.remnant.datapanel;
 
-import java.io.File;
-import java.util.List;
-import java.util.logging.Logger;
-import java.util.stream.IntStream;
-
-import javax.swing.SwingUtilities;
-
+import egps2.modulei.IModuleLoader;
 import egps2.utils.common.model.datatransfer.TwoTuple;
 import module.remnant.datapanel.data.DataCenter;
 import module.remnant.datapanel.data.DataType;
@@ -16,7 +10,12 @@ import module.remnant.datapanel.informationArea.InformationAreaMultipleSeqs;
 import module.remnant.datapanel.informationArea.InformationAreaNexus;
 import module.remnant.datapanel.informationArea.InformationAreaTxt;
 import module.remnant.mafoperator.CalculateMAFInformation;
-import egps2.modulei.IModuleLoader;
+
+import javax.swing.*;
+import java.io.File;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 /**
  * The main entry panel management class!

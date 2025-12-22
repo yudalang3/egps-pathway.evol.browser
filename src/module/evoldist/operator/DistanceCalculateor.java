@@ -1,12 +1,12 @@
 package module.evoldist.operator;
 
-import java.util.Arrays;
-import java.util.List;
-
 import egps2.panels.dialog.SwingDialog;
 import module.evoldist.operator.pairdist.AlignmentEvoDistance;
 import module.evoltrepipline.IPairwiseEvolutionaryDistance;
 import msaoperator.alignment.AlignmentPreprocesser;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Usage:

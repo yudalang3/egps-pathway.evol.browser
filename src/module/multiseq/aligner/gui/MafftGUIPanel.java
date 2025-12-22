@@ -1,36 +1,18 @@
 package module.multiseq.aligner.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
-
+import com.jidesoft.swing.JideSplitPane;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
+import egps2.panels.dialog.EGPSJSpinner;
+import module.multiseq.aligner.MultipleSeqAlignerMain;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
-import com.jidesoft.swing.JideSplitPane;
-
-import egps2.panels.dialog.EGPSJSpinner;
-import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
-import egps2.UnifiedAccessPoint;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MAFFT多序列比对工具的GUI面板基类。

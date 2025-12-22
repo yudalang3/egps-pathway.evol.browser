@@ -3,9 +3,9 @@ package module.evolview.phylotree.visualization.layout;
 import egps2.UnifiedAccessPoint;
 import evoltree.struct.util.EvolNodeUtil;
 import graphic.engine.guicalculator.BlankArea;
-import module.evolview.phylotree.visualization.graphics.struct.*;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.model.tree.HighlightProperties;
+import module.evolview.phylotree.visualization.graphics.struct.*;
 
 import javax.swing.*;
 import java.awt.*;

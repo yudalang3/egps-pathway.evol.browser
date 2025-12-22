@@ -1,24 +1,19 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import egps2.frame.gui.EGPSMainGuiUtil;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.alignment.view.AlignmentViewMain;
+import module.multiseq.alignment.view.model.AlignmentDrawProperties;
+import msaoperator.alignment.sequence.SequenceI;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
-
-import javax.swing.JPanel;
-
-import egps2.frame.gui.EGPSMainGuiUtil;
-import msaoperator.alignment.sequence.SequenceI;
-import module.multiseq.alignment.view.AlignmentViewMain;
-import module.multiseq.alignment.view.model.AlignmentDrawProperties;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class ViewAreaSequenceJPanel extends JPanel implements MouseListener, MouseMotionListener {
 

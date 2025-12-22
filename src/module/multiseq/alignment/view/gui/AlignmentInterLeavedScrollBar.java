@@ -1,13 +1,12 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.Graphics;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.alignment.view.AlignmentViewMain;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
-
-import javax.swing.JScrollBar;
-
-import module.multiseq.alignment.view.AlignmentViewMain;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class AlignmentInterLeavedScrollBar extends JScrollBar implements AdjustmentListener {
 

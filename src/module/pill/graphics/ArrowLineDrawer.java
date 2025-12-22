@@ -1,8 +1,6 @@
 package module.pill.graphics;
 
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.RectangularShape;
 
 /**

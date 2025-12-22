@@ -1,22 +1,12 @@
 package module.treebuilder.frommaf;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
-
-import egps2.frame.gui.handler.EGPSTextTransferHandler;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.gui.EGPSMainGuiUtil;
+import egps2.frame.gui.handler.EGPSTextTransferHandler;
 
-import javax.swing.JCheckBox;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class ParameterPanel extends JPanel {

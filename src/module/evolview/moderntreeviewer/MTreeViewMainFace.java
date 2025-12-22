@@ -1,12 +1,34 @@
 package module.evolview.moderntreeviewer;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import com.alibaba.fastjson.JSONObject;
+import com.jidesoft.swing.JideSplitPane;
+import egps2.EGPSProperties;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.ModuleFace;
+import egps2.frame.gui.EGPSMainGuiUtil;
+import egps2.modulei.AdjusterFillAndLine;
+import egps2.modulei.IInformation;
+import egps2.modulei.IModuleLoader;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.model.filefilter.SaveFilterNwk;
+import egps2.utils.common.util.SaveUtil;
+import module.evolview.gfamily.work.gui.CtrlTreeLayoutPanel;
+import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
+import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.moderntreeviewer.gui.CreativeModeTaskPanel;
+import module.evolview.moderntreeviewer.para.TextInputDialogWithOKCancel;
+import module.evolview.phylotree.visualization.graphics.phylogeny.PhyloGraphicsTreeEncoderDecoder;
+import module.evolview.phylotree.visualization.graphics.struct.AdvancedParametersBean;
+import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
+import utils.storage.MapPersistence;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,42 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JViewport;
-
-import module.evolview.phylotree.visualization.graphics.phylogeny.PhyloGraphicsTreeEncoderDecoder;
-import egps2.utils.common.model.filefilter.SaveFilterNwk;
-import org.apache.commons.lang3.tuple.Pair;
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import com.alibaba.fastjson.JSONObject;
-import com.jidesoft.swing.JideSplitPane;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.util.SaveUtil;
-import egps2.EGPSProperties;
-import utils.storage.MapPersistence;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.ModuleFace;
-import module.evolview.gfamily.work.gui.CtrlTreeLayoutPanel;
-import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import egps2.frame.gui.EGPSMainGuiUtil;
-import module.evolview.moderntreeviewer.gui.CreativeModeTaskPanel;
-import module.evolview.phylotree.visualization.graphics.struct.AdvancedParametersBean;
-import module.evolview.moderntreeviewer.para.TextInputDialogWithOKCancel;
-import egps2.modulei.AdjusterFillAndLine;
-import egps2.modulei.IInformation;
-import egps2.modulei.IModuleLoader;
 
 @SuppressWarnings("serial")
 public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine, IInformation {

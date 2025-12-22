@@ -1,10 +1,10 @@
 package module.remnant.treeoperator.reconAlgo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import module.remnant.treeoperator.DefaultNode;
 import module.remnant.treeoperator.NodeEGPSv1;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NJ implements TreeReconMethod {
 	static boolean debug;

@@ -1,16 +1,15 @@
 package module.webmsaoperator.webIO;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import module.webmsaoperator.webIO.gene.Gene;
+import module.webmsaoperator.webIO.gene.Transcript;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-
-import module.webmsaoperator.webIO.gene.Gene;
-import module.webmsaoperator.webIO.gene.Transcript;
 /**
  * 
  * Copyright (c) 2019 Chinese Academy of Sciences. All rights reserved.

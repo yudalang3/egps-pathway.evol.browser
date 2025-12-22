@@ -1,9 +1,13 @@
 package module.multiseq.alignment.trimmer.gui;
 
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import egps2.UnifiedAccessPoint;
+import egps2.panels.dialog.SwingDialog;
+import fasta.io.FastaReader;
+import module.multiseq.alignment.trimmer.SimpleModuleController;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -12,19 +16,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.UnifiedAccessPoint;
-import module.multiseq.alignment.trimmer.SimpleModuleController;
-import fasta.io.FastaReader;
 
 public class ParametersPanel extends JPanel {
 	

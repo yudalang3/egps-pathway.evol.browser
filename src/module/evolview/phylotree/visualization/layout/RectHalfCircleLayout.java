@@ -1,23 +1,15 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
-import org.apache.commons.math3.util.FastMath;
-
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
+import org.apache.commons.math3.util.FastMath;
+
+import java.awt.*;
+import java.awt.geom.*;
 
 public class RectHalfCircleLayout extends RectPhyloLayout {
 

@@ -1,16 +1,16 @@
 package module.remnant.datapanel.data.validation;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-
 import egps2.utils.common.math.MatrixElementUtil;
 import module.remnant.datapanel.data.DataFormat;
 import module.remnant.datapanel.data.DataFormatError;
 import module.webmsaoperator.webIO.DistMatrixTextInput;
 import msaoperator.DataforamtInfo;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
 
 public class ValidateDistance implements FormatDetect,CommonValidate {
 	

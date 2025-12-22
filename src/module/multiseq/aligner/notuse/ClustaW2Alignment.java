@@ -1,16 +1,10 @@
 package module.multiseq.aligner.notuse;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import module.multiseq.aligner.MultipleSeqAlignerMain;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import module.multiseq.aligner.MultipleSeqAlignerMain;
 
 public class ClustaW2Alignment {
 

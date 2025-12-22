@@ -1,6 +1,6 @@
 package module.evolview.gfamily.work.beans;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class SequenceElementInfo {
 

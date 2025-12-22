@@ -1,16 +1,15 @@
 package module.evoltrepipline.alignment;
 
+import msaoperator.alignment.sequence.BasicSequenceData;
+import msaoperator.alignment.sequence.SequenceComponentRatio;
+import msaoperator.alignment.sequence.SequenceI;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import msaoperator.alignment.sequence.SequenceComponentRatio;
-import org.apache.commons.lang3.StringUtils;
-
-import msaoperator.alignment.sequence.BasicSequenceData;
-import msaoperator.alignment.sequence.SequenceI;
 
 
 /**

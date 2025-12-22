@@ -1,9 +1,9 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Color;
-import java.util.List;
-
 import module.evolview.model.tree.GraphicsNode;
+
+import java.awt.*;
+import java.util.List;
 
 public class DrawPropInternalNode2LeafAnno4LinageType extends DrawPropInternalNode2LeafAnno {
 

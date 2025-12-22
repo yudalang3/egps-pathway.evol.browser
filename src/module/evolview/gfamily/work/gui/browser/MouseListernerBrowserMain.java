@@ -1,11 +1,8 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Component;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 
 public class MouseListernerBrowserMain extends AbstractMouseListener {
 

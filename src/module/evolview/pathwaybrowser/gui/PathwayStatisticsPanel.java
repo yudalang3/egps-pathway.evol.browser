@@ -1,25 +1,19 @@
 package module.evolview.pathwaybrowser.gui;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import egps2.frame.gui.EGPSMainGuiUtil;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.util.poi.pptx.Decoder4pptx;
+import org.apache.poi.xslf.usermodel.XSLFShape;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextBox;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-
-import org.apache.poi.xslf.usermodel.XSLFShape;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFTextBox;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.frame.gui.EGPSMainGuiUtil;
-import egps2.utils.common.util.poi.pptx.Decoder4pptx;
 
 @SuppressWarnings("serial")
 public class PathwayStatisticsPanel extends JPanel {

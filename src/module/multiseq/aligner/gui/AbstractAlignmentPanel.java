@@ -1,8 +1,8 @@
 package module.multiseq.aligner.gui;
 
-import javax.swing.JPanel;
-
 import module.multiseq.aligner.MultipleSeqAlignerMain;
+
+import javax.swing.*;
 
 public abstract class AbstractAlignmentPanel extends JPanel {
 

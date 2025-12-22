@@ -1,19 +1,13 @@
 package module.remnant.datapanel.informationArea;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.io.File;
+import egps2.UnifiedAccessPoint;
 
-import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-
-import egps2.UnifiedAccessPoint;
+import java.awt.*;
+import java.io.File;
 
 public abstract class AbstractTableBasedArea extends AbstractInformationArea{
 	private static final long serialVersionUID = 1481963980351932821L;

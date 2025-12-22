@@ -1,22 +1,15 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
-import java.awt.Point;
+import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
+import module.evolview.gfamily.work.gui.Triangle;
+import module.evolview.gfamily.work.gui.browser.draw.*;
+
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
-import module.evolview.gfamily.work.gui.Triangle;
-import module.evolview.gfamily.work.gui.browser.draw.AxisTicks;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyGeneStructure;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyRegionData;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceElement;
-import module.evolview.gfamily.work.gui.browser.draw.GeneStructureInfo;
-import module.evolview.gfamily.work.gui.browser.draw.ScaleAndTickNum;
-import module.evolview.gfamily.work.gui.browser.draw.TicksHandler;
 
 public class CalculatorGeneStructure implements LocationCalculator<DrawingPropertyGeneStructure> {
 

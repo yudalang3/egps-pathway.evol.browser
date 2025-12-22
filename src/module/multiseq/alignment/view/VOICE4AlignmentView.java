@@ -1,25 +1,19 @@
 package module.multiseq.alignment.view;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-import module.evoltrepipline.alignment.AlignmentImportBean;
+import com.jidesoft.swing.JideTabbedPane;
+import egps2.Authors;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.comp.DataImportPanel_OneTypeMultiFiles_WithInputBox;
+import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile_WithInputBox;
 import egps2.panels.dialog.SwingDialog;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.multiseq.alignment.view.io.AlignmentSaver;
+import module.multiseq.alignment.view.io.VOICE4AlignmentViewIO;
+import msaoperator.alignment.sequence.BasicSequenceData;
+import msaoperator.alignment.sequence.SequenceI;
+import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
+import msaoperator.io.seqFormat.SequenceParser;
+import msaoperator.io.seqFormat.parser.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,25 +22,14 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.jdesktop.swingx.MultiSplitLayout;
 
-import com.jidesoft.swing.JideTabbedPane;
-
-import egps2.frame.gui.comp.DataImportPanel_OneTypeMultiFiles_WithInputBox;
-import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile_WithInputBox;
-import egps2.Authors;
-import egps2.UnifiedAccessPoint;
-import msaoperator.alignment.sequence.BasicSequenceData;
-import msaoperator.alignment.sequence.SequenceI;
-import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
-import msaoperator.io.seqFormat.SequenceParser;
-import msaoperator.io.seqFormat.parser.ClustalWParser;
-import msaoperator.io.seqFormat.parser.FastaParser;
-import msaoperator.io.seqFormat.parser.GCGMSFParser;
-import msaoperator.io.seqFormat.parser.MEGAParser;
-import msaoperator.io.seqFormat.parser.NEXUSParser;
-import msaoperator.io.seqFormat.parser.PAMLParser;
-import msaoperator.io.seqFormat.parser.PHYParser;
-import module.multiseq.alignment.view.io.VOICE4AlignmentViewIO;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class VOICE4AlignmentView extends JPanel {

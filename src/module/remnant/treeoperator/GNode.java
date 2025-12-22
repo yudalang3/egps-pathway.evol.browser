@@ -1,8 +1,8 @@
 package module.remnant.treeoperator;
 
-import java.util.Set;
-
 import module.remnant.treeoperator.evoTree.NodeUtil;
+
+import java.util.Set;
 
 public interface GNode {
 	

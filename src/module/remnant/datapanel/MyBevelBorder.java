@@ -1,6 +1,6 @@
 package module.remnant.datapanel;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Pls see the website for information!

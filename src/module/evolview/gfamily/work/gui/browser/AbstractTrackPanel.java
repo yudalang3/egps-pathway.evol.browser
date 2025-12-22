@@ -1,8 +1,7 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
-
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public abstract class AbstractTrackPanel extends JPanel {

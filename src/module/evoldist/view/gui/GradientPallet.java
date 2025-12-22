@@ -1,21 +1,13 @@
 package module.evoldist.view.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.LinearGradientPaint;
-import java.awt.MultipleGradientPaint;
-import java.awt.Point;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class GradientPallet extends JPanel{

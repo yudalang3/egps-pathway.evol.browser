@@ -11,9 +11,9 @@ package module.remnant.treeoperator.io;
  */
 
 
-import java.text.DecimalFormat;
-
 import module.remnant.treeoperator.NodeEGPSv1;
+
+import java.text.DecimalFormat;
 
 /**
  *

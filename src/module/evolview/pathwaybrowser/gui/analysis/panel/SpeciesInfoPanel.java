@@ -9,11 +9,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -25,16 +21,12 @@ import java.io.IOException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 
-public class SpeciesPanel extends AbstractAnalysisPanel {
+public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 
-    private static final Logger log = LoggerFactory.getLogger(SpeciesPanel.class);
+    private static final Logger log = LoggerFactory.getLogger(SpeciesInfoPanel.class);
     private final File inputFile;
 
 	private static final Color COLOR_PANEL_BG = new Color(245, 249, 255);
@@ -55,7 +47,7 @@ public class SpeciesPanel extends AbstractAnalysisPanel {
 	private Font displayFont;
 	private Font displayTitleFont;
 
-    public SpeciesPanel(PathwayBrowserController controller, File tsvFile) {
+    public SpeciesInfoPanel(PathwayBrowserController controller, File tsvFile) {
         super(controller);
         this.inputFile = tsvFile;
     }

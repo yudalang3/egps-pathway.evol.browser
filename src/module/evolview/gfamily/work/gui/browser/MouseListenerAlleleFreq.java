@@ -1,16 +1,12 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPaintBar;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
 
 public class MouseListenerAlleleFreq extends AbstractMouseListener {
 

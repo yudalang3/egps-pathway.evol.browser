@@ -1,17 +1,13 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.model.tree.GraphicsNode;
+
+import java.awt.*;
+import java.util.*;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.function.Function;
 
 public class AnnotationsProperties4LinageType {
 

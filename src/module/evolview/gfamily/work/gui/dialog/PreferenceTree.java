@@ -1,14 +1,11 @@
 package module.evolview.gfamily.work.gui.dialog;
 
-import java.awt.Color;
-import java.awt.Component;
+import egps2.builtin.modules.IconObtainer;
 
-import javax.swing.ImageIcon;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
-import egps2.builtin.modules.IconObtainer;
+import java.awt.*;
 
 /**
 * @author YFQ

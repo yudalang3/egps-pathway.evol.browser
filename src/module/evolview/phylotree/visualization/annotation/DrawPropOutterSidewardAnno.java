@@ -1,10 +1,9 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.geom.Point2D;
-
 import module.evolview.model.tree.GraphicsNode;
+
+import java.awt.*;
+import java.awt.geom.Point2D;
 
 public class DrawPropOutterSidewardAnno extends AnnotationRender {
 

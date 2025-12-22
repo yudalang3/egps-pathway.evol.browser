@@ -1,15 +1,15 @@
 package module.evolview.model;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import module.multiseq.alignment.trimmer.calculate.PositionConvertor;
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.alignment.sequence.Sequence;
 import msaoperator.alignment.sequence.SequenceI;
 import msaoperator.io.seqFormat.parser.FastaParser;
-import module.multiseq.alignment.trimmer.calculate.PositionConvertor;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class AlignmentGetSequence {
 

@@ -1,26 +1,13 @@
 package module.evolview.gfamily.work.gui.tree;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import egps2.UnifiedAccessPoint;
+import graphic.engine.guibean.ColorIcon;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.util.function.BiConsumer;
 import java.util.prefs.Preferences;
-
-import javax.swing.JButton;
-import javax.swing.JColorChooser;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
-
-import graphic.engine.guibean.ColorIcon;
-import egps2.UnifiedAccessPoint;
 
 public class CollapseDialog extends JDialog {
 

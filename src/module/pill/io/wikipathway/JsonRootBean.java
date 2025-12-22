@@ -1,7 +1,8 @@
 package module.pill.io.wikipathway;
-import java.util.Map;
 
 import com.alibaba.fastjson.annotation.JSONField;
+
+import java.util.Map;
 
 public class JsonRootBean {
     private Map<String, Entity> entitiesById;

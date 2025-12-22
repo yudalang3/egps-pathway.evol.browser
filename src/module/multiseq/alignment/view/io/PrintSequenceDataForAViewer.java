@@ -1,14 +1,10 @@
 package module.multiseq.alignment.view.io;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeSet;
-
 import msaoperator.alignment.sequence.BasicSequenceData;
-import msaoperator.alignment.sequence.SequenceI;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
+import msaoperator.alignment.sequence.SequenceI;
+
+import java.util.*;
 
 public class PrintSequenceDataForAViewer extends BasicSequenceData {
 

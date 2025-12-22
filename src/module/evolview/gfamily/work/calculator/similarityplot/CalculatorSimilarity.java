@@ -1,6 +1,6 @@
 package module.evolview.gfamily.work.calculator.similarityplot;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 

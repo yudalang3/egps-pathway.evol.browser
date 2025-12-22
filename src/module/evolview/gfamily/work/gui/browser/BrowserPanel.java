@@ -1,23 +1,6 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
 import com.jidesoft.swing.JideSplitPane;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.beans.RequiredGeneData;
@@ -29,6 +12,12 @@ import module.evolview.gfamily.work.gui.browser.draw.GeneStructureInfo;
 import module.evolview.model.AlignmentGetSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Copyright (c) 2019 Chinese Academy of Sciences. All rights reserved.

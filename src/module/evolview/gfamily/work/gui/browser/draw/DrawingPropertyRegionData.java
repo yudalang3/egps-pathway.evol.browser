@@ -1,8 +1,8 @@
 package module.evolview.gfamily.work.gui.browser.draw;
 
-import java.awt.geom.Rectangle2D;
-
 import module.evolview.gfamily.work.gui.Triangle;
+
+import java.awt.geom.Rectangle2D;
 
 public class DrawingPropertyRegionData {
 

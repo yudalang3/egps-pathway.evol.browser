@@ -1,19 +1,17 @@
 package module.evoltreio;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.io.FileUtils;
-
 import com.google.common.base.Strings;
-
 import evoltree.phylogeny.DefaultPhyNode;
 import evoltree.phylogeny.NWKInternalCoderDecoder;
 import evoltree.phylogeny.NWKLeafCoderDecoder;
 import evoltree.struct.io.PrimaryNodeTreeDecoder;
 import module.evolview.model.tree.NodeUtils;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
 
 public class TreeParser4Evoltree {
 

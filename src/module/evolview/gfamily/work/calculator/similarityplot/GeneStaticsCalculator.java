@@ -1,11 +1,11 @@
 package module.evolview.gfamily.work.calculator.similarityplot;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import phylo.msa.util.EvolutionaryProperties;
 import module.evolview.model.AlignmentGetSequence;
 import msaoperator.alignment.sequence.SequenceI;
+import phylo.msa.util.EvolutionaryProperties;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GeneStaticsCalculator {
 	/**

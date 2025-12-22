@@ -1,10 +1,9 @@
 package module.multiseq.alignment.view.io;
 
-import java.io.File;
+import msaoperator.io.seqFormat.MSAFormatSuffixName;
 
 import javax.swing.filechooser.FileFilter;
-
-import msaoperator.io.seqFormat.MSAFormatSuffixName;
+import java.io.File;
 
 public abstract class SaveFilterPDF extends FileFilter implements MSAFormatSuffixName {
 

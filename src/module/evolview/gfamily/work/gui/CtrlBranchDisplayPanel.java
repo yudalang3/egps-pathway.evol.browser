@@ -1,21 +1,12 @@
 package module.evolview.gfamily.work.gui;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
-import javax.swing.border.EmptyBorder;
-
-import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
 
 @SuppressWarnings("serial")
 public class CtrlBranchDisplayPanel extends BaseCtrlPanel {

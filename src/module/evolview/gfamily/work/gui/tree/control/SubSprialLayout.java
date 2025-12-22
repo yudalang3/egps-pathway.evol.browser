@@ -1,28 +1,17 @@
 package module.evolview.gfamily.work.gui.tree.control;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
+import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.model.enums.TreeLayoutEnum;
+import module.evolview.phylotree.visualization.graphics.struct.SprialLayoutProperty;
+import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
+
+import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeListener;
-
-import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
-import module.evolview.model.enums.TreeLayoutEnum;
-import module.evolview.phylotree.visualization.graphics.struct.SprialLayoutProperty;
 
 @SuppressWarnings("serial")
 public class SubSprialLayout extends BaseCtrlPanel implements Turn2ThisLayoutPanel {

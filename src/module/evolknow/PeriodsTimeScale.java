@@ -1,6 +1,6 @@
 package module.evolknow;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class PeriodsTimeScale {
 	private final TimeScaleEntity[] entities;

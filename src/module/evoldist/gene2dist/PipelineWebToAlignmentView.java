@@ -1,17 +1,8 @@
 package module.evoldist.gene2dist;
 
-import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import msaoperator.alignment.sequence.Sequence;
-import msaoperator.alignment.sequence.SequenceI;
-
-import geneticcodes.GeneticCode;
+import egps2.modulei.RunningTask;
 import egps2.panels.dialog.SwingDialog;
+import geneticcodes.GeneticCode;
 import module.evoltrepipline.ConstantNameClass_GeneticCode;
 import module.evoltrepipline.ConstantNameClass_SpeciesSet;
 import module.evoltrepipline.ConstantNameClass_WebConnection;
@@ -20,7 +11,15 @@ import module.webmsaoperator.webIO.RestGRegion2MSAMultiStep;
 import module.webmsaoperator.webIO.RestGenomicRegionMultiStep;
 import module.webmsaoperator.webIO.RestWeb2AlignmentMultiStep;
 import module.webmsaoperator.webIO.gene.EmployedRegionNotAvailable;
-import egps2.modulei.RunningTask;
+import msaoperator.alignment.sequence.Sequence;
+import msaoperator.alignment.sequence.SequenceI;
+
+import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 

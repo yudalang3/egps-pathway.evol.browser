@@ -1,14 +1,27 @@
 package module.multiseq.alignerwithref;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.ItemEvent;
+import egps2.Authors;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.ComputationalModuleFace;
+import egps2.frame.MainFrameProperties;
+import egps2.frame.gui.comp.JTextAreaWithDefaultContent_MouseAdapter;
+import egps2.modulei.IModuleLoader;
+import egps2.modulei.RunningTask;
+import egps2.panels.dialog.SwingDialog;
+import module.config.externalprograms.ExternalProgramConfigManager;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.aligner.cli.MafftAlignerAutoMode;
+import module.multiseq.alignment.view.Launcher4ModuleLoader;
+import msaoperator.alignment.sequence.Sequence;
+import msaoperator.alignment.sequence.SequenceI;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.BorderFactory;
+import org.apache.commons.io.FileUtils;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.JSeparator;
+import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,34 +32,6 @@ import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.prefs.Preferences;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
-
-import org.apache.commons.io.FileUtils;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.frame.gui.comp.JTextAreaWithDefaultContent_MouseAdapter;
-import egps2.Authors;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.ComputationalModuleFace;
-import egps2.frame.MainFrameProperties;
-import module.config.externalprograms.ExternalProgramConfigManager;
-import msaoperator.alignment.sequence.Sequence;
-import msaoperator.alignment.sequence.SequenceI;
-import module.multiseq.aligner.cli.MafftAlignerAutoMode;
-import module.multiseq.alignment.view.Launcher4ModuleLoader;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
-import egps2.modulei.IModuleLoader;
-import egps2.modulei.RunningTask;
 
 @SuppressWarnings("serial")
 public class GuiMain extends ComputationalModuleFace {

@@ -1,9 +1,8 @@
 package module.evoldist.msa2distview;
 
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import module.evoldist.view.gui.DistanceMatrixParameterMain;
 import egps2.modulei.IModuleLoader;
+import module.evoldist.view.gui.DistanceMatrixParameterMain;
+import org.jdesktop.swingx.JXTaskPaneContainer;
 
 /**
  * 从历史记录点击一个曾经运算过的距离矩阵后调用此面板

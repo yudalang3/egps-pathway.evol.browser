@@ -1,13 +1,6 @@
 package module.evoldist.operator.pairdist;
 
-import module.evoldist.operator.disAlgo.JukesCantorModel;
-import module.evoldist.operator.disAlgo.Kimura2ParamModel;
-import module.evoldist.operator.disAlgo.NumOfDifferences;
-import module.evoldist.operator.disAlgo.SimplePDistance;
-import module.evoldist.operator.disAlgo.TajimaNeiModel;
-import module.evoldist.operator.disAlgo.Tamura3ParamModel;
-import module.evoldist.operator.disAlgo.TamuraNeiModel;
-import module.evoldist.operator.disAlgo.TheTransversionRate;
+import module.evoldist.operator.disAlgo.*;
 import module.evoltrepipline.IPairwiseEvolutionaryDistance;
 
 public class AlignmentEvoDistance <T extends DistParameterLevel1>{

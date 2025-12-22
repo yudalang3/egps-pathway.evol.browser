@@ -1,13 +1,13 @@
 package module.evolview.gfamily.work.beans;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import module.evolview.gfamily.work.gui.browser.PrimerUtil;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimerSet;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
 import module.evolview.model.AlignmentGetSequence;
 import msaoperator.alignment.sequence.SequenceI;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 读取网络中引物文件(压缩/非压缩)

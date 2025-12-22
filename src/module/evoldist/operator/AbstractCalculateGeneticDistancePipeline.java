@@ -9,19 +9,19 @@
 */
 package module.evoldist.operator;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-
+import egps2.modulei.RunningTask;
 import module.evoldist.operator.pairdist.DistParameterLevel1;
 import module.evoldist.operator.pairdist.DistParameterLevel2;
 import module.evoldist.operator.pairdist.DistParameterLevel41;
 import module.evoldist.operator.pairdist.DistParameterLevel42;
-import module.evoltrepipline.TreeParameterHandler;
 import module.evoltrepipline.ConstantNameClass_EvolutionaryDistance;
 import module.evoltrepipline.IPairwiseEvolutionaryDistance;
-import egps2.modulei.RunningTask;
+import module.evoltrepipline.TreeParameterHandler;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>

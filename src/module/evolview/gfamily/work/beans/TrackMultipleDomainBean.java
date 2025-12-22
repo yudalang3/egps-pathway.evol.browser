@@ -1,8 +1,8 @@
 package module.evolview.gfamily.work.beans;
 
-import java.util.List;
-
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
+
+import java.util.List;
 
 public class TrackMultipleDomainBean {
 

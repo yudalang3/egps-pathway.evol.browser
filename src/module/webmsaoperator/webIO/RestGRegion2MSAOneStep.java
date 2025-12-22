@@ -1,26 +1,15 @@
 package module.webmsaoperator.webIO;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import egps2.panels.dialog.SwingDialog;
 import module.webmsaoperator.webIO.jsonBean.EnsemblRestAlignmentJsonModel;
 import module.webmsaoperator.webIO.jsonBean.RestAlignments;
+
+import java.io.*;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 

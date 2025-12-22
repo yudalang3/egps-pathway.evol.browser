@@ -1,9 +1,9 @@
 package module.evolview.phylotree.visualization.primary.swing;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
 import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
+
+import java.util.Map;
 
 public class FastGraphicsProperties {
 

@@ -1,10 +1,10 @@
 package module.multiseq.alignment.view.gui;
 
+import msaoperator.alignment.sequence.SequenceComponentRatio;
+
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import msaoperator.alignment.sequence.SequenceComponentRatio;
 
 public class SequenceAnnotation2D extends SequenceJShap {
 

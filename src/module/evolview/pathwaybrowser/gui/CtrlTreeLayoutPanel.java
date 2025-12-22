@@ -1,19 +1,12 @@
 package module.evolview.pathwaybrowser.gui;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-
-import module.evolview.pathwaybrowser.PathwayBrowserController;
-import module.evolview.pathwaybrowser.gui.tree.control.SubCircularLayout;
-import module.evolview.pathwaybrowser.gui.tree.control.SubRadicalLayout;
-import module.evolview.pathwaybrowser.gui.tree.control.SubRectangularLayout;
-import module.evolview.pathwaybrowser.gui.tree.control.SubSlopeLayout;
-import module.evolview.pathwaybrowser.gui.tree.control.SubSprialLayout;
-import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.model.enums.TreeLayoutEnum;
+import module.evolview.pathwaybrowser.PathwayBrowserController;
+import module.evolview.pathwaybrowser.gui.tree.control.*;
+import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
+
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class CtrlTreeLayoutPanel extends BaseCtrlPanel {

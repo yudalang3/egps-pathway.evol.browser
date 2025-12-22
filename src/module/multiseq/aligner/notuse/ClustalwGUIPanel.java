@@ -1,40 +1,22 @@
 package module.multiseq.aligner.notuse;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import com.jidesoft.swing.JideSplitPane;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
+import egps2.panels.dialog.EGPSJSpinner;
+import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.gui.AbstractAlignmentPanel;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-
-import module.multiseq.aligner.gui.AbstractAlignmentPanel;
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import com.jidesoft.swing.JideSplitPane;
-
-import egps2.panels.dialog.EGPSJSpinner;
-import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
-import egps2.UnifiedAccessPoint;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
 
 public class ClustalwGUIPanel extends AbstractAlignmentPanel {
 	private static final long serialVersionUID = -2908588357598487831L;

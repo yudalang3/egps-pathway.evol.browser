@@ -1,13 +1,10 @@
 package module.pill.graphics;
 
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.io.IOException;
+import egps2.UnifiedAccessPoint;
 
 import javax.imageio.ImageIO;
-
-import egps2.UnifiedAccessPoint;
+import java.awt.*;
+import java.io.IOException;
 
 /**
  * Regular map Notation <br>

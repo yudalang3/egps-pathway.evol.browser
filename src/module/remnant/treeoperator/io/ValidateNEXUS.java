@@ -1,15 +1,15 @@
 package module.remnant.treeoperator.io;
 
+import module.remnant.datapanel.data.DataFormat;
+import module.remnant.datapanel.data.DataFormatError;
+import module.remnant.datapanel.data.validation.FormatDetect;
+import msaoperator.DataforamtInfo;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-
-import module.remnant.datapanel.data.DataFormat;
-import module.remnant.datapanel.data.DataFormatError;
-import msaoperator.DataforamtInfo;
-import module.remnant.datapanel.data.validation.FormatDetect;
 
 
 public class ValidateNEXUS implements FormatDetect{

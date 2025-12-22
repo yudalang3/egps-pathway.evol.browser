@@ -1,33 +1,16 @@
 package module.evolview.gfamily;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
-
 import com.jidesoft.swing.JideSplitPane;
 import com.jidesoft.swing.JideTabbedPane;
 import com.jidesoft.swing.JideTabbedPane.GradientColorProvider;
-
-import egps2.builtin.modules.IconObtainer;
-import egps2.panels.dialog.SwingDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import utils.EGPSObjectsUtil;
-import egps2.utils.common.util.SaveUtil;
 import egps2.EGPSProperties;
 import egps2.UnifiedAccessPoint;
+import egps2.builtin.modules.IconObtainer;
 import egps2.frame.ModuleFace;
+import egps2.modulei.IInformation;
+import egps2.modulei.IModuleLoader;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.util.SaveUtil;
 import module.evolview.gfamily.work.beans.GeneFamilyMainFaceBean;
 import module.evolview.gfamily.work.beans.RequiredGeneData;
 import module.evolview.gfamily.work.gui.ControlPanelContainer;
@@ -36,8 +19,16 @@ import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.io.Voice4geneFamilyBrowser;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import egps2.modulei.IInformation;
-import egps2.modulei.IModuleLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import utils.EGPSObjectsUtil;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <pre>

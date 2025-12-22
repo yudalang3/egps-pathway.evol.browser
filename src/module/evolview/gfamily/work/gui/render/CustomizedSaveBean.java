@@ -1,9 +1,9 @@
 package module.evolview.gfamily.work.gui.render;
 
+import module.evolview.model.enums.ColorScheme;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import module.evolview.model.enums.ColorScheme;
 
 public class CustomizedSaveBean {
 	

@@ -1,10 +1,10 @@
 package module.evoldist.msa2distview;
 
 import egps2.EGPSProperties;
-import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;
+import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
 
 public class VOICE4MSA2EvolDist extends AbstractGuiBaseVoiceFeaturedPanel {
 

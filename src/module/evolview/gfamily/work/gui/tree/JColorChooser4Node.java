@@ -1,18 +1,16 @@
 package module.evolview.gfamily.work.gui.tree;
 
-import java.awt.Color;
-import java.util.List;
-
-import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
-
+import graphic.engine.colors.EGPSColors;
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.gui.colorscheme.BaseContentPanel;
 import module.evolview.gfamily.work.gui.render.CustomizedRenderRecord;
 import module.evolview.gfamily.work.gui.render.CustomizedSaveBean;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.util.TreeOperationUtil;
-import graphic.engine.colors.EGPSColors;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 
 /**
  * 自定义的一个colorChooser，增加了一个勾选染色是否应用于子节点的checkbox

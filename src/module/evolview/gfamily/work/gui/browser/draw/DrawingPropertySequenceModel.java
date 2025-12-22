@@ -1,9 +1,9 @@
 package module.evolview.gfamily.work.gui.browser.draw;
 
-import java.awt.Point;
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
+
+import java.awt.*;
+import java.util.List;
 
 /**
  * 存错Ncov2019GenomeElementModel的集合信息,但是本身也可能会有多条信息

@@ -8,17 +8,17 @@
 */
 package module.remnant.treeoperator;
 
-import java.util.Map;
-
+import module.evoldist.operator.AbstractCalculateGeneticDistancePipeline;
+import module.evoldist.operator.DistanceParameterConfigurer;
+import module.evoltrepipline.ConstantNameClass_TreeBuildMethod;
 import module.remnant.treeoperator.dmMethod.BuilderBootstrapTree4MSA;
 import module.remnant.treeoperator.dmMethod.BuilderSinglePhyloTree;
 import module.remnant.treeoperator.reconAlgo.NJ;
 import module.remnant.treeoperator.reconAlgo.SwiftNJ;
 import module.remnant.treeoperator.reconAlgo.TreeReconMethod;
 import module.remnant.treeoperator.reconAlgo.Upgma;
-import module.evoldist.operator.AbstractCalculateGeneticDistancePipeline;
-import module.evoldist.operator.DistanceParameterConfigurer;
-import module.evoltrepipline.ConstantNameClass_TreeBuildMethod;
+
+import java.util.Map;
 
 /**
  * <p>

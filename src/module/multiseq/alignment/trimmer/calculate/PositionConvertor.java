@@ -1,12 +1,12 @@
 package module.multiseq.alignment.trimmer.calculate;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.alignment.sequence.SequenceI;
 import msaoperator.io.seqFormat.parser.FastaParser;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PositionConvertor: convert AlignPos to RefGenomePos PositionConvertor:

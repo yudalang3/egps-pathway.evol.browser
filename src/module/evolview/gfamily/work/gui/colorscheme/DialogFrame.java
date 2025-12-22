@@ -1,30 +1,19 @@
 package module.evolview.gfamily.work.gui.colorscheme;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-
-import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
+import egps2.panels.dialog.SwingDialog;
 import module.evolview.gfamily.GeneFamilyController;
-import module.evolview.gfamily.work.gui.browser.BrowserPanel;
-import module.evolview.gfamily.work.gui.browser.CalculatorKeyDomains;
-import module.evolview.gfamily.work.gui.browser.CalculatorPrimers;
-import module.evolview.gfamily.work.gui.browser.ContentPanelCustomizedKeyDomains;
-import module.evolview.gfamily.work.gui.browser.ContentPanelCustomizedPrimerSet;
-import module.evolview.gfamily.work.gui.browser.TrackKeyDomains;
-import module.evolview.gfamily.work.gui.browser.TrackPrimers;
+import module.evolview.gfamily.work.gui.browser.*;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimerSet;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
 import module.evolview.gfamily.work.gui.render.CustomizedRenderUtil;
 import module.evolview.gfamily.work.gui.tree.JColorChooser4Node;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 /**
  * 一个自定义dialog的类，汇集了各个地方用到的自定义的dialog
  */

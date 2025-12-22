@@ -1,7 +1,6 @@
 package module.pill.core;
 
-import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.Line2D;
 
 class ArrowHead {

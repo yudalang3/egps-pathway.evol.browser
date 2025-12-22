@@ -1,6 +1,6 @@
 package module.evolview.model.tree;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 

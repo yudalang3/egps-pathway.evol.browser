@@ -1,35 +1,16 @@
 package module.evoldist.view.contorl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-import egps2.panels.dialog.EGPSFileChooser;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
-import egps2.frame.gui.VectorGraphicsEncoder;
-import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.model.filefilter.FileFilterPdf;
-import egps2.utils.common.model.filefilter.FileFilterSvg;
-import egps2.utils.common.model.filefilter.SaveFilterDist;
-import egps2.utils.common.model.filefilter.SaveFilterExel;
-import egps2.utils.common.model.filefilter.SaveFilterJpg;
-import egps2.utils.common.util.EGPSPrintUtilities;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.MyFrame;
+import egps2.frame.gui.VectorGraphicsEncoder;
+import egps2.panels.dialog.EGPSFileChooser;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.model.filefilter.*;
+import egps2.utils.common.util.EGPSPrintUtilities;
+import org.apache.poi.hssf.usermodel.*;
+
+import javax.swing.*;
+import java.io.*;
 
 public class SaveDistanceMatrix {
 

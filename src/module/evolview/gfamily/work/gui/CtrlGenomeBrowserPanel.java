@@ -1,28 +1,16 @@
 package module.evolview.gfamily.work.gui;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
-
-import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
-// import module.evolview.genebrowser.GeneBrowserMainFace; // Removed - genebrowser module not included
-import module.evolview.gfamily.GeneFamilyMainFace;
 import egps2.builtin.modules.IconObtainer;
+import egps2.panels.dialog.SwingDialog;
 import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
 import module.evolview.gfamily.work.gui.browser.BrowserPanel;
 import module.evolview.gfamily.work.gui.browser.GeneDrawingLengthCursor;
 import module.evolview.gfamily.work.gui.browser.draw.GeneStructureInfo;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class CtrlGenomeBrowserPanel extends BaseCtrlPanel {

@@ -1,24 +1,19 @@
 package module.evolview.phylotree.visualization.primary.swing;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.geom.Line2D;
-import java.util.Optional;
-import java.util.function.Consumer;
-
-import javax.swing.*;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.util.SaveUtil;
 import egps2.LaunchProperty;
 import egps2.UnifiedAccessPoint;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.util.SaveUtil;
 import evoltree.struct.EvolNode;
 import evoltree.struct.util.EvolNodeUtil;
 import evoltree.txtdisplay.ReflectGraphicNode;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.Line2D;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class SingleTreePaintingListener extends MouseAdapter {
 

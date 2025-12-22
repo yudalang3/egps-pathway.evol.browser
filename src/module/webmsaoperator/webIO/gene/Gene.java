@@ -1,10 +1,10 @@
 package module.webmsaoperator.webIO.gene;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import geneticcodes.GeneticCode;
 import msaoperator.alignment.GlobalAlignmentSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Gene {

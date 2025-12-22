@@ -1,8 +1,8 @@
 package module.multiseq.gene2msa;
 
-import java.io.IOException;
-
 import utils.EGPSUtil;
+
+import java.io.IOException;
 
 public class CLI {
 	

@@ -1,13 +1,11 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Graphics2D;
-import java.awt.geom.CubicCurve2D;
-import java.util.List;
-
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.RectangularLayoutProperty;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+
+import java.awt.*;
+import java.awt.geom.CubicCurve2D;
+import java.util.List;
 
 public abstract class RectangularLayout extends BaseLayout {
 

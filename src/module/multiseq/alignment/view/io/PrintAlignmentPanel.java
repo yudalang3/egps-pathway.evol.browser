@@ -1,16 +1,13 @@
 package module.multiseq.alignment.view.io;
 
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.List;
-
-import javax.swing.JPanel;
-
-import msaoperator.alignment.sequence.SequenceI;
 import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.gui.VisulizationDataProperty;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
+import msaoperator.alignment.sequence.SequenceI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 
 /**
  * Copyright (c) 2019 Chinese Academy of Sciences. All rights reserved.

@@ -4,13 +4,8 @@ import fasta.io.FastaReader;
 import module.evoltre.mutation.MutationOperator;
 import module.multiseq.deversitydescriptor.calculate.VariantDescriptorElement;
 import module.multiseq.deversitydescriptor.calculate.VariantStateObtainer;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 import java.io.File;
 import java.io.IOException;

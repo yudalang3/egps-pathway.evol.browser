@@ -1,9 +1,7 @@
 package module.pill.images;
 
+import javax.swing.*;
 import java.net.URL;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 public class ImageUtils {
 

@@ -1,12 +1,12 @@
 package module.evolview.phylotree.visualization.graphics.struct.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import module.evolview.model.tree.GraphicsNode;
 import evoltree.struct.util.EvolTreeOperator;
+import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 这个类是实现树的一些性质计算或者改变操作！<br>

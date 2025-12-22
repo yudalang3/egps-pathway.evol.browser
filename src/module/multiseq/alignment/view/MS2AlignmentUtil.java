@@ -1,25 +1,19 @@
 package module.multiseq.alignment.view;
 
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.alignment.DataFileSuffixNames;
+import msaoperator.alignment.sequence.BasicSequenceData;
+import msaoperator.io.seqFormat.SequenceFormatInfo;
+import msaoperator.io.seqFormat.SequencesWriter;
+import msaoperator.io.seqFormat.parser.FastaParser;
+import msaoperator.io.seqFormat.writer.*;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-
-import msaoperator.alignment.sequence.BasicSequenceData;
-import msaoperator.io.seqFormat.SequenceFormatInfo;
-import msaoperator.io.seqFormat.SequencesWriter;
-import msaoperator.io.seqFormat.parser.FastaParser;
-import msaoperator.io.seqFormat.writer.ClustalWriter;
-import msaoperator.io.seqFormat.writer.FastaWriter;
-import msaoperator.io.seqFormat.writer.GCGMSFWriter;
-import msaoperator.io.seqFormat.writer.MEGAWriter;
-import msaoperator.io.seqFormat.writer.NEXUSWriter;
-import msaoperator.io.seqFormat.writer.PAMLWriter;
-import msaoperator.io.seqFormat.writer.PHYLIPWriter;
-import module.multiseq.alignment.DataFileSuffixNames;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 public class MS2AlignmentUtil {
 	// input or out put

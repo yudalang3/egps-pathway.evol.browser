@@ -1,11 +1,10 @@
 package module.evoldist.operator.disAlgo;
 
+import module.evoldist.operator.pairdist.DistParameterLevel42;
+import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
-
-import module.evoldist.operator.pairdist.DistParameterLevel42;
-import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
 
 public class GTRModelDist<E extends DistParameterLevel42> implements EvoPairwiseDistMethod<E> {
 

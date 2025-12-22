@@ -1,16 +1,16 @@
 package module.multiseq.alignment.trimmer.calculate;
 
+import egps2.EGPSProperties;
+import msaoperator.alignment.sequence.BasicSequenceData;
+import msaoperator.alignment.sequence.SequenceI;
+import msaoperator.io.seqFormat.parser.FastaParser;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import egps2.EGPSProperties;
-import msaoperator.alignment.sequence.BasicSequenceData;
-import msaoperator.alignment.sequence.SequenceI;
-import msaoperator.io.seqFormat.parser.FastaParser;
 
 public class AlignmentTrimmer {
 

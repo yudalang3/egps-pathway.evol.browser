@@ -1,25 +1,17 @@
 package module.evolview.pathwaybrowser.gui;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import egps2.UnifiedAccessPoint;
+import egps2.builtin.modules.IconObtainer;
+import module.evolview.model.enums.ColorScheme;
+import module.evolview.pathwaybrowser.PathwayBrowserController;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
-import javax.swing.border.EmptyBorder;
-
-import egps2.UnifiedAccessPoint;
-import module.evolview.pathwaybrowser.PathwayBrowserController;
-import egps2.builtin.modules.IconObtainer;
-import module.evolview.model.enums.ColorScheme;
 
 /**
  * 

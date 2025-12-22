@@ -1,9 +1,9 @@
 package module.evolview.gfamily.work.gui;
 
-import java.awt.Cursor;
-
 import module.evolview.gfamily.work.gui.tree.RectObj;
 import module.evolview.model.tree.ScaleBarProperty;
+
+import java.awt.*;
 
 public class ScaleBarRectObject extends RectObj{
 	

@@ -10,15 +10,15 @@
 */
 package module.webmsaoperator.webIO;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import geneticcodes.GeneticCode;
 import geneticcodes.codeTables.TheStandardCode;
 import module.webmsaoperator.SpeciesNameTrans;
 import module.webmsaoperator.webIO.gene.EmployedRegionNotAvailable;
 import module.webmsaoperator.webIO.gene.Gene;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>

@@ -1,11 +1,11 @@
 package module.remnant.treeoperator.reconAlgo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import module.remnant.treeoperator.DefaultNode;
 import module.remnant.treeoperator.NodeEGPSv1;
 import module.remnant.treeoperator.TreeUtility;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Ref: Naruya Saitou, 2018, Introduction to Evolutionary Genomics (Second

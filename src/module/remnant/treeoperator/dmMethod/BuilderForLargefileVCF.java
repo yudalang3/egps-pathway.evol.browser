@@ -10,8 +10,8 @@
 */
 package module.remnant.treeoperator.dmMethod;
 
-import module.remnant.treeoperator.NodeEGPSv1;
 import module.evoldist.operator.pairdist.DistParameterLevel1;
+import module.remnant.treeoperator.NodeEGPSv1;
 
 /**
  * <p>

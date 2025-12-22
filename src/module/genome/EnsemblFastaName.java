@@ -1,9 +1,9 @@
 package module.genome;
 
+import utils.string.EGPSStringUtil;
+
 import java.util.Optional;
 import java.util.StringJoiner;
-
-import utils.string.EGPSStringUtil;
 
 public class EnsemblFastaName {
 

@@ -1,11 +1,10 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.util.List;
-
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
+
+import java.awt.*;
+import java.util.List;
 
 public class DrawPropLeafNameAnno extends AnnotationRender{
 	final Color color;

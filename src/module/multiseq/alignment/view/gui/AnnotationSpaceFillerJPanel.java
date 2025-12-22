@@ -1,16 +1,10 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-
-import javax.swing.JPanel;
-
 import egps2.frame.gui.EGPSMainGuiUtil;
 import module.multiseq.alignment.view.AlignmentViewMain;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class AnnotationSpaceFillerJPanel extends JPanel {
 

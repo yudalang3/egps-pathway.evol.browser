@@ -1,16 +1,16 @@
 package module.evolview.demo.parsimonytre;
 
+import evoltree.struct.EvolNode;
+import evoltree.struct.TreeDecoder;
+import evoltree.struct.util.EvolNodeUtil;
+import module.parsimonytre.algo.Node4SankoffAlgo;
+import module.parsimonytre.algo.SankoffAlgoRunner;
+import module.parsimonytre.algo.StateAfterMutation;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import evoltree.struct.util.EvolNodeUtil;
-import evoltree.struct.EvolNode;
-import evoltree.struct.TreeDecoder;
-import module.parsimonytre.algo.Node4SankoffAlgo;
-import module.parsimonytre.algo.SankoffAlgoRunner;
-import module.parsimonytre.algo.StateAfterMutation;
 
 /**
  * @author yudalang

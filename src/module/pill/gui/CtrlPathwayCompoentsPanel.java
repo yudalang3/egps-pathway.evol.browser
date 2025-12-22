@@ -1,6 +1,15 @@
 package module.pill.gui;
 
-import java.awt.Font;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.MyFrame;
+import module.pill.core.*;
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -10,32 +19,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import egps2.UnifiedAccessPoint;
-import egps2.frame.MyFrame;
-import module.pill.core.CONSTANTS;
-import module.pill.core.ConfigFileMaintainer;
-import module.pill.core.DrawingPanelSkeletonMaker;
-import module.pill.core.GraphicProperties;
-import module.pill.core.GraphicsNodeShape;
-import module.pill.core.IntuitiveShapeCreator;
-import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class CtrlPathwayCompoentsPanel extends JPanel{

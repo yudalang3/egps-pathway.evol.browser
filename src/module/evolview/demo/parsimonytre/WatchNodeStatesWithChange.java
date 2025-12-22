@@ -1,48 +1,40 @@
 package module.evolview.demo.parsimonytre;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.awt.geom.RoundRectangle2D.Double;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import javax.swing.JFrame;
-
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import evoltree.phylogeny.DefaultPhyNode;
+import evoltree.struct.EvolNode;
+import evoltree.struct.TreeDecoder;
+import evoltree.struct.util.EvolNodeUtil;
+import evoltree.swingvis.OneNodeDrawer;
+import graphic.engine.EGPSDrawUtil;
+import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
+import module.evolview.phylotree.visualization.primary.swing.FastSingleTreeVisualizer;
+import module.evolview.phylotree.visualization.primary.swing.SingleTreePaintingPanel;
 import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
-
-import utils.EGPSGuiUtil;
-import utils.string.EGPSStringUtil;
 import tsv.io.KitTable;
 import tsv.io.TSVReader;
-import evoltree.struct.TreeDecoder;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.phylotree.visualization.primary.swing.FastSingleTreeVisualizer;
-import evoltree.swingvis.OneNodeDrawer;
-import module.evolview.phylotree.visualization.primary.swing.SingleTreePaintingPanel;
-import evoltree.phylogeny.DefaultPhyNode;
-import evoltree.struct.EvolNode;
-import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
-import graphic.engine.EGPSDrawUtil;
+import utils.EGPSGuiUtil;
+import utils.string.EGPSStringUtil;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.RoundRectangle2D.Double;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class WatchNodeStatesWithChange {
 

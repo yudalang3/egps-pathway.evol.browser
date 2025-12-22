@@ -1,13 +1,11 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Toolkit;
+import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
 
 /**
  * 引物短带跳转

@@ -1,16 +1,14 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Color;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D.Double;
-
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
+import evoltree.txtdisplay.TreeDrawUnit;
+import graphic.engine.guicalculator.GuiCalculator;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.SprialLayoutProperty;
-import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import graphic.engine.guicalculator.GuiCalculator;
+
+import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D.Double;
 
 public abstract class SprialLayout extends BaseLayout {
 

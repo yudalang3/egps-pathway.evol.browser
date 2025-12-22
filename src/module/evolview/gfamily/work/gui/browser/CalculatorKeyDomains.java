@@ -1,18 +1,17 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Point;
-import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
-
 import module.evolview.gfamily.work.beans.TrackMultipleDomainBean;
 import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyKeyDomains;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
 import module.evolview.gfamily.work.gui.browser.draw.GeneStructureInfo;
+
+import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 需要注意的是当绘制ElementStructure的位置信息的时候,包含起始位置(左闭右闭原则)

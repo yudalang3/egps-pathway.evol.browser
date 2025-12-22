@@ -1,18 +1,10 @@
 package module.evoldist.operator.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-
 import module.evoldist.operator.pairdist.DistParameterPreparerABEqualPos;
 import module.evoldist.operator.pairdist.SimpleObj;
 
-import java.util.Set;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class QuickDistUtil {
 

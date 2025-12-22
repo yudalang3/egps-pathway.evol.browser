@@ -1,24 +1,23 @@
 package module.treebuilder.gene2tree;
 
-import java.util.Map;
-
+import egps2.frame.MainFrameProperties;
 import egps2.panels.dialog.SwingDialog;
+import module.evoldist.operator.DistanceParameterConfigurer;
+import module.evoltrepipline.ConstantNameClass_EvolutionaryDistance;
+import module.evoltrepipline.ConstantNameClass_TreeBuildMethod;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.moderntreeviewer.IndependentModuleLoader;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
+import module.multiseq.gene2msa.PipelineWebToAlignment;
 import module.remnant.treeoperator.NodeEGPSv1;
-import module.remnant.treeoperator.TreeUtility;
 import module.remnant.treeoperator.dmMethod.BuilderBootstrapTree4MSA;
 import module.remnant.treeoperator.dmMethod.BuilderSinglePhyloTree;
 import module.remnant.treeoperator.reconAlgo.NJ;
 import module.remnant.treeoperator.reconAlgo.SwiftNJ;
 import module.remnant.treeoperator.reconAlgo.TreeReconMethod;
 import module.remnant.treeoperator.reconAlgo.Upgma;
-import egps2.frame.MainFrameProperties;
-import module.evoldist.operator.DistanceParameterConfigurer;
-import module.evoltrepipline.ConstantNameClass_EvolutionaryDistance;
-import module.evoltrepipline.ConstantNameClass_TreeBuildMethod;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.moderntreeviewer.IndependentModuleLoader;
-import module.multiseq.gene2msa.PipelineWebToAlignment;
-import module.evolview.phylotree.visualization.util.TreeConversionUtil;
+
+import java.util.Map;
 
 /**
   *

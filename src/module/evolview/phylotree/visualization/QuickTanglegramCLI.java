@@ -1,10 +1,10 @@
 package module.evolview.phylotree.visualization;
 
 import egps2.utils.common.util.EGPSPrintUtilities;
-import evoltree.tanglegram.QuickPairwiseTreeComparator;
 import evoltree.struct.EvolNode;
 import evoltree.struct.TreeDecoder;
 import evoltree.swingvis.OneNodeDrawer;
+import evoltree.tanglegram.QuickPairwiseTreeComparator;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;

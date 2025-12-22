@@ -1,40 +1,28 @@
 package module.evolview.gfamily;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Point;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.MyFrame;
+import evoltree.struct.util.EvolNodeUtil;
+import module.evolview.gfamily.work.gui.*;
+import module.evolview.gfamily.work.gui.render.CustomizedSaveBean;
+import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.model.enums.BranchLengthType;
+import module.evolview.model.enums.ColorScheme;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.annotation.*;
+import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
+import module.evolview.phylotree.visualization.layout.BaseLayout;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
+import utils.datetime.LocalDateHandler;
+
+import javax.swing.*;
+import java.awt.*;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-
-import javax.swing.JColorChooser;
-import javax.swing.SwingUtilities;
-
-import utils.datetime.LocalDateHandler;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.MyFrame;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.gfamily.work.gui.ControlPanelContainer;
-import module.evolview.gfamily.work.gui.CtrlGenomeBrowserPanel;
-import module.evolview.gfamily.work.gui.CtrlTreeLayoutPanel;
-import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
-import module.evolview.gfamily.work.gui.TreeLayoutSwitcher;
-import module.evolview.gfamily.work.gui.render.CustomizedSaveBean;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNode2LeafAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNodeInsituAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropLeafNameAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropOutterSidewardAnno;
-import module.evolview.model.enums.BranchLengthType;
-import module.evolview.model.enums.ColorScheme;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.layout.BaseLayout;
 
 public class GeneFamilyController {
     final GeneFamilyMainFace main;

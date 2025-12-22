@@ -1,27 +1,21 @@
 package module.evolview.pathwaybrowser.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
+import egps2.EGPSProperties;
+import module.evolview.model.enums.ColorScheme;
+import module.evolview.pathwaybrowser.LeftControlPanelCollapseProperties;
+import module.evolview.pathwaybrowser.PathwayBrowserController;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import utils.EGPSObjectsUtil;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import utils.EGPSObjectsUtil;
-import egps2.EGPSProperties;
-import module.evolview.pathwaybrowser.PathwayBrowserController;
-import module.evolview.pathwaybrowser.LeftControlPanelCollapseProperties;
-import module.evolview.model.enums.ColorScheme;
 
 @SuppressWarnings("serial")
 public class ControlPanelContainer extends JPanel {

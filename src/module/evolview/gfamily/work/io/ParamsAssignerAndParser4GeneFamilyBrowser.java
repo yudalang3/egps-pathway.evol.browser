@@ -1,17 +1,15 @@
 package module.evolview.gfamily.work.io;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import egps2.EGPSProperties;
-// import module.evolview.genebrowser.io.MapperOfGeneBrowser; // Removed - genebrowser module not included
+import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
+import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import module.evolview.gfamily.work.beans.RequiredGeneData;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
-import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
-import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class ParamsAssignerAndParser4GeneFamilyBrowser extends ParamsAssignerAndParser4ModernTreeView {
 

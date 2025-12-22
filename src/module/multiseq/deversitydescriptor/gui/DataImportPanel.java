@@ -1,24 +1,16 @@
 package module.multiseq.deversitydescriptor.gui;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.handler.EGPSTextTransferHandler;
+import egps2.panels.dialog.EGPSFileChooser;
+import egps2.utils.common.util.EGPSShellIcons;
+import module.multiseq.deversitydescriptor.SimpleModuleController;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
-
-import egps2.panels.dialog.EGPSFileChooser;
-import egps2.frame.gui.handler.EGPSTextTransferHandler;
-import egps2.utils.common.util.EGPSShellIcons;
-import egps2.UnifiedAccessPoint;
-import module.multiseq.deversitydescriptor.SimpleModuleController;
 
 public class DataImportPanel extends JPanel {
 	private JTextField textField;

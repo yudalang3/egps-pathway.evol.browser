@@ -10,18 +10,18 @@
 */
 package module.treebuilder.frommsa;
 
-import java.io.File;
-import java.util.Map;
-
-import egps2.panels.dialog.SwingDialog;
-import module.remnant.treeoperator.NodeEGPSv1;
 import egps2.frame.MainFrameProperties;
+import egps2.panels.dialog.SwingDialog;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
+import module.remnant.treeoperator.NodeEGPSv1;
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.io.MSAFileParser;
 import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
-import module.evolview.phylotree.visualization.util.TreeConversionUtil;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  * <p>

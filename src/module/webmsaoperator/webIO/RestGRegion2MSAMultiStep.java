@@ -1,32 +1,17 @@
 package module.webmsaoperator.webIO;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
+import module.webmsaoperator.webIO.jsonBean.EnsemblRestAlignmentJsonModel;
+import module.webmsaoperator.webIO.jsonBean.RestAlignments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.string.EGPSStringUtil;
-import module.webmsaoperator.webIO.jsonBean.EnsemblRestAlignmentJsonModel;
-import module.webmsaoperator.webIO.jsonBean.RestAlignments;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 

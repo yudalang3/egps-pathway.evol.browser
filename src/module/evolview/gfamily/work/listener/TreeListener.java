@@ -1,11 +1,28 @@
 package module.evolview.gfamily.work.listener;
 
+import egps2.UnifiedAccessPoint;
+import egps2.frame.MyFrame;
+import egps2.panels.dialog.SwingDialog;
+import evoltree.struct.EvolNode;
+import evoltree.struct.util.EvolNodeUtil;
+import evoltree.txtdisplay.TreeDrawUnit;
+import module.evolview.gfamily.work.gui.ScaleBarRectObject;
+import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.gfamily.work.gui.tree.RectObj;
+import module.evolview.gfamily.work.gui.tree.TreePopupMenu;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.model.tree.ScaleBarProperty;
+import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
+import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.math3.util.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
+import java.awt.event.*;
 import java.awt.geom.Line2D;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,32 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JViewport;
-import javax.swing.SwingUtilities;
-
-import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
-import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.math3.util.FastMath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.MyFrame;
-import evoltree.struct.util.EvolNodeUtil;
-import evoltree.struct.EvolNode;
-import module.evolview.gfamily.work.gui.ScaleBarRectObject;
-import module.evolview.gfamily.work.gui.tree.TreePopupMenu;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.gfamily.work.gui.tree.RectObj;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.ScaleBarProperty;
-import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 
 public class TreeListener extends MouseAdapter implements KeyListener {
 	private static final Logger logger = LoggerFactory.getLogger(TreeListener.class);

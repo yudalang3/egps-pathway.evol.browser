@@ -1,20 +1,18 @@
 package module.remnant.datapanel.informationArea;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import javax.swing.border.EtchedBorder;
-
-import org.apache.commons.io.FileUtils;
-
 import module.remnant.datapanel.data.DataCenter;
 import module.remnant.datapanel.data.DataFormat;
 import module.remnant.datapanel.data.IDataCenter;
 import msaoperator.io.seqFormat.parser.ClustalWParser;
 import msaoperator.io.seqFormat.parser.GCGMSFParser;
 import msaoperator.io.seqFormat.parser.PHYParser;
+import org.apache.commons.io.FileUtils;
+
+import javax.swing.border.EtchedBorder;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public class InformationAreaMultipleSeqs extends AbstractTableBasedArea {
 

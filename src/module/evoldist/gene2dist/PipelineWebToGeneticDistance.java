@@ -1,13 +1,12 @@
 package module.evoldist.gene2dist;
 
-import java.util.HashMap;
-
-import javax.swing.SwingUtilities;
-
 import module.evoldist.operator.DistanceCalculateor;
 import module.evoldist.operator.DistanceParameterConfigurer;
 import module.evoldist.view.gui.DistanceMatrixParameterMain;
 import module.evoldist.view.gui.EGPSDistanceMatrixJTableHolder;
+
+import javax.swing.*;
+import java.util.HashMap;
 
 /**
  * 

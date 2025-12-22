@@ -1,23 +1,17 @@
 package module.multiseq.alignment.trimmer.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.io.File;
-import java.util.Arrays;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
+import egps2.panels.dialog.SwingDialog;
 import module.multiseq.alignment.trimmer.SimpleModuleController;
 import module.multiseq.alignment.trimmer.calculate.AlignmentTrimmer;
 import module.multiseq.alignment.view.ModuleLauncher4MSA2AlignmentView;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.util.Arrays;
 
 public class SimpleLeftControlPanel extends JPanel {
 	private static final long serialVersionUID = 6360716192941698962L;

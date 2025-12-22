@@ -1,19 +1,14 @@
 package module.evolview.gfamily.work.gui.browser;
 
+import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
+import module.evolview.gfamily.work.gui.browser.draw.*;
+
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
-import module.evolview.gfamily.work.gui.browser.draw.AxisTicks;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyLine;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPaintBar;
-import module.evolview.gfamily.work.gui.browser.draw.GeneStructureInfo;
-import module.evolview.gfamily.work.gui.browser.draw.ScaleAndTickNum;
-import module.evolview.gfamily.work.gui.browser.draw.TicksHandler;
 
 public class CalculatorAlleleFreq implements LocationCalculator<DrawingPropertyPaintBar> {
 

@@ -1,49 +1,22 @@
 package module.evolview.gfamily.work.gui.tree;
 
-import java.awt.*;
-import java.util.List;
-
-import javax.swing.JPanel;
-import javax.swing.JViewport;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-
+import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.EGPSMainGuiUtil;
+import egps2.panels.dialog.SwingDialog;
+import graphic.engine.guicalculator.BlankArea;
+import module.evolview.gfamily.work.listener.TreeListener;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.model.tree.ScaleBarProperty;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
+import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
+import module.evolview.phylotree.visualization.layout.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import egps2.panels.dialog.SwingDialog;
-import egps2.UnifiedAccessPoint;
-import module.evolview.gfamily.work.listener.TreeListener;
-import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.ScaleBarProperty;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.layout.BaseLayout;
-import module.evolview.phylotree.visualization.layout.CircularCladoAlign2Tip;
-import module.evolview.phylotree.visualization.layout.CircularCladoEqual;
-import module.evolview.phylotree.visualization.layout.CircularInnerCladoAligned;
-import module.evolview.phylotree.visualization.layout.CircularPhylo;
-import module.evolview.phylotree.visualization.layout.CircularPhyloAlign2Tip;
-import module.evolview.phylotree.visualization.layout.RadialCladoLayout;
-import module.evolview.phylotree.visualization.layout.RadialPhyloLayout;
-import module.evolview.phylotree.visualization.layout.RadicalEqualDaylightCladoLayout;
-import module.evolview.phylotree.visualization.layout.RadicalEqualDaylightPhyloLayout;
-import module.evolview.phylotree.visualization.layout.RectCladoAlign2tip;
-import module.evolview.phylotree.visualization.layout.RectCladoEqual;
-import module.evolview.phylotree.visualization.layout.RectHalfCircleLayout;
-import module.evolview.phylotree.visualization.layout.RectPhyloAlign2Tip;
-import module.evolview.phylotree.visualization.layout.RectPhyloInnerYAxis;
-import module.evolview.phylotree.visualization.layout.RectPhyloLayout;
-import module.evolview.phylotree.visualization.layout.SlopeCladoAlignedLeft;
-import module.evolview.phylotree.visualization.layout.SpiralCladoAlignedWithBeta;
-import module.evolview.phylotree.visualization.layout.SpiralPhyloWithAlpha;
-import module.evolview.phylotree.visualization.layout.SpiralPhyloWithBeta;
-import module.evolview.phylotree.visualization.layout.SprialCladoAlignedWithAlpha;
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import egps2.frame.gui.EGPSMainGuiUtil;
-import graphic.engine.guicalculator.BlankArea;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 
 /**
  * This class is the "Phylogenetic Tree" tab.

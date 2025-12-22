@@ -1,8 +1,8 @@
 package module.pill.graphics;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 /**
  * https://www.kegg.jp/kegg/xml/docs/

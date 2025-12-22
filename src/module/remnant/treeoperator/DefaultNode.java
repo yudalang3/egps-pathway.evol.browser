@@ -1,6 +1,6 @@
 package module.remnant.treeoperator;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

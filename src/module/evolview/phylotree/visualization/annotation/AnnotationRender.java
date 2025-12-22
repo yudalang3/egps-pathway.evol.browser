@@ -1,8 +1,8 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Graphics2D;
-
 import module.evolview.model.tree.GraphicsNode;
+
+import java.awt.*;
 
 /**
  * 这里其实应该有两个过程：

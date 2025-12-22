@@ -1,12 +1,12 @@
 package module.evolview.gfamily.work.gui.browser.draw;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import module.evolview.gfamily.work.calculator.similarityplot.ComparedSequenceResult;
 import module.evolview.gfamily.work.calculator.similarityplot.SimilarityPlotData;
 import module.evolview.model.AlignmentGetSequence;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Derived statistics

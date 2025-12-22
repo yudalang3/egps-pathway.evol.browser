@@ -1,5 +1,11 @@
 package module.evoldist.operator;
 
+import egps2.utils.common.math.matrix.MatrixTriangleOp;
+import module.evoldist.operator.pairdist.DistParameterLevel1;
+import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
+import org.apache.commons.lang3.StringUtils;
+import utils.EGPSFileUtil;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -7,13 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import org.apache.commons.lang3.StringUtils;
-
-import egps2.utils.common.math.matrix.MatrixTriangleOp;
-import utils.EGPSFileUtil;
-import module.evoldist.operator.pairdist.DistParameterLevel1;
-import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
 
 public class BootstrapDistCalculator<E extends DistParameterLevel1> extends DistanceCalculateor {
 

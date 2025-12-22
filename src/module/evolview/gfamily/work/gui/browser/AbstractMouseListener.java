@@ -1,16 +1,12 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Component;
-import java.awt.Point;
+import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-
-import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 
 public class AbstractMouseListener extends MouseAdapter {
     protected int trackWidth = LocationCalculator.BLINK_LEFT_SPACE_LENGTH;

@@ -1,13 +1,11 @@
 package module.remnant.datapanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.io.File;
-
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-
 import module.remnant.datapanel.informationArea.AbstractInformationArea;
+
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import java.awt.*;
+import java.io.File;
 
 public class MiddleInformationArea extends JPanel {
 	

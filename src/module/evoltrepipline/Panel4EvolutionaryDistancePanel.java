@@ -3,28 +3,15 @@
  */
 package module.evoltrepipline;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.math.CheckedNumber;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.border.TitledBorder;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.math.CheckedNumber;
 
 /**
 * @author YFQ

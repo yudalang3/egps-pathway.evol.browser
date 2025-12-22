@@ -3,24 +3,13 @@
  */
 package module.evoltrepipline;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSpinner;
-import javax.swing.JTree;
-import javax.swing.border.TitledBorder;
-
 import egps2.panels.dialog.EGPSJSpinner;
 import egps2.panels.dialog.SwingDialog;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.util.Map;
 
 /**
  * @author YFQ

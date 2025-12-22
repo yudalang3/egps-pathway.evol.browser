@@ -10,15 +10,15 @@
 */
 package module.remnant.treeoperator.dmMethod;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
-import module.remnant.treeoperator.NodeEGPSv1;
-import module.remnant.treeoperator.TreeUtility;
 import module.evoldist.operator.EvoDistanceUtil;
 import module.evoldist.operator.pairdist.DistParameterLevel1;
 import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
+import module.remnant.treeoperator.NodeEGPSv1;
+import module.remnant.treeoperator.TreeUtility;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * <p>

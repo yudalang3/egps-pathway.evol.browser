@@ -1,14 +1,11 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.geom.Line2D;
-
-import module.evolview.phylotree.visualization.util.DrawUtil;
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import graphic.engine.guicalculator.GuiCalculator;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+
+import java.awt.*;
+import java.awt.geom.Line2D;
 
 public class CircularPhyloAlign2Tip extends CircularPhylo {
 

@@ -1,13 +1,9 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.model.tree.GraphicsNode;
+
+import java.awt.*;
 
 public class DrawPropInternalNode2LeafAnno extends AnnotationRender {
 

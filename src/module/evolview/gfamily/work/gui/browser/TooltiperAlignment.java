@@ -1,12 +1,12 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
-import java.util.List;
-
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignment;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignmentItem;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignmentNucleotide;
+
+import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
+import java.util.List;
 
 public class TooltiperAlignment extends AbstractTrackTooltiper {
 

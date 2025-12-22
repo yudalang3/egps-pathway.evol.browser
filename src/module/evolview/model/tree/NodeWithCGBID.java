@@ -2,8 +2,6 @@ package module.evolview.model.tree;
 
 import java.util.Objects;
 
-import module.evolview.model.tree.DefaultGraphicsPhyloNode;
-
 
 public class NodeWithCGBID extends DefaultGraphicsPhyloNode {
 

@@ -15,9 +15,7 @@ import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.listener.TreeListener;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.pathwaybrowser.gui.ControlPanelContainer;
-import module.evolview.pathwaybrowser.gui.analysis.panel.AbstractAnalysisPanel;
-import module.evolview.pathwaybrowser.gui.analysis.panel.PathwayGalleryPanel;
-import module.evolview.pathwaybrowser.gui.analysis.panel.SpeciesPanel;
+import module.evolview.pathwaybrowser.gui.analysis.panel.*;
 import module.evolview.pathwaybrowser.io.ImporterBean4PathwayFamilyBrowser;
 import module.evolview.pathwaybrowser.io.Voice4pathwayFamilyBrowser;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
@@ -260,6 +258,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		tabbedPhylogeneticTreePane = new JideTabbedPane();
 		tabbedPhylogeneticTreePane.setTabShape(JideTabbedPane.SHAPE_OFFICE2003);
 		tabbedPhylogeneticTreePane.setTabPlacement(JideTabbedPane.TOP);
+
 		tabbedPhylogeneticTreePane.setTabColorProvider(tabColorProvider);
 		tabbedPhylogeneticTreePane.setTabEditingAllowed(true);
 		tabbedPhylogeneticTreePane.setSelectedTabFont(controller.getTitleFont());
@@ -318,29 +317,8 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 		// 4. Parse component information from TSV file
 		String componentsInfoPath = geneData.getComponentsInfoPath();
-		String geneColumnName = geneData.getGeneColumnName();
-		String categoryColumnName = geneData.getCategoryColumnName();
-
-		String speciesInfoPath = geneData.getSpeciesInfoPath();
 
 		GuiCompCreator guiCompCreator = new GuiCompCreator(controller);
-
-				// 5. Create Pathway Details panel
-		Optional<SpeciesPanel> speciesInforPanel = guiCompCreator.createSpeciesInfoPanel(
-				geneData
-		);
-
-		if (speciesInforPanel.isPresent()){
-			SpeciesPanel speciesPanel = speciesInforPanel.get();
-			// SpeciesPanel already manages its own table scrolling.
-			tabbedAnalysisPanel.addTab(speciesPanel.getTitle(), IconObtainer.get("tab.png"),
-					speciesPanel, "The species information display.");
-
-			tree2AnalyzingPanelInteractions.add(n -> {
-				speciesPanel.treeNodeClicked(n.getName());
-			});
-			analysisPanels.add(speciesPanel);
-		}
 
 		Optional<PathwayGalleryPanel> pathwayGalleryPanel = guiCompCreator.createPathwayGalleryPanel(
 				controller,
@@ -349,7 +327,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 		if (pathwayGalleryPanel.isPresent()){
 			PathwayGalleryPanel speciesPanel = pathwayGalleryPanel.get();
-			// SpeciesPanel already manages its own table scrolling.
+			// SpeciesInfoPanel already manages its own table scrolling.
 			tabbedAnalysisPanel.addTab(speciesPanel.getTitle(), IconObtainer.get("tab.png"),
 					speciesPanel, "The pathway details galleries.");
 
@@ -358,6 +336,55 @@ public class PathwayFamilyMainFace extends ModuleFace {
 			});
 			analysisPanels.add(speciesPanel);
 		}
+
+		Optional<SpeciesInfoPanel> speciesInforPanel = guiCompCreator.createSpeciesInfoPanel(
+				geneData
+		);
+
+		if (speciesInforPanel.isPresent()){
+			SpeciesInfoPanel speciesPanel = speciesInforPanel.get();
+			// SpeciesInfoPanel already manages its own table scrolling.
+			tabbedAnalysisPanel.addTab(speciesPanel.getTitle(), IconObtainer.get("tab.png"),
+					speciesPanel, "The species information display.");
+
+			tree2AnalyzingPanelInteractions.add(n -> {
+				speciesPanel.treeNodeClicked(n.getName());
+			});
+			analysisPanels.add(speciesPanel);
+		}
+		Optional<PathwayComponentPanel> pathwayComponentPanel = guiCompCreator.createPathwayComponentPanel(
+				geneData
+		);
+
+		if (pathwayComponentPanel.isPresent()){
+			PathwayComponentPanel speciesPanel = pathwayComponentPanel.get();
+			// SpeciesInfoPanel already manages its own table scrolling.
+			tabbedAnalysisPanel.addTab(speciesPanel.getTitle(), IconObtainer.get("tab.png"),
+					speciesPanel, "The pathway component count distribution on species.");
+
+			tree2AnalyzingPanelInteractions.add(n -> {
+				speciesPanel.treeNodeClicked(n.getName());
+			});
+			analysisPanels.add(speciesPanel);
+		}
+
+		Optional<SpeciesTraitPanel> speciesTraitPanel = guiCompCreator.createSpeciesTraitPanel(
+				geneData
+		);
+
+		if (speciesTraitPanel.isPresent()){
+			SpeciesTraitPanel traitPanel = speciesTraitPanel.get();
+			// SpeciesTraitPanel already manages its own table scrolling.
+			tabbedAnalysisPanel.addTab(traitPanel.getTitle(), IconObtainer.get("tab.png"),
+					traitPanel, "The species trait information display.");
+
+			tree2AnalyzingPanelInteractions.add(n -> {
+				traitPanel.treeNodeClicked(n.getName());
+			});
+			analysisPanels.add(traitPanel);
+		}
+
+
 
 		SwingUtilities.invokeLater(() -> {
 			for (AbstractAnalysisPanel analysisPanel : analysisPanels){
@@ -437,6 +464,8 @@ public class PathwayFamilyMainFace extends ModuleFace {
 			tabbedAnalysisPanel.setTabPlacement(JideTabbedPane.TOP);
 			tabbedAnalysisPanel.setTabColorProvider(tabColorProvider);
 			tabbedAnalysisPanel.setTabEditingAllowed(true);
+
+			tabbedAnalysisPanel.setTabResizeMode(JideTabbedPane.RESIZE_MODE_FIT);
 
 			Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 			tabbedAnalysisPanel.setFont(defaultTitleFont);

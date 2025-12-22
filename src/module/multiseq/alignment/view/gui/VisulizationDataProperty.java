@@ -1,15 +1,12 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import egps2.UnifiedAccessPoint;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import msaoperator.alignment.sequence.SequenceI;
+
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
-
-import egps2.UnifiedAccessPoint;
-import msaoperator.alignment.sequence.SequenceI;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
 
 /**
  * Copyright (c) 2019 Chinese Academy of Sciences. All rights reserved.

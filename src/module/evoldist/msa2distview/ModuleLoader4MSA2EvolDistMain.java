@@ -1,13 +1,13 @@
 package module.evoldist.msa2distview;
 
-import java.io.InputStream;
-
 import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
 import egps2.modulei.IModuleLoader;
 import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
+
+import java.io.InputStream;
 
 public class ModuleLoader4MSA2EvolDistMain implements IModuleLoader{
 

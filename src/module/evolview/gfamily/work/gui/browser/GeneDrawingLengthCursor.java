@@ -1,8 +1,6 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import java.awt.*;
 
 
 public class GeneDrawingLengthCursor {

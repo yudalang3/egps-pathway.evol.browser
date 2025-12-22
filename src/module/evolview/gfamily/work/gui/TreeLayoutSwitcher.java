@@ -1,16 +1,12 @@
 package module.evolview.gfamily.work.gui;
 
-import java.awt.Component;
-import java.awt.FlowLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JToggleButton;
-import javax.swing.border.Border;
-
 import egps2.builtin.modules.IconObtainer;
 import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
 import module.evolview.model.enums.TreeLayoutEnum;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
 
 
 /**

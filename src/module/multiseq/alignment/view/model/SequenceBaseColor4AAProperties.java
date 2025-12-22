@@ -1,6 +1,6 @@
 package module.multiseq.alignment.view.model;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.function.Supplier;
 
 public enum SequenceBaseColor4AAProperties {

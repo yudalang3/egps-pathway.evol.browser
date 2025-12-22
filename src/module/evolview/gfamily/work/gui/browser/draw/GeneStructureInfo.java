@@ -1,17 +1,16 @@
 package module.evolview.gfamily.work.gui.browser.draw;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
-
 import module.evolview.gfamily.work.beans.GeneMetaInfo;
 import module.evolview.gfamily.work.beans.SequenceElementInfo;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 用于基因的每个block位置信息封装,

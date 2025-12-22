@@ -1,16 +1,13 @@
 package module.multiseq.alignerwithref;
 
-import java.io.InputStream;
-
+import egps2.EGPSProperties;
 import egps2.frame.ModuleFace;
-import egps2.EGPSProperties;
 import egps2.modulei.IModuleLoader;
-import egps2.modulei.ModuleVersion;
-import egps2.EGPSProperties;
 import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
-import egps2.EGPSProperties;
+
+import java.io.InputStream;
 
 public class IndependentModuleLoader implements IModuleLoader{
 

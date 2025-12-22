@@ -1,11 +1,9 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Graphics2D;
-
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
+
+import java.awt.*;
 
 public class RadialCladoLayout extends RadialPhyloLayout {
 	public RadialCladoLayout(TreeLayoutProperties controller, GraphicsNode rootNode,TreeLayoutHost phylogeneticTreePanel) {

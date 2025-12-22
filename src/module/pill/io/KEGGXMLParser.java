@@ -1,17 +1,16 @@
 package module.pill.io;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 // https://www.kegg.jp/kegg/xml/docs/
 // 这其实可以当一个脚本型的文件来用，每次更具自己的需求来改写代码

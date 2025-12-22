@@ -1,11 +1,11 @@
 package module.multiseq.deversitydescriptor;
 
-import java.awt.BorderLayout;
-
 import egps2.frame.ModuleFace;
-import module.multiseq.deversitydescriptor.gui.SimpleLeftControlPanel;
 import egps2.modulei.IInformation;
 import egps2.modulei.IModuleLoader;
+import module.multiseq.deversitydescriptor.gui.SimpleLeftControlPanel;
+
+import java.awt.*;
 
 public class SimpleModuleMain extends ModuleFace {
 

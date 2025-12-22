@@ -1,13 +1,10 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.util.List;
-
+import evoltree.struct.util.EvolNodeUtil;
+import module.evolview.model.tree.GraphicsNode;
 import org.apache.commons.math3.util.FastMath;
 
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import java.util.List;
 
 public class RectPhyloInnerYAxis extends RectPhyloLayout {
 

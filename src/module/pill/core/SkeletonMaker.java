@@ -1,31 +1,20 @@
 package module.pill.core;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.Timer;
-
+import egps2.UnifiedAccessPoint;
 import egps2.frame.gui.EGPSSwingUtil;
+import egps2.panels.dialog.EGPSFileChooser;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.util.poi.pptx.Decoder4pptx;
+import module.pill.gui.CtrlConvenientOperationPanel;
+import module.pill.gui.CtrlPathwayCompoentsPanel;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
-import egps2.panels.dialog.EGPSFileChooser;
-import egps2.panels.dialog.SwingDialog;
-import egps2.UnifiedAccessPoint;
-import module.pill.gui.CtrlConvenientOperationPanel;
-import module.pill.gui.CtrlPathwayCompoentsPanel;
-import egps2.utils.common.util.poi.pptx.Decoder4pptx;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 
 public class SkeletonMaker {
 

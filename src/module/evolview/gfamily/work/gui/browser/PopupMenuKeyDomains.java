@@ -1,20 +1,17 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Toolkit;
+import egps2.panels.dialog.SwingDialog;
+import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
+import module.evolview.model.AlignmentGetSequence;
+import msaoperator.alignment.sequence.SequenceI;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JTextArea;
-
-import egps2.panels.dialog.SwingDialog;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
-import module.evolview.model.AlignmentGetSequence;
-import msaoperator.alignment.sequence.SequenceI;
 
 /**
  * 当点击ElementStructure Block时,弹出Menu,操作对应区域数据

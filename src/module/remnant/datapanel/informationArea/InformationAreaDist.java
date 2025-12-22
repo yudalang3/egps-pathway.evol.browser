@@ -1,13 +1,12 @@
 package module.remnant.datapanel.informationArea;
 
-import java.awt.Color;
-import java.io.File;
-
-import javax.swing.border.EtchedBorder;
-
 import module.remnant.datapanel.data.DataCenter;
 import module.remnant.datapanel.data.IDataCenter;
 import module.webmsaoperator.webIO.DistMatrixTextInput;
+
+import javax.swing.border.EtchedBorder;
+import java.awt.*;
+import java.io.File;
 
 public class InformationAreaDist extends AbstractTableBasedArea {
 

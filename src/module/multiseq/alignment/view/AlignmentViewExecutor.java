@@ -1,10 +1,10 @@
 package module.multiseq.alignment.view;
 
-import java.awt.Adjustable;
-
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.multiseq.alignment.view.gui.ViewAreaSequenceJPanel;
 import module.multiseq.alignment.view.gui.VisulizationDataProperty;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
+
+import java.awt.*;
 
 public class AlignmentViewExecutor {
 

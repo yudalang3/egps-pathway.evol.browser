@@ -1,30 +1,15 @@
 package module.multiseq.aligner.notuse;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
-
+import com.jidesoft.swing.JideSplitPane;
+import egps2.UnifiedAccessPoint;
+import egps2.panels.dialog.EGPSJSpinner;
+import module.multiseq.aligner.MultipleSeqAlignerMain;
 import module.multiseq.aligner.gui.AbstractAlignmentPanel;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
-import com.jidesoft.swing.JideSplitPane;
-
-import egps2.panels.dialog.EGPSJSpinner;
-import egps2.UnifiedAccessPoint;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import javax.swing.*;
+import java.awt.*;
 
 public class MusclePanel extends AbstractAlignmentPanel {
 

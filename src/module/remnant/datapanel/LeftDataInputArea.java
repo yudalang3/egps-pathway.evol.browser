@@ -1,11 +1,11 @@
 package module.remnant.datapanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
+import com.jidesoft.utils.SystemInfo;
+import egps2.UnifiedAccessPoint;
+import module.remnant.datapanel.data.IDataCenter;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -13,17 +13,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
-import com.jidesoft.utils.SystemInfo;
-
-import module.remnant.datapanel.data.IDataCenter;
-import egps2.UnifiedAccessPoint;
 
 
 public class LeftDataInputArea extends JPanel {

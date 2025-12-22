@@ -1,24 +1,17 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.RoundRectangle2D.Double;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import module.evolview.gfamily.work.beans.TrackMultipleDomainBean;
 import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyKeyDomains;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D.Double;
+import java.util.List;
 
 /**
  * 绘制ElementStructure信息,可能会有多行 这里类名还是叫做 KeyDomain 但是它可以充当任何 Element Structure

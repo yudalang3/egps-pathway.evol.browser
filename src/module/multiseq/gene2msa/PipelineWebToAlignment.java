@@ -1,5 +1,22 @@
 package module.multiseq.gene2msa;
 
+import egps2.frame.MainFrameProperties;
+import egps2.modulei.RunningTask;
+import egps2.panels.dialog.SwingDialog;
+import geneticcodes.GeneticCode;
+import module.evoltrepipline.ConstantNameClass_GeneticCode;
+import module.evoltrepipline.ConstantNameClass_SpeciesSet;
+import module.evoltrepipline.ConstantNameClass_WebConnection;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.alignment.view.Launcher4ModuleLoader;
+import module.multiseq.alignment.view.MS2AlignmentUtil;
+import module.webmsaoperator.webIO.RestGRegion2MSAMultiStep;
+import module.webmsaoperator.webIO.RestGenomicRegionMultiStep;
+import module.webmsaoperator.webIO.RestWeb2AlignmentMultiStep;
+import module.webmsaoperator.webIO.gene.EmployedRegionNotAvailable;
+import msaoperator.alignment.sequence.Sequence;
+import msaoperator.alignment.sequence.SequenceI;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
@@ -8,23 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.frame.MainFrameProperties;
-import module.evoltrepipline.ConstantNameClass_GeneticCode;
-import module.evoltrepipline.ConstantNameClass_SpeciesSet;
-import module.evoltrepipline.ConstantNameClass_WebConnection;
-import geneticcodes.GeneticCode;
-import msaoperator.alignment.sequence.Sequence;
-import msaoperator.alignment.sequence.SequenceI;
-import module.multiseq.alignment.view.Launcher4ModuleLoader;
-import module.multiseq.alignment.view.MS2AlignmentUtil;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
-import module.webmsaoperator.webIO.RestGRegion2MSAMultiStep;
-import module.webmsaoperator.webIO.RestGenomicRegionMultiStep;
-import module.webmsaoperator.webIO.RestWeb2AlignmentMultiStep;
-import module.webmsaoperator.webIO.gene.EmployedRegionNotAvailable;
-import egps2.modulei.RunningTask;
 
 /**
  * 

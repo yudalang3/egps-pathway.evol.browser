@@ -1,24 +1,18 @@
 package module.evoldist.gene2dist;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.HashMap;
-import java.util.Map;
+import com.jidesoft.swing.JideSplitPane;
+import egps.preferences.gui.PreferenceTree;
+import egps2.modulei.IInformation;
+import egps2.modulei.IModuleLoader;
+import module.evoldist.view.gui.DistanceMatrixParameterMain;
+import module.evoltrepipline.Panel4BiologyCodesPanel;
+import module.evoltrepipline.Panel4EvolutionaryDistancePanel;
+import module.evoltrepipline.Panel4WebResources;
+import module.evoltrepipline.TreeParameterHandler;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -27,20 +21,12 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
-
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import com.jidesoft.swing.JideSplitPane;
-
-import egps.preferences.gui.PreferenceTree;
-import module.evoldist.view.gui.DistanceMatrixParameterMain;
-import module.evoltrepipline.TreeParameterHandler;
-import module.evoltrepipline.Panel4BiologyCodesPanel;
-import module.evoltrepipline.Panel4EvolutionaryDistancePanel;
-import module.evoltrepipline.Panel4WebResources;
-import egps2.modulei.IInformation;
-import egps2.modulei.IModuleLoader;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 从基因名到算距离矩阵的面板

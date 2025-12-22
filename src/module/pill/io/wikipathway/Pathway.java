@@ -1,8 +1,8 @@
 package module.pill.io.wikipathway;
 
-import java.util.List;
-
 import com.alibaba.fastjson.annotation.JSONField;
+
+import java.util.List;
 
 public class Pathway {
     private String id;

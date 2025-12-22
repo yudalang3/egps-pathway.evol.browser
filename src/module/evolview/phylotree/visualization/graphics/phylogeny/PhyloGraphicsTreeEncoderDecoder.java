@@ -1,7 +1,7 @@
 package module.evolview.phylotree.visualization.graphics.phylogeny;
 
-import evoltree.struct.io.BasicLeafCoderDecoder;
 import evoltree.struct.TreeCoder;
+import evoltree.struct.io.BasicLeafCoderDecoder;
 import evoltree.struct.io.PrimaryNodeTreeDecoder;
 import module.evolview.model.tree.DefaultGraphicsPhyloNode;
 

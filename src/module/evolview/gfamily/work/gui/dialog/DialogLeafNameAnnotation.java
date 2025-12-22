@@ -1,27 +1,17 @@
 package module.evolview.gfamily.work.gui.dialog;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import egps2.UnifiedAccessPoint;
+import graphic.engine.guibean.ColorIcon;
+import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.DrawPropLeafNameAnno;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JColorChooser;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-
-import graphic.engine.guibean.ColorIcon;
-import egps2.UnifiedAccessPoint;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.phylotree.visualization.annotation.DrawPropLeafNameAnno;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
-import module.evolview.model.tree.GraphicsNode;
 
 
 @SuppressWarnings("serial")

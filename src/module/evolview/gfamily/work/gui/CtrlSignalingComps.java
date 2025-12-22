@@ -1,19 +1,15 @@
 package module.evolview.gfamily.work.gui;
 
-import java.awt.Font;
-
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-
-import utils.EGPSFileUtil;
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
+import utils.EGPSFileUtil;
 
-import java.awt.GridLayout;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import javax.swing.border.EmptyBorder;
 
 @SuppressWarnings("serial")
 public class CtrlSignalingComps extends BaseCtrlPanel {

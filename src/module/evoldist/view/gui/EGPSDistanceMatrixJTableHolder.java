@@ -1,22 +1,14 @@
 package module.evoldist.view.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.print.PrinterException;
+import egps2.utils.common.math.matrix.MatrixTriangleOp;
+import module.evoldist.view.contorl.SaveDistanceMatrix;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
-
-import egps2.utils.common.math.matrix.MatrixTriangleOp;
-import module.evoldist.view.contorl.SaveDistanceMatrix;
+import java.awt.*;
+import java.awt.print.PrinterException;
 
 
 /**

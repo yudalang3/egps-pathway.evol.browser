@@ -1,8 +1,8 @@
 package module.evolview.gfamily.work.gui.browser.draw;
 
-import java.awt.Color;
-
 import module.evolview.gfamily.work.gui.Triangle;
+
+import java.awt.*;
 
 /**
  * 存储Nucleotid的

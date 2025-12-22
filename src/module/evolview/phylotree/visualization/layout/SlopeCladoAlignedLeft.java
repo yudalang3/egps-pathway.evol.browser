@@ -1,30 +1,21 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import evoltree.struct.util.EvolNodeUtil;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.annotation.*;
+import module.evolview.phylotree.visualization.graphics.struct.NodeType;
+import module.evolview.phylotree.visualization.graphics.struct.SlopeLayoutProperty;
+import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
+import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D.Double;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
-
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.phylotree.visualization.util.DrawUtil;
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNode2LeafAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNodeInsituAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropOutterSidewardAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropOutterSidewardAnno4LinageType;
-import module.evolview.phylotree.visualization.annotation.OutterSidewardLocation;
-import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.graphics.struct.SlopeLayoutProperty;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 
 /**
  * 这种layout和枝长没有关系！

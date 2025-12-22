@@ -1,6 +1,6 @@
 package module.evolview.gfamily.work.gui;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 

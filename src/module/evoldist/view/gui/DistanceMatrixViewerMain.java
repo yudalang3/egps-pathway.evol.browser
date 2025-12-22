@@ -1,9 +1,8 @@
 package module.evoldist.view.gui;
 
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import module.evoldist.view.contorl.VOICE4EvolDist;
 import egps2.modulei.IModuleLoader;
+import module.evoldist.view.contorl.VOICE4EvolDist;
+import org.jdesktop.swingx.JXTaskPaneContainer;
 
 /**
  * 从历史记录点击一个曾经运算过的距离矩阵后调用此面板

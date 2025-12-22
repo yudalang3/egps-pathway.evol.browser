@@ -1,21 +1,16 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.Rectangle2D.Double;
-import java.util.ArrayList;
-import java.util.List;
-
 import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 import module.evolview.gfamily.work.gui.Triangle;
 import module.evolview.gfamily.work.gui.browser.draw.AlignmentWithDerivedStatistics;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignment;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignmentItem;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyAlignmentNucleotide;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D.Double;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class TrackAlignment extends AbstractTrackPanel {

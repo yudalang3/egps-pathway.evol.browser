@@ -1,12 +1,9 @@
 package module.evolview.gfamily.work.gui.tree;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-
-import javax.swing.JPanel;
-
 import module.evolview.phylotree.visualization.layout.BaseLayout;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class InnerJPanel extends JPanel {
 

@@ -1,16 +1,9 @@
 package module.evolview.pathwaybrowser.gui;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-
-import javax.swing.JPanel;
-
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 
-import egps2.panels.dialog.SwingDialog;
-import egps2.frame.gui.EGPSMainGuiUtil;
-import egps2.utils.common.util.poi.pptx.Decoder4pptx;
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class EvoSelectionPressurePanel extends JPanel {

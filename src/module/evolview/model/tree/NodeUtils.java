@@ -1,19 +1,17 @@
 package module.evolview.model.tree;
 
+import evoltree.phylogeny.DefaultPhyNode;
+import evoltree.struct.ArrayBasedNode;
+import evoltree.struct.EvolNode;
+import evoltree.struct.util.EvolNodeUtil;
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
-
-import org.apache.commons.io.FileUtils;
-
-import evoltree.struct.util.EvolNodeUtil;
-import evoltree.phylogeny.DefaultPhyNode;
-import evoltree.struct.ArrayBasedNode;
-import evoltree.struct.EvolNode;
-import module.evolview.model.tree.GraphicsNode;
 
 public class NodeUtils {
 	public static GraphicsNode convertBasicNode2graphicsNode(EvolNode node) {

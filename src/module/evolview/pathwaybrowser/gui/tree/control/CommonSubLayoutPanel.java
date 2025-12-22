@@ -1,8 +1,8 @@
 package module.evolview.pathwaybrowser.gui.tree.control;
 
-import javax.swing.JPanel;
-
 import module.evolview.pathwaybrowser.PathwayBrowserController;
+
+import javax.swing.*;
 
 @SuppressWarnings("serial")
 public abstract class CommonSubLayoutPanel extends JPanel {

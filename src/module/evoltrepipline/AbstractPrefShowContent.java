@@ -1,13 +1,11 @@
 package module.evoltrepipline;
 
-import java.awt.Font;
-import java.util.Map;
-
-import javax.swing.JPanel;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import egps2.UnifiedAccessPoint;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
+import java.util.Map;
 
 /**
  * @ClassName: AbstructPrefShowContent.java

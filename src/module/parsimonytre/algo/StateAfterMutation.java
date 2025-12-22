@@ -1,9 +1,9 @@
 package module.parsimonytre.algo;
 
-import java.util.Objects;
-
-import phylo.msa.util.EvolutionaryProperties;
 import module.evoldist.operator.util.QuickDistUtil;
+import phylo.msa.util.EvolutionaryProperties;
+
+import java.util.Objects;
 
 public class StateAfterMutation implements Comparable<StateAfterMutation>, Cloneable {
 

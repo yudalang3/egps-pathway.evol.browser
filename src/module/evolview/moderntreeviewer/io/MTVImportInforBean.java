@@ -1,10 +1,10 @@
 package module.evolview.moderntreeviewer.io;
 
-import java.awt.Font;
-
 import egps2.UnifiedAccessPoint;
-import module.evoltreio.EvolTreeImportInfoBean;
 import graphic.engine.guicalculator.BlankArea;
+import module.evoltreio.EvolTreeImportInfoBean;
+
+import java.awt.*;
 
 public class MTVImportInforBean extends EvolTreeImportInfoBean {
 

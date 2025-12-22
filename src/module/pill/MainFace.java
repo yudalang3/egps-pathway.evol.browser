@@ -1,15 +1,13 @@
 package module.pill;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JComponent;
-import javax.swing.JSplitPane;
-
+import egps2.frame.ModuleFace;
+import egps2.modulei.IModuleLoader;
 import egps2.panels.dialog.SwingDialog;
 import egps2.utils.common.util.SaveUtil;
-import egps2.frame.ModuleFace;
 import module.pill.core.SkeletonMaker;
-import egps2.modulei.IModuleLoader;
+
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class MainFace extends ModuleFace{

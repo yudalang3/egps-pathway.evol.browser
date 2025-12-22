@@ -1,6 +1,6 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Shape;
+import java.awt.*;
 
 public class OutterSidewardLocation {
 	float textX;

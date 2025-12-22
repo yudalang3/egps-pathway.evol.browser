@@ -1,15 +1,15 @@
 package module.evolview.demo.parsimonytre;
 
-import java.awt.Dimension;
-import java.util.Arrays;
-
 import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.phylotree.visualization.primary.swing.FastSingleTreeVisualizer;
 import evoltree.swingvis.OneNodeDrawer;
+import module.evolview.phylotree.visualization.primary.swing.FastSingleTreeVisualizer;
 import module.parsimonytre.algo.ComplexSnakoffAlgo;
 import module.parsimonytre.algo.Node4SankoffAlgo;
 import module.parsimonytre.algo.PrepareFactor;
 import module.parsimonytre.algo.StateAfterMutation;
+
+import java.awt.*;
+import java.util.Arrays;
 
 /**
  * @author yudalang

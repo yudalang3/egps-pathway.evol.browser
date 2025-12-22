@@ -1,9 +1,7 @@
 package module.evolview.phylotree.visualization.layout;
 
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
 public class CircularInnerCladoAligned extends CircularInnerPhylo{
 

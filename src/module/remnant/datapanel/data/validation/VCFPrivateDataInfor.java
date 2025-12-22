@@ -1,9 +1,9 @@
 package module.remnant.datapanel.data.validation;
 
-import java.util.Arrays;
-
 import msaoperator.DataForamtPrivateInfor;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Arrays;
 
 public class VCFPrivateDataInfor implements DataForamtPrivateInfor {
 	

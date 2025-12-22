@@ -2,11 +2,8 @@ package module.pill.core;
 
 import egps2.frame.gui.EGPSSwingUtil;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -14,9 +11,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 public class DrawingPanelIntuiShapeCreator extends JPanel {
 

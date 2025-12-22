@@ -1,7 +1,6 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
+import javax.swing.*;
 
 /**
  * 当点击VirusGenomeStructure Block时,弹出Menu跳转当前Block起始区域

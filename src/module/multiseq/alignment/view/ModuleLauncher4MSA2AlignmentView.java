@@ -1,10 +1,10 @@
 package module.multiseq.alignment.view;
 
-import java.io.File;
-import java.util.List;
-
 import egps2.frame.MainFrameProperties;
 import module.evoltrepipline.alignment.SequenceDataForAViewer;
+
+import java.io.File;
+import java.util.List;
 
 public class ModuleLauncher4MSA2AlignmentView {
 

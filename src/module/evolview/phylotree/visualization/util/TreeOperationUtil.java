@@ -1,19 +1,15 @@
 package module.evolview.phylotree.visualization.util;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import evoltree.struct.EvolNode;
+import evoltree.struct.util.EvolNodeUtil;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.graphics.struct.NodeType;
+import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import evoltree.struct.util.EvolNodeUtil;
-import evoltree.struct.EvolNode;
-import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 
 public class TreeOperationUtil {
 

@@ -1,11 +1,10 @@
 package module.multiseq.alignment.view.io;
 
-import java.io.File;
+import module.multiseq.alignment.DataFileSuffixNames;
+import msaoperator.io.seqFormat.MSAFormatSuffixName;
 
 import javax.swing.filechooser.FileFilter;
-
-import msaoperator.io.seqFormat.MSAFormatSuffixName;
-import module.multiseq.alignment.DataFileSuffixNames;
+import java.io.File;
 
 public class SaveFilterNEXUS extends FileFilter implements MSAFormatSuffixName{
 	

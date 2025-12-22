@@ -1,10 +1,10 @@
 package module.multiseq.alignment.trimmer;
 
-import java.awt.BorderLayout;
-
 import egps2.frame.ModuleFace;
-import module.multiseq.alignment.trimmer.gui.SimpleLeftControlPanel;
 import egps2.modulei.IModuleLoader;
+import module.multiseq.alignment.trimmer.gui.SimpleLeftControlPanel;
+
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class SimpleModuleMain extends ModuleFace{

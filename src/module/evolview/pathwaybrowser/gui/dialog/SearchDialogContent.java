@@ -1,31 +1,20 @@
 package module.evolview.pathwaybrowser.gui.dialog;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import egps2.UnifiedAccessPoint;
+import evoltree.struct.util.EvolNodeUtil;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.pathwaybrowser.PathwayBrowserController;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Objects;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-
-import egps2.UnifiedAccessPoint;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.pathwaybrowser.PathwayBrowserController;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public class SearchDialogContent extends JPanel implements ActionListener {
 

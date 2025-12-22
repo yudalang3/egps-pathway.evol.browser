@@ -1,8 +1,8 @@
 
 package module.evolview.phylotree.visualization.graphics.struct;
 
-import module.evolview.model.tree.GraphicsNode;
 import evoltree.txtdisplay.BaseGraphicNode;
+import module.evolview.model.tree.GraphicsNode;
 
 public class TreeDecideUtil {
 

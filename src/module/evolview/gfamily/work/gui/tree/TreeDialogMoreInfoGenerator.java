@@ -1,22 +1,15 @@
 package module.evolview.gfamily.work.gui.tree;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.dialog.DialogMoreInfoGenerator;
+import module.evoltre.mutation.IMutation;
+import module.evoltre.mutation.MutationOperator;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-
-import egps2.UnifiedAccessPoint;
-import module.evoltre.mutation.IMutation;
-import module.evoltre.mutation.MutationOperator;
-import egps2.frame.gui.dialog.DialogMoreInfoGenerator;
 
 @SuppressWarnings("serial")
 public class TreeDialogMoreInfoGenerator extends DialogMoreInfoGenerator {

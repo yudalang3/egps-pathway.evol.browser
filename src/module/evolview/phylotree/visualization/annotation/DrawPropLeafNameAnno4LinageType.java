@@ -1,6 +1,6 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class DrawPropLeafNameAnno4LinageType {
 

@@ -1,12 +1,11 @@
 package module.evolview.gfamily.work.gui.dialog;
 
-import java.awt.Font;
-
-import javax.swing.JComponent;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
 
 
 @SuppressWarnings("serial")

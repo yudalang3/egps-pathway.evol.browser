@@ -6,11 +6,8 @@ EXPRESS OR IMPLIED WITH RESPECT TO THE PROGRAM, INCLUDING THE IMPLIED WARRANTIES
 OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK ARISING OUT OF USE OR
 PERFORMANCE OF THE PROGRAM AND DOCUMENTATION REMAINS WITH THE USER.
 */
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.LayoutManager;
+
+import java.awt.*;
 import java.util.Hashtable;
 
 /**

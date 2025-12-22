@@ -1,12 +1,11 @@
 package module.remnant.datapanel;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-
 import egps2.frame.MainFrameProperties;
 import egps2.modulei.IModuleLoader;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class RightMethodButton implements ActionListener{

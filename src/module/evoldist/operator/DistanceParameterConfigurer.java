@@ -1,9 +1,9 @@
 package module.evoldist.operator;
 
-import java.util.Map;
-
 import module.evoltrepipline.ConstantNameClass_EvolutionaryDistance;
 import module.evoltrepipline.ConstantNameClass_GeneticCode;
+
+import java.util.Map;
 
 /**
  * Configuration utility for distance calculators.

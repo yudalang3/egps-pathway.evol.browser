@@ -1,19 +1,19 @@
 package module.evolview.pathwaybrowser.io;
 
-import java.util.LinkedHashMap;
-import java.util.Optional;
-
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.moderntreeviewer.io.TreeParser4MTV;
-import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
-import module.evolview.pathwaybrowser.PathwayFamilyMainFace;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.moderntreeviewer.io.TreeParser4MTV;
+import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
+import module.evolview.pathwaybrowser.PathwayFamilyMainFace;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.LinkedHashMap;
+import java.util.Optional;
 
 public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPanel {
 	private static final Logger log = LoggerFactory.getLogger(Voice4pathwayFamilyBrowser.class);
@@ -55,4 +55,8 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 
 	}
 
+	@Override
+	protected String getExampleText() {
+		return super.getExampleText();
+	}
 }

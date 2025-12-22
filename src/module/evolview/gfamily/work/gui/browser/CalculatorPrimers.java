@@ -1,15 +1,15 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimerSet;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimersNucleotide;
 import module.evolview.model.AlignmentGetSequence;
 import msaoperator.alignment.sequence.SequenceI;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 需要注意的是当绘制CalculatorPrimers的位置信息的时候,包含起始位置(左闭右闭原则)

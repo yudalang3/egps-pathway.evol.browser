@@ -1,6 +1,6 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * 引物转换工具类

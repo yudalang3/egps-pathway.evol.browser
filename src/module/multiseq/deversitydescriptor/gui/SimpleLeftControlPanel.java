@@ -1,28 +1,20 @@
 package module.multiseq.deversitydescriptor.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.io.File;
-import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.border.TitledBorder;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
+import egps2.panels.dialog.SwingDialog;
 import module.evoltre.mutation.MutationOperator;
 import module.multiseq.deversitydescriptor.SimpleModuleController;
 import module.multiseq.deversitydescriptor.calculate.VariantDescriptorElement;
 import module.multiseq.deversitydescriptor.calculate.VariantStateObtainer;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.io.File;
+import java.util.List;
 
 public class SimpleLeftControlPanel extends JPanel {
 	private static final long serialVersionUID = 6360716192941698962L;

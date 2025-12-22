@@ -1,19 +1,12 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.border.EmptyBorder;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.gui.colorscheme.DialogFrame;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class LeftCustomizedBrowserTrackPanel extends JPanel {

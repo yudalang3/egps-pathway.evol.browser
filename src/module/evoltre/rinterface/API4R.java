@@ -1,21 +1,19 @@
 package module.evoltre.rinterface;
 
+import com.google.common.base.Objects;
+import evoltree.phylogeny.DefaultPhyNode;
+import evoltree.phylogeny.NWKInternalCoderDecoder;
+import evoltree.phylogeny.NWKLeafCoderDecoder;
+import evoltree.struct.io.PrimaryNodeTreeDecoder;
+import evoltree.struct.util.EvolNodeUtil;
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.commons.io.FileUtils;
-
-import com.google.common.base.Objects;
-
-import evoltree.struct.util.EvolNodeUtil;
-import evoltree.phylogeny.DefaultPhyNode;
-import evoltree.phylogeny.NWKInternalCoderDecoder;
-import evoltree.phylogeny.NWKLeafCoderDecoder;
-import evoltree.struct.io.PrimaryNodeTreeDecoder;
 
 public class API4R {
 

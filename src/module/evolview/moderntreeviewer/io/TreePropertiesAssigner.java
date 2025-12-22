@@ -1,27 +1,22 @@
 package module.evolview.moderntreeviewer.io;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.BooleanUtils;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
-import tsv.io.TSVReader;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.MyFrame;
 import evoltree.struct.util.EvolNodeUtil;
+import evoltree.txtdisplay.TreeDrawUnit;
+import graphic.engine.colors.EGPSColors;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import evoltree.txtdisplay.TreeDrawUnit;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import graphic.engine.colors.EGPSColors;
+import org.apache.commons.lang3.BooleanUtils;
+import tsv.io.TSVReader;
+
+import java.awt.*;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
 
 public class TreePropertiesAssigner {
 

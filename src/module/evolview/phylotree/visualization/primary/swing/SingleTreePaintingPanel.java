@@ -1,26 +1,19 @@
 package module.evolview.phylotree.visualization.primary.swing;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Stroke;
+import egps2.frame.gui.EGPSMainGuiUtil;
+import egps2.panels.dialog.SwingDialog;
+import evoltree.struct.EvolNode;
+import evoltree.struct.util.EvolNodeUtil;
+import evoltree.swingvis.OneNodeDrawer;
+import evoltree.txtdisplay.ReflectGraphicNode;
+import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.util.Map;
 import java.util.function.Consumer;
-
-import javax.swing.*;
-
-import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
-import egps2.panels.dialog.SwingDialog;
-import evoltree.struct.util.EvolNodeUtil;
-import evoltree.struct.EvolNode;
-import egps2.frame.gui.EGPSMainGuiUtil;
-import evoltree.swingvis.OneNodeDrawer;
-import evoltree.txtdisplay.ReflectGraphicNode;
 
 public class SingleTreePaintingPanel<T extends EvolNode> extends JPanel {
 

@@ -1,13 +1,13 @@
 package module.evolview.moderntreeviewer.io;
 
+import evoltree.phylogeny.DefaultPhyNode;
+import graphic.engine.guicalculator.BlankArea;
+import module.evoltreio.TreeParser4Evoltree;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.model.tree.NodeUtils;
+
 import java.util.Objects;
 import java.util.Optional;
-
-import evoltree.phylogeny.DefaultPhyNode;
-import module.evoltreio.TreeParser4Evoltree;
-import module.evolview.model.tree.NodeUtils;
-import module.evolview.model.tree.GraphicsNode;
-import graphic.engine.guicalculator.BlankArea;
 
 public class TreeParser4MTV extends TreeParser4Evoltree {
 

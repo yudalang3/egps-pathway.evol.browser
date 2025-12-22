@@ -1,6 +1,6 @@
 package module.evolview.gfamily.work.gui.colorscheme;
 
-import javax.swing.JPanel;
+import javax.swing.*;
 /**
  * DialogFrame类的构造函数的传入参数的基类</br>
  * 有一个executeRenderProcess()函数，为点击ok后调用的过程

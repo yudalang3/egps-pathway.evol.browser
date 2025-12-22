@@ -1,8 +1,8 @@
 package module.evoldist.operator.pairdist;
 
-import java.util.HashSet;
-
 import module.evoldist.operator.EvoDistanceUtil;
+
+import java.util.HashSet;
 
 public class DistParameterPreparerABAsGap implements DistParameterPreparer {
 

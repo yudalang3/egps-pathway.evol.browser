@@ -1,12 +1,9 @@
 package module.evolview.gfamily.work.gui.dialog;
 
-import java.awt.Graphics;
-import java.awt.Image;
-
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-
 import egps2.builtin.modules.IconObtainer;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class ImageContainer extends JPanel {
 

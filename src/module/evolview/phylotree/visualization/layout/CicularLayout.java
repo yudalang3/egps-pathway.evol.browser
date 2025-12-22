@@ -1,14 +1,12 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Color;
+import evoltree.txtdisplay.TreeDrawUnit;
+import module.evolview.model.tree.GraphicsNode;
+
+import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.model.tree.GraphicsNode;
-import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public abstract class CicularLayout extends BaseLayout {
 	public CicularLayout(TreeLayoutProperties controller, GraphicsNode rootNode,

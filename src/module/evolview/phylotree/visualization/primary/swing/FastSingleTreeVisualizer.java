@@ -1,23 +1,18 @@
 package module.evolview.phylotree.visualization.primary.swing;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import evoltree.struct.EvolNode;
+import evoltree.struct.TreeDecoder;
+import evoltree.swingvis.OneNodeDrawer;
+import evoltree.txtdisplay.ReflectGraphicNode;
+import utils.EGPSFileUtil;
+import utils.EGPSGuiUtil;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;
-
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-
-import evoltree.swingvis.OneNodeDrawer;
-import evoltree.txtdisplay.ReflectGraphicNode;
-import utils.EGPSFileUtil;
-import evoltree.struct.EvolNode;
-import evoltree.struct.TreeDecoder;
-import utils.EGPSGuiUtil;
 
 /**
  * 快速可视化 实现了EvolNode的进化树，调用API的时候只要将 根节点传入即可。

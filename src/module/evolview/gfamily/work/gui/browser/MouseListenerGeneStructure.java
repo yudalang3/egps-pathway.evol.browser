@@ -1,17 +1,13 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Point;
+import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceElement;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Rectangle2D.Double;
 import java.util.List;
-
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceElement;
 
 public class MouseListenerGeneStructure extends AbstractMouseListener {
 

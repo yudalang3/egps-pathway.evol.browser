@@ -5,15 +5,15 @@ import egps2.utils.common.model.datatransfer.TwoTuple;
 import evoltree.txtdisplay.TreeDrawUnit;
 import graphic.engine.AxisTickCalculator;
 import graphic.engine.guicalculator.BlankArea;
-import module.evolview.phylotree.visualization.util.DrawUtil;
-import module.evolview.phylotree.visualization.annotation.*;
 import module.evolview.model.enums.BranchLengthType;
 import module.evolview.model.tree.*;
+import module.evolview.phylotree.visualization.annotation.*;
 import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.phylotree.visualization.graphics.struct.ShowInnerNodePropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
+import module.evolview.phylotree.visualization.util.DrawUtil;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.awt.*;

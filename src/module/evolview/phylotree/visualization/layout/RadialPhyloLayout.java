@@ -1,27 +1,20 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Graphics2D;
-import java.awt.Point;
+import evoltree.struct.util.EvolNodeUtil;
+import graphic.engine.guicalculator.GuiCalculator;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.annotation.*;
+import module.evolview.phylotree.visualization.graphics.struct.NodeType;
+import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
+import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+
+import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D.Double;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
-
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.phylotree.visualization.util.DrawUtil;
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNode2LeafAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNodeInsituAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropOutterSidewardAnno;
-import module.evolview.phylotree.visualization.annotation.OutterSidewardLocation;
-import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import graphic.engine.guicalculator.GuiCalculator;
 
 public class RadialPhyloLayout extends RadicalLayout {
 

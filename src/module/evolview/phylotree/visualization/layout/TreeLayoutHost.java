@@ -1,10 +1,10 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Container;
-
 import module.evolview.model.tree.ScaleBarProperty;
 import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
 import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
+
+import java.awt.*;
 
 /**
  * Host interface for tree layouts.

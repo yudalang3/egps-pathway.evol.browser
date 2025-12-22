@@ -1,8 +1,8 @@
 package module.evolview.model.tree;
 
-import java.awt.Font;
-
 import egps2.UnifiedAccessPoint;
+
+import java.awt.*;
 
 public class ScaleBarProperty {
 	

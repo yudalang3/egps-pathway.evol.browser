@@ -1,11 +1,10 @@
 package module.evolview.pathwaybrowser.gui;
 
-import java.awt.Font;
-
-import javax.swing.JPanel;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
+
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public abstract class BaseCtrlPanel extends JPanel {

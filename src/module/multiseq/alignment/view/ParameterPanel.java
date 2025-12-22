@@ -1,18 +1,11 @@
 package module.multiseq.alignment.view;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
 import egps2.UnifiedAccessPoint;
 import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 public class ParameterPanel extends JPanel {
 	private JComboBox<String> dataTypeComboBox;

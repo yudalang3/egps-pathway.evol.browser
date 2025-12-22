@@ -3,10 +3,8 @@
  */
 package module.evoltrepipline;
 
-import java.awt.Component;
-
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JList;
+import javax.swing.*;
+import java.awt.*;
 
 /**
 * @author YFQ

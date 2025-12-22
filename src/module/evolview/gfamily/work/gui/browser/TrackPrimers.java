@@ -1,18 +1,13 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.Rectangle2D;
-import java.util.List;
-
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimerSet;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimersNucleotide;
 import module.evolview.model.AlignmentGetSequence;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.util.List;
 
 /**
  * 绘制ElementStructure信息,可能会有多行

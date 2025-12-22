@@ -1,16 +1,16 @@
 package module.remnant.datapanel.data.validation;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-
 import module.remnant.datapanel.data.DataAlignmentFormat;
 import module.remnant.datapanel.data.DataFormat;
 import module.remnant.datapanel.data.DataFormatError;
 import module.remnant.mafoperator.mafParser.MafLine;
 import msaoperator.DataforamtInfo;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * 

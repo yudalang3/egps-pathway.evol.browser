@@ -1,8 +1,10 @@
 package module.pill.graphics;
 
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+import graphic.engine.colors.EGPSColors;
+import module.pill.io.KEGGXML2JavaShapeParser;
+import org.dom4j.Element;
+
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
@@ -16,11 +18,6 @@ import java.text.AttributedString;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.dom4j.Element;
-
-import graphic.engine.colors.EGPSColors;
-import module.pill.io.KEGGXML2JavaShapeParser;
 
 public class PathwayDrawer {
 

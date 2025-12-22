@@ -1,29 +1,18 @@
 package module.multiseq.alignment.view.gui.leftcontrol;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.List;
-import java.util.Optional;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
-
+import egps2.UnifiedAccessPoint;
 import egps2.panels.dialog.SwingDialog;
 import egps2.utils.common.util.EGPSShellIcons;
-import egps2.UnifiedAccessPoint;
 import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.gui.AlignmentViewContinuousRightPanel;
 import module.multiseq.alignment.view.gui.UserSelectedViewElement;
 import module.multiseq.alignment.view.gui.VisulizationDataProperty;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * 

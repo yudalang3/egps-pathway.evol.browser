@@ -1,19 +1,14 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
-import java.util.List;
-
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.gui.browser.draw.AxisTicks;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyLine;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPaintBar;
+
+import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class TrackAlleleFreq extends AbstractBarPlot {

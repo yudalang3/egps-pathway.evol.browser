@@ -1,12 +1,12 @@
 package module.multiseq.alignment.view.io;
 
-import java.util.Map;
-
 import egps2.EGPSProperties;
-import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import module.evoltrepipline.alignment.AlignmentImportBean;
+import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
+
+import java.util.Map;
 
 public class AligViewAbstractParamsAssignerAndParser extends AbstractParamsAssignerAndParser4VOICE {
 

@@ -1,17 +1,12 @@
 package module.remnant.mafoperator;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintStream;
+import egps2.utils.common.model.datatransfer.TwoTuple;
+import module.remnant.mafoperator.mafParser.MafFastaParser;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
-import egps2.utils.common.model.datatransfer.TwoTuple;
-import module.remnant.mafoperator.mafParser.MafFastaParser;
 
 /**
 * @author YFQ,yudalang

@@ -1,12 +1,9 @@
 package module.remnant.datapanel.informationArea;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-
 import module.remnant.datapanel.IDataInformation;
+
+import javax.swing.*;
+import java.awt.*;
 
 public abstract class AbstractInformationArea extends JPanel implements IDataInformation{
 

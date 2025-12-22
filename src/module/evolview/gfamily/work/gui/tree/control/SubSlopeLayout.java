@@ -1,20 +1,12 @@
 package module.evolview.gfamily.work.gui.tree.control;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.JLabel;
-import javax.swing.JSeparator;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-
 import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
 import module.evolview.phylotree.visualization.graphics.struct.SlopeLayoutProperty;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 @SuppressWarnings("serial")
 public class SubSlopeLayout extends BaseCtrlPanel {

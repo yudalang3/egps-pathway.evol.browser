@@ -1,17 +1,15 @@
 package module.evolview.moderntreeviewer.io;
 
-import java.awt.Font;
-
-import org.apache.commons.lang3.BooleanUtils;
-
 import com.google.common.base.Strings;
-
-import egps2.utils.common.util.EGPSFonts;
-import utils.string.EGPSStringUtil;
 import egps2.UnifiedAccessPoint;
-import module.evoltreio.ParamsAssignerAndParser4PhyloTree;
-import graphic.engine.guicalculator.BlankArea;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
+import egps2.utils.common.util.EGPSFonts;
+import graphic.engine.guicalculator.BlankArea;
+import module.evoltreio.ParamsAssignerAndParser4PhyloTree;
+import org.apache.commons.lang3.BooleanUtils;
+import utils.string.EGPSStringUtil;
+
+import java.awt.*;
 
 public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndParser4PhyloTree {
 

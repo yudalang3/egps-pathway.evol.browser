@@ -1,19 +1,17 @@
 package module.multiseq.aligner.gui;
 
-import java.awt.Color;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Optional;
-
+import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
+import module.config.externalprograms.ExternalProgramConfigManager;
+import module.multiseq.aligner.MultipleSeqAlignerMain;
+import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
-import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
-import module.config.externalprograms.ExternalProgramConfigManager;
-import net.miginfocom.swing.MigLayout;
-
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * MAFFT多序列比对工具的独立模块GUI面板。

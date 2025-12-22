@@ -1,9 +1,9 @@
 package module.evolview.model.tree;
 
-import java.util.Objects;
-
-import evoltree.txtdisplay.TreeDrawUnit;
 import evoltree.struct.ArrayBasedNode;
+import evoltree.txtdisplay.TreeDrawUnit;
+
+import java.util.Objects;
 
 /**
  * Nodes are building blocks for trees, which can be either species tree or

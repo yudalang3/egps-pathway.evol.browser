@@ -1,20 +1,12 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import com.jidesoft.swing.JideSplitPane;
+import module.multiseq.alignment.view.AlignmentViewMain;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-
-import com.jidesoft.swing.JideSplitPane;
-
-import module.multiseq.alignment.view.AlignmentViewMain;
 
 public class AlignmentViewContinuousRightPanel extends JPanel implements MouseWheelListener {
 	/**

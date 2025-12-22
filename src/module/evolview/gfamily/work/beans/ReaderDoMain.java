@@ -1,18 +1,17 @@
 package module.evolview.gfamily.work.beans;
 
-import java.awt.Color;
+import graphic.engine.colors.EGPSColors;
+import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
+import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
+import org.apache.commons.io.FileUtils;
+import utils.string.EGPSStringUtil;
+
+import java.awt.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-
-import utils.string.EGPSStringUtil;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
-import graphic.engine.colors.EGPSColors;
 
 /**
  * 读取domain文件(压缩/非压缩)

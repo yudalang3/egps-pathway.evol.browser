@@ -1,29 +1,26 @@
 package module.evolview.moderntreeviewer;
 
-import java.io.File;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.swing.JViewport;
-import javax.swing.SwingUtilities;
-
 import com.google.common.base.Strings;
-
+import egps2.EGPSProperties;
+import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
+import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;
 import egps2.panels.dialog.SwingDialog;
-import egps2.EGPSProperties;
 import module.evoltreio.EvolTreeImportInfoBean;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 import module.evolview.moderntreeviewer.io.TreeParser4MTV;
 import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
-import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
-import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.io.File;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 这个类的移植还是有点麻烦，需要花时间让其更加通用

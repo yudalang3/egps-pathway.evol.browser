@@ -1,9 +1,9 @@
 package module.remnant.treeoperator;
 
+import module.remnant.treeoperator.util.GenealogyAnalyzer;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import module.remnant.treeoperator.util.GenealogyAnalyzer;
 
 /**
  *

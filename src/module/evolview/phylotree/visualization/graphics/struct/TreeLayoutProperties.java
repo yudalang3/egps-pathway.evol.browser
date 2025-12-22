@@ -2,9 +2,9 @@ package module.evolview.phylotree.visualization.graphics.struct;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import evoltree.struct.util.EvolNodeUtil;
 import evoltree.txtdisplay.BaseGraphicNode;
 import graphic.engine.guicalculator.BlankArea;
-import evoltree.struct.util.EvolNodeUtil;
 
 import javax.swing.*;
 import java.awt.*;

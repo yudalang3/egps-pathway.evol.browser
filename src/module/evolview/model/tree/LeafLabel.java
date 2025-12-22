@@ -1,14 +1,8 @@
 package module.evolview.model.tree;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Insets;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.border.Border;
+import java.awt.*;
 
 public class LeafLabel extends JComponent {
 	

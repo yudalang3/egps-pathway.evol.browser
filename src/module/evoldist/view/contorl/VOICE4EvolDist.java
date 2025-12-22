@@ -1,21 +1,18 @@
 package module.evoldist.view.contorl;
 
+import com.google.common.base.Strings;
+import egps2.EGPSProperties;
+import egps2.builtin.modules.voice.VersatileOpenInputClickAbstractGuiBase;
+import egps2.builtin.modules.voice.fastmodvoice.VoiceParameterParser;
+import egps2.panels.dialog.SwingDialog;
+import module.evoldist.view.gui.DistanceMatrixParameterMain;
+import module.evoldist.view.gui.EGPSDistanceMatrixJTableHolder;
+import module.webmsaoperator.webIO.DistMatrixTextInput;
+
+import javax.swing.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-import com.google.common.base.Strings;
-
-import egps2.panels.dialog.SwingDialog;
-import egps2.EGPSProperties;
-import module.evoldist.view.gui.DistanceMatrixParameterMain;
-import module.evoldist.view.gui.EGPSDistanceMatrixJTableHolder;
-import egps2.builtin.modules.voice.VersatileOpenInputClickAbstractGuiBase;
-import egps2.builtin.modules.voice.fastmodvoice.VoiceParameterParser;
-import module.webmsaoperator.webIO.DistMatrixTextInput;
 
 public class VOICE4EvolDist extends VersatileOpenInputClickAbstractGuiBase {
 

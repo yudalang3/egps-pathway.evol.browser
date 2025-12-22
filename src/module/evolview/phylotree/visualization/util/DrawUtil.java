@@ -1,18 +1,14 @@
 package module.evolview.phylotree.visualization.util;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+import egps2.utils.common.model.datatransfer.TwoTuple;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D.Double;
 import java.awt.geom.Point2D;
 import java.util.List;
-
-import egps2.utils.common.model.datatransfer.TwoTuple;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 
 public class DrawUtil {
 

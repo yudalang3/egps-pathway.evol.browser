@@ -1,6 +1,6 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 
 /**
  * The top interface for the tree layout.

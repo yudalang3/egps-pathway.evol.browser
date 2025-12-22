@@ -1,10 +1,10 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.geom.Rectangle2D.Double;
-import java.util.List;
-
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyLine;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPaintBar;
+
+import java.awt.geom.Rectangle2D.Double;
+import java.util.List;
 
 public class TooltiperAlleleFreq extends AbstractTrackTooltiper {
 

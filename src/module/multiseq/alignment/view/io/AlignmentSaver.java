@@ -1,32 +1,25 @@
 package module.multiseq.alignment.view.io;
 
-import java.awt.Component;
-import java.io.File;
-import java.util.InputMismatchException;
-import java.util.Optional;
-import java.util.function.Consumer;
-
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
-
-import egps2.frame.gui.VectorGraphicsEncoder;
-import egps2.utils.common.model.filefilter.FileFilterEPS;
-import egps2.utils.common.model.filefilter.FileFilterPPTX;
-import egps2.utils.common.model.filefilter.FileFilterPng;
-import egps2.utils.common.model.filefilter.FileFilterSvg;
-import egps2.utils.common.model.filefilter.SaveFilterJpg;
-import egps2.utils.common.util.EGPSPrintUtilities;
-import egps2.utils.common.util.SaveUtil;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.MyFrame;
-import msaoperator.io.seqFormat.MSAFormatSuffixName;
+import egps2.frame.gui.VectorGraphicsEncoder;
+import egps2.utils.common.model.filefilter.*;
+import egps2.utils.common.util.EGPSPrintUtilities;
+import egps2.utils.common.util.SaveUtil;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.MS2AlignmentUtil;
 import module.multiseq.alignment.view.gui.AlignmentViewContinuousRightPanel;
 import module.multiseq.alignment.view.gui.AlignmentViewInterLeavedPanel;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import msaoperator.io.seqFormat.MSAFormatSuffixName;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.io.File;
+import java.util.InputMismatchException;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class AlignmentSaver extends SaveUtil {
 

@@ -1,12 +1,11 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
-
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.gui.tree.AbstractContentPanelCustomized;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class ContentPanelCustomizedKeyDomains extends AbstractContentPanelCustomized {

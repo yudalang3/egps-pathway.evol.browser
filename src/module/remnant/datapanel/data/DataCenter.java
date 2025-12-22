@@ -1,17 +1,17 @@
 package module.remnant.datapanel.data;
 
-import static module.remnant.datapanel.data.DataFormatError.*;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import egps2.panels.dialog.SwingDialog;
 import egps2.utils.common.model.datatransfer.TwoTuple;
 import msaoperator.DataForamtPrivateInfor;
 import msaoperator.DataforamtInfo;
 import msaoperator.DefaultDataFormatPrivateInfor;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static module.remnant.datapanel.data.DataFormatError.*;
 
 /**
  * 

@@ -1,8 +1,8 @@
 package module.multiseq.deversitydescriptor.calculate;
 
-import java.util.List;
-
 import module.evoltre.mutation.IMutation;
+
+import java.util.List;
 
 public class VariantDescriptorElement {
 	

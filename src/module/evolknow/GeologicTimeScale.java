@@ -1,11 +1,8 @@
 package module.evolknow;
 
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-
 import utils.string.EGPSStringUtil;
+
+import java.awt.*;
 
 /**
  * https://en.wikipedia.org/wiki/Geologic_time_scale

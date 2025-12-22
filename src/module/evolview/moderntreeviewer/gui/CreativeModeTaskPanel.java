@@ -1,26 +1,25 @@
 package module.evolview.moderntreeviewer.gui;
 
+import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.EGPSSwingUtil;
+import egps2.frame.gui.comp.toggle.toggle.ToggleAdapter;
+import egps2.frame.gui.comp.toggle.toggle.ToggleButton;
+import egps2.panels.dialog.SwingDialog;
+import evoltree.struct.util.EvolNodeUtil;
+import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.moderntreeviewer.MTreeViewMainFace;
+import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
+import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.pill.images.ImageUtils;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
-import egps2.frame.gui.EGPSSwingUtil;
-import egps2.panels.dialog.SwingDialog;
-import egps2.frame.gui.comp.toggle.toggle.ToggleAdapter;
-import egps2.frame.gui.comp.toggle.toggle.ToggleButton;
-import egps2.UnifiedAccessPoint;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
-import module.evolview.moderntreeviewer.MTreeViewMainFace;
-import module.pill.images.ImageUtils;
 
 public class CreativeModeTaskPanel extends JPanel {
 

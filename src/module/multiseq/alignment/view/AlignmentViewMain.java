@@ -1,43 +1,27 @@
 package module.multiseq.alignment.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Optional;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import egps2.panels.dialog.SwingDialog;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.ComputationalModuleFace;
-import module.multiseq.alignment.view.gui.AbstractSequenceColor;
-import module.multiseq.alignment.view.gui.AlignmentViewContinuousRightPanel;
-import module.multiseq.alignment.view.gui.AlignmentViewInterLeavedPanel;
-import module.multiseq.alignment.view.gui.UserSelectedViewElement;
-import module.multiseq.alignment.view.gui.VisulizationDataProperty;
+import egps2.modulei.AdjusterFillAndLine;
+import egps2.modulei.IInformation;
+import egps2.modulei.IModuleLoader;
+import egps2.panels.dialog.SwingDialog;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.alignment.view.gui.*;
 import module.multiseq.alignment.view.gui.leftcontrol.AlignmentColorSchemeLeftPanel;
 import module.multiseq.alignment.view.gui.leftcontrol.AlignmentLayoutLeftPanel;
 import module.multiseq.alignment.view.gui.leftcontrol.LeftPanelMarker;
 import module.multiseq.alignment.view.io.AlignmentSaver;
 import module.multiseq.alignment.view.model.AlignmentDrawProperties;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.multiseq.alignment.view.model.SequenceLayout;
-import egps2.modulei.AdjusterFillAndLine;
-import egps2.modulei.IInformation;
-import egps2.modulei.IModuleLoader;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * 

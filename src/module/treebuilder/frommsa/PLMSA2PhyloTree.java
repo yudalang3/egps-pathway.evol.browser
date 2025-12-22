@@ -1,14 +1,14 @@
 package module.treebuilder.frommsa;
 
-import java.util.Map;
-
-import egps2.panels.dialog.SwingDialog;
-import module.remnant.treeoperator.AbstractDistanceBasedTreePipeline;
-import module.remnant.treeoperator.NodeEGPSv1;
 import egps2.frame.MainFrameProperties;
+import egps2.panels.dialog.SwingDialog;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
 import module.evolview.phylotree.visualization.util.TreeConversionUtil;
+import module.remnant.treeoperator.AbstractDistanceBasedTreePipeline;
+import module.remnant.treeoperator.NodeEGPSv1;
+
+import java.util.Map;
 
 public class PLMSA2PhyloTree extends AbstractDistanceBasedTreePipeline {
 	protected int processIndex = 1;

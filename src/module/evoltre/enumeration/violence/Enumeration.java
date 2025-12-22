@@ -1,11 +1,11 @@
 package module.evoltre.enumeration.violence;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import utils.EGPSUtil;
 import evoltree.struct.ArrayBasedNode;
 import evoltree.struct.EvolNode;
+import utils.EGPSUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Enumeration {

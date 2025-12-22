@@ -1,24 +1,16 @@
 package module.evoldist.msa2distview;
 
-import java.io.File;
-
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
+import egps2.panels.dialog.SwingDialog;
 import module.evoldist.view.contorl.SaveDistanceMatrix;
 import module.evoldist.view.gui.EGPSDistanceMatrixJTableHolder;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
 import msaoperator.io.seqFormat.SequenceParser;
-import msaoperator.io.seqFormat.parser.ClustalWParser;
-import msaoperator.io.seqFormat.parser.FastaParser;
-import msaoperator.io.seqFormat.parser.GCGMSFParser;
-import msaoperator.io.seqFormat.parser.MEGAParser;
-import msaoperator.io.seqFormat.parser.NEXUSParser;
-import msaoperator.io.seqFormat.parser.PAMLParser;
-import msaoperator.io.seqFormat.parser.PHYParser;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
-import egps2.panels.dialog.SwingDialog;
+import msaoperator.io.seqFormat.parser.*;
+
+import javax.swing.*;
+import java.io.File;
 
 
 /**

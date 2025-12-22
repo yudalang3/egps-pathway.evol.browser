@@ -1,9 +1,9 @@
 package module.evolview.gfamily.work.gui.browser;
 
+import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceElement;
+
 import java.awt.geom.Rectangle2D;
 import java.util.List;
-
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceElement;
 
 public class TooltiperGeneStructure extends AbstractTrackTooltiper {
 

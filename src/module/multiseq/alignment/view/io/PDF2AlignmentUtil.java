@@ -1,15 +1,5 @@
 package module.multiseq.alignment.view.io;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-
-import javax.swing.JPanel;
-
 import com.itextpdf.text.Document;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Rectangle;
@@ -17,12 +7,18 @@ import com.itextpdf.text.pdf.DefaultFontMapper;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
-
+import egps2.modulei.RunningTask;
 import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.gui.AlignmentViewContinuousRightPanel;
 import module.multiseq.alignment.view.gui.AlignmentViewInterLeavedPanel;
 import module.multiseq.alignment.view.gui.VisulizationDataProperty;
-import egps2.modulei.RunningTask;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 public class PDF2AlignmentUtil {
 

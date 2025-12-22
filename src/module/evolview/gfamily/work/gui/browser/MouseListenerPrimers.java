@@ -1,19 +1,15 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
-import java.util.List;
-
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-
 import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimerSet;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimersNucleotide;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
+import java.util.List;
 
 public class MouseListenerPrimers extends AbstractMouseListener {
 

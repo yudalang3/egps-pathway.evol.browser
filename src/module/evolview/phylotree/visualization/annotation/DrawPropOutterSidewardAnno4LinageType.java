@@ -1,8 +1,6 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 

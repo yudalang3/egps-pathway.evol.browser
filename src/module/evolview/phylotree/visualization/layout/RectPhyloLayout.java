@@ -1,33 +1,22 @@
 
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+import com.google.common.base.Strings;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.annotation.*;
+import module.evolview.phylotree.visualization.graphics.struct.NodeType;
+import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
+import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
+import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
+import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
-
-import com.google.common.base.Strings;
-
-import module.evolview.phylotree.visualization.util.DrawUtil;
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNode2LeafAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropInternalNodeInsituAnno;
-import module.evolview.phylotree.visualization.annotation.DrawPropOutterSidewardAnno;
-import module.evolview.phylotree.visualization.annotation.OutterSidewardLocation;
-import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
-import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 
 public class RectPhyloLayout extends RectangularLayout {
 

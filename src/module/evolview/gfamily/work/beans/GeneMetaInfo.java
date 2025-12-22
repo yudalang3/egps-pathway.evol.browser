@@ -1,19 +1,14 @@
 package module.evolview.gfamily.work.beans;
 
-import java.awt.Color;
+import egps2.builtin.modules.voice.fastmodvoice.VoiceParameterParser;
+import org.apache.commons.io.FileUtils;
+
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-
-import egps2.builtin.modules.voice.fastmodvoice.VoiceParameterParser;
 
 /**
  * 从网页中获取数据,同时进行封装

@@ -1,19 +1,13 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
+import module.multiseq.alignment.view.AlignmentViewMain;
+
+import javax.swing.*;
+import javax.swing.border.MatteBorder;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-
-import javax.swing.JPanel;
-import javax.swing.border.MatteBorder;
-
-import module.multiseq.alignment.view.AlignmentViewMain;
 
 public class SpaceFillerWidthAdjuster extends JPanel implements MouseListener, MouseMotionListener {
 	/**

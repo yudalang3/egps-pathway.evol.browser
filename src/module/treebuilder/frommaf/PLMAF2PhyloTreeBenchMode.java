@@ -10,30 +10,28 @@
 */
 package module.treebuilder.frommaf;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.swing.SwingUtilities;
-
+import egps2.frame.MainFrameProperties;
 import egps2.panels.dialog.SwingDialog;
 import module.evoldist.operator.DistanceParameterConfigurer;
+import module.evoldist.operator.pairdist.EvoDistParamter;
+import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.moderntreeviewer.IndependentModuleLoader;
+import module.evolview.phylotree.visualization.util.TreeConversionUtil;
 import module.remnant.mafoperator.mafParser.MafFastaParser;
 import module.remnant.treeoperator.AbstractDistanceBasedTreePipeline;
 import module.remnant.treeoperator.NodeEGPSv1;
 import module.remnant.treeoperator.dmMethod.BuilderForLargefile;
 import module.remnant.treeoperator.reconAlgo.NJ;
 import module.remnant.treeoperator.reconAlgo.TreeReconMethod;
-import egps2.frame.MainFrameProperties;
-import module.evoldist.operator.pairdist.EvoDistParamter;
-import module.evoldist.operator.pairdist.EvoPairwiseDistMethod;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.moderntreeviewer.IndependentModuleLoader;
-import module.evoltrepipline.ParameterAssigner;
-import module.evolview.phylotree.visualization.util.TreeConversionUtil;
+
+import javax.swing.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * <p>

@@ -1,14 +1,25 @@
 package module.evoldist.view.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import com.jidesoft.swing.JideSplitPane;
+import egps.preferences.gui.PreferenceTree;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.ComputationalModuleFace;
+import egps2.frame.MyFrame;
+import egps2.modulei.IModuleLoader;
+import egps2.panels.dialog.EGPSJSpinner;
+import egps2.panels.dialog.SwingDialog;
+import egps2.utils.common.math.matrix.MatrixTriangleOp;
+import egps2.utils.common.model.datatransfer.ThreeTuple;
+import module.evoltrepipline.*;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
+
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -16,44 +27,6 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeSelectionModel;
-
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
-import com.jidesoft.swing.JideSplitPane;
-
-import egps2.panels.dialog.EGPSJSpinner;
-import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.math.matrix.MatrixTriangleOp;
-import egps2.utils.common.model.datatransfer.ThreeTuple;
-import egps.preferences.gui.PreferenceTree;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.ComputationalModuleFace;
-import egps2.frame.MainFrameProperties;
-import egps2.frame.MyFrame;
-import module.evoltrepipline.TreeParameterHandler;
-import module.evoltrepipline.AbstractPrefShowContent;
-import module.evoltrepipline.Panel4BiologyCodesPanel;
-import module.evoltrepipline.Panel4EvolutionaryDistancePanel;
-import module.evoltrepipline.SettingConstantsBuYaoChuCuo;
-import egps2.modulei.IModuleLoader;
 
 /**
  * 计算距离矩阵的图形面板的父类

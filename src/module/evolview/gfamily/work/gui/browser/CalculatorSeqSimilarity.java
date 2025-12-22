@@ -1,20 +1,15 @@
 package module.evolview.gfamily.work.gui.browser;
 
+import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
+import module.evolview.gfamily.work.calculator.similarityplot.ComparedSequenceResult;
+import module.evolview.gfamily.work.calculator.similarityplot.SimilarityPlotData;
+import module.evolview.gfamily.work.gui.browser.draw.*;
+
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
-import module.evolview.gfamily.work.calculator.similarityplot.ComparedSequenceResult;
-import module.evolview.gfamily.work.calculator.similarityplot.SimilarityPlotData;
-import module.evolview.gfamily.work.gui.browser.draw.AlignmentWithDerivedStatistics;
-import module.evolview.gfamily.work.gui.browser.draw.AxisTicks;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPolyLine;
-import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPolylinePlot;
-import module.evolview.gfamily.work.gui.browser.draw.ScaleAndTickNum;
-import module.evolview.gfamily.work.gui.browser.draw.TicksHandler;
 
 public class CalculatorSeqSimilarity implements LocationCalculator<DrawingPropertyPolylinePlot> {
 

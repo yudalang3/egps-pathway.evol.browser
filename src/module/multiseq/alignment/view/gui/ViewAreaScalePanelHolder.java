@@ -1,21 +1,13 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import egps2.frame.gui.EGPSMainGuiUtil;
+import module.multiseq.alignment.view.AlignmentViewMain;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-
-import javax.swing.JPanel;
-
-import egps2.frame.gui.EGPSMainGuiUtil;
-import module.multiseq.alignment.view.AlignmentViewMain;
 
 public class ViewAreaScalePanelHolder extends JPanel implements MouseListener, MouseMotionListener {
 

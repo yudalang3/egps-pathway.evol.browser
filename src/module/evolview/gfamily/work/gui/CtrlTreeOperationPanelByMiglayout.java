@@ -1,32 +1,13 @@
 package module.evolview.gfamily.work.gui;
 
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JSeparator;
-import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-
 import com.raven.swing.Button;
 import com.raven.swing.ButtonBadges;
-
-import egps2.utils.common.util.EGPSShellIcons;
 import egps.lnf.utils.BEUtils;
 import egps2.UnifiedAccessPoint;
-import evoltree.struct.util.EvolNodeUtil;
 import egps2.builtin.modules.IconObtainer;
+import egps2.utils.common.util.EGPSShellIcons;
+import evoltree.struct.util.EvolNodeUtil;
+import graphic.engine.guirelated.JFontChooser;
 import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
 import module.evolview.gfamily.work.gui.dialog.SeachDialog;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
@@ -34,7 +15,15 @@ import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowInnerNodePropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import graphic.engine.guirelated.JFontChooser;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 @SuppressWarnings("serial")
 public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements MouseListener, ActionListener {

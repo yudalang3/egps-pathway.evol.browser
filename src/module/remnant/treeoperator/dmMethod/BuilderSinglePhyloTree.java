@@ -10,16 +10,16 @@
 */
 package module.remnant.treeoperator.dmMethod;
 
-import java.util.List;
-
+import module.evoldist.operator.DistanceCalculateor;
+import module.evoldist.operator.EvoDistanceUtil;
+import module.evoltrepipline.IPairwiseEvolutionaryDistance;
 import module.remnant.treeoperator.NodeEGPSv1;
 import module.remnant.treeoperator.TreeUtility;
 import module.remnant.treeoperator.io.TreeCoder;
 import module.remnant.treeoperator.reconAlgo.NJ;
 import module.remnant.treeoperator.reconAlgo.TreeReconMethod;
-import module.evoldist.operator.DistanceCalculateor;
-import module.evoldist.operator.EvoDistanceUtil;
-import module.evoltrepipline.IPairwiseEvolutionaryDistance;
+
+import java.util.List;
 
 /**
  * <p>

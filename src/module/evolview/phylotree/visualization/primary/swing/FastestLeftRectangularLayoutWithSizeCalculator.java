@@ -1,10 +1,10 @@
 package module.evolview.phylotree.visualization.primary.swing;
 
-import java.awt.Dimension;
-
-import evoltree.struct.util.EvolNodeUtil;
 import evoltree.struct.EvolNode;
+import evoltree.struct.util.EvolNodeUtil;
 import evoltree.txtdisplay.ReflectGraphicNode;
+
+import java.awt.*;
 
 public class FastestLeftRectangularLayoutWithSizeCalculator {
 

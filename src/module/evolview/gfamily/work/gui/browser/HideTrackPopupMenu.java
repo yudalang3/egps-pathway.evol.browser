@@ -1,13 +1,10 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.util.List;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
+
+import javax.swing.*;
+import java.util.List;
 
 /**
  * 隐藏/显示track

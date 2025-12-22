@@ -1,9 +1,9 @@
 package module.parsimonytre.algo;
 
-import java.util.Arrays;
-
 import evoltree.struct.ArrayBasedNode;
 import evoltree.struct.EvolNode;
+
+import java.util.Arrays;
 
 public class Node4SankoffAlgo extends ArrayBasedNode {
 	private final int[] minParsimonyScore;

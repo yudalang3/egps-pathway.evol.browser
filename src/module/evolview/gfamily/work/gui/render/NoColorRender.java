@@ -1,9 +1,9 @@
 package module.evolview.gfamily.work.gui.render;
 
-import java.awt.Color;
-
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
+
+import java.awt.*;
 
 public class NoColorRender implements IColorRenderer {
 

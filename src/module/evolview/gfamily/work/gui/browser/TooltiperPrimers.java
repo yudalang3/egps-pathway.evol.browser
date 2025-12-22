@@ -1,11 +1,11 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.geom.Rectangle2D;
-import java.util.List;
-
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimerSet;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimers;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyPrimersNucleotide;
+
+import java.awt.geom.Rectangle2D;
+import java.util.List;
 
 public class TooltiperPrimers extends AbstractTrackTooltiper {
 

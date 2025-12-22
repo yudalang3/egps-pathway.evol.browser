@@ -1,8 +1,8 @@
 package module.remnant.mafoperator;
 
-import javax.swing.SwingUtilities;
-
 import module.remnant.datapanel.DefaultPanel;
+
+import javax.swing.*;
 
 
 

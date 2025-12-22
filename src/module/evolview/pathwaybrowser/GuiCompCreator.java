@@ -1,21 +1,17 @@
 package module.evolview.pathwaybrowser;
 
-import com.google.common.collect.Maps;
-import module.evolview.pathwaybrowser.gui.analysis.panel.PathwayDetailsPanel;
-import module.evolview.pathwaybrowser.gui.PathwayStatisticsPanel;
+import com.google.common.base.Strings;
+import module.evolview.pathwaybrowser.gui.analysis.panel.PathwayComponentPanel;
 import module.evolview.pathwaybrowser.gui.analysis.panel.PathwayGalleryPanel;
-import module.evolview.pathwaybrowser.gui.analysis.panel.SpeciesPanel;
+import module.evolview.pathwaybrowser.gui.analysis.panel.SpeciesInfoPanel;
+import module.evolview.pathwaybrowser.gui.analysis.panel.SpeciesTraitPanel;
 import module.evolview.pathwaybrowser.io.ImporterBean4PathwayFamilyBrowser;
-import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tsv.io.TSVReader;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 /**
@@ -34,104 +30,114 @@ public class GuiCompCreator {
 	}
 
 	/**
-	 * Create and configure the Pathway Details panel with its scroll pane and tab.
+	 * Check if the path is provided and valid.
 	 *
-	 * @param geneData Gene family data containing pathway figures and component information
-	 * @return
+	 * @param path The path to check
+	 * @param parameterName The name of the parameter (for error messages)
+	 * @return true if the path is not provided (null, empty, or false-like values), false if path is provided
+	 * @throws IllegalArgumentException if path is provided but file does not exist
 	 */
-	public Optional<PathwayDetailsPanel> createPathwayDetailsPanel(
+	private boolean isPathNotProvided(String path, String parameterName) {
+		// Check if path is not provided (null, empty, or false-like values)
+		if (Strings.isNullOrEmpty(path) ||
+			path.equalsIgnoreCase("false") ||
+			path.equalsIgnoreCase("f") ||
+			path.equalsIgnoreCase("null")) {
+			return true;
+		}
+
+		// Path is provided, check if file exists
+		File file = new File(path);
+		if (!file.exists()) {
+			throw new IllegalArgumentException(
+				String.format("File not found for %s: %s", parameterName, path));
+		}
+
+		return false;
+	}
+
+	/**
+	 * Validate a list of file paths.
+	 *
+	 * @param paths The list of paths to validate
+	 * @param parameterName The name of the parameter (for error messages)
+	 * @return A list of valid file paths (excluding null/empty/false-like values)
+	 * @throws IllegalArgumentException if any provided path does not exist
+	 */
+	private List<String> validatePathList(List<String> paths, String parameterName) {
+		if (paths == null || paths.isEmpty()) {
+			return List.of();
+		}
+
+		List<String> validPaths = new java.util.ArrayList<>();
+		for (int i = 0; i < paths.size(); i++) {
+			String path = paths.get(i);
+
+			// Skip if not provided
+			if (Strings.isNullOrEmpty(path) ||
+				path.equalsIgnoreCase("false") ||
+				path.equalsIgnoreCase("f") ||
+				path.equalsIgnoreCase("null")) {
+				continue;
+			}
+
+			// Path is provided, check if file exists
+			File file = new File(path);
+			if (!file.exists()) {
+				throw new IllegalArgumentException(
+					String.format("File not found for %s[%d]: %s", parameterName, i, path));
+			}
+
+			validPaths.add(path);
+		}
+
+		return validPaths;
+	}
+
+	public Optional<PathwayComponentPanel> createPathwayComponentPanel(
 			ImporterBean4PathwayFamilyBrowser geneData) {
 
-		String pathwayDetailsFigure = geneData.getPathwayDetailsFigure();
-		File file = new File(pathwayDetailsFigure);
-		if (!file.exists()){
-			log.warn("Pathway Details Figure not found: {}", pathwayDetailsFigure);
+		String pathwayDetailsFigure = geneData.getPathwayComponentCountPath();
+		if (isPathNotProvided(pathwayDetailsFigure, "pathwayComponentCountPath")) {
 			return Optional.empty();
 		}
 
-		PathwayDetailsPanel pathwayDrawDemo = new PathwayDetailsPanel(controller,
-				geneData.getPathwayDetailsFigure(),
-				geneData.getGeneNameSeparator().charAt(0));
+		PathwayComponentPanel pathwayDrawDemo = new PathwayComponentPanel(controller,
+				pathwayDetailsFigure);
 		return Optional.of(pathwayDrawDemo);
 	}
 
-	/**
-	 * Create and configure the Pathway Statistics panel with its scroll pane and tab.
-	 *
-	 * @param geneData                        Gene family data containing pathway figures and component information
-	 * @param categoryList                    List of category names
-	 * @param species2geneCountMap            Map of species names to gene counts
-	 * @return
-	 */
-	public PathwayStatisticsPanel createPathwayStatisticsPanel(
-			ImporterBean4PathwayFamilyBrowser geneData,
-			List<String> categoryList,
-			Map<String, List<Short>> species2geneCountMap) {
 
-		PathwayStatisticsPanel pathwayStageStatistics = new PathwayStatisticsPanel(
-				geneData.getPathwayStatisticsFigure(),
-				geneData.getCategoryColumnName());
-		pathwayStageStatistics.setSpeciesCategory2CompMaps(categoryList, species2geneCountMap);
-
-		return pathwayStageStatistics;
-	}
-
-
-	/**
-	 * Parse component information from TSV file and convert to numeric format.
-	 *
-	 * @param componentsInfoPath Path to the TSV file containing component information
-	 * @param geneColumnName Name of the gene column in the TSV file
-	 * @param categoryColumnName Name of the category column in the TSV file
-	 * @return ComponentData object containing parsed gene list, category list, and species-to-count mapping
-	 * @throws IOException if the file cannot be read
-	 */
-	public static ComponentData parseComponentInfo(
-			String componentsInfoPath,
-			String geneColumnName,
-			String categoryColumnName) throws IOException {
-
-		Map<String, List<String>> tableAsKey2ListMap = TSVReader.readAsKey2ListMap(componentsInfoPath);
-
-		// Extract gene and category lists
-		List<String> geneList = tableAsKey2ListMap.remove(geneColumnName);
-		List<String> categoryList = tableAsKey2ListMap.remove(categoryColumnName);
-
-		// Convert gene count data to numeric format
-		Map<String, List<Short>> species2geneCountMap = Maps.newHashMap();
-		for (Entry<String, List<String>> entry : tableAsKey2ListMap.entrySet()) {
-			List<String> value = entry.getValue();
-			List<Short> array = Lists.newArrayList();
-			for (String string : value) {
-				array.add(Short.valueOf(string));
-			}
-			species2geneCountMap.put(entry.getKey(), array);
-		}
-
-		return new ComponentData(geneList, categoryList, species2geneCountMap);
-	}
-
-	public Optional<SpeciesPanel> createSpeciesInfoPanel(ImporterBean4PathwayFamilyBrowser geneData) {
+	public Optional<SpeciesInfoPanel> createSpeciesInfoPanel(ImporterBean4PathwayFamilyBrowser geneData) {
 		String speciesInfoPath = geneData.getSpeciesInfoPath();
-		File file = new File(speciesInfoPath);
-		if (!file.exists()){
+		if (isPathNotProvided(speciesInfoPath, "speciesInfoPath")) {
 			return Optional.empty();
 		}
-		
-		SpeciesPanel speciesPanel = new SpeciesPanel(controller, file);
+
+		SpeciesInfoPanel speciesPanel = new SpeciesInfoPanel(controller, new File(speciesInfoPath));
 		return Optional.of(speciesPanel);
 	}
 
 	public Optional<PathwayGalleryPanel> createPathwayGalleryPanel(PathwayBrowserController controller, ImporterBean4PathwayFamilyBrowser geneData) {
 		List<String> pathwayGalleryPaths = geneData.getPathwayGalleryPaths();
-		if (pathwayGalleryPaths.isEmpty()){
+		List<String> validPaths = validatePathList(pathwayGalleryPaths, "pathwayGalleryPaths");
+
+		if (validPaths.isEmpty()){
 			return Optional.empty();
 		}
 
-
-		PathwayGalleryPanel pathwayGalleryPanel = new PathwayGalleryPanel(controller, pathwayGalleryPaths);
+		PathwayGalleryPanel pathwayGalleryPanel = new PathwayGalleryPanel(controller, validPaths);
 		return Optional.of(pathwayGalleryPanel);
+	}
 
+	public Optional<SpeciesTraitPanel> createSpeciesTraitPanel(ImporterBean4PathwayFamilyBrowser geneData) {
+		String speciesTraitPath = geneData.getSpeciesTraitPath();
+		if (isPathNotProvided(speciesTraitPath, "speciesTraitPath")) {
+			return Optional.empty();
+		}
+
+		SpeciesTraitPanel speciesTraitPanel = new SpeciesTraitPanel(controller, speciesTraitPath);
+		return Optional.of(speciesTraitPanel);
 	}
 
 	/**

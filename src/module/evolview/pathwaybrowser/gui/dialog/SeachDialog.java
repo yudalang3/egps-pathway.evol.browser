@@ -1,11 +1,10 @@
 package module.evolview.pathwaybrowser.gui.dialog;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JDialog;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class SeachDialog extends JDialog {
 

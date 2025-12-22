@@ -1,10 +1,10 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.Graphics2D;
-
+import module.multiseq.alignment.view.model.SequenceBaseColor;
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.alignment.sequence.SequenceI;
-import module.multiseq.alignment.view.model.SequenceBaseColor;
+
+import java.awt.*;
 
 
 public class HighlightAllSitesSequenceJPanel extends AbstractSequenceColor {

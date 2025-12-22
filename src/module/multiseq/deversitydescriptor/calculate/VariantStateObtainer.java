@@ -1,22 +1,17 @@
 package module.multiseq.deversitydescriptor.calculate;
 
-import static phylo.msa.util.EvolutionaryProperties.GAP_CHAR;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Objects;
-
 import fasta.io.FastaReader;
-import org.apache.commons.lang3.tuple.Pair;
-
 import module.evoltre.mutation.IMutation;
 import module.evoltre.mutation.IMutation4Rec;
 import module.evoltre.mutation.MutationOperator;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static phylo.msa.util.EvolutionaryProperties.GAP_CHAR;
 
 public class VariantStateObtainer {
 

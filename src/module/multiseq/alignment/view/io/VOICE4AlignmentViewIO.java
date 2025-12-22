@@ -1,17 +1,16 @@
 package module.multiseq.alignment.view.io;
 
-import java.awt.Dialog;
-import java.io.File;
-
-import javax.swing.SwingUtilities;
-
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;
-import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
-import module.multiseq.alignment.view.VOICE4AlignmentView;
 import module.evoltrepipline.alignment.AlignmentImportBean;
 import module.evoltrepipline.alignment.SequenceDataForAViewer;
+import module.multiseq.alignment.view.VOICE4AlignmentView;
+import msaoperator.io.seqFormat.MSA_DATA_FORMAT;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 
 public class VOICE4AlignmentViewIO extends AbstractGuiBaseVoiceFeaturedPanel {
 

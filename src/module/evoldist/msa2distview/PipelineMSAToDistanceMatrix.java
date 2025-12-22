@@ -1,7 +1,7 @@
 package module.evoldist.msa2distview;
 
-import module.evoldist.operator.AbstractCalculateGeneticDistancePipeline;
 import egps2.modulei.RunningTask;
+import module.evoldist.operator.AbstractCalculateGeneticDistancePipeline;
 
 public class PipelineMSAToDistanceMatrix extends AbstractCalculateGeneticDistancePipeline implements RunningTask{
 

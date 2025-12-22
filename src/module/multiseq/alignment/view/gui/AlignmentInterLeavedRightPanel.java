@@ -1,19 +1,15 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.List;
-
-import javax.swing.JPanel;
-
 import egps2.frame.gui.EGPSMainGuiUtil;
-import msaoperator.alignment.sequence.SequenceI;
+import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.model.AlignmentDrawProperties;
-import module.evoltrepipline.alignment.SequenceDataForAViewer;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
+import msaoperator.alignment.sequence.SequenceI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 
 public class AlignmentInterLeavedRightPanel extends JPanel {
 

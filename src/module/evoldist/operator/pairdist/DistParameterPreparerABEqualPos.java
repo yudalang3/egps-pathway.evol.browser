@@ -1,9 +1,9 @@
 package module.evoldist.operator.pairdist;
 
+import module.evoldist.operator.EvoDistanceUtil;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import module.evoldist.operator.EvoDistanceUtil;
 
 public class DistParameterPreparerABEqualPos implements DistParameterPreparer {
 

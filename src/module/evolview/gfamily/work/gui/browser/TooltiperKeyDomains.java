@@ -1,11 +1,11 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.geom.RoundRectangle2D;
-import java.util.List;
-
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyKeyDomains;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
+
+import java.awt.geom.RoundRectangle2D;
+import java.util.List;
 
 public class TooltiperKeyDomains extends AbstractTrackTooltiper {
 

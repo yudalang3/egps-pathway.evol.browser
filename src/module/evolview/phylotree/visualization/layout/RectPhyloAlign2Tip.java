@@ -1,14 +1,11 @@
 package module.evolview.phylotree.visualization.layout;
 
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.util.List;
-
-import module.evolview.phylotree.visualization.util.DrawUtil;
-import module.evolview.phylotree.visualization.layout.TreeLayoutHost;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.util.DrawUtil;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
+
+import java.awt.*;
+import java.util.List;
 
 public class RectPhyloAlign2Tip extends RectPhyloLayout {
 

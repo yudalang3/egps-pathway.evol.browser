@@ -10,16 +10,16 @@
 */
 package module.treebuilder.fromdist;
 
-import java.io.File;
-
-import egps2.panels.dialog.SwingDialog;
-import module.remnant.treeoperator.AbstractDistanceBasedTreePipeline;
-import module.remnant.treeoperator.NodeEGPSv1;
 import egps2.frame.MainFrameProperties;
+import egps2.panels.dialog.SwingDialog;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
-import module.webmsaoperator.webIO.DistMatrixTextInput;
 import module.evolview.phylotree.visualization.util.TreeConversionUtil;
+import module.remnant.treeoperator.AbstractDistanceBasedTreePipeline;
+import module.remnant.treeoperator.NodeEGPSv1;
+import module.webmsaoperator.webIO.DistMatrixTextInput;
+
+import java.io.File;
 
 /**
  * <p>

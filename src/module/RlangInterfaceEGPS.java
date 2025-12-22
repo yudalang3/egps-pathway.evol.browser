@@ -1,16 +1,13 @@
 package module;
 
-import java.io.File;
-
-import javax.swing.SwingUtilities;
-
 import egps2.EGPSProperties;
 import egps2.Launcher;
 import egps2.Launcher4Dev;
-import egps2.panels.dialog.SwingDialog;
 import egps2.frame.MainFrameProperties;
-import egps2.frame.ModuleFace;
+import egps2.panels.dialog.SwingDialog;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
+
+import javax.swing.*;
 
 /**
  * 这是一个沟通R的JAVA类

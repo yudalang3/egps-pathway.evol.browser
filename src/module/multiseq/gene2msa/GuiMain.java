@@ -1,34 +1,23 @@
 package module.multiseq.gene2msa;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
+import egps2.UnifiedAccessPoint;
+import egps2.frame.ComputationalModuleFace;
+import egps2.modulei.IInformation;
+import egps2.modulei.IModuleLoader;
+import egps2.panels.dialog.EGPSFileChooser;
+import egps2.panels.dialog.SwingDialog;
+import module.evoltrepipline.BuildTreeAllRelatedParametersConfigGUI;
+import module.evoltrepipline.ConstantNameClass_WebQuery;
+import module.evoltrepipline.TreeParameterHandler;
+import module.multiseq.alignment.view.io.SaveFilterFasta;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
-
-import egps2.panels.dialog.EGPSFileChooser;
-import egps2.panels.dialog.SwingDialog;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.ComputationalModuleFace;
-import module.evoltrepipline.TreeParameterHandler;
-import module.evoltrepipline.BuildTreeAllRelatedParametersConfigGUI;
-import module.evoltrepipline.ConstantNameClass_WebQuery;
-import module.multiseq.alignment.view.io.SaveFilterFasta;
-import egps2.modulei.IInformation;
-import egps2.modulei.IModuleLoader;
 
 @SuppressWarnings("serial")
 public class GuiMain extends ComputationalModuleFace {

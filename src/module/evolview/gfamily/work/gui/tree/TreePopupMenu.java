@@ -1,7 +1,28 @@
 package module.evolview.gfamily.work.gui.tree;
 
-import java.awt.Component;
-import java.awt.Point;
+import egps2.UnifiedAccessPoint;
+import egps2.builtin.modules.IconObtainer;
+import egps2.frame.MainFrameProperties;
+import egps2.frame.gui.dialog.DialogMoreInfoGenerator;
+import egps2.panels.dialog.EGPSFileChooser;
+import egps2.utils.common.model.datatransfer.Tuple;
+import evoltree.struct.util.EvolNodeUtil;
+import evoltree.txtdisplay.TreeDrawUnit;
+import module.evoltre.mutation.IMutation4Rec;
+import module.evolview.gfamily.work.gui.dialog.NodeAnnotationDialogContainer;
+import module.evolview.model.enums.BranchLengthType;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.model.tree.NodeUtils;
+import module.evolview.moderntreeviewer.IndependentModuleLoader;
+import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
+import module.evolview.phylotree.visualization.layout.BaseLayout;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
+
+import javax.swing.*;
+import javax.swing.Timer;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -9,39 +30,9 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import module.evolview.gfamily.work.gui.dialog.NodeAnnotationDialogContainer;
-import module.evolview.moderntreeviewer.IndependentModuleLoader;
-import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
-import egps2.panels.dialog.EGPSFileChooser;
-import egps2.utils.common.model.datatransfer.Tuple;
-import egps2.UnifiedAccessPoint;
-import egps2.frame.MainFrameProperties;
-import evoltree.struct.util.EvolNodeUtil;
-import module.evoltre.mutation.IMutation4Rec;
-import egps2.builtin.modules.IconObtainer;
-import module.evolview.model.tree.NodeUtils;
-import module.evolview.gfamily.work.gui.tree.CollapseDialog;
-import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
-import module.evolview.model.enums.BranchLengthType;
-import module.evolview.model.tree.GraphicsNode;
-import evoltree.txtdisplay.TreeDrawUnit;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.phylotree.visualization.layout.BaseLayout;
-import egps2.frame.gui.dialog.DialogMoreInfoGenerator;
 
 public class TreePopupMenu {
 

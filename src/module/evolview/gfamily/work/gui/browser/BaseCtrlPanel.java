@@ -1,11 +1,10 @@
 package module.evolview.gfamily.work.gui.browser;
 
-import java.awt.Font;
-
-import javax.swing.JPanel;
-
 import egps2.UnifiedAccessPoint;
 import module.evolview.gfamily.GeneFamilyController;
+
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public abstract class BaseCtrlPanel extends JPanel {

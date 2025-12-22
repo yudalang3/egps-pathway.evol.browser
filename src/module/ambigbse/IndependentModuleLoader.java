@@ -1,14 +1,7 @@
 package module.ambigbse;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
 import egps2.EGPSProperties;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
@@ -17,6 +10,12 @@ import egps2.modulei.IconBean;
 import egps2.modulei.ModuleClassification;
 import egps2.modulei.ModuleVersion;
 import fasta.io.FastaReader;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 @SuppressWarnings("serial")
 public class IndependentModuleLoader extends TabModuleFaceOfVoice {

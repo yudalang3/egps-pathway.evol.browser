@@ -1,21 +1,13 @@
 package module.evolview.pathwaybrowser.gui;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JSeparator;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeListener;
-
 import egps2.frame.gui.comp.toggle.toggle.ToggleAdapter;
 import egps2.frame.gui.comp.toggle.toggle.ToggleButton;
-import module.evolview.pathwaybrowser.gui.tree.control.Turn2ThisLayoutPanel;
 import module.evolview.model.enums.TreeLayoutEnum;
+import module.evolview.pathwaybrowser.gui.tree.control.Turn2ThisLayoutPanel;
+
+import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements Turn2ThisLayoutPanel {

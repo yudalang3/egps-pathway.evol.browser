@@ -1,9 +1,9 @@
 package module.multiseq.alignment.view.gui;
 
-import java.awt.Graphics2D;
-
 import msaoperator.alignment.sequence.BasicSequenceData;
 import msaoperator.alignment.sequence.SequenceI;
+
+import java.awt.*;
 
 public abstract class AbstractSequenceColor {
 

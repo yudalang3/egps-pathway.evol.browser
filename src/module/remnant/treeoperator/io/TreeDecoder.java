@@ -1,13 +1,13 @@
 package module.remnant.treeoperator.io;
 
 
-import java.util.HashMap;
-import java.util.StringTokenizer;
-import java.util.regex.Pattern;
-
 import module.remnant.treeoperator.DefaultBranch;
 import module.remnant.treeoperator.DefaultNode;
 import module.remnant.treeoperator.NodeEGPSv1;
+
+import java.util.HashMap;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 //import com.ibm.math.*;   // import BigDecimal and MathContext
 

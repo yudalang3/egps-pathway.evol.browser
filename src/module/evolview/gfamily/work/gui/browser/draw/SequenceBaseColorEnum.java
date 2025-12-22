@@ -1,6 +1,6 @@
 package module.evolview.gfamily.work.gui.browser.draw;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.function.Supplier;
 
 /**

@@ -1,8 +1,6 @@
 package module.evolview.phylotree.visualization.annotation;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 
 public class SidewardNodeAnnotation {
 	// For line property

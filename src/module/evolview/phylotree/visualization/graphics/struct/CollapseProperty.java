@@ -1,6 +1,6 @@
 package module.evolview.phylotree.visualization.graphics.struct;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class CollapseProperty {
 	

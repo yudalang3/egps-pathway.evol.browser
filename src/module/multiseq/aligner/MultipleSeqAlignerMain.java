@@ -1,20 +1,16 @@
 package module.multiseq.aligner;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Font;
-
-import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import egps2.UnifiedAccessPoint;
 import egps2.frame.ComputationalModuleFace;
-import module.multiseq.aligner.gui.MafftGUIPanel;
 import egps2.modulei.CreditBean;
 import egps2.modulei.IInformation;
 import egps2.modulei.IModuleLoader;
+import module.multiseq.aligner.gui.MafftGUIPanel;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 
 public class MultipleSeqAlignerMain extends ComputationalModuleFace {
 

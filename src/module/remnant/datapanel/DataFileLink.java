@@ -1,25 +1,15 @@
 package module.remnant.datapanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-
+import egps2.UnifiedAccessPoint;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.painter.BusyPainter;
 
-import egps2.UnifiedAccessPoint;
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 
 public class DataFileLink extends JPanel{
 	private static final long serialVersionUID = 608583872411325477L;

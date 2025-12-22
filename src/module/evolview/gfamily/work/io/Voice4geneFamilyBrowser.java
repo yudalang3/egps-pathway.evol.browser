@@ -1,17 +1,17 @@
 package module.evolview.gfamily.work.io;
 
-import java.util.Optional;
-
-import module.evolview.gfamily.GeneFamilyMainFace;
-import module.evolview.gfamily.work.beans.RequiredGeneData;
-import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import module.evolview.moderntreeviewer.io.MTVImportInforBean;
-import module.evolview.moderntreeviewer.io.TreeParser4MTV;
-import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.builtin.modules.voice.template.AbstractGuiBaseVoiceFeaturedPanel;
+import module.evolview.gfamily.GeneFamilyMainFace;
+import module.evolview.gfamily.work.beans.RequiredGeneData;
+import module.evolview.model.tree.GraphicsNode;
+import module.evolview.moderntreeviewer.io.MTVImportInforBean;
+import module.evolview.moderntreeviewer.io.TreeParser4MTV;
+import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
+import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+
+import java.util.Optional;
 
 /**
  * 这个类的移植还是有点麻烦，需要花时间让其更加通用

@@ -1,20 +1,15 @@
 package module.evolview.gfamily.work.gui.render;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import graphic.engine.colors.EGPSColors;
 import module.evolview.gfamily.GeneFamilyController;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import module.evolview.model.enums.ColorScheme;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import graphic.engine.colors.EGPSColors;
+import module.evolview.phylotree.visualization.util.TreeOperationUtil;
+
+import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 /**
  * 进行自定义颜色渲染的类
