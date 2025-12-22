@@ -23,26 +23,35 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 
 		requiredParams.clear();
 		String propertiesDir = UnifiedAccessPoint.getLaunchProperty().getTestDataDir();
+		addKeyValueEntryBean("@", "The Pathway Family Browser", "");
+
 		addKeyValueEntryBean("input.nwk.path",
 				propertiesDir + "/bioData/example/9_model_species_evolution.nwk",
 				"Input the Tree nwk file path.");
-		addKeyValueEntryBean("pathway.components.info.path",
-				propertiesDir + "/bioData/pathwayBrowser/components.info.tsv",
-				"Input the file path of the components, tsv format. Must has the gene column and category column.");
-		addKeyValueEntryBean("gene.column.name", "name", "The column name of the gene symbol or ids");
-		addKeyValueEntryBean("category.column.name", "category",
-				"The column name of the category in the tsv file.");
-		addKeyValueEntryBean("pathway.details.figure.path",
+		addKeyValueEntryBean("pathway.species.info.path",
+				"False",
+				"Input the file path of the species information, tsv format. Must has the Name column. F/False or annotated for none");
+
+		addKeyValueEntryBean("pathway.gallery.figure.paths\n",
 				propertiesDir + "/bioData/pathwayBrowser/wnt_pathway2.pptx",
-				"Input the file path of the components, format is the pptx and the shape id is same as the gene name.");
+				"Input the file path of the components, format is the pptx and the shape id is same as the gene name.  F/False or annotated for none");
+
+//		addKeyValueEntryBean("pathway.components.info.path",
+//				propertiesDir + "/bioData/pathwayBrowser/components.info.tsv",
+//				"Input the file path of the components, tsv format. Must has the gene column and category column.");
+//		addKeyValueEntryBean("gene.column.name", "name", "The column name of the gene symbol or ids");
+//		addKeyValueEntryBean("category.column.name", "category",
+//				"The column name of the category in the tsv file.");
+
 		addKeyValueEntryBean("pathway.statistics.figure.path",
 				propertiesDir + "/bioData/pathwayBrowser/pathway_counts.pptx",
 				"Input the file path of the category counts, format is the pptx and the shape id is same as the category name.");
 
 		addKeyValueEntryBean("^", "", "");
-		addKeyValueEntryBean("@", "The Pathway Family Browser", "");
+		addKeyValueEntryBean("%1", "The pathway components", "");
 		addKeyValueEntryBean("gene.name.separater", "_",
 				"The gene symbol or ids separator, default is _. For different components like arrow, textbox and shape.");
+		addKeyValueEntryBean("%12", "The species tree", "");
 		addKeyValueEntryBean("blank.space", "20,20,100,20",
 				"The blank area of top,left,bottom,right. Note: right will take effects if divider = 0");
 		addKeyValueEntryBean("need.reverse.axis.bar", "T",
@@ -67,13 +76,14 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 
 		bean.geneNameSeparater = str.getSimplifiedString("gene.name.separater");
 
-		bean.componentsInfoPath = str.getSimplifiedString("pathway.components.info.path");
-		bean.geneColumnName = str.getSimplifiedString("gene.column.name");
-		bean.categoryColumnName = str.getSimplifiedString("category.column.name");
+		bean.speciesInfoPath = str.getSimplifiedString("pathway.species.info.path");
+//		bean.componentsInfoPath = str.getSimplifiedString("pathway.components.info.path");
+//		bean.geneColumnName = str.getSimplifiedString("gene.column.name");
+//		bean.categoryColumnName = str.getSimplifiedString("category.column.name");
 
 
 		bean.pathwayDetailsFigure = str.getSimplifiedString("pathway.details.figure.path");
-		bean.pathwayStatisticsFigure = str.getSimplifiedString("pathway.statistics.figure.path");
+//		bean.pathwayStatisticsFigure = str.getSimplifiedString("pathway.statistics.figure.path");
 
 
 		return bean;

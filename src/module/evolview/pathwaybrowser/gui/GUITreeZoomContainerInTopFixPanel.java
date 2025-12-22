@@ -14,7 +14,6 @@ import javax.swing.event.ChangeListener;
 
 import egps2.frame.gui.comp.toggle.toggle.ToggleAdapter;
 import egps2.frame.gui.comp.toggle.toggle.ToggleButton;
-import module.evolview.pathwaybrowser.gui.browser.BaseCtrlPanel;
 import module.evolview.pathwaybrowser.gui.tree.control.Turn2ThisLayoutPanel;
 import module.evolview.model.enums.TreeLayoutEnum;
 

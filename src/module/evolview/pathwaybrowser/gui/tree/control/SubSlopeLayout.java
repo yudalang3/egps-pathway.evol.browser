@@ -13,7 +13,7 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import module.evolview.pathwaybrowser.gui.browser.BaseCtrlPanel;
+import module.evolview.pathwaybrowser.gui.BaseCtrlPanel;
 import module.evolview.phylotree.visualization.graphics.struct.SlopeLayoutProperty;
 
 @SuppressWarnings("serial")

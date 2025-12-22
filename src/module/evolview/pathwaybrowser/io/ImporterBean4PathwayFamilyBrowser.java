@@ -2,8 +2,12 @@ package module.evolview.pathwaybrowser.io;
 
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 
+import java.util.List;
+
 public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
 
+	String speciesInfoPath;
+	List<String> pathwayGalleryPaths;
 	String geneNameSeparater;
 	String componentsInfoPath;
 	String geneColumnName;
@@ -63,4 +67,11 @@ public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
 		return evolutionarySelectionFigurePath;
 	}
 
+	public String getSpeciesInfoPath() {
+		return speciesInfoPath;
+	}
+
+	public List<String> getPathwayGalleryPaths() {
+		return pathwayGalleryPaths;
+	}
 }

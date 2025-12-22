@@ -15,7 +15,7 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import module.evolview.pathwaybrowser.gui.browser.BaseCtrlPanel;
+import module.evolview.pathwaybrowser.gui.BaseCtrlPanel;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.model.enums.TreeLayoutEnum;

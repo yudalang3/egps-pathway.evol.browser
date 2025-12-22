@@ -7,7 +7,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import module.evolview.pathwaybrowser.PathwayBrowserController;
-import module.evolview.pathwaybrowser.gui.browser.BaseCtrlPanel;
 import module.evolview.pathwaybrowser.gui.tree.control.SubCircularLayout;
 import module.evolview.pathwaybrowser.gui.tree.control.SubRadicalLayout;
 import module.evolview.pathwaybrowser.gui.tree.control.SubRectangularLayout;

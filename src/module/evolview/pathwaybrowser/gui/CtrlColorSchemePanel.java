@@ -19,7 +19,6 @@ import javax.swing.border.EmptyBorder;
 import egps2.UnifiedAccessPoint;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
 import egps2.builtin.modules.IconObtainer;
-import module.evolview.pathwaybrowser.gui.browser.BaseCtrlPanel;
 import module.evolview.model.enums.ColorScheme;
 
 /**

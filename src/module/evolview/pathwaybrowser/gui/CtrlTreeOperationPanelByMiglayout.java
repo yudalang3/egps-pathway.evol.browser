@@ -27,7 +27,6 @@ import egps.lnf.utils.BEUtils;
 import egps2.UnifiedAccessPoint;
 import evoltree.struct.util.EvolNodeUtil;
 import egps2.builtin.modules.IconObtainer;
-import module.evolview.pathwaybrowser.gui.browser.BaseCtrlPanel;
 import module.evolview.pathwaybrowser.gui.dialog.SeachDialog;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.model.tree.GraphicsNode;

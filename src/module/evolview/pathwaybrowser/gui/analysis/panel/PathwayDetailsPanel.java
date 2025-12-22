@@ -1,4 +1,4 @@
-package module.evolview.pathwaybrowser.gui;
+package module.evolview.pathwaybrowser.gui.analysis.panel;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
+import module.evolview.pathwaybrowser.PathwayBrowserController;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
@@ -25,7 +26,7 @@ import egps2.frame.gui.EGPSMainGuiUtil;
 import egps2.utils.common.util.poi.pptx.Decoder4pptx;
 
 @SuppressWarnings("serial")
-public class PathwayDetailsPanel extends JPanel {
+public class PathwayDetailsPanel extends AbstractAnalysisPanel {
 
 	private XSLFSlide firstSlide;
 	private String OUTname = "";
@@ -40,9 +41,10 @@ public class PathwayDetailsPanel extends JPanel {
 	private Map<String, List<Short>> species2geneCountMap;
 	private List<String> geneList;
 
-	public PathwayDetailsPanel(String path, char geneNameSeparater) {
+	public PathwayDetailsPanel(PathwayBrowserController controller, String path, char geneNameSeparater) {
+        super(controller);
 
-		MouseAdapter mouseAdapter = new MouseAdapter() {
+        MouseAdapter mouseAdapter = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				boolean rightMouseButton = SwingUtilities.isRightMouseButton(e);
@@ -114,7 +116,7 @@ public class PathwayDetailsPanel extends JPanel {
 	 * Render the slide to a BufferedImage in a background thread.
 	 * This method should NOT be called on the EDT.
 	 */
-	public void renderSlideImageAsync() {
+	private void renderSlideImageAsync() {
 		if (isRendering || pageSize == null) {
 			return;
 		}
@@ -184,6 +186,20 @@ public class PathwayDetailsPanel extends JPanel {
 
 	}
 
+	@Override
+	public String getTitle() {
+		return "Pathway Details";
+	}
+
+	@Override
+	public void reInitializeGUI() {
+		renderSlideImageAsync();
+	}
+
+	@Override
+	public void treeNodeClicked(String nodeName) {
+
+	}
 }
 
 class Grobs {

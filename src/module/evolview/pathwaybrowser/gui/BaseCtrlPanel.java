@@ -1,4 +1,4 @@
-package module.evolview.pathwaybrowser.gui.browser;
+package module.evolview.pathwaybrowser.gui;
 
 import java.awt.Font;
 
@@ -11,6 +11,7 @@ import module.evolview.pathwaybrowser.PathwayBrowserController;
 public abstract class BaseCtrlPanel extends JPanel {
 	
 	protected Font globalFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
+
 
 	
 	protected PathwayBrowserController controller;

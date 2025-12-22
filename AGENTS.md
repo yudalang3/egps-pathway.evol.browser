@@ -30,6 +30,7 @@
 - Since eGPS v2.2, `getVersion()` must return a `ModuleVersion`; for core‑like modules, return `EGPSProperties.MAINFRAME_CORE_VERSION`.
 - Follow existing Java style: tab indentation, lowercase packages under `module.*`, PascalCase classes, loader names like `IndependentModuleLoader` or `ModuleLoader4<Feature>`.
 - Logging: always use SLF4J (`LoggerFactory.getLogger(...)`); never use `System.out/err` or `printStackTrace()`.
+- GUI fonts: prefer `UnifiedAccessPoint.getLaunchProperty().getDefaultFont()` (body) and `UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont()` (titles/headers) so users can adjust fonts via global preferences; avoid hardcoding font families/sizes.
 
 ## Testing Guidelines
 

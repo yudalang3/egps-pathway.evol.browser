@@ -9,7 +9,6 @@ import javax.swing.JToggleButton;
 import javax.swing.border.Border;
 
 import egps2.builtin.modules.IconObtainer;
-import module.evolview.pathwaybrowser.gui.browser.BaseCtrlPanel;
 import module.evolview.model.enums.TreeLayoutEnum;
 
 

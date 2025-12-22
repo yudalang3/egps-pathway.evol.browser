@@ -22,7 +22,8 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
 	
 	
 	protected boolean needReverseAxisBar = false;
-	protected String branchLengthUnit = "Time (MYA)";
+	// Default is "", You can change it to "Time (MYA)"
+	protected String branchLengthUnit = "";
 	private String nodeVisualAnnotationConfigFilePath;
 	
 	public boolean isShouldLeafNameRightAlign() {
