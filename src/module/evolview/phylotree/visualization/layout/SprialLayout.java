@@ -24,21 +24,24 @@ public abstract class SprialLayout extends BaseLayout {
 		super.beforeCalculate(width, height);
 
 		leafLoop = 0;
-		centerX = (int) (currentWidth / 2);
-		centerY = (int) (currentHeight / 2);
+
+		int workHeight = blankArea.getWorkHeight((int) currentHeight);
+		int workWidth = blankArea.getWorkWidth((int) currentWidth);
+
+		// Fix: Center should be in the middle of the working area, not the full canvas
+		// This accounts for asymmetric margins (e.g., top=20, left=40, bottom=80, right=40)
+		centerX = blankArea.getLeft() + workWidth / 2;
+		centerY = blankArea.getTop() + workHeight / 2;
 
 		SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
 		globalStartDegree = circularLayoutPropertiy.getGlobalStartDegree();
 		double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree() - globalStartDegree;
 		increseDeg = totolDeg / GraphicTreePropertyCalculator.getLeafNumber(rootNode);
 
-		int workHeight = blankArea.getWorkHeight((int) currentHeight);
-		int workWidth = blankArea.getWorkWidth((int) currentWidth);
-		
-		/*
-		 *  + 50 是一个经验性的视觉调整因素
-		 */
-		biggestCircleRadicus = 0.5 * Math.min(workWidth, workHeight) + 50;
+		// Note: Spiral layout uses biggestCircleRadicus differently than Circular.
+		// The leaf label space reservation is handled in subclasses (Alpha/Beta variants)
+		// via maxAlpha/maxBeta calculations.
+		biggestCircleRadicus = 0.5 * Math.min(workWidth, workHeight);
 	}
 
 	public SprialLayout(TreeLayoutProperties controller, GraphicsNode rootNode,

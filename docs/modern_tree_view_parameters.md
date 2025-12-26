@@ -1,254 +1,239 @@
 # Modern Tree View Parameters Design Document
 
-This document lists all parameterizable options for the Modern Tree View module. Parameters are organized by category using the `%N` prefix format for grouping in the VOICE parameter system.
+本文档列出 Modern Tree View 模块的所有可参数化选项。参数按类别组织，使用 `%N` 前缀格式在 VOICE 参数系统中分组。
 
-## Existing Parameters (Already Implemented)
-
-These parameters are already implemented in `ParamsAssignerAndParser4ModernTreeView.java`:
-
-| Parameter Key | Default | Description |
-|--------------|---------|-------------|
-| `input.nwk.string` | `""` | Direct input the nwk string content. Highest priority. |
-| `input.nwk.path` | `<example path>` | Input the nwk file path. Medium priority. |
-| `nwk.format` | `0` | Newick format type (0-9). |
-| `nwk.remove.whitespace` | `F` | Whether remove whitespace for the nwk file. |
-| `input.tableLike.path` | `""` | Input the table-like tree file path. |
-| `tree.global.font` | `<system font>` | The font for global, leaf label names employ it. |
-| `bottom.title.font` | `<title font>` | The font for bottom title. |
-| `blank.space` | `20,20,80,20` | The blank area of top,left,bottom,right. |
-| `height.scale.on` | `T` | Whether mouse wheel scale on for height. |
-| `width.scale.on` | `T` | Whether mouse wheel scale on for width. |
-| `show.leaf.label` | `T` | Whether display the leaf label on the tree. |
-| `leaf.label.right.align` | `T` | Whether right align the leaf labels. |
-| `need.reverse.axis.bar` | `F` | Whether reverse the axis bar. |
-| `bottom.title.string` | `The phylogenetic tree with {0} high-quality sequenced samples.` | Statement displayed at the bottom. |
-| `branch.length.unit` | `""` | The unit of branch (e.g., mya). |
-| `node.visual.config.path` | `""` | Node specific visual annotations config file. |
+**实现状态**: ✅ 已完成
 
 ---
 
-## Proposed New Parameters
+## 必需参数（不归类）
 
-### Category %1: Tree Information Display
+这些是输入数据的必需参数，保持在顶层：
 
-Control what information is displayed on the tree.
+| Parameter Key | Default | Description |
+|--------------|---------|-------------|
+| `input.nwk.string` | `""` | Way1: Direct input the nwk string content. Highest priority. |
+| `input.nwk.path` | `<example path>` | Way2: Input the nwk file path. Medium priority. |
+| `nwk.format` | `0` | Newick format type (0-9). |
+| `nwk.remove.whitespace` | `F` | Whether remove whitespace for the nwk file. |
+| `input.tableLike.path` | `""` | Way3: Input the table-like tree file path. |
 
-| Parameter Key | Default | Tooltip | GUI Button | Related Property |
-|--------------|---------|---------|------------|------------------|
-| `show.scale.bar` | `F` | Show the plotting scale for the phylogram. | `scaleBar` toggle | `TreeLayoutProperties.showScaleBar` |
-| `show.axis.bar` | `T` | Show the x-axis. | `axisButton` toggle | `TreeLayoutProperties.showAxisBar` |
-| `show.title` | `T` | Show the statement below the tree. | `displayTitleToggleButton` toggle | `TreeLayoutProperties.showTitle` |
-| `show.width.height` | `F` | Show width and height in the drawing panel. Useful for circular layout. | `toggleButtonWH` toggle | `TreeLayoutProperties.showWidthAndHeightString` |
+---
 
-### Category %2: Node Label Display
+## Category %1: Tree Information (树信息显示)
 
-Control node label visibility.
+控制树的整体信息显示。
 
-| Parameter Key | Default | Tooltip | GUI Button | Related Property |
-|--------------|---------|---------|------------|------------------|
-| `show.inner.node.label` | `F` | Show internal node label. | `showInnerNodeLabelToggleButton` toggle | `ShowInnerNodePropertiesInfo.showInternalNodeLabel` |
-| `show.branch.length` | `F` | Show node branch length. | `showBranchLengthToggleButton` toggle | `TreeLayoutProperties.showNodeBranchLength` |
-| `show.bootstrap` | `F` | Show internal node bootstrap value. | `showBootstrapToggleButton` toggle | `ShowInnerNodePropertiesInfo.showInternalNodeBootstrap` |
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `tree.show.scale.bar` | `F` | Show the plotting scale for the phylogram. | NEW |
+| `tree.show.axis.bar` | `T` | Show the x-axis. | NEW |
+| `tree.show.title` | `T` | Show the statement at the bottom of the tree. | NEW |
+| `tree.show.width.height` | `F` | Show width and height in the drawing panel. Useful for circular layout. | NEW |
+| `tree.title.string` | `The phylogenetic tree with {0} high-quality sequenced samples.` | Statement displayed at the bottom. | EXISTING (was `bottom.title.string`) |
+| `tree.branch.length.unit` | `""` | The unit of branch (e.g., mya). | EXISTING (was `branch.length.unit`) |
+| `tree.need.reverse.axis` | `F` | Whether reverse the axis bar. In some cases, the time is years ago. | EXISTING (was `need.reverse.axis.bar`) |
 
-### Category %3: Root and Branch Settings
+---
 
-Control root and branch display properties.
+## Category %2: Leaf Node (叶节点显示)
 
-| Parameter Key | Default | Tooltip | Related Property |
-|--------------|---------|---------|------------------|
-| `show.root` | `F` | Whether to display the root node. | `TreeLayoutProperties.showRoot` |
-| `root.tip.length` | `10` | The length of the root tip line. | `TreeLayoutProperties.rootTipLength` |
-| `show.branch.label` | `F` | Whether to show branch labels. | `TreeLayoutProperties.showBranchLabel` |
+控制叶节点的显示设置。
 
-### Category %4: Font Settings
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `leaf.show.label` | `T` | Whether display the leaf label on the tree. | EXISTING (was `show.leaf.label`) |
+| `leaf.label.right.align` | `T` | Whether right align the leaf labels. | EXISTING (was `leaf.label.right.align`) |
 
-Control fonts used in the visualization.
+---
 
-| Parameter Key | Default | Tooltip | Related Property |
-|--------------|---------|---------|------------------|
-| `axis.font` | `<global font>` | The font for x-axis and plotting scale. | `TreeLayoutProperties.axisFont` |
+## Category %3: Inner Node (内部节点显示)
 
-### Category %5: Layout Settings
+控制内部节点的显示设置。
 
-Control tree layout and rotation.
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `inner.show.label` | `F` | Show internal node label. | NEW |
+| `inner.show.bootstrap` | `F` | Show internal node bootstrap value. | NEW |
+| `inner.show.branch.length` | `F` | Show node branch length. | NEW |
 
-| Parameter Key | Default | Tooltip | Related Property |
-|--------------|---------|---------|------------------|
-| `initial.layout` | `RECTANGULAR` | Initial tree layout (RECTANGULAR, CIRCULAR, SPIRAL, SLOPE, RADICAL). | `TreeLayoutProperties.myLayout` |
-| `radical.rotation.deg` | `0` | Rotation degree for radical layout (0-360). | `TreeLayoutProperties.radicalLayoutRotationDeg` |
+---
+
+## Category %4: Root Settings (根节点设置)
+
+控制根节点相关显示。
+
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `root.show` | `F` | Whether to display the root node. | NEW |
+| `root.tip.length` | `10` | The length of the root tip line in pixels. | NEW |
+| `root.show.branch.label` | `F` | Whether to show branch labels. | NEW |
+
+---
+
+## Category %5: Mouse Wheel (鼠标滚轮缩放)
+
+控制鼠标滚轮缩放行为。
+
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `wheel.height.scale.on` | `T` | Whether mouse wheel scale on for height. | EXISTING (was `height.scale.on`) |
+| `wheel.width.scale.on` | `T` | Whether mouse wheel scale on for width. | EXISTING (was `width.scale.on`) |
+
+---
+
+## Category %6: Font Settings (字体设置)
+
+控制各种字体显示。
+
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `font.global` | `<system font, 14>` | The font for global, leaf label names employ it. | EXISTING (was `tree.global.font`) |
+| `font.title` | `<title font>` | The font for bottom title. | EXISTING (was `bottom.title.font`) |
+| `font.axis` | `<global font>` | The font for x-axis and plotting scale. | NEW |
+
+---
+
+## Category %7: Layout Settings (布局设置)
+
+控制树的布局方式。
+
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `layout.initial` | `RECTANGULAR` | Initial tree layout: RECTANGULAR, CIRCULAR, SPIRAL, SLOPE, or RADICAL. | NEW |
+| `layout.radical.rotation` | `0` | Rotation degree for radical layout (0-360). | NEW |
+| `layout.blank.space` | `20,40,80,40` | The blank area of top,left,bottom,right. | EXISTING (was `blank.space`) |
+
+---
+
+## Category %8: Advanced (高级设置)
+
+其他高级配置。
+
+| Parameter Key | Default | Tooltip | Status |
+|--------------|---------|---------|--------|
+| `advanced.node.visual.config` | `""` | Node specific visual annotations config file path. | EXISTING (was `node.visual.config.path`) |
+
+---
+
+## 参数重命名映射表
+
+| 旧参数名 | 新参数名 | 分类 |
+|---------|---------|------|
+| `tree.global.font` | `font.global` | %6 Font Settings |
+| `bottom.title.font` | `font.title` | %6 Font Settings |
+| `blank.space` | `layout.blank.space` | %7 Layout Settings |
+| `height.scale.on` | `wheel.height.scale.on` | %5 Mouse Wheel |
+| `width.scale.on` | `wheel.width.scale.on` | %5 Mouse Wheel |
+| `show.leaf.label` | `leaf.show.label` | %2 Leaf Node |
+| `leaf.label.right.align` | `leaf.label.right.align` | %2 Leaf Node |
+| `need.reverse.axis.bar` | `tree.need.reverse.axis` | %1 Tree Information |
+| `bottom.title.string` | `tree.title.string` | %1 Tree Information |
+| `branch.length.unit` | `tree.branch.length.unit` | %1 Tree Information |
+| `node.visual.config.path` | `advanced.node.visual.config` | %8 Advanced |
 
 ---
 
 ## Implementation Code Template
 
-Add to `ParamsAssignerAndParser4ModernTreeView.java` constructor:
+### ParamsAssignerAndParser4ModernTreeView.java 构造函数
 
 ```java
-// Category %1: Tree Information Display
-addKeyValueEntryBean("%1", "Tree Information Display", "");
-addKeyValueEntryBean("show.scale.bar", "F", "Show the plotting scale for the phylogram.");
-addKeyValueEntryBean("show.axis.bar", "T", "Show the x-axis.");
-addKeyValueEntryBean("show.title", "T", "Show the statement at the bottom of the tree.");
-addKeyValueEntryBean("show.width.height", "F", "Show width and height in the drawing panel. Useful for circular layout.");
+public ParamsAssignerAndParser4ModernTreeView() {
+    super();
 
-// Category %2: Node Label Display
-addKeyValueEntryBean("%2", "Node Label Display", "");
-addKeyValueEntryBean("show.inner.node.label", "F", "Show internal node label.");
-addKeyValueEntryBean("show.branch.length", "F", "Show node branch length.");
-addKeyValueEntryBean("show.bootstrap", "F", "Show internal node bootstrap value.");
+    Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(14f);
+    Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
+    String codeFont = EGPSFonts.codeFont(defaultFont);
+    String codeTitleFont = EGPSFonts.codeFont(defaultTitleFont);
 
-// Category %3: Root and Branch Settings
-addKeyValueEntryBean("%3", "Root and Branch Settings", "");
-addKeyValueEntryBean("show.root", "F", "Whether to display the root node.");
-addKeyValueEntryBean("root.tip.length", "10", "The length of the root tip line in pixels.");
-addKeyValueEntryBean("show.branch.label", "F", "Whether to show branch labels.");
+    // Category %1: Tree Information
+    addKeyValueEntryBean("%1", "Tree Information", "");
+    addKeyValueEntryBean("tree.show.scale.bar", "F", "Show the plotting scale for the phylogram.");
+    addKeyValueEntryBean("tree.show.axis.bar", "T", "Show the x-axis.");
+    addKeyValueEntryBean("tree.show.title", "T", "Show the statement at the bottom of the tree.");
+    addKeyValueEntryBean("tree.show.width.height", "F",
+            "Show width and height in the drawing panel. Useful for circular layout.");
+    addKeyValueEntryBean("tree.title.string",
+            "The phylogenetic tree with {0} high-quality sequenced samples.",
+            "Statement displayed at the bottom. {0} will be replaced with number of leaves.");
+    addKeyValueEntryBean("tree.branch.length.unit", "",
+            "The unit of branch, for example mya(million years ago) or evolutionary rate.");
+    addKeyValueEntryBean("tree.need.reverse.axis", "F",
+            "Whether reverse the axis bar. In some cases, the time is years ago.");
 
-// Category %4: Font Settings
-addKeyValueEntryBean("%4", "Font Settings", "");
-addKeyValueEntryBean("axis.font", "", "The font for x-axis and plotting scale. Leave empty to use global font.");
+    // Category %2: Leaf Node
+    addKeyValueEntryBean("%2", "Leaf Node", "");
+    addKeyValueEntryBean("leaf.show.label", "T", "Whether display the leaf label on the tree.");
+    addKeyValueEntryBean("leaf.label.right.align", "T", "Whether right align the leaf labels.");
 
-// Category %5: Layout Settings
-addKeyValueEntryBean("%5", "Layout Settings", "");
-addKeyValueEntryBean("initial.layout", "RECTANGULAR", "Initial tree layout: RECTANGULAR, CIRCULAR, SPIRAL, SLOPE, or RADICAL.");
-addKeyValueEntryBean("radical.rotation.deg", "0", "Rotation degree for radical layout (0-360).");
-```
+    // Category %3: Inner Node
+    addKeyValueEntryBean("%3", "Inner Node", "");
+    addKeyValueEntryBean("inner.show.label", "F", "Show internal node label.");
+    addKeyValueEntryBean("inner.show.bootstrap", "F", "Show internal node bootstrap value.");
+    addKeyValueEntryBean("inner.show.branch.length", "F", "Show node branch length.");
 
-Add to `generateTreeFromKeyValue()` method:
+    // Category %4: Root Settings
+    addKeyValueEntryBean("%4", "Root Settings", "");
+    addKeyValueEntryBean("root.show", "F", "Whether to display the root node.");
+    addKeyValueEntryBean("root.tip.length", "10", "The length of the root tip line in pixels.");
+    addKeyValueEntryBean("root.show.branch.label", "F", "Whether to show branch labels.");
 
-```java
-// Parse Category %1: Tree Information Display
-string = input.getSimplifiedStringWithDefault("show.scale.bar");
-if (!string.isEmpty()) {
-    ret.setShowScaleBar(BooleanUtils.toBoolean(string));
-}
-string = input.getSimplifiedStringWithDefault("show.axis.bar");
-if (!string.isEmpty()) {
-    ret.setShowAxisBar(BooleanUtils.toBoolean(string));
-}
-string = input.getSimplifiedStringWithDefault("show.title");
-if (!string.isEmpty()) {
-    ret.setShowTitle(BooleanUtils.toBoolean(string));
-}
-string = input.getSimplifiedStringWithDefault("show.width.height");
-if (!string.isEmpty()) {
-    ret.setShowWidthAndHeightString(BooleanUtils.toBoolean(string));
-}
+    // Category %5: Mouse Wheel
+    addKeyValueEntryBean("%5", "Mouse Wheel", "");
+    addKeyValueEntryBean("wheel.height.scale.on", "T", "Whether mouse wheel scale on for height.");
+    addKeyValueEntryBean("wheel.width.scale.on", "T", "Whether mouse wheel scale on for width.");
 
-// Parse Category %2: Node Label Display
-string = input.getSimplifiedStringWithDefault("show.inner.node.label");
-if (!string.isEmpty()) {
-    ret.setShowInnerNodeLabel(BooleanUtils.toBoolean(string));
-}
-string = input.getSimplifiedStringWithDefault("show.branch.length");
-if (!string.isEmpty()) {
-    ret.setShowNodeBranchLength(BooleanUtils.toBoolean(string));
-}
-string = input.getSimplifiedStringWithDefault("show.bootstrap");
-if (!string.isEmpty()) {
-    ret.setShowBootstrap(BooleanUtils.toBoolean(string));
-}
+    // Category %6: Font Settings
+    addKeyValueEntryBean("%6", "Font Settings", "");
+    addKeyValueEntryBean("font.global", codeFont, "The font for global, leaf label names employ it.");
+    addKeyValueEntryBean("font.title", codeTitleFont, "The font for bottom title.");
+    addKeyValueEntryBean("font.axis", "", "The font for x-axis and plotting scale. Leave empty to use global font.");
 
-// Parse Category %3: Root and Branch Settings
-string = input.getSimplifiedStringWithDefault("show.root");
-if (!string.isEmpty()) {
-    ret.setShowRoot(BooleanUtils.toBoolean(string));
-}
-string = input.getSimplifiedStringWithDefault("root.tip.length");
-if (!string.isEmpty()) {
-    ret.setRootTipLength(Double.parseDouble(string));
-}
-string = input.getSimplifiedStringWithDefault("show.branch.label");
-if (!string.isEmpty()) {
-    ret.setShowBranchLabel(BooleanUtils.toBoolean(string));
-}
+    // Category %7: Layout Settings
+    addKeyValueEntryBean("%7", "Layout Settings", "");
+    addKeyValueEntryBean("layout.initial", "RECTANGULAR",
+            "Initial tree layout: RECTANGULAR, CIRCULAR, SPIRAL, SLOPE, or RADICAL.");
+    addKeyValueEntryBean("layout.radical.rotation", "0", "Rotation degree for radical layout (0-360).");
+    addKeyValueEntryBean("layout.blank.space", "20,40,80,40", "The blank area of top,left,bottom,right (pixels).");
 
-// Parse Category %4: Font Settings
-string = input.getSimplifiedStringWithDefault("axis.font");
-if (!string.isEmpty()) {
-    Font font = EGPSFonts.parseFont(string);
-    ret.setAxisFont(font);
-}
-
-// Parse Category %5: Layout Settings
-string = input.getSimplifiedStringWithDefault("initial.layout");
-if (!string.isEmpty()) {
-    ret.setInitialLayout(string);
-}
-string = input.getSimplifiedStringWithDefault("radical.rotation.deg");
-if (!string.isEmpty()) {
-    ret.setRadicalLayoutRotationDeg(Integer.parseInt(string));
+    // Category %8: Advanced
+    addKeyValueEntryBean("%8", "Advanced", "");
+    addKeyValueEntryBean("advanced.node.visual.config", "",
+            "Node specific visual annotations config file path.");
 }
 ```
 
 ---
 
-## MTVImportInforBean Fields to Add
+## Summary 汇总
 
-Add the following fields to `MTVImportInforBean.java`:
-
-```java
-// Category %1
-protected boolean showScaleBar = false;
-protected boolean showAxisBar = true;
-protected boolean showTitle = true;
-protected boolean showWidthAndHeightString = false;
-
-// Category %2
-protected boolean showInnerNodeLabel = false;
-protected boolean showNodeBranchLength = false;
-protected boolean showBootstrap = false;
-
-// Category %3
-protected boolean showRoot = false;
-protected double rootTipLength = 10;
-protected boolean showBranchLabel = false;
-
-// Category %4
-protected Font axisFont = null;
-
-// Category %5
-protected String initialLayout = "RECTANGULAR";
-protected int radicalLayoutRotationDeg = 0;
-
-// Getters and setters for each...
-```
+| Category | Parameter Count | Description |
+|----------|----------------|-------------|
+| Essential (必需) | 5 | 输入数据参数 |
+| %1 Tree Information | 7 | 树信息显示 |
+| %2 Leaf Node | 2 | 叶节点显示 |
+| %3 Inner Node | 3 | 内部节点显示 |
+| %4 Root Settings | 3 | 根节点设置 |
+| %5 Mouse Wheel | 2 | 鼠标滚轮缩放 |
+| %6 Font Settings | 3 | 字体设置 |
+| %7 Layout Settings | 3 | 布局设置 |
+| %8 Advanced | 1 | 高级设置 |
+| **Total** | **29** | 全部参数 |
 
 ---
 
-## Summary
+## GUI Button to Parameter Mapping
 
-| Category | Count | Description |
-|----------|-------|-------------|
-| Existing | 16 | Already implemented parameters |
-| %1 | 4 | Tree Information Display |
-| %2 | 3 | Node Label Display |
-| %3 | 3 | Root and Branch Settings |
-| %4 | 1 | Font Settings |
-| %5 | 2 | Layout Settings |
-| **Total New** | **13** | New parameters to implement |
-
----
-
-## GUI to Parameter Mapping
-
-| GUI Button/Control | Parameter Key |
-|-------------------|---------------|
-| Scale bar toggle | `show.scale.bar` |
-| Axis button toggle | `show.axis.bar` |
-| Display title toggle | `show.title` |
-| W&H toggle | `show.width.height` |
-| Show inner node label toggle | `show.inner.node.label` |
-| Show branch length toggle | `show.branch.length` |
-| Show bootstrap toggle | `show.bootstrap` |
-| Height scale toggle | `height.scale.on` (existing) |
-| Width scale toggle | `width.scale.on` (existing) |
-| Show leaf label toggle | `show.leaf.label` (existing) |
-
----
-
-## Notes
-
-1. All boolean parameters use `T/F` (True/False) format for consistency
-2. Font parameters use the `EGPSFonts.codeFont()` format: `fontName,style,size` (e.g., `Arial,0,12`)
-3. The `%N` prefix creates a category header in the VOICE parameter UI
-4. Parameters without a category prefix will appear in the default "Visual properties settings" section
+| GUI Button | New Parameter Key |
+|------------|------------------|
+| Scale bar toggle | `tree.show.scale.bar` |
+| Axis button toggle | `tree.show.axis.bar` |
+| Display title toggle | `tree.show.title` |
+| W&H toggle | `tree.show.width.height` |
+| Show leaf label toggle | `leaf.show.label` |
+| Show inner node label toggle | `inner.show.label` |
+| Show branch length toggle | `inner.show.branch.length` |
+| Show bootstrap toggle | `inner.show.bootstrap` |
+| Height scale toggle | `wheel.height.scale.on` |
+| Width scale toggle | `wheel.width.scale.on` |

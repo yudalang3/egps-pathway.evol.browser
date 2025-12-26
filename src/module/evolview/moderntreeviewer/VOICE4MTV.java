@@ -75,9 +75,11 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
         evolTreeParserMap4VOICM = new ParamsAssignerAndParser4ModernTreeView();
 
         if (exampleIndex == 0) {
-            String nwkStr = "(((a:8.5,b:8.5):2.5,e:11.0):5.5,(c:14.0,d:14.0):2.5):0.0;";
+            // Great Apes phylogenetic tree with divergence times in MYA (Million Years Ago)
+            // Human-Chimp: ~6.5 MYA, Chimp-Bonobo: ~1.5 MYA, Human/Chimp-Gorilla: ~8.5 MYA, Homininae-Orangutan: ~12.5 MYA
+            String nwkStr = "(((Human:6.5,(Chimpanzee:1.5,Bonobo:1.5):5):2,Gorilla:8.5):4,Orangutan:12.5);";
             evolTreeParserMap4VOICM.addKeyValueEntryBean("input.nwk.string", nwkStr,
-                    "Direct input the nwk string content. Hight priority.");
+                    "Great Apes phylogeny with divergence times (MYA). Direct input the nwk string content.");
         } else if (exampleIndex == 1) {
             String speciesTree = EGPSProperties.PROPERTIES_DIR + "/bioData/example/treeBarplot/01.speci.nwk";
             evolTreeParserMap4VOICM.addKeyValueEntryBean("input.nwk.path", speciesTree, "Input the nwk file path.");

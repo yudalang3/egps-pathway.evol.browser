@@ -286,3 +286,58 @@ if (SwingUtilities.isEventDispatchThread()) {
 - UTF-8 encoding is enforced: `System.setProperty("file.encoding", "UTF-8")`
 - **Test files must be placed in `src/test/` directory**, not in the main source tree (`src/egps2/` or `src/egps/`)
 - No formal unit testing framework (like JUnit); tests are standalone Java classes with main methods
+
+## egps-base Dependency
+
+The core graphics and utility classes are in a separate repository: **https://github.com/yudalang3/egps-base**
+
+This project depends on `egps-base.jar` (located in `dependency-egps/`). When modifying graphics-related code, you may need to reference the source from egps-base.
+
+### Key Classes in egps-base
+
+**Location:** `egps-base/src/main/java/graphic/engine/`
+
+| Class | Description |
+|-------|-------------|
+| `GuiCalculator` | Coordinate transformation utilities (circular, spiral, polar coordinates) |
+| `BlankArea` | Margin/padding management for canvas layouts |
+| `AxisTickCalculator` | Automatic axis tick calculation for scale bars |
+
+**Common methods in `GuiCalculator`:**
+```java
+// Calculate point on a circle
+Point2D.Double calculateCircularLocation(double angle, double radius, double centerX, double centerY)
+
+// Calculate point on an Archimedean spiral: r = alpha + beta * theta
+Point2D.Double calculateSpiralLocation(double alpha, double beta, double angle, double centerX, double centerY)
+```
+
+**BlankArea usage:**
+```java
+BlankArea blankArea = new BlankArea(top, left, bottom, right);
+
+// Get working dimensions (canvas minus margins)
+int workWidth = blankArea.getWorkWidth(canvasWidth);
+int workHeight = blankArea.getWorkHeight(canvasHeight);
+
+// Get margin values
+int leftMargin = blankArea.getLeft();
+int topMargin = blankArea.getTop();
+```
+
+### Layout Center Calculation Pattern
+
+When implementing circular or spiral layouts, always calculate the center based on the **working area**, not the full canvas:
+
+```java
+// CORRECT: Center in working area (accounts for asymmetric margins)
+int workWidth = blankArea.getWorkWidth(width);
+int workHeight = blankArea.getWorkHeight(height);
+centerX = blankArea.getLeft() + workWidth / 2;
+centerY = blankArea.getTop() + workHeight / 2;
+
+// WRONG: Center in full canvas (ignores margins)
+centerX = width / 2;   // Don't do this!
+centerY = height / 2;  // Don't do this!
+```
+

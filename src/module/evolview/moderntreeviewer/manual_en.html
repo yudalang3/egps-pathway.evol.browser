@@ -5,197 +5,316 @@
 <title>Modern Tree Viewer Manual</title>
 </head>
 <body>
+<blockquote>
 
-	<blockquote>
-		<h3>Task to resolve</h3>
-		<p>Interactive visualization and operation of phylogenetic trees. Supports multiple tree layouts, color configurations, and graphical annotations with high-quality vector graphics export.</p>
+<h2><font color="#2c3e50">Modern Tree Viewer</font></h2>
+<p>Interactive visualization and operation of phylogenetic trees. Supports multiple tree layouts, color configurations, and graphical annotations with high-quality vector graphics export.</p>
 
-		<h3>Quick start</h3>
-		<p>Any actions are straightforward. Please follow the GUI instructions.</p>
+<hr>
 
-		<ol>
-			<li>Click the Example button to see the input data.</li>
-			<li>Click the Execute button to see the results.</li>
-		</ol>
+<h3><font color="#16a085">Quick Start</font></h3>
+<ol>
+	<li>Click <b>Example</b> to see sample input data</li>
+	<li>Click <b>Execute</b> to visualize the tree</li>
+	<li>Use the left control panel to adjust display options</li>
+</ol>
 
-		<h3>The novel features in the control panel (GUI):</h3>
-		<ol>
-			<li>A modern graphical interface, not the previous dull state. It can remember some user operations.</li>
-			<li>Control panel buttons, divided into four categories:
-				<ol type="i">
-					<li>First category: Gesture buttons</li>
-					<li>Second category: Normal buttons</li>
-					<li>Third category: Counting gesture buttons</li>
-					<li>Fourth category: Swing Toggle buttons</li>
-				</ol>
-			</li>
-			<li>Highly recommended is this Toggle button with an Apple desktop style, which is used in the Tree layout and Creative mode panels.</li>
-			<li>VOICM solves the parameter explosion issue:
-				<ol type="a">
-					<li>Bookmarks that can be recorded, support free operations, and can be imported and exported.</li>
-					<li>All parameters can be set in the input panel.</li>
-				</ol>
-			</li>
-		</ol>
+<hr>
 
-		<hr>
-		<h2>Input Parameters Reference</h2>
+<h2><font color="#2c3e50">Input Parameters</font></h2>
 
-		<h3>Tree Input Methods</h3>
-		<p>There are three ways to input a phylogenetic tree (in priority order):</p>
+<h3><font color="#8e44ad">Tree Input Methods</font></h3>
+<p>Three ways to input a phylogenetic tree (in priority order):</p>
 
-		<h4>1. input.nwk.string</h4>
-		<p><b>Description:</b> Direct input of Newick string content. This has the highest priority.</p>
-		<p><b>Examples:</b></p>
-		<pre>
-# Simple tree with branch lengths
-(A:0.1,B:0.2,(C:0.3,D:0.4):0.5);
+<table border="1" cellpadding="8" cellspacing="0" width="100%">
+<tr bgcolor="#3498db">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>input.nwk.string</code></td>
+	<td>Direct Newick string input (highest priority)</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>input.nwk.path</code></td>
+	<td>Path to Newick file (.nwk, .newick, .tree)</td>
+</tr>
+<tr>
+	<td><code>input.tableLike.path</code></td>
+	<td>Path to table-like tree file (ITP format)</td>
+</tr>
+</table>
 
-# Tree with internal node names
-(A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F;
+<h4>Newick String Example:</h4>
+<p>Great Apes phylogeny with divergence times in Million Years Ago (MYA):</p>
+<pre>
+(((Human:6.5,(Chimpanzee:1.5,Bonobo:1.5):5):2,Gorilla:8.5):4,Orangutan:12.5);
+</pre>
+<p><i>Human-Chimp: ~6.5 MYA, Chimp-Bonobo: ~1.5 MYA, Human/Chimp-Gorilla: ~8.5 MYA, Homininae-Orangutan: ~12.5 MYA</i></p>
 
-# Tree with support values
-(A:0.1,B:0.2,(C:0.3,D:0.4)100:0.5);
-		</pre>
-
-		<h4>2. input.nwk.path</h4>
-		<p><b>Description:</b> Path to a Newick format tree file (.nwk, .newick, .tree).</p>
-		<p><b>Example file content:</b></p>
-		<pre>
-# SpeciesTree.nwk
-((Human:0.1,Chimp:0.08)Hominini:0.2,(Gorilla:0.15,Orangutan:0.25)GreatApes:0.3)Hominidae;
-		</pre>
-
-		<h4>3. input.tableLike.path</h4>
-		<p><b>Description:</b> Path to a table-like tree file (Intuitive Tree Format, ITP).</p>
-		<p>This format is more readable for humans and easier to edit manually.</p>
-		<p><b>Format rules:</b></p>
-		<ul>
-			<li>Tab (<code>\t</code>) separates parent from children</li>
-			<li>Comma (<code>,</code>) separates sibling nodes</li>
-			<li>Colon (<code>:</code>) separates node name from branch length (like Newick)</li>
-			<li>First line defines the root node</li>
-			<li>Leaf nodes have empty children (or just their name)</li>
-		</ul>
-		<p><b>Example 1 - Simple tree without branch lengths:</b></p>
-		<pre>
-root	A,B
-A	C,D
-B	E,F
-C
-D
-E
-F
-		</pre>
-		<p>This represents the tree: ((C,D)A,(E,F)B)root;</p>
-
-		<p><b>Example 2 - Tree with branch lengths:</b></p>
-		<pre>
-root:0	A:0.1,B:0.2
-A:0.1	C:0.3,D:0.4
-B:0.2	E:0.15,F:0.25
+<h4>Table-like Format Example:</h4>
+<pre>
+root:0    A:0.1,B:0.2
+A:0.1     C:0.3,D:0.4
+B:0.2
 C:0.3
 D:0.4
-E:0.15
-F:0.25
-		</pre>
+</pre>
 
-		<p><b>Example 3 - Species tree:</b></p>
-		<pre>
-Hominidae:0	Hominini:0.2,GreatApes:0.3
-Hominini:0.2	Human:0.1,Chimp:0.08
-GreatApes:0.3	Gorilla:0.15,Orangutan:0.25
-Human:0.1
-Chimp:0.08
-Gorilla:0.15
-Orangutan:0.25
-		</pre>
+<hr>
 
-		<hr>
-		<h3>Newick Format Options</h3>
+<h3><font color="#8e44ad">Newick Format (nwk.format)</font></h3>
+<p><b>Default:</b> 0 | <b>Range:</b> 0-9</p>
+<p><font color="#e74c3c"><b>Note:</b></font> Bootstrap values should be in <b>0-100</b> range (e.g., 90), not decimal (0.9).</p>
 
-		<h4>nwk.format</h4>
-		<p><b>Description:</b> Specifies the Newick format type for parsing. Reference: ETE3/ETE4 format definitions.</p>
-		<p><b>Default:</b> 0 (flexible with support values)</p>
-		<p><b>Note on Support Values:</b> Bootstrap/support values should be in the <b>0-100</b> range (e.g., 90, 95, 100),
-		   not decimal format (0.0-1.0). For example, use <code>90</code> to represent 90% bootstrap support, not <code>0.9</code>.</p>
-		<table border="1" cellpadding="5">
-			<tr bgcolor="#e0e0e0">
-				<th>Format</th>
-				<th>Leaf Node</th>
-				<th>Internal Node</th>
-				<th>Example</th>
-			</tr>
-			<tr>
-				<td><b>0</b></td>
-				<td>name:dist</td>
-				<td>support:dist</td>
-				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">90</font>:0.4);</td>
-			</tr>
-			<tr>
-				<td><b>1</b></td>
-				<td>name:dist</td>
-				<td>name:dist</td>
-				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">NodeX</font>:0.4);</td>
-			</tr>
-			<tr>
-				<td><b>2</b></td>
-				<td>name:dist (strict)</td>
-				<td>support:dist (strict)</td>
-				<td>Same as 0, but all fields required</td>
-			</tr>
-			<tr>
-				<td><b>3</b></td>
-				<td>name:dist (strict)</td>
-				<td>name:dist (strict)</td>
-				<td>Same as 1, but all fields required</td>
-			</tr>
-			<tr>
-				<td><b>4</b></td>
-				<td>name:dist</td>
-				<td>- (none)</td>
-				<td>(A:0.1,(B:0.2,C:0.3));</td>
-			</tr>
-			<tr>
-				<td><b>5</b></td>
-				<td>name:dist</td>
-				<td>:dist only</td>
-				<td>(A:0.1,(B:0.2,C:0.3):0.4);</td>
-			</tr>
-			<tr>
-				<td><b>6</b></td>
-				<td>name:dist</td>
-				<td>name only</td>
-				<td>(A:0.1,(B:0.2,C:0.3)NodeX);</td>
-			</tr>
-			<tr>
-				<td><b>7</b></td>
-				<td>name only</td>
-				<td>name only</td>
-				<td>(A,(B,C)NodeX);</td>
-			</tr>
-			<tr>
-				<td><b>8</b></td>
-				<td>name only</td>
-				<td>- (none)</td>
-				<td>(A,(B,C));</td>
-			</tr>
-			<tr>
-				<td><b>9</b></td>
-				<td>- (none)</td>
-				<td>- (none)</td>
-				<td>(,(,));</td>
-			</tr>
-		</table>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#9b59b6">
+	<th><font color="white">Format</font></th>
+	<th><font color="white">Leaf</font></th>
+	<th><font color="white">Internal</font></th>
+	<th><font color="white">Example</font></th>
+</tr>
+<tr>
+	<td align="center"><b>0</b></td>
+	<td>name:dist</td>
+	<td>support:dist</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3)<font color="blue">90</font>:0.4);</code></td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>1</b></td>
+	<td>name:dist</td>
+	<td>name:dist</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3)<font color="blue">NodeX</font>:0.4);</code></td>
+</tr>
+<tr>
+	<td align="center"><b>2-3</b></td>
+	<td colspan="3">Strict versions of 0-1 (all fields required)</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>4</b></td>
+	<td>name:dist</td>
+	<td>none</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3));</code></td>
+</tr>
+<tr>
+	<td align="center"><b>5</b></td>
+	<td>name:dist</td>
+	<td>:dist only</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3):0.4);</code></td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>6</b></td>
+	<td>name:dist</td>
+	<td>name only</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3)NodeX);</code></td>
+</tr>
+<tr>
+	<td align="center"><b>7</b></td>
+	<td>name only</td>
+	<td>name only</td>
+	<td><code>(A,(B,C)NodeX);</code></td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>8-9</b></td>
+	<td colspan="3">Name only (8) or none (9)</td>
+</tr>
+</table>
 
-		<h4>nwk.remove.whitespace</h4>
-		<p><b>Description:</b> Whether to remove whitespace (spaces, tabs, carriage returns, and linefeeds) from the Newick file before parsing.</p>
-		<p><b>Default:</b> F (False)</p>
-		<p><b>Values:</b> T (True) or F (False)</p>
-		<p><b>Use case:</b> Set to T when your Newick file contains line breaks or formatting whitespace that should be ignored.</p>
+<hr>
 
-	</blockquote>
+<h2><font color="#2c3e50">Advanced Parameters</font></h2>
+<p>These parameters allow fine-grained control over tree visualization.</p>
 
+<h3><font color="#27ae60">%1 Tree Information</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#27ae60">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>tree.show.scale.bar</code></td>
+	<td>F</td>
+	<td>Show plotting scale bar</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>tree.show.axis.bar</code></td>
+	<td>T</td>
+	<td>Show x-axis</td>
+</tr>
+<tr>
+	<td><code>tree.show.title</code></td>
+	<td>T</td>
+	<td>Show title statement at bottom</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>tree.show.width.height</code></td>
+	<td>F</td>
+	<td>Show width/height (useful for circular layout)</td>
+</tr>
+<tr>
+	<td><code>tree.title.string</code></td>
+	<td><i>The phylogenetic tree with {0}...</i></td>
+	<td>Title text ({0} = leaf count)</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>tree.branch.length.unit</code></td>
+	<td><i>empty</i></td>
+	<td>Branch length unit (e.g., mya)</td>
+</tr>
+<tr>
+	<td><code>tree.need.reverse.axis</code></td>
+	<td>F</td>
+	<td>Reverse axis direction</td>
+</tr>
+</table>
 
+<h3><font color="#3498db">%2 Leaf Node</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#3498db">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>leaf.show.label</code></td>
+	<td>T</td>
+	<td>Display leaf labels</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>leaf.label.right.align</code></td>
+	<td>T</td>
+	<td>Right-align leaf labels</td>
+</tr>
+</table>
+
+<h3><font color="#e67e22">%3 Inner Node</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e67e22">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>inner.show.label</code></td>
+	<td>F</td>
+	<td>Show internal node labels</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>inner.show.bootstrap</code></td>
+	<td>F</td>
+	<td>Show bootstrap values</td>
+</tr>
+<tr>
+	<td><code>inner.show.branch.length</code></td>
+	<td>F</td>
+	<td>Show branch lengths</td>
+</tr>
+</table>
+
+<h3><font color="#9b59b6">%4 Root Settings</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#9b59b6">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>root.show</code></td>
+	<td>F</td>
+	<td>Display root node</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>root.tip.length</code></td>
+	<td>10</td>
+	<td>Root tip line length (pixels)</td>
+</tr>
+</table>
+
+<h3><font color="#1abc9c">%5 Mouse Wheel</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#1abc9c">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>wheel.height.scale.on</code></td>
+	<td>T</td>
+	<td>Enable height scaling with mouse wheel</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>wheel.width.scale.on</code></td>
+	<td>T</td>
+	<td>Enable width scaling with mouse wheel</td>
+</tr>
+</table>
+
+<h3><font color="#e74c3c">%6 Font Settings</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e74c3c">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>font.global</code></td>
+	<td><i>System font, 14pt</i></td>
+	<td>Global font for labels</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>font.title</code></td>
+	<td><i>Title font</i></td>
+	<td>Title statement font</td>
+</tr>
+<tr>
+	<td><code>font.axis</code></td>
+	<td><i>Global font</i></td>
+	<td>Axis and scale font</td>
+</tr>
+</table>
+<p><b>Font format:</b> <code>FontName,Style,Size</code> (e.g., <code>Arial,0,12</code> where style: 0=plain, 1=bold, 2=italic)</p>
+
+<h3><font color="#34495e">%7 Layout Settings</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#34495e">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>layout.blank.space</code></td>
+	<td>20,40,80,40</td>
+	<td>Blank area: top,left,bottom,right (pixels)</td>
+</tr>
+</table>
+
+<h3><font color="#7f8c8d">%8 Advanced</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#7f8c8d">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Default</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><code>advanced.node.visual.config</code></td>
+	<td><i>empty</i></td>
+	<td>Node visual config file (TSV)</td>
+</tr>
+</table>
+
+<h4>Node Visual Config File Format (TSV):</h4>
+<pre>
+name	fillColor	circleRadius	lineThickness	displayName
+leaf1	#FF00FF	2	2	T
+leaf2	#00FF00	3	1	F
+</pre>
+
+<hr>
+
+<h3><font color="#16a085">Boolean Values</font></h3>
+<p>Use <b>T</b> (True) or <b>F</b> (False) for all boolean parameters.</p>
+
+</blockquote>
 </body>
 </html>

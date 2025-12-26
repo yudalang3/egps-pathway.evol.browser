@@ -8,22 +8,41 @@ import java.awt.*;
 
 public class MTVImportInforBean extends EvolTreeImportInfoBean {
 
+	// Layout settings
 	protected BlankArea blank_space;
+
+	// Tree Information (%1)
+	protected boolean showScaleBar = false;
+	protected boolean showAxisBar = true;
+	protected boolean showTitle = true;
+	protected boolean showWidthAndHeightString = false;
 	protected String titleString;
-	
+	protected String branchLengthUnit = "";
+	protected boolean needReverseAxisBar = false;
+
+	// Leaf Node (%2)
 	protected boolean showLeafLabel = false;
-	protected Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(12f);
-	protected Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
-	
 	protected boolean shouldLeafNameRightAlign = false;
-	
+
+	// Inner Node (%3)
+	protected boolean showInnerNodeLabel = false;
+	protected boolean showBootstrap = false;
+	protected boolean showBranchLength = false;
+
+	// Root Settings (%4)
+	protected boolean showRoot = false;
+	protected double rootTipLength = 10;
+
+	// Mouse Wheel (%5)
 	protected boolean whetherWidthScaleOnMouseWheel = true;
 	protected boolean whetherHeightScaleOnMouseWheel = true;
-	
-	
-	protected boolean needReverseAxisBar = false;
-	// Default is "", You can change it to "Time (MYA)"
-	protected String branchLengthUnit = "";
+
+	// Font Settings (%6)
+	protected Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(14f);
+	protected Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
+	protected Font axisFont = null;
+
+	// Advanced (%8)
 	private String nodeVisualAnnotationConfigFilePath;
 	
 	public boolean isShouldLeafNameRightAlign() {
@@ -114,5 +133,89 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
 	public String getNodeVisualAnnotationConfigFilePath() {
 		return nodeVisualAnnotationConfigFilePath;
 	}
-	
+
+	// Tree Information (%1) getters/setters
+	public boolean isShowScaleBar() {
+		return showScaleBar;
+	}
+
+	public void setShowScaleBar(boolean showScaleBar) {
+		this.showScaleBar = showScaleBar;
+	}
+
+	public boolean isShowAxisBar() {
+		return showAxisBar;
+	}
+
+	public void setShowAxisBar(boolean showAxisBar) {
+		this.showAxisBar = showAxisBar;
+	}
+
+	public boolean isShowTitle() {
+		return showTitle;
+	}
+
+	public void setShowTitle(boolean showTitle) {
+		this.showTitle = showTitle;
+	}
+
+	public boolean isShowWidthAndHeightString() {
+		return showWidthAndHeightString;
+	}
+
+	public void setShowWidthAndHeightString(boolean showWidthAndHeightString) {
+		this.showWidthAndHeightString = showWidthAndHeightString;
+	}
+
+	// Inner Node (%3) getters/setters
+	public boolean isShowInnerNodeLabel() {
+		return showInnerNodeLabel;
+	}
+
+	public void setShowInnerNodeLabel(boolean showInnerNodeLabel) {
+		this.showInnerNodeLabel = showInnerNodeLabel;
+	}
+
+	public boolean isShowBootstrap() {
+		return showBootstrap;
+	}
+
+	public void setShowBootstrap(boolean showBootstrap) {
+		this.showBootstrap = showBootstrap;
+	}
+
+	public boolean isShowBranchLength() {
+		return showBranchLength;
+	}
+
+	public void setShowBranchLength(boolean showBranchLength) {
+		this.showBranchLength = showBranchLength;
+	}
+
+	// Root Settings (%4) getters/setters
+	public boolean isShowRoot() {
+		return showRoot;
+	}
+
+	public void setShowRoot(boolean showRoot) {
+		this.showRoot = showRoot;
+	}
+
+	public double getRootTipLength() {
+		return rootTipLength;
+	}
+
+	public void setRootTipLength(double rootTipLength) {
+		this.rootTipLength = rootTipLength;
+	}
+
+	// Font Settings (%6) getters/setters
+	public Font getAxisFont() {
+		return axisFont;
+	}
+
+	public void setAxisFont(Font axisFont) {
+		this.axisFont = axisFont;
+	}
+
 }

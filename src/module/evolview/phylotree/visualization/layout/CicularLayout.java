@@ -23,8 +23,11 @@ public abstract class CicularLayout extends BaseLayout {
 		double xSelf = node.getXSelf();
 		double ySelf = node.getYSelf();
 
-		int centerX = (int) (currentWidth / 2);
-		int centerY = (int) (currentHeight / 2);
+		// Fix: Use working area center, not full canvas center
+		int workWidth = blankArea.getWorkWidth((int) currentWidth);
+		int workHeight = blankArea.getWorkHeight((int) currentHeight);
+		int centerX = blankArea.getLeft() + workWidth / 2;
+		int centerY = blankArea.getTop() + workHeight / 2;
 
 		TreeDrawUnit drawUnit = node.getDrawUnit();
 

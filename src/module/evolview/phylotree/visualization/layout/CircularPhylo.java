@@ -40,15 +40,24 @@ public class CircularPhylo extends CicularLayout {
 		beforeCalculate(width, height);
 
 		leafLoop = 0;
-		
+
 		int workWidth = blankArea.getWorkWidth(width);
 		int workHeight = blankArea.getWorkHeight(height);
-		biggestCircleRadicus = 0.5 * Math.min(workWidth,workHeight );
+
+		// Calculate available radius, reserving space for leaf labels if shown
+		double availableRadius = 0.5 * Math.min(workWidth, workHeight);
+		if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
+			int maxLeafLabelWidth = getMaxLengthLeafNameWidthAccording2CurrentFont();
+			availableRadius -= maxLeafLabelWidth;
+		}
+		biggestCircleRadicus = Math.max(availableRadius, 50); // Ensure minimum radius
 
 		calculateRatioAndChooseStartLength();
 
-		centerX = (int) (currentWidth / 2);
-		centerY = (int) (currentHeight / 2);
+		// Fix: Center should be in the middle of the working area, not the full canvas
+		// This accounts for asymmetric margins (e.g., top=20, left=40, bottom=80, right=40)
+		centerX = blankArea.getLeft() + workWidth / 2;
+		centerY = blankArea.getTop() + workHeight / 2;
 
 		CircularLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getCircularLayoutPropertiy();
 		globalStartDegree = circularLayoutPropertiy.getGlobalStartDegree();

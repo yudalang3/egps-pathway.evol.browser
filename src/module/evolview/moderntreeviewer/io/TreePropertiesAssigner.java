@@ -8,6 +8,7 @@ import evoltree.struct.util.EvolNodeUtil;
 import evoltree.txtdisplay.TreeDrawUnit;
 import graphic.engine.colors.EGPSColors;
 import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.graphics.struct.ShowInnerNodePropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.apache.commons.lang3.BooleanUtils;
@@ -21,24 +22,23 @@ import java.util.List;
 public class TreePropertiesAssigner {
 
 	public void assign(TreeLayoutProperties treeLayoutProperties, MTVImportInforBean object) {
-		treeLayoutProperties.setBlankArea(object.getBlank_space());
-		
-		if(!Strings.isNullOrEmpty(object.getTitleString())) {
+		// Category %1: Tree Information
+		treeLayoutProperties.setShowScaleBar(object.isShowScaleBar());
+		treeLayoutProperties.setShowAxisBar(object.isShowAxisBar());
+		treeLayoutProperties.setShowTitle(object.isShowTitle());
+		treeLayoutProperties.setShowWidthAndHeightString(object.isShowWidthAndHeightString());
+		if (!Strings.isNullOrEmpty(object.getTitleString())) {
 			treeLayoutProperties.setTitleString(object.getTitleString());
 		}
-		
-		treeLayoutProperties.setWhetherHeightScaleOnMouseWheel( object.isWhetherHeightScaleOnMouseWheel());
-		treeLayoutProperties.setWhetherWidthScaleOnMouseWheel( object.isWhetherWidthScaleOnMouseWheel());
-		
-		treeLayoutProperties.setTitleString(object.getTitleString());
+		treeLayoutProperties.setBranchLengthUnit(object.getBranchLengthUnit());
+		treeLayoutProperties.setNeedReverseAxisBar(object.isNeedReverseAxisBar());
 
+		// Category %2: Leaf Node
 		ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
 		showLeafPropertiesInfo.setShowLeafLabel(object.isShowLeafLabel());
-
 		if (object.isShowLeafLabel()) {
 			showLeafPropertiesInfo.setNeedChange4showLabel(true);
 			showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-
 			List<GraphicsNode> leaves = treeLayoutProperties.getLeaves();
 			for (GraphicsNode node : leaves) {
 				node.getDrawUnit().setDrawName(true);
@@ -47,15 +47,31 @@ public class TreePropertiesAssigner {
 			showLeafPropertiesInfo.setNeedChange4showLabel(false);
 			showLeafPropertiesInfo.setNeedChange4hideLabel(false);
 		}
-
-		treeLayoutProperties.setGlobalFont(object.getDefaultFont());
-		treeLayoutProperties.setNeedReverseAxisBar(object.isNeedReverseAxisBar());
 		treeLayoutProperties.setShouldLeafNameRightAlign(object.isShouldLeafNameRightAlign());
-		treeLayoutProperties.setBranchLengthUnit(object.getBranchLengthUnit());
-	
-	
+
+		// Category %3: Inner Node
+		ShowInnerNodePropertiesInfo showInnerNodePropertiesInfo = treeLayoutProperties.getShowInnerNodePropertiesInfo();
+		showInnerNodePropertiesInfo.setShowInternalNodeLabel(object.isShowInnerNodeLabel());
+		showInnerNodePropertiesInfo.setShowInternalNodeBootstrap(object.isShowBootstrap());
+		treeLayoutProperties.setShowNodeBranchLength(object.isShowBranchLength());
+
+		// Category %4: Root Settings
+		treeLayoutProperties.setShowRoot(object.isShowRoot());
+		treeLayoutProperties.setRootTipLength(object.getRootTipLength());
+
+		// Category %5: Mouse Wheel
+		treeLayoutProperties.setWhetherHeightScaleOnMouseWheel(object.isWhetherHeightScaleOnMouseWheel());
+		treeLayoutProperties.setWhetherWidthScaleOnMouseWheel(object.isWhetherWidthScaleOnMouseWheel());
+
+		// Category %6: Font Settings
 		treeLayoutProperties.setGlobalFont(object.getDefaultFont());
 		treeLayoutProperties.setTitleFont(object.getDefaultTitleFont());
+		if (object.getAxisFont() != null) {
+			treeLayoutProperties.setAxisFont(object.getAxisFont());
+		}
+
+		// Category %7: Layout Settings
+		treeLayoutProperties.setBlankArea(object.getBlank_space());
 	}
 
 	public void assignGraphicsNodeEffects(GraphicsNode rootNode, MTVImportInforBean evolTreeImportInfoBean)
