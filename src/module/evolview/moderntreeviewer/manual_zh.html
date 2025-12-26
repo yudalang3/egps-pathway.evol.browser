@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>low volume text editor</title>
+<title>现代化树形视图手册</title>
 </head>
 
 <body>
@@ -18,7 +18,7 @@
 			<li>点击示例按钮查看输入数据。</li>
 			<li>点击执行按钮查看结果。</li>
 		</ol>
-		
+
 		<h3>图形界面中控制面板新特性：</h3>
 		<ol>
 			<li>现代化的图形界面，不是之前灰蒙蒙的状态。可记忆一些用户操作</li>
@@ -38,7 +38,163 @@
 				</ol>
 			</li>
 		</ol>
-		
+
+		<hr>
+		<h2>输入参数参考</h2>
+
+		<h3>进化树输入方式</h3>
+		<p>有三种方式可以输入进化树（按优先级排序）：</p>
+
+		<h4>1. input.nwk.string</h4>
+		<p><b>说明：</b> 直接输入Newick格式字符串。优先级最高。</p>
+		<p><b>示例：</b></p>
+		<pre>
+# 带分支长度的简单树
+(A:0.1,B:0.2,(C:0.3,D:0.4):0.5);
+
+# 带内部节点名称的树
+(A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F;
+
+# 带支持度值的树
+(A:0.1,B:0.2,(C:0.3,D:0.4)100:0.5);
+		</pre>
+
+		<h4>2. input.nwk.path</h4>
+		<p><b>说明：</b> Newick格式树文件的路径（.nwk, .newick, .tree）。</p>
+		<p><b>文件内容示例：</b></p>
+		<pre>
+# SpeciesTree.nwk
+((Human:0.1,Chimp:0.08)Hominini:0.2,(Gorilla:0.15,Orangutan:0.25)GreatApes:0.3)Hominidae;
+		</pre>
+
+		<h4>3. input.tableLike.path</h4>
+		<p><b>说明：</b> 表格式树文件的路径（直观树格式，ITP）。</p>
+		<p>这种格式对人类更易读，也更方便手动编辑。</p>
+		<p><b>格式规则：</b></p>
+		<ul>
+			<li>制表符（<code>\t</code>）分隔父节点和子节点</li>
+			<li>逗号（<code>,</code>）分隔同级节点</li>
+			<li>冒号（<code>:</code>）分隔节点名称和分支长度（与Newick格式相同）</li>
+			<li>第一行定义根节点</li>
+			<li>叶节点的子节点为空（或只有节点名称）</li>
+		</ul>
+		<p><b>示例1 - 不带分支长度的简单树：</b></p>
+		<pre>
+root	A,B
+A	C,D
+B	E,F
+C
+D
+E
+F
+		</pre>
+		<p>对应的Newick格式: ((C,D)A,(E,F)B)root;</p>
+
+		<p><b>示例2 - 带分支长度的树：</b></p>
+		<pre>
+root:0	A:0.1,B:0.2
+A:0.1	C:0.3,D:0.4
+B:0.2	E:0.15,F:0.25
+C:0.3
+D:0.4
+E:0.15
+F:0.25
+		</pre>
+
+		<p><b>示例3 - 物种树：</b></p>
+		<pre>
+Hominidae:0	Hominini:0.2,GreatApes:0.3
+Hominini:0.2	Human:0.1,Chimp:0.08
+GreatApes:0.3	Gorilla:0.15,Orangutan:0.25
+Human:0.1
+Chimp:0.08
+Gorilla:0.15
+Orangutan:0.25
+		</pre>
+
+		<hr>
+		<h3>Newick格式选项</h3>
+
+		<h4>nwk.format</h4>
+		<p><b>说明：</b> 指定解析时使用的Newick格式类型。参考：ETE3/ETE4格式定义。</p>
+		<p><b>默认值：</b> 0（灵活格式，带支持度值）</p>
+		<p><b>支持度值说明：</b> Bootstrap/支持度值应使用 <b>0-100</b> 范围（如：90, 95, 100），
+		   而非小数格式（0.0-1.0）。例如，使用 <code>90</code> 表示90%的bootstrap支持度，而不是 <code>0.9</code>。</p>
+		<table border="1" cellpadding="5">
+			<tr bgcolor="#e0e0e0">
+				<th>格式</th>
+				<th>叶节点</th>
+				<th>内部节点</th>
+				<th>示例</th>
+			</tr>
+			<tr>
+				<td><b>0</b></td>
+				<td>名称:距离</td>
+				<td>支持度:距离</td>
+				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">90</font>:0.4);</td>
+			</tr>
+			<tr>
+				<td><b>1</b></td>
+				<td>名称:距离</td>
+				<td>名称:距离</td>
+				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">NodeX</font>:0.4);</td>
+			</tr>
+			<tr>
+				<td><b>2</b></td>
+				<td>名称:距离（严格）</td>
+				<td>支持度:距离（严格）</td>
+				<td>与0相同，但所有字段必填</td>
+			</tr>
+			<tr>
+				<td><b>3</b></td>
+				<td>名称:距离（严格）</td>
+				<td>名称:距离（严格）</td>
+				<td>与1相同，但所有字段必填</td>
+			</tr>
+			<tr>
+				<td><b>4</b></td>
+				<td>名称:距离</td>
+				<td>-（无）</td>
+				<td>(A:0.1,(B:0.2,C:0.3));</td>
+			</tr>
+			<tr>
+				<td><b>5</b></td>
+				<td>名称:距离</td>
+				<td>仅:距离</td>
+				<td>(A:0.1,(B:0.2,C:0.3):0.4);</td>
+			</tr>
+			<tr>
+				<td><b>6</b></td>
+				<td>名称:距离</td>
+				<td>仅名称</td>
+				<td>(A:0.1,(B:0.2,C:0.3)NodeX);</td>
+			</tr>
+			<tr>
+				<td><b>7</b></td>
+				<td>仅名称</td>
+				<td>仅名称</td>
+				<td>(A,(B,C)NodeX);</td>
+			</tr>
+			<tr>
+				<td><b>8</b></td>
+				<td>仅名称</td>
+				<td>-（无）</td>
+				<td>(A,(B,C));</td>
+			</tr>
+			<tr>
+				<td><b>9</b></td>
+				<td>-（无）</td>
+				<td>-（无）</td>
+				<td>(,(,));</td>
+			</tr>
+		</table>
+
+		<h4>nwk.remove.whitespace</h4>
+		<p><b>说明：</b> 是否在解析前移除Newick文件中的空白字符（空格、制表符、回车符和换行符）。</p>
+		<p><b>默认值：</b> F（False，不移除）</p>
+		<p><b>可选值：</b> T（True，移除）或 F（False，不移除）</p>
+		<p><b>使用场景：</b> 当您的Newick文件包含换行或格式化空白需要忽略时，设置为T。</p>
+
 	</blockquote>
 </body>
 

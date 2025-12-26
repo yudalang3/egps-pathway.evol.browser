@@ -70,13 +70,18 @@ public class NodeUtils {
 		ArrayBasedNode rootNode = null;
 
 		for (String string : readLines) {
+			// Skip empty lines and comment lines
+			if (string.isEmpty() || string.startsWith("#")) {
+				continue;
+			}
+
 			String[] split = string.split("\t", -1);
 
 			ArrayBasedNode parent = parseOneNode(split[0]);
 			{
 				ArrayBasedNode existNode = name2nodeMap.get(parent.getName());
 				if (existNode == null) {
-					name2nodeMap.put(parent.getName(), existNode);
+					name2nodeMap.put(parent.getName(), parent);
 				} else {
 					parent = existNode;
 				}
@@ -85,6 +90,11 @@ public class NodeUtils {
 			// 第一个节点就是根
 			if (rootNode == null) {
 				rootNode = parent;
+			}
+
+			// Leaf node: no children (no tab separator or empty after tab)
+			if (split.length < 2) {
+				continue;
 			}
 
 			String childrenStr = split[1];

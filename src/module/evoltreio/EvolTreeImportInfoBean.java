@@ -1,11 +1,12 @@
 package module.evoltreio;
 
 //@JSONType(orders = {
-//		"input_nwk_string", 
-//		"input_nwk_path", 
-//		"input_tableLike_path", 
-//		"blank_space", 
-//		"removeWhitespace"
+//		"input_nwk_string",
+//		"input_nwk_path",
+//		"input_tableLike_path",
+//		"blank_space",
+//		"removeWhitespace",
+//		"nwkFormat"
 //		})
 public class EvolTreeImportInfoBean {
 
@@ -13,6 +14,7 @@ public class EvolTreeImportInfoBean {
 	private String input_nwk_path = "";
 	private String input_tableLike_path = "";
 	private boolean removeWhitespace = false;
+	private int nwkFormat = NewickFormatConfig.DEFAULT_FORMAT;
 
 	public EvolTreeImportInfoBean() {
 
@@ -50,6 +52,12 @@ public class EvolTreeImportInfoBean {
 		this.removeWhitespace = removeWhitespace;
 	}
 
-	
+	public int getNwkFormat() {
+		return nwkFormat;
+	}
+
+	public void setNwkFormat(int nwkFormat) {
+		this.nwkFormat = nwkFormat;
+	}
 
 }

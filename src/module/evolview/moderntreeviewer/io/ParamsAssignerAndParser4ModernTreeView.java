@@ -20,6 +20,9 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 		Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 		String codeFont = EGPSFonts.codeFont(defaultFont);
 		String codeTitleFont = EGPSFonts.codeFont(defaultTitleFont);
+
+
+		addKeyValueEntryBean("^", "Visual properties settings","");
 		addKeyValueEntryBean("tree.global.font", codeFont,
 				"The font for global, current the leaf label names employ it.");
 		addKeyValueEntryBean("bottom.title.font", codeTitleFont, "The font for bottom title.");

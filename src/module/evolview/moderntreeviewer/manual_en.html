@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>low volume text editor</title>
+<title>Modern Tree Viewer Manual</title>
 </head>
 <body>
 
@@ -37,6 +37,163 @@
 				</ol>
 			</li>
 		</ol>
+
+		<hr>
+		<h2>Input Parameters Reference</h2>
+
+		<h3>Tree Input Methods</h3>
+		<p>There are three ways to input a phylogenetic tree (in priority order):</p>
+
+		<h4>1. input.nwk.string</h4>
+		<p><b>Description:</b> Direct input of Newick string content. This has the highest priority.</p>
+		<p><b>Examples:</b></p>
+		<pre>
+# Simple tree with branch lengths
+(A:0.1,B:0.2,(C:0.3,D:0.4):0.5);
+
+# Tree with internal node names
+(A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F;
+
+# Tree with support values
+(A:0.1,B:0.2,(C:0.3,D:0.4)100:0.5);
+		</pre>
+
+		<h4>2. input.nwk.path</h4>
+		<p><b>Description:</b> Path to a Newick format tree file (.nwk, .newick, .tree).</p>
+		<p><b>Example file content:</b></p>
+		<pre>
+# SpeciesTree.nwk
+((Human:0.1,Chimp:0.08)Hominini:0.2,(Gorilla:0.15,Orangutan:0.25)GreatApes:0.3)Hominidae;
+		</pre>
+
+		<h4>3. input.tableLike.path</h4>
+		<p><b>Description:</b> Path to a table-like tree file (Intuitive Tree Format, ITP).</p>
+		<p>This format is more readable for humans and easier to edit manually.</p>
+		<p><b>Format rules:</b></p>
+		<ul>
+			<li>Tab (<code>\t</code>) separates parent from children</li>
+			<li>Comma (<code>,</code>) separates sibling nodes</li>
+			<li>Colon (<code>:</code>) separates node name from branch length (like Newick)</li>
+			<li>First line defines the root node</li>
+			<li>Leaf nodes have empty children (or just their name)</li>
+		</ul>
+		<p><b>Example 1 - Simple tree without branch lengths:</b></p>
+		<pre>
+root	A,B
+A	C,D
+B	E,F
+C
+D
+E
+F
+		</pre>
+		<p>This represents the tree: ((C,D)A,(E,F)B)root;</p>
+
+		<p><b>Example 2 - Tree with branch lengths:</b></p>
+		<pre>
+root:0	A:0.1,B:0.2
+A:0.1	C:0.3,D:0.4
+B:0.2	E:0.15,F:0.25
+C:0.3
+D:0.4
+E:0.15
+F:0.25
+		</pre>
+
+		<p><b>Example 3 - Species tree:</b></p>
+		<pre>
+Hominidae:0	Hominini:0.2,GreatApes:0.3
+Hominini:0.2	Human:0.1,Chimp:0.08
+GreatApes:0.3	Gorilla:0.15,Orangutan:0.25
+Human:0.1
+Chimp:0.08
+Gorilla:0.15
+Orangutan:0.25
+		</pre>
+
+		<hr>
+		<h3>Newick Format Options</h3>
+
+		<h4>nwk.format</h4>
+		<p><b>Description:</b> Specifies the Newick format type for parsing. Reference: ETE3/ETE4 format definitions.</p>
+		<p><b>Default:</b> 0 (flexible with support values)</p>
+		<p><b>Note on Support Values:</b> Bootstrap/support values should be in the <b>0-100</b> range (e.g., 90, 95, 100),
+		   not decimal format (0.0-1.0). For example, use <code>90</code> to represent 90% bootstrap support, not <code>0.9</code>.</p>
+		<table border="1" cellpadding="5">
+			<tr bgcolor="#e0e0e0">
+				<th>Format</th>
+				<th>Leaf Node</th>
+				<th>Internal Node</th>
+				<th>Example</th>
+			</tr>
+			<tr>
+				<td><b>0</b></td>
+				<td>name:dist</td>
+				<td>support:dist</td>
+				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">90</font>:0.4);</td>
+			</tr>
+			<tr>
+				<td><b>1</b></td>
+				<td>name:dist</td>
+				<td>name:dist</td>
+				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">NodeX</font>:0.4);</td>
+			</tr>
+			<tr>
+				<td><b>2</b></td>
+				<td>name:dist (strict)</td>
+				<td>support:dist (strict)</td>
+				<td>Same as 0, but all fields required</td>
+			</tr>
+			<tr>
+				<td><b>3</b></td>
+				<td>name:dist (strict)</td>
+				<td>name:dist (strict)</td>
+				<td>Same as 1, but all fields required</td>
+			</tr>
+			<tr>
+				<td><b>4</b></td>
+				<td>name:dist</td>
+				<td>- (none)</td>
+				<td>(A:0.1,(B:0.2,C:0.3));</td>
+			</tr>
+			<tr>
+				<td><b>5</b></td>
+				<td>name:dist</td>
+				<td>:dist only</td>
+				<td>(A:0.1,(B:0.2,C:0.3):0.4);</td>
+			</tr>
+			<tr>
+				<td><b>6</b></td>
+				<td>name:dist</td>
+				<td>name only</td>
+				<td>(A:0.1,(B:0.2,C:0.3)NodeX);</td>
+			</tr>
+			<tr>
+				<td><b>7</b></td>
+				<td>name only</td>
+				<td>name only</td>
+				<td>(A,(B,C)NodeX);</td>
+			</tr>
+			<tr>
+				<td><b>8</b></td>
+				<td>name only</td>
+				<td>- (none)</td>
+				<td>(A,(B,C));</td>
+			</tr>
+			<tr>
+				<td><b>9</b></td>
+				<td>- (none)</td>
+				<td>- (none)</td>
+				<td>(,(,));</td>
+			</tr>
+		</table>
+
+		<h4>nwk.remove.whitespace</h4>
+		<p><b>Description:</b> Whether to remove whitespace (spaces, tabs, carriage returns, and linefeeds) from the Newick file before parsing.</p>
+		<p><b>Default:</b> F (False)</p>
+		<p><b>Values:</b> T (True) or F (False)</p>
+		<p><b>Use case:</b> Set to T when your Newick file contains line breaks or formatting whitespace that should be ignored.</p>
+
 	</blockquote>
 
 

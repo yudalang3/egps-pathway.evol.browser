@@ -49,7 +49,7 @@ public class ParamsAssignerAndParser4GeneFamilyBrowser extends ParamsAssignerAnd
 		requiredParams.put("@", bean);
 		// requiredParams.putAll(parserMapBean2); // Commented out - genome browser params removed
 
-		addKeyValueEntryBean("remove.whitespace", "F",
+		addKeyValueEntryBean("nwk.remove.whitespace", "F",
 				"Whether remove whitespace (spaces, tabs, carriage returns, and linefeeds)");
 		addKeyValueEntryBean("leaf.label.right.align", "F", "Whther right align the leaf labels.");
 
