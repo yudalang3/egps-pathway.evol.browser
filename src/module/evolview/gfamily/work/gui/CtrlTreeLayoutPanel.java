@@ -133,4 +133,10 @@ public class CtrlTreeLayoutPanel extends BaseCtrlPanel {
 		guiZoomAndRotateContainner.resetZoomLayoutPanel(newHeight, newWidth);
 	}
 
+	@Override
+	public void reInitializeGUIAccording2treeLayoutProperties() {
+		// Sync zoom container toggle buttons (height/width scale on mouse wheel)
+		guiZoomAndRotateContainner.reInitializeGUIAccording2treeLayoutProperties();
+	}
+
 }

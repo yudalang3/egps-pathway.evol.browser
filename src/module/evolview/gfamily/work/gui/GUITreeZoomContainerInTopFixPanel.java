@@ -333,4 +333,17 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 //		spinnerHorizontalChange.addChangeListener(ChangeListenerSpinnerHorizontal);
 	}
 
+	@Override
+	public void reInitializeGUIAccording2treeLayoutProperties() {
+		if (controller == null || controller.getTreeLayoutProperties() == null) {
+			return;
+		}
+
+		// Sync height scale toggle button
+		height1ScaleTogbtn.setSelected(controller.getTreeLayoutProperties().isWhetherHeightScaleOnMouseWheel());
+
+		// Sync width scale toggle button
+		width1ScaleTogbtn.setSelected(controller.getTreeLayoutProperties().isWhetherWidthScaleOnMouseWheel());
+	}
+
 }

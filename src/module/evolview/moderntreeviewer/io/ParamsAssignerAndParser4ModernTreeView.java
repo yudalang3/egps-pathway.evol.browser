@@ -16,7 +16,7 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 	public ParamsAssignerAndParser4ModernTreeView() {
 		super();
 
-		Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(9f);
+		Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(12f);
 		Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 		String codeFont = EGPSFonts.codeFont(defaultFont);
 		String codeTitleFont = EGPSFonts.codeFont(defaultTitleFont);

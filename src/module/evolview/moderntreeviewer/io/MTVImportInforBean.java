@@ -12,7 +12,7 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
 	protected String titleString;
 	
 	protected boolean showLeafLabel = false;
-	protected Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
+	protected Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(12f);
 	protected Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 	
 	protected boolean shouldLeafNameRightAlign = false;

@@ -34,6 +34,11 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 	private ButtonBadges lineDecreaseButton;
 	private ButtonBadges lineIncreaseButton;
 	private JToggleButton showleaveLabelToggleButton;
+	private JToggleButton displayTitleToggleButton;
+	private JToggleButton toggleButtonWH;
+	private JToggleButton showInnerNodeLabelToggleButton;
+	private JToggleButton showBranchLengthToggleButton;
+	private JToggleButton showBootstrapToggleButton;
 	private Button searchButton;
 	private Button buttonLadderize4up;
 	private Button buttonLaddrize4down;
@@ -316,14 +321,14 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 		gbc_btnNewButton1.gridy = 7;
 		add(showleaveLabelToggleButton, gbc_btnNewButton1);
 
-		JToggleButton displayTitle = new JToggleButton("");
-		displayTitle.setFocusable(false);
-		displayTitle.setToolTipText("Show the statement below.");
-		displayTitle.setIcon(IconObtainer.get("mingpian.png"));
-		displayTitle.setSelected(true);
-		displayTitle.addActionListener(new ActionListener() {
+		displayTitleToggleButton = new JToggleButton("");
+		displayTitleToggleButton.setFocusable(false);
+		displayTitleToggleButton.setToolTipText("Show the statement below.");
+		displayTitleToggleButton.setIcon(IconObtainer.get("mingpian.png"));
+		displayTitleToggleButton.setSelected(true);
+		displayTitleToggleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				controller.getTreeLayoutProperties().setShowTitle(displayTitle.isSelected());
+				controller.getTreeLayoutProperties().setShowTitle(displayTitleToggleButton.isSelected());
 				controller.refreshPhylogeneticTree();
 			}
 		});
@@ -332,7 +337,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 		gbc_button2.insets = new Insets(0, 0, 5, 5);
 		gbc_button2.gridx = 2;
 		gbc_button2.gridy = 7;
-		add(displayTitle, gbc_button2);
+		add(displayTitleToggleButton, gbc_button2);
 
 		axisButton = new JToggleButton("");
 		axisButton.setSelected(true);
@@ -351,7 +356,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 			}
 		});
 
-		JToggleButton toggleButtonWH = new JToggleButton("W&H");
+		toggleButtonWH = new JToggleButton("W&H");
 //		JToggleButton toggleButtonWH = new JToggleButton("");
 		toggleButtonWH.setFocusable(false);
 //		toggleButtonWH.setIcon(IconObtainer.get("showInnerNodeLabel.png"));
@@ -372,18 +377,18 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 		gbc_toggleButtonWH.gridy = 8;
 		add(toggleButtonWH, gbc_toggleButtonWH);
 
-		JToggleButton showInnerNodeLabel = new JToggleButton("");
-		showInnerNodeLabel.setToolTipText("Show internal node label.");
-		showInnerNodeLabel.setIcon(IconObtainer.get("showInnerNodeLabel.png"));
-		showInnerNodeLabel.setFocusable(false);
+		showInnerNodeLabelToggleButton = new JToggleButton("");
+		showInnerNodeLabelToggleButton.setToolTipText("Show internal node label.");
+		showInnerNodeLabelToggleButton.setIcon(IconObtainer.get("showInnerNodeLabel.png"));
+		showInnerNodeLabelToggleButton.setFocusable(false);
 		GridBagConstraints gbc_showInnerNodeLabel = new GridBagConstraints();
 		gbc_showInnerNodeLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_showInnerNodeLabel.gridx = 1;
 		gbc_showInnerNodeLabel.gridy = 8;
-		add(showInnerNodeLabel, gbc_showInnerNodeLabel);
-		showInnerNodeLabel.addActionListener(new ActionListener() {
+		add(showInnerNodeLabelToggleButton, gbc_showInnerNodeLabel);
+		showInnerNodeLabelToggleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				boolean selected = showInnerNodeLabel.isSelected();
+				boolean selected = showInnerNodeLabelToggleButton.isSelected();
 				TreeLayoutProperties treeLayoutProperties = controller.getTreeLayoutProperties();
 				GraphicsNode originalRootNode = treeLayoutProperties.getOriginalRootNode();
 				EvolNodeUtil.recursiveIterateTreeIF(originalRootNode, node -> {
@@ -399,36 +404,36 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 			}
 		});
 
-		JToggleButton showbranchLengthButton = new JToggleButton("");
-		showbranchLengthButton.setToolTipText("Show node branch length.");
-		showbranchLengthButton.setIcon(IconObtainer.get("showBranchlength.png"));
-		showbranchLengthButton.setFocusable(false);
+		showBranchLengthToggleButton = new JToggleButton("");
+		showBranchLengthToggleButton.setToolTipText("Show node branch length.");
+		showBranchLengthToggleButton.setIcon(IconObtainer.get("showBranchlength.png"));
+		showBranchLengthToggleButton.setFocusable(false);
 		GridBagConstraints gbc_showAxisButton = new GridBagConstraints();
 		gbc_showAxisButton.insets = new Insets(0, 0, 5, 5);
 		gbc_showAxisButton.gridx = 2;
 		gbc_showAxisButton.gridy = 8;
-		add(showbranchLengthButton, gbc_showAxisButton);
-		showbranchLengthButton.addActionListener(new ActionListener() {
+		add(showBranchLengthToggleButton, gbc_showAxisButton);
+		showBranchLengthToggleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				boolean selected = showbranchLengthButton.isSelected();
+				boolean selected = showBranchLengthToggleButton.isSelected();
                 TreeLayoutProperties treeLayoutProperties = controller.getTreeLayoutProperties();
                 treeLayoutProperties.setShowNodeBranchLength(selected);
 				controller.refreshPhylogeneticTree();
 			}
 		});
 
-		JToggleButton showBtspButton = new JToggleButton("");
-		showBtspButton.setToolTipText("Show internal node bootstrap value.");
-		showBtspButton.setIcon(IconObtainer.get("showBootstrapValue.png"));
-		showBtspButton.setFocusable(false);
+		showBootstrapToggleButton = new JToggleButton("");
+		showBootstrapToggleButton.setToolTipText("Show internal node bootstrap value.");
+		showBootstrapToggleButton.setIcon(IconObtainer.get("showBootstrapValue.png"));
+		showBootstrapToggleButton.setFocusable(false);
 		GridBagConstraints gbc_showBtspButton = new GridBagConstraints();
 		gbc_showBtspButton.insets = new Insets(0, 0, 5, 5);
 		gbc_showBtspButton.gridx = 3;
 		gbc_showBtspButton.gridy = 8;
-		add(showBtspButton, gbc_showBtspButton);
-		showBtspButton.addActionListener(new ActionListener() {
+		add(showBootstrapToggleButton, gbc_showBtspButton);
+		showBootstrapToggleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				boolean selected = showBtspButton.isSelected();
+				boolean selected = showBootstrapToggleButton.isSelected();
 				ShowInnerNodePropertiesInfo showInnerNodePropertiesInfo = controller.getTreeLayoutProperties()
 						.getShowInnerNodePropertiesInfo();
 				showInnerNodePropertiesInfo.setShowInternalNodeBootstrap(selected);
@@ -494,19 +499,57 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 
 	@Override
 	public void reInitializeGUIAccording2treeLayoutProperties() {
-		ActionListener[] actionListeners = showleaveLabelToggleButton.getActionListeners();
-		for (ActionListener actionListener : actionListeners) {
-			showleaveLabelToggleButton.removeActionListener(actionListener);
-		}
-
 		TreeLayoutProperties treeLayoutProperties = controller.getTreeLayoutProperties();
-		ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
-		showleaveLabelToggleButton.setSelected(showLeafPropertiesInfo.isShowLeafLabel());
-
-		for (ActionListener actionListener : actionListeners) {
-			showleaveLabelToggleButton.addActionListener(actionListener);
+		if (treeLayoutProperties == null) {
+			return;
 		}
 
+		ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
+		ShowInnerNodePropertiesInfo showInnerNodePropertiesInfo = treeLayoutProperties.getShowInnerNodePropertiesInfo();
+
+		// Sync showleaveLabelToggleButton
+		syncToggleButton(showleaveLabelToggleButton, showLeafPropertiesInfo.isShowLeafLabel());
+
+		// Sync scaleBar
+		syncToggleButton(scaleBar, treeLayoutProperties.isShowScaleBar());
+
+		// Sync axisButton
+		syncToggleButton(axisButton, treeLayoutProperties.isShowAxisBar());
+
+		// Sync displayTitleToggleButton
+		syncToggleButton(displayTitleToggleButton, treeLayoutProperties.isShowTitle());
+
+		// Sync toggleButtonWH
+		syncToggleButton(toggleButtonWH, treeLayoutProperties.isShowWidthAndHeightString());
+
+		// Sync showInnerNodeLabelToggleButton
+		syncToggleButton(showInnerNodeLabelToggleButton, showInnerNodePropertiesInfo.isShowInternalNodeLabel());
+
+		// Sync showBranchLengthToggleButton
+		syncToggleButton(showBranchLengthToggleButton, treeLayoutProperties.isShowNodeBranchLength());
+
+		// Sync showBootstrapToggleButton
+		syncToggleButton(showBootstrapToggleButton, showInnerNodePropertiesInfo.isShowInternalNodeBootstrap());
+	}
+
+	/**
+	 * Helper method to sync toggle button state without triggering listeners.
+	 * Removes listeners before setting value, then restores them.
+	 */
+	private void syncToggleButton(JToggleButton button, boolean value) {
+		if (button == null) {
+			return;
+		}
+		ActionListener[] listeners = button.getActionListeners();
+		for (ActionListener listener : listeners) {
+			button.removeActionListener(listener);
+		}
+
+		button.setSelected(value);
+
+		for (ActionListener listener : listeners) {
+			button.addActionListener(listener);
+		}
 	}
 
 	/**
