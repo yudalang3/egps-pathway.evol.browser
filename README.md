@@ -2,7 +2,7 @@
 
 A comprehensive **Pathway evolutionary browser** module suite for evolutionary analysis, multiple sequence alignment (MSA), phylogenetic tree construction, and pathway evolution visualization.
 
-![通路进化浏览器 截图](https://github.com/yudalang3/egps-pathway.evol.browser/blob/main/snapshot/ScreenShot_2025-12-13_1.png?raw=true)
+![通路进化浏览器 截图](https://github.com/yudalang3/egps-pathway.evol.browser/blob/main/snapshot/ScreenShot_PEBrowser.png?raw=true)
 
 
 ## Overview

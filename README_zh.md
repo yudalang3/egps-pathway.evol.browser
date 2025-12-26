@@ -2,7 +2,7 @@
 
 一个综合性的**通路进化浏览器**模块套件，用于进化分析、多序列比对（MSA）、系统树构建和通路进化可视化。
 
-![通路进化浏览器 截图](https://github.com/yudalang3/egps-pathway.evol.browser/blob/main/snapshot/ScreenShot_2025-12-13_1.png?raw=true)
+![通路进化浏览器 截图](https://github.com/yudalang3/egps-pathway.evol.browser/blob/main/snapshot/ScreenShot_PEBrowser.png?raw=true)
 
 
 ## 概述
