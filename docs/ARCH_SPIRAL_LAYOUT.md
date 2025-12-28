@@ -275,3 +275,9 @@ Change `if (false)` to `if (true)` to enable debug visualization.
 - Tree has < 30 taxa
 - Precise branch length comparison is needed
 - You need traditional annotation bars
+
+---
+
+## 9. Maintenance Notes
+
+- Debug drawing blocks are intentionally guarded by `if (false)`; temporarily switch to `if (true)` for visualization during development.
