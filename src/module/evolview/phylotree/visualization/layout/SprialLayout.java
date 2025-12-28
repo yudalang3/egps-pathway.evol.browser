@@ -133,24 +133,24 @@ public abstract class SprialLayout extends BaseLayout {
 
 	protected abstract GeneralPath configGneralPath(double radicus, double lowAngle, double extent);
 
-	protected GeneralPath produceSprial(double startDeg, double extendDeg, double alpha, double beta) {
-		GeneralPath generalPath4Sprial = new GeneralPath(GeneralPath.WIND_NON_ZERO, 1024);
+	protected GeneralPath produceSpiral(double startDeg, double extendDeg, double alpha, double beta) {
+		GeneralPath generalPath4SprialPath = new GeneralPath(GeneralPath.WIND_NON_ZERO, 1024);
 		final int numOfPoints2draw = 1000;
 		double eachDeg = extendDeg / numOfPoints2draw;
 		for (int i = 0; i < numOfPoints2draw; i++) {
 			double currentDeg = startDeg + eachDeg * i;
 			Double point = GuiCalculator.calculateSpiralLocation(alpha, beta, currentDeg, centerX, centerY);
 			if (i == 0) {
-				generalPath4Sprial.reset();
-				generalPath4Sprial.moveTo(point.getX(), point.getY());
+				generalPath4SprialPath.reset();
+				generalPath4SprialPath.moveTo(point.getX(), point.getY());
 			} else {
-				generalPath4Sprial.lineTo(point.getX(), point.getY());
+				generalPath4SprialPath.lineTo(point.getX(), point.getY());
 			}
 		}
 
 		Double point = GuiCalculator.calculateSpiralLocation(alpha, beta, startDeg + extendDeg, centerX, centerY);
-		generalPath4Sprial.lineTo(point.getX(), point.getY());
-		return generalPath4Sprial;
+		generalPath4SprialPath.lineTo(point.getX(), point.getY());
+		return generalPath4SprialPath;
 	}
 
 	/**
@@ -170,31 +170,31 @@ public abstract class SprialLayout extends BaseLayout {
 	 * @param maxBeta   最大的螺旋线beta
 	 * @return
 	 */
-	protected GeneralPath produceSprialRing(double startDeg, double extendDeg, double minAlpha, double minBeta,
-			double maxAlpha, double maxBeta) {
+	protected GeneralPath produceSpiralRing(double startDeg, double extendDeg, double minAlpha, double minBeta,
+											double maxAlpha, double maxBeta) {
 
-		GeneralPath generalPath4Sprial = new GeneralPath(GeneralPath.WIND_NON_ZERO, 1024);
+		GeneralPath generalPath4SprialRing = new GeneralPath(GeneralPath.WIND_NON_ZERO, 1024);
 		final int numOfPoints2draw = 1000;
 		double eachDeg = extendDeg / numOfPoints2draw;
 		for (int i = 0; i < numOfPoints2draw; i++) {
 			double currentDeg = startDeg + eachDeg * i;
 			Double point = GuiCalculator.calculateSpiralLocation(minAlpha, minBeta, currentDeg, centerX, centerY);
 			if (i == 0) {
-				generalPath4Sprial.reset();
-				generalPath4Sprial.moveTo(point.getX(), point.getY());
+				generalPath4SprialRing.reset();
+				generalPath4SprialRing.moveTo(point.getX(), point.getY());
 			} else {
-				generalPath4Sprial.lineTo(point.getX(), point.getY());
+				generalPath4SprialRing.lineTo(point.getX(), point.getY());
 			}
 		}
 
 		for (int i = numOfPoints2draw - 1; i > -1; i--) {
 			double currentDeg = startDeg + eachDeg * i;
 			Double point = GuiCalculator.calculateSpiralLocation(maxAlpha, maxBeta, currentDeg, centerX, centerY);
-			generalPath4Sprial.lineTo(point.getX(), point.getY());
+			generalPath4SprialRing.lineTo(point.getX(), point.getY());
 		}
 
-		generalPath4Sprial.closePath();
+		generalPath4SprialRing.closePath();
 
-		return generalPath4Sprial;
+		return generalPath4SprialRing;
 	}
 }

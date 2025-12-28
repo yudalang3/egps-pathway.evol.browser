@@ -73,38 +73,6 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 		node.setXSelf(tt.x);
 		node.setYSelf(tt.y);
 
-		// 不用加了 这个时候外群已经看不出来了！
-//		if (treeLayoutProperties.isShowOutgroup()) {
-//			GraphicsNode outgroupNode = TreePropertyCalculator.getOutgroupNode(node);
-//			
-//			double angleIfNeeded = outgroupNode.getAngleIfNeeded();
-//			double delayStartDegree = 0;
-//			SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
-//			int totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
-//			
-//			if (angleIfNeeded == globalStartDegree) {
-//				delayStartDegree = globalStartDegree - 15;
-//			}else {
-//				delayStartDegree = globalStartDegree + totolDeg +15;
-//			}
-//			
-//			
-//			tt = GuiCalculator.calculateSpiralLocation(alpha, betaFactor * node.getRadicusIfNeeded(),
-//					node.getAngleIfNeeded(), centerX, centerY);
-//			tt = GuiCalculator.calculateSpiralLocation(node.getRadicusIfNeeded(), beta, delayStartDegree,
-//					centerX, centerY);
-//			outgroupNode.setXParent(tt.x);
-//			outgroupNode.setYParent(tt.y);
-//			
-//			tt = GuiCalculator.calculateSpiralLocation(100, beta, delayStartDegree,
-//					centerX, centerY);
-//			
-//			outgroupNode.setXSelf(tt.x);
-//			outgroupNode.setYSelf(tt.y);
-//			
-//			
-//		}
-
 		scaleBarProperty.setIfDrawScaleBar(true);
 		afterCalculation();
 	}
@@ -121,7 +89,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double lastDeg = lastLeaf.getAngleIfNeeded();
-				GeneralPath clone = produceSprialRing(startDeg, lastDeg - startDeg, alpha,
+				GeneralPath clone = produceSpiralRing(startDeg, lastDeg - startDeg, alpha,
 						betaFactor * currentGraphicsNode.getRadicusIfNeeded(), alpha, maxBeta);
 
 				tt.setDrawShape(clone);
@@ -143,7 +111,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double lastDeg = lastLeaf.getAngleIfNeeded();
 
-				GeneralPath clone = produceSprial(startDeg, lastDeg - startDeg, alpha + 2, maxBeta);
+				GeneralPath clone = produceSpiral(startDeg, lastDeg - startDeg, alpha + 2, maxBeta);
 
 				Double point = GuiCalculator.calculateSpiralLocation(alpha, maxBeta, 0.5 * (startDeg + lastDeg),
 						centerX, centerY);
@@ -177,7 +145,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 					extentDeg = 1;
 				}
 
-				GeneralPath clone = produceSprial(startDeg, extentDeg, alpha + 2, maxBeta);
+				GeneralPath clone = produceSpiral(startDeg, extentDeg, alpha + 2, maxBeta);
 
 				Double point = GuiCalculator.calculateSpiralLocation(alpha, maxBeta, 0.5 * (startDeg + endDeg), centerX,
 						centerY);
@@ -206,7 +174,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 					lastDeg = startDeg + 1;
 				}
 
-				GeneralPath clone = produceSprialRing(startDeg, extendDeg, alpha,
+				GeneralPath clone = produceSpiralRing(startDeg, extendDeg, alpha,
 						betaFactor * mrca.getRadicusIfNeeded(), alpha, maxBeta);
 
 				Double point = GuiCalculator.calculateSpiralLocation(alpha, maxBeta, 0.5 * (startDeg + lastDeg),
@@ -284,36 +252,52 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 
 	@Override
 	protected void specificTreeDrawingProcess(Graphics2D g2d) {
-//		double rootTipLength = treeLayoutProperties.getRootTipLength();
-		// Draw rings
-//		SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
-//		double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
-//		produceSprialRing(0, totolDeg, rootTipLength, minBeta, rootTipLength, maxBeta);
-//		g2d.setColor(Color.lightGray);
-//		g2d.draw(generalPath);
-//		g2d.setColor(new Color(12, 12, 5, 12));
-//		g2d.fill(generalPath);
+		GeneralPath generalPath = null;
+		double rootTipLength = treeLayoutProperties.getRootTipLength();
+		SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
+		double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
 
-//		produceSprial(rootTipLength, minBeta * betaFactor);
-//		g2d.setColor(Color.red);
-//		g2d.draw(generalPath);
-//
-//		produceSprial(rootTipLength, 21);
-//		g2d.setColor(Color.magenta);
-//		g2d.draw(generalPath);
-//
-//		produceSprial(rootTipLength, 22);
-//		g2d.setColor(Color.green);
-//		g2d.draw(generalPath);
-//
-//		produceSprial(rootTipLength, 33);
-//		g2d.setColor(Color.cyan);
-//		g2d.draw(generalPath);
-//		produceSprial(rootTipLength, 25);
-//		g2d.setColor(Color.black);
-//		g2d.draw(generalPath);
+		/**
+		 * Draw the whole region of the spiral, for debug
+		 */
+		if(false){
+			generalPath = produceSpiralRing(0, totolDeg, rootTipLength, minBeta, rootTipLength, maxBeta);
+			g2d.setColor(Color.lightGray);
+			g2d.draw(generalPath);
+			g2d.setColor(new Color(12, 12, 5, 12));
+			g2d.fill(generalPath);
+		}
 
-		drawButtomAxis(g2d);
+		/**
+		 * Draw the time line, for debug
+		 */
+		if(false){
+			generalPath = produceSpiral(0, totolDeg, rootTipLength, minBeta * betaFactor);
+			g2d.setColor(Color.red);
+			g2d.draw(generalPath);
+
+			generalPath = produceSpiral(0, totolDeg, rootTipLength, 21);
+			g2d.setColor(Color.magenta);
+			g2d.draw(generalPath);
+
+			generalPath = produceSpiral(0, totolDeg, rootTipLength, 22);
+			g2d.setColor(Color.green);
+			g2d.draw(generalPath);
+
+			generalPath = produceSpiral(0, totolDeg, rootTipLength, 25);
+			g2d.setColor(Color.black);
+			g2d.draw(generalPath);
+
+			generalPath = produceSpiral(0, totolDeg, rootTipLength, 33);
+			g2d.setColor(Color.cyan);
+			g2d.draw(generalPath);
+
+			generalPath = produceSpiral(0, totolDeg, rootTipLength, maxBeta);
+			g2d.setColor(Color.orange);
+			g2d.draw(generalPath);
+		}
+
+		drawBottomAxis(g2d);
 	}
 
 	/**
@@ -321,15 +305,12 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 	 * 
 	 * @param g2d
 	 */
-	protected void drawButtomAxis(Graphics2D g2d) {
+	protected void drawBottomAxis(Graphics2D g2d) {
 		if (!is4AnnotationDialog && treeLayoutProperties.isShowAxisBar()) {
 			g2d.setFont(treeLayoutProperties.getAxisFont());
 
-			double totalAvailableAlpha = maxBeta - minBeta;
-			double leftBlankLength = minBeta;
-//			if (treeLayoutProperties.isShowOutgroup() && isForGlobalPhyoloTree) {
-//				leftBlankLength += TreeLayoutProperties.MAIN_VIRUS_ROOT_PERCENTIGE * totalAvailableAlpha;
-//			}
+			double totalAvailableBeta = maxBeta - minBeta;
+//			double leftBlankLength = minBeta;
 
 			g2d.setColor(Color.decode("#E9E4E6"));
 			g2d.setStroke(new BasicStroke(1f));
@@ -339,24 +320,30 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 			int count = displayedStrings.size();
 
 			SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
-			int totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
+			double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
+			double rootTipLength = treeLayoutProperties.getRootTipLength();
 
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			for (int i = 0; i < count; i++) {
+			java.lang.Double first = displayeDoubles.getFirst();
+			java.lang.Double last = displayeDoubles.getLast();
+			double range = last - first;
+			for (int i = 0; i < count; i++){
 				java.lang.Double double1 = displayeDoubles.get(i);
-				double beta = leftBlankLength + double1 * totalAvailableAlpha;
-
-				GeneralPath clone = produceSprial(0, totolDeg, alpha, betaFactor * beta);
-				g2d.draw(clone);
+				double currentBeta = (double1 - minBeta) / range * totalAvailableBeta + minBeta;
+				GeneralPath generalPath = produceSpiral(globalStartDegree, totolDeg, rootTipLength, currentBeta);
+				g2d.draw(generalPath);
 
 				String str = displayedStrings.get(i);
 
-				Double tt = GuiCalculator.calculateSpiralLocation(alpha, beta, totolDeg, centerX, centerY);
+								// Position text at the end of the limited spiral arc
+				Double tt = GuiCalculator.calculateSpiralLocation(alpha, currentBeta,
+						globalStartDegree + totolDeg, centerX, centerY);
 
 				float xStr = (float) (tt.x + 5);
 				float yStr = (float) (tt.y);
 				g2d.drawString(str, xStr, yStr);
+
 			}
+
 		}
 	}
 	
@@ -387,7 +374,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 		double currentAngle = node.getAngleIfNeeded();
 		double parentAngle = parent.getAngleIfNeeded();
 
-		realConfigurate(radicus, Math.min(currentAngle, parentAngle), Math.abs(currentAngle - parentAngle),generalPath);
+		realConfigure(radicus, Math.min(currentAngle, parentAngle), Math.abs(currentAngle - parentAngle),generalPath);
 		g2d.draw(generalPath);
 
 	}
@@ -395,11 +382,11 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 	@Override
 	protected GeneralPath configGneralPath(double radicus, double lowAngle, double extent) {
 		GeneralPath generalPath2 = new GeneralPath();
-		realConfigurate(radicus,lowAngle,extent,generalPath2);
+		realConfigure(radicus,lowAngle,extent,generalPath2);
 		return generalPath2;
 	}
 	
-	private void realConfigurate(double radicus, double lowAngle, double extent, GeneralPath generalPath) {
+	private void realConfigure(double radicus, double lowAngle, double extent, GeneralPath generalPath) {
 		final int numOfDivider = 100;
 		double eachDeg = extent / numOfDivider;
 
