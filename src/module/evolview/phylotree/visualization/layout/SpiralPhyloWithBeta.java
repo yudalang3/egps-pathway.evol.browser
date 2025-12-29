@@ -55,8 +55,14 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 		double maxLengthOfRoot2Leaf = maxLengthOfRoot2LeafNoOutgroup.getLength();
 		canvas2logicRatio = (maxBeta - minBeta) / maxLengthOfRoot2Leaf;
 
-		configurateButtomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
-				maxLengthOfRoot2LeafNoOutgroup.getLeaf());
+		// Beta layout: workWidth is the actual screen distance at maximum theta
+		// r = alpha + beta × theta, so distance = (maxBeta - minBeta) × thetaMax
+		// Currently globalStartDegree is always 0, but keep full formula for robustness
+		double thetaMax = Math.toRadians(circularLayoutPropertiy.getGlobalStartDegree()
+				+ circularLayoutPropertiy.getGlobalExtendingDegree());
+		int workWidth = (int) ((maxBeta - minBeta) * thetaMax);
+		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
+				maxLengthOfRoot2LeafNoOutgroup.getLeaf(),workWidth);
 	}
 
 	@Override

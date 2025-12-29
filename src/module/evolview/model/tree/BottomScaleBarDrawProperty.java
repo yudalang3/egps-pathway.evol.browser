@@ -9,7 +9,7 @@ import java.util.List;
  * @author yudal
  *
  */
-public class ButtomScaleBarDrawProperty {
+public class BottomScaleBarDrawProperty {
 
 	private List<String> displayedStrings = Lists.newArrayList();
 	private List<Double> displayeDoubles = Lists.newArrayList();
@@ -33,7 +33,7 @@ public class ButtomScaleBarDrawProperty {
 		displayeDoubles.clear();
 	}
 	
-	public void addElement(String str,double value) {
+	public void addElement(String str, double value) {
 		displayedStrings.add(str);
 		displayeDoubles.add(value);
 	}

@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import egps2.utils.common.model.datatransfer.TwoTuple;
 import evoltree.txtdisplay.TreeDrawUnit;
 import graphic.engine.AxisTickCalculator;
+import graphic.engine.AxisTickCalculatorHeavy;
 import graphic.engine.guicalculator.BlankArea;
 import module.evolview.model.enums.BranchLengthType;
 import module.evolview.model.tree.*;
@@ -37,7 +38,7 @@ public abstract class BaseLayout implements ITreeLayout {
     protected final TreeLayoutHost phylogeneticTreePanel;
     protected final ScaleBarProperty scaleBarProperty;
 
-    protected ButtomScaleBarDrawProperty buttomScaleBarDrawProperty = new ButtomScaleBarDrawProperty();
+    protected BottomScaleBarDrawProperty buttomScaleBarDrawProperty = new BottomScaleBarDrawProperty();
 
     protected Font annotationFont;
 
@@ -45,7 +46,7 @@ public abstract class BaseLayout implements ITreeLayout {
     protected double currentWidth;
 
     protected final BlankArea blankArea;
-    protected AxisTickCalculator axisTickCalculator = new AxisTickCalculator();
+    protected AxisTickCalculatorHeavy axisTickCalculator = new AxisTickCalculatorHeavy();
 
     protected boolean is4AnnotationDialog = false;
     protected boolean isShowAnnotation = true;
@@ -258,16 +259,24 @@ public abstract class BaseLayout implements ITreeLayout {
         }
     }
 
-    protected void configurateButtomScaleBarDrawProperty(double maxLengthOfRoot2Leaf, GraphicsNode maxLengthLeaf) {
+    /**
+     * 配置底部刻度: maxLengthOfRoot2Leaf 就是实际的刻度， maxLengthLeaf 是具体的叶子， drawWorkingWidth 是实际可以绘制的宽度。
+     *
+     *
+     * @param maxLengthOfRoot2Leaf
+     * @param maxLengthLeaf
+     * @param drawWorkingWidth
+     */
+    protected void configureBottomScaleBarDrawProperty(double maxLengthOfRoot2Leaf, GraphicsNode maxLengthLeaf, int drawWorkingWidth) {
         buttomScaleBarDrawProperty.clear();
-
-        int workWidth = blankArea.getWorkWidth((int) currentWidth);
 
         Pair<java.lang.Double, java.lang.Double> minMax = Pair.of(0.0, maxLengthOfRoot2Leaf);
 
         axisTickCalculator.setMinAndMaxPair(minMax);
-        axisTickCalculator.setWorkingSpace(workWidth);
+        axisTickCalculator.setWorkingSpace(drawWorkingWidth);
+        axisTickCalculator.setWorkSpaceRatio(1f);
         axisTickCalculator.determineAxisTick();
+
 
 
         List<String> tickLabels = axisTickCalculator.getTickLabels();
@@ -280,7 +289,7 @@ public abstract class BaseLayout implements ITreeLayout {
             for (int i = size - 1; i >= 0; i--) {
                 String string = tickLabels.get(i);
                 Integer integer = tickLocations.get(i);
-                int plotValue = workWidth - integer;
+                int plotValue = drawWorkingWidth - integer;
                 buttomScaleBarDrawProperty.addElement(string, plotValue);
             }
         } else {
@@ -624,6 +633,11 @@ public abstract class BaseLayout implements ITreeLayout {
 
     }
 
+    /**
+     * 左上角的比例尺
+     * @param g2d
+     * @param scaleBarProperty
+     */
     private void drawScaleBar(Graphics2D g2d, ScaleBarProperty scaleBarProperty) {
 
         g2d.setStroke(new BasicStroke(2.0f));
@@ -657,24 +671,6 @@ public abstract class BaseLayout implements ITreeLayout {
         float xStr = (float) (0.5 * (xx + xAxis) - 0.5 * fontMetrics.stringWidth(str));
         g2d.drawString(str, xStr, (float) (verticalTipLength + fontHeight));
 
-//		double SHOW_LENGTH = 80;
-//
-//		g2d.drawLine(xAxis, yAxis, xAxis, yAxis + 4);
-//		g2d.drawLine(xAxis, yAxis + 2, (int) (xAxis + SHOW_LENGTH), yAxis + 2);
-//		g2d.drawLine((int) (xAxis + SHOW_LENGTH), yAxis, (int) (xAxis + SHOW_LENGTH), yAxis + 4);
-//		scaleBarProperty.setFont(treeLayoutProperties.getAxisFont());
-//		g2d.setFont(scaleBarProperty.getFont());
-//		String displayedStr = null;
-//		if (isLayoutSupportDrawScaleBar()) {
-//			int intAdjOneUnitBranchLength = (int) (SHOW_LENGTH / canves2logicRatio);
-//			displayedStr = String.valueOf(intAdjOneUnitBranchLength);
-//		} else {
-//			displayedStr = "Unit only for visual effect";
-//		}
-//
-//		int strX = (int) (xAxis + SHOW_LENGTH / 2.0 - 0.5 * g2d.getFontMetrics().stringWidth(displayedStr));
-//
-//		g2d.drawString(displayedStr, strX, yAxis - 5);
     }
 
     /**

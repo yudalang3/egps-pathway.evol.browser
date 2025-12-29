@@ -216,7 +216,41 @@ Double pos = GuiCalculator.calculateSpiralLocation(
 
 ---
 
-## 6. Configuration Parameters
+## 6. Scale Bar Configuration (workWidth)
+
+The `configureBottomScaleBarDrawProperty()` method requires the actual screen pixel distance available for drawing branch lengths.
+
+### Alpha Layout
+```java
+// Alpha varies from rootTipLength to maxAlpha
+// The screen distance is constant regardless of theta
+int workWidth = (int) (maxAlpha - rootTipLength);
+```
+
+### Beta Layout
+```java
+// Beta varies from minBeta to maxBeta
+// At different theta, the screen distance varies!
+// Must calculate at maximum theta for proper scaling
+// Currently globalStartDegree is always 0, but keep full formula for robustness
+double thetaMax = Math.toRadians(globalStartDegree + globalExtendingDegree);
+int workWidth = (int) ((maxBeta - minBeta) * thetaMax);
+```
+
+**Why the difference?**
+
+Using spiral formula `r = α + β × θ`:
+
+| Layout | What Varies | Screen Distance Formula |
+|--------|-------------|------------------------|
+| Alpha | α (starting radius) | `Δr = Δα` (constant) |
+| Beta | β (growth rate) | `Δr = Δβ × θ` (varies with angle) |
+
+For Beta layout, the screen distance between inner and outer spirals increases as θ increases. We use `thetaMax` to ensure the scale bar reflects the maximum spread at the outermost ring.
+
+---
+
+## 7. Configuration Parameters
 
 | Parameter | Property Class | Description | Default |
 |-----------|---------------|-------------|---------|
@@ -228,7 +262,7 @@ Double pos = GuiCalculator.calculateSpiralLocation(
 
 ---
 
-## 7. Debugging
+## 8. Debugging
 
 Both layouts include debug visualization blocks:
 
@@ -259,7 +293,7 @@ Change `if (false)` to `if (true)` to enable debug visualization.
 
 ---
 
-## 8. When to Use Each Layout
+## 9. When to Use Each Layout
 
 ### Use Alpha Layout When:
 - Branch length variations are relatively small
@@ -278,6 +312,6 @@ Change `if (false)` to `if (true)` to enable debug visualization.
 
 ---
 
-## 9. Maintenance Notes
+## 10. Maintenance Notes
 
 - Debug drawing blocks are intentionally guarded by `if (false)`; temporarily switch to `if (true)` for visualization during development.

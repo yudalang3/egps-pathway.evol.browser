@@ -50,8 +50,9 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 				.getMaxLengthOfRoot2Leaf(rootNode);
 		canvas2logicRatio = (betaTimesTwoPi - GAP_SIZE) / maxLengthOfRoot2LeafNoOutgroup.getLength();
 
-		configurateButtomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
-				maxLengthOfRoot2LeafNoOutgroup.getLeaf());
+		int workWidth = (int) (maxAlpha - treeLayoutProperties.getRootTipLength());
+		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
+				maxLengthOfRoot2LeafNoOutgroup.getLeaf(),workWidth);
 	}
 
 	@Override

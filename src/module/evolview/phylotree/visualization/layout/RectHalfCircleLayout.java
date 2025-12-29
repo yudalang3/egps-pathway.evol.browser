@@ -76,7 +76,7 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 		// y axis
 		eachYGapLength = totalAvaliableLength / (GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
 
-		configurateButtomScaleBarDrawProperty(maxLengthOfRoot2LeafBean.getLength(), maxLengthOfRoot2LeafBean.getLeaf());
+		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafBean.getLength(), maxLengthOfRoot2LeafBean.getLeaf(),workWidth);
 	}
 
 	@Override

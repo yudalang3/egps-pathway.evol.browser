@@ -243,8 +243,9 @@ public class CircularPhylo extends CicularLayout {
 
 		recursiveCalculateStartLength = (int) treeLayoutProperties.getRootTipLength();
 
-		configurateButtomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
-				maxLengthOfRoot2LeafNoOutgroup.getLeaf());
+		int workWidth = blankArea.getWorkWidth((int) currentWidth);
+		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
+				maxLengthOfRoot2LeafNoOutgroup.getLeaf(), workWidth);
 	}
 
 	/**

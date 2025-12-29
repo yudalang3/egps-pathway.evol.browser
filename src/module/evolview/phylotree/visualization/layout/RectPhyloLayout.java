@@ -39,7 +39,8 @@ public class RectPhyloLayout extends RectangularLayout {
 		eachYGapLength = blankArea.getWorkHeight((int) currentHeight)
 				/ (GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
 
-		configurateButtomScaleBarDrawProperty(maxLengthOfRoot2LeafBean.getLength(), maxLengthOfRoot2LeafBean.getLeaf());
+		int workWidth = blankArea.getWorkWidth((int) currentWidth);
+		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafBean.getLength(), maxLengthOfRoot2LeafBean.getLeaf(),workWidth);
 	}
 
 	@Override
