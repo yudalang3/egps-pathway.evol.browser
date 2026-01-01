@@ -11,8 +11,10 @@ A comprehensive **Pathway evolutionary browser** module suite for evolutionary a
 
 ### Key Features
 
-- **Pathway evolutionary browser**: Interactive visualization with phylogenetic context of the biological pathways
-- **Other vital assistant modules**.
+- **Pathway evolutionary browser**: Interactive visualization with phylogenetic context of biological pathways
+- **Phylogenetic workflows**: Build trees from MSA/MAF/distance matrices
+- **MSA toolkit**: MAFFT alignment, trimming, and multi-format viewers
+- **Evolutionary distance analysis**: Distance matrix computation and heatmap visualization
 
 ## System Requirements
 
@@ -97,34 +99,34 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 The suite contains 18 modules organized in 9 packages:
 
 ### Sequence Tools
-- **ambigbse**: Converts IUPAC ambiguous nucleotide codes (R, Y, M, K, S, W, H, B, V, D, N) to concrete sequences
+- **ambigbse**: Converts IUPAC ambiguous nucleotide codes (R, Y, M, K, S, W, H, B, V, D, N) to concrete sequences and reverse complements
 
 ### Evolutionary Distance Analysis (3 modules)
-- **evoldist/gene2dist**: Calculate evolutionary distance from Ensembl/eGPS cloud sequences
-- **evoldist/msa2distview**: Distance matrix calculation from MSA files
+- **evoldist/gene2dist**: Retrieve MSA from Ensembl/eGPS cloud sequences and compute evolutionary distance
+- **evoldist/msa2distview**: Distance matrix calculation from MSA files (JC69, K2P, Tamura-Nei)
 - **evoldist/view**: Heatmap visualization of evolutionary distance matrices
 
 ### Evolutionary Visualization (3 modules)
-- **evolview/gfamily**: Interactive gene family browser with phylogenetic trees
+- **evolview/gfamily**: Interactive gene family browser with phylogenetic trees and sequence structures
 - **evolview/moderntreeviewer**: Modern phylogenetic tree viewer with multiple layouts
 - **evolview/pathwaybrowser**: Biological pathway visualization with phylogenetic context
 
 ### Multiple Sequence Alignment (6 modules)
-- **multiseq/aligner**: MAFFT-based sequence alignment
+- **multiseq/aligner**: MAFFT wrapper for fast multiple sequence alignment
 - **multiseq/alignerwithref**: Reference-based MSA with MAFFT
-- **multiseq/alignment/trimmer**: Trim alignments based on reference sequences
-- **multiseq/alignment/view**: Interactive MSA viewer (ClustalW, FASTA, PHYLIP, NEXUS)
-- **multiseq/deversitydescriptor**: Alignment diversity metrics
-- **multiseq/gene2msa**: Generate MSA from Ensembl/eGPS cloud sequences
+- **multiseq/alignment/trimmer**: Trim MSA based on reference sequence
+- **multiseq/alignment/view**: Interactive MSA viewer (ClustalW, FASTA, PHYLIP, NEXUS, etc.)
+- **multiseq/deversitydescriptor**: Text-based alignment diversity metrics
+- **multiseq/gene2msa**: Retrieve gene sequences from Ensembl/eGPS cloud and generate MSA
 
 ### Pathway Tools
 - **pill**: Pathway diagram drawing and editing tool (Pathway Illuminator)
 
 ### Tree Construction (4 modules)
-- **treebuilder/gene2tree**: Build phylogenetic trees from Ensembl/UCSC sequences
-- **treebuilder/frommsa**: Construct trees from multiple sequence alignments
-- **treebuilder/frommaf**: Construct trees from MAF (Multiple Alignment Format) files
-- **treebuilder/fromdist**: Construct trees from evolutionary distance matrices
+- **treebuilder/gene2tree**: Obtain MSA from Ensembl/UCSC and construct gene phylogenetic trees
+- **treebuilder/frommsa**: Construct phylogenetic trees from multiple sequence alignments
+- **treebuilder/frommaf**: Construct phylogenetic trees from MAF (Multiple Alignment Format) files
+- **treebuilder/fromdist**: Construct phylogenetic trees from evolutionary distance matrices
 
 ## Architecture
 
@@ -238,4 +240,4 @@ For issues, questions, or contributions, please refer to the project documentati
 
 **Project**: eGPS2 Pathway Evolution Browser
 **Version**: 2.2.0
-**Last Updated**: 2025-12-13
+**Last Updated**: 2026-01-01
