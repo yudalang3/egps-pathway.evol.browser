@@ -229,7 +229,7 @@ public class PathwayBrowserController {
             GraphicsNode determinedNode = onlyLeaf ? (GraphicsNode) EvolNodeUtil.getFirstLeaf(graphicsNode) : graphicsNode;
             final float thinkness = determinedNode.getDrawUnit().getStrokeSize() - 1;
             if (thinkness < 0) {
-                break;
+                continue;
             }
             TreeOperationUtil.recursiveIterateTreeIF(graphicsNode, node -> {
                 if (onlyLeaf) {
@@ -293,7 +293,7 @@ public class PathwayBrowserController {
             GraphicsNode determinedNode = onlyLeaf ? (GraphicsNode) EvolNodeUtil.getFirstLeaf(graphicsNode) : graphicsNode;
             final int circleRadius = determinedNode.getDrawUnit().getCircleRadius() - 1;
             if (circleRadius < 0) {
-                break;
+                continue;
             }
             TreeOperationUtil.recursiveIterateTreeIF(graphicsNode, node -> {
                 if (onlyLeaf) {
