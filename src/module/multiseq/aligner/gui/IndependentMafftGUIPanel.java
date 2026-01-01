@@ -2,7 +2,7 @@ package module.multiseq.aligner.gui;
 
 import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
 import module.config.externalprograms.ExternalProgramConfigManager;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.BaseMultipleSeqAlignerMain;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
@@ -56,7 +56,7 @@ public class IndependentMafftGUIPanel extends MafftGUIPanel {
     private JButton mafftPathTestButton;
     private JLabel mafftPathStatusLabel;
 
-    public IndependentMafftGUIPanel(MultipleSeqAlignerMain alignmentMain) {
+    public IndependentMafftGUIPanel(BaseMultipleSeqAlignerMain alignmentMain) {
         super(alignmentMain);
     }
 
@@ -242,10 +242,10 @@ public class IndependentMafftGUIPanel extends MafftGUIPanel {
         ExternalProgramConfigManager.ValidationResult result = configManager.validatePath(path);
 
         if (result.isValid()) {
-            mafftPathStatusLabel.setText("✓ Configured and executable");
+            mafftPathStatusLabel.setText("Congratulations: Configured and executable");
             mafftPathStatusLabel.setForeground(new Color(0, 128, 0));
         } else {
-            mafftPathStatusLabel.setText("✗ " + result.getMessage());
+            mafftPathStatusLabel.setText("Sorry: " + result.getMessage());
             mafftPathStatusLabel.setForeground(Color.RED);
         }
     }

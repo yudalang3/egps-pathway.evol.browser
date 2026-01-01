@@ -1,9 +1,9 @@
 package module.evolview.phylotree.visualization.graphics.struct;
 
 public class SlopeLayoutProperty {
-	
+
 	double leafLocationRightMostRatio = 1.0;
-	double blankMarginRatio = 0.0;
+	double blankMarginRatio = 0.2;
 	
 	private int slopeLayoutRotationDeg = 0;
 

@@ -6,6 +6,7 @@ import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.utils.common.util.EGPSFonts;
 import graphic.engine.guicalculator.BlankArea;
 import module.evoltreio.ParamsAssignerAndParser4PhyloTree;
+import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import org.apache.commons.lang3.BooleanUtils;
 import utils.string.EGPSStringUtil;
 
@@ -65,7 +66,36 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 
 		// Category %7: Layout Settings
 		addKeyValueEntryBean("%7", "Layout Settings", "");
+		addKeyValueEntryBean("layout.initial", "RECT_PHYLO_LEFT",
+				"Initial tree layout. Values: RECT_PHYLO_LEFT, RECT_CLADO_ALIGNED_LEFT, OUTER_CIR_PHYLO, SLOPE_CLADO_ALIGNED_LEFT, RADIAL_PHYLO, etc. " +
+				"Or use friendly names: RECTANGULAR, CIRCULAR, SPIRAL, SLANT, RADIAL.");
 		addKeyValueEntryBean("layout.blank.space", "20,40,80,40", "The blank area of top,left,bottom,right (pixels).");
+
+		// Category %7.1: Rectangular Layout
+		addKeyValueEntryBean("%7.1", "Rectangular Layout", "");
+		addKeyValueEntryBean("layout.rectangular.curvature", "0", "Branch curvature (0-100). 0 = straight lines, 100 = curved.");
+
+		// Category %7.2: Circular Layout
+		addKeyValueEntryBean("%7.2", "Circular Layout", "");
+		addKeyValueEntryBean("layout.circular.start.degree", "285", "Start angle in degrees (0-360).");
+		addKeyValueEntryBean("layout.circular.extent.degree", "360", "Arc extent in degrees (0-360).");
+		addKeyValueEntryBean("layout.circular.inner.radius", "50", "Inner circle radius for Inner Cladogram layout (0-200 pixels).");
+
+		// Category %7.3: Spiral Layout
+		addKeyValueEntryBean("%7.3", "Spiral Layout", "");
+		addKeyValueEntryBean("layout.spiral.extent.degree", "720", "Total spiral angle (0-10000 degrees).");
+		addKeyValueEntryBean("layout.spiral.gap.factor", "10", "Gap between spiral arms (0-50).");
+		addKeyValueEntryBean("layout.spiral.beta.factor", "100", "Beta mode factor (100-500, unit is 0.01).");
+
+		// Category %7.4: Slant Layout
+		addKeyValueEntryBean("%7.4", "Slant Layout", "");
+		addKeyValueEntryBean("layout.slant.tree.width", "100", "Tree width percentage (0-100). Smaller values add right margin.");
+		addKeyValueEntryBean("layout.slant.left.margin", "20", "Left margin percentage (0-100).");
+		addKeyValueEntryBean("layout.slant.rotation", "0", "Rotation angle: 0, 90, 180, or 270 degrees.");
+
+		// Category %7.5: Radial Layout
+		addKeyValueEntryBean("%7.5", "Radial Layout", "");
+		addKeyValueEntryBean("layout.radial.rotation", "0", "Rotation angle (0-360 degrees).");
 
 		// Category %8: Advanced
 		addKeyValueEntryBean("%8", "Advanced", "");
@@ -177,6 +207,11 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 		}
 
 		// Category %7: Layout Settings
+		string = input.getSimplifiedStringWithDefault("layout.initial");
+		if (!string.isEmpty()) {
+			TreeLayout layout = parseTreeLayout(string);
+			ret.setInitialLayout(layout);
+		}
 		string = input.getSimplifiedStringWithDefault("layout.blank.space");
 		if (!string.isEmpty()) {
 			String[] split = EGPSStringUtil.split(string, ',');
@@ -188,6 +223,60 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 			ret.setBlank_space(eggsInsets);
 		}
 
+		// Category %7.1: Rectangular Layout
+		string = input.getSimplifiedStringWithDefault("layout.rectangular.curvature");
+		if (!string.isEmpty()) {
+			ret.setRectangularCurvature(Integer.parseInt(string));
+		}
+
+		// Category %7.2: Circular Layout
+		string = input.getSimplifiedStringWithDefault("layout.circular.start.degree");
+		if (!string.isEmpty()) {
+			ret.setCircularStartDegree(Integer.parseInt(string));
+		}
+		string = input.getSimplifiedStringWithDefault("layout.circular.extent.degree");
+		if (!string.isEmpty()) {
+			ret.setCircularExtentDegree(Integer.parseInt(string));
+		}
+		string = input.getSimplifiedStringWithDefault("layout.circular.inner.radius");
+		if (!string.isEmpty()) {
+			ret.setCircularInnerRadius(Integer.parseInt(string));
+		}
+
+		// Category %7.3: Spiral Layout
+		string = input.getSimplifiedStringWithDefault("layout.spiral.extent.degree");
+		if (!string.isEmpty()) {
+			ret.setSpiralExtentDegree(Integer.parseInt(string));
+		}
+		string = input.getSimplifiedStringWithDefault("layout.spiral.gap.factor");
+		if (!string.isEmpty()) {
+			ret.setSpiralGapFactor(Integer.parseInt(string));
+		}
+		string = input.getSimplifiedStringWithDefault("layout.spiral.beta.factor");
+		if (!string.isEmpty()) {
+			ret.setSpiralBetaFactor(Integer.parseInt(string));
+		}
+
+		// Category %7.4: Slant Layout
+		string = input.getSimplifiedStringWithDefault("layout.slant.tree.width");
+		if (!string.isEmpty()) {
+			ret.setSlantTreeWidth(Integer.parseInt(string));
+		}
+		string = input.getSimplifiedStringWithDefault("layout.slant.left.margin");
+		if (!string.isEmpty()) {
+			ret.setSlantLeftMargin(Integer.parseInt(string));
+		}
+		string = input.getSimplifiedStringWithDefault("layout.slant.rotation");
+		if (!string.isEmpty()) {
+			ret.setSlantRotation(Integer.parseInt(string));
+		}
+
+		// Category %7.5: Radial Layout
+		string = input.getSimplifiedStringWithDefault("layout.radial.rotation");
+		if (!string.isEmpty()) {
+			ret.setRadialRotation(Integer.parseInt(string));
+		}
+
 		// Category %8: Advanced
 		string = input.getSimplifiedStringWithDefault("advanced.node.visual.config");
 		if (!Strings.isNullOrEmpty(string)) {
@@ -195,6 +284,35 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 		}
 
 		return ret;
+	}
+
+	/**
+	 * Parse tree layout from string value.
+	 * Supports both exact TreeLayout enum names and friendly names.
+	 */
+	private TreeLayout parseTreeLayout(String value) {
+		String upper = value.toUpperCase().trim();
+
+		// First try exact enum match
+		try {
+			return TreeLayout.valueOf(upper);
+		} catch (IllegalArgumentException e) {
+			// Try friendly name mapping
+			switch (upper) {
+				case "RECTANGULAR":
+					return TreeLayout.RECT_PHYLO_LEFT;
+				case "CIRCULAR":
+					return TreeLayout.OUTER_CIR_PHYLO;
+				case "SPIRAL":
+					return TreeLayout.SPRIAL_ALPHA_PHYLO;
+				case "SLANT":
+					return TreeLayout.SLOPE_CLADO_ALIGNED_LEFT;
+				case "RADIAL":
+					return TreeLayout.RADIAL_PHYLO;
+				default:
+					return TreeLayout.RECT_PHYLO_LEFT;
+			}
+		}
 	}
 
 }

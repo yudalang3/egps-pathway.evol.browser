@@ -39,7 +39,22 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 
 	@Override
 	public void calculateForPainting(int width, int height) {
-		beforeCalculate(width, height);
+		SlopeLayoutProperty slopeLayoutProperety = treeLayoutProperties.getSlopeLayoutProperety();
+		int slopeLayoutRotationDeg = slopeLayoutProperety.getSlopeLayoutRotationDeg();
+
+		// For 90° and 270° rotations, use a square bounding box based on the smaller dimension
+		// This ensures the tree fits within bounds after rotation
+		int calcWidth, calcHeight;
+		if (slopeLayoutRotationDeg == 90 || slopeLayoutRotationDeg == 270) {
+			int minDim = Math.min(width, height);
+			calcWidth = minDim;
+			calcHeight = minDim;
+		} else {
+			calcWidth = width;
+			calcHeight = height;
+		}
+
+		beforeCalculate(calcWidth, calcHeight);
 
 		rootNode.setDisplayedBranchLength(0);
 
@@ -50,7 +65,6 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 		int leafNumbers = leaves.size();
 		reciprocalOfLeafNumbers = 1.0 / leafNumbers;
 
-		SlopeLayoutProperty slopeLayoutProperety = treeLayoutProperties.getSlopeLayoutProperety();
 		blankMarginRatio = slopeLayoutProperety.getBlankMarginRatio();
 		double leafLocationRightMostRatio = slopeLayoutProperety
 				.getLeafLocationRightMostRatio();
@@ -64,7 +78,7 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 			n.setAngleIfNeeded(0.0);
 			index++;
 		}
-		
+
 		prepareStep2AllocateLocationRatio(rootNode);
 
 		realHeight = blankArea.getWorkHeight((int) currentHeight);
@@ -73,9 +87,22 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 
 		afterCalculation();
 
-		int slopeLayoutRotationDeg = slopeLayoutProperety.getSlopeLayoutRotationDeg();
-		DrawUtil.rotationTransform(rootNode, slopeLayoutRotationDeg, currentWidth,
-				currentHeight);
+		// For 90°/270°, first translate to center of actual canvas, then rotate
+		if (slopeLayoutRotationDeg == 90 || slopeLayoutRotationDeg == 270) {
+			// Offset to center the square tree in the actual canvas
+			double offsetX = (width - calcWidth) / 2.0;
+			double offsetY = (height - calcHeight) / 2.0;
+			translateTree(rootNode, offsetX, offsetY);
+		}
+
+		// Apply rotation transform around the center of the actual canvas
+		DrawUtil.rotationTransform(rootNode, slopeLayoutRotationDeg, width, height);
+
+		// For 180° rotation, reset text angles to 0 so text remains readable
+		// (otherwise text would be upside down)
+		if (slopeLayoutRotationDeg == 180) {
+			setTextAnglesForLeftSide(rootNode);
+		}
 
 		// 下面是一些绘图注释的功能，现在先不用
 		// transform annotations
@@ -330,6 +357,35 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 		int numOfLeaves = n.getSize();
 		double a = 1 - reciprocalOfLeafNumbers * (numOfLeaves - 1.0);
 		return a;
+	}
+
+	/**
+	 * Translate all node coordinates by the given offset.
+	 */
+	private void translateTree(GraphicsNode node, double offsetX, double offsetY) {
+		node.setXSelf(node.getXSelf() + offsetX);
+		node.setYSelf(node.getYSelf() + offsetY);
+		node.setXParent(node.getXParent() + offsetX);
+		node.setYParent(node.getYParent() + offsetY);
+
+		int count = node.getChildCount();
+		for (int i = 0; i < count; i++) {
+			translateTree((GraphicsNode) node.getChildAt(i), offsetX, offsetY);
+		}
+	}
+
+	/**
+	 * Reset text angles to 0 for all nodes so text remains readable after 180° rotation.
+	 * Use angle = 180 as a signal to draw text on the LEFT side.
+	 */
+	private void setTextAnglesForLeftSide(GraphicsNode node) {
+		// Use 180 as a special signal: text should be on LEFT side, but not rotated
+		node.setAngleIfNeeded(180.0);
+
+		int count = node.getChildCount();
+		for (int i = 0; i < count; i++) {
+			setTextAnglesForLeftSide((GraphicsNode) node.getChildAt(i));
+		}
 	}
 
 	@Override

@@ -301,13 +301,13 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 
 		showleaveLabelToggleButton = new JToggleButton("");
 		showleaveLabelToggleButton.setFocusable(false);
-		showleaveLabelToggleButton.setToolTipText("Show leave labels.");
+		showleaveLabelToggleButton.setToolTipText("Show leaf labels.");
 		showleaveLabelToggleButton.setIcon(IconObtainer.get("showLeafNodeLabel.png"));
 		showleaveLabelToggleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				boolean selected = showleaveLabelToggleButton.isSelected();
 				controller.showLeaveLabel(selected);
-				controller.refreshPhylogeneticTree();
+				controller.reCalculateTreeLayoutAndRefreshViewPort();
 			}
 		});
 		GridBagConstraints gbc_btnNewButton1 = new GridBagConstraints();

@@ -3,13 +3,36 @@ package module.evolview.moderntreeviewer.io;
 import egps2.UnifiedAccessPoint;
 import graphic.engine.guicalculator.BlankArea;
 import module.evoltreio.EvolTreeImportInfoBean;
+import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 
 import java.awt.*;
 
 public class MTVImportInforBean extends EvolTreeImportInfoBean {
 
 	// Layout settings
-	protected BlankArea blank_space;
+	protected BlankArea blank_space = new BlankArea(20, 40, 80, 40);  // default: top,left,bottom,right
+	protected TreeLayout initialLayout = TreeLayout.RECT_PHYLO_LEFT;
+
+	// Slant layout parameters
+	protected int slantTreeWidth = 100;        // 0-100, percentage
+	protected int slantLeftMargin = 20;        // 0-100, percentage
+	protected int slantRotation = 0;           // 0, 90, 180, 270
+
+	// Radial layout parameters
+	protected int radialRotation = 0;          // 0-360
+
+	// Rectangular layout parameters
+	protected int rectangularCurvature = 0;    // 0-100
+
+	// Circular layout parameters
+	protected int circularStartDegree = 285;   // 0-360
+	protected int circularExtentDegree = 360;  // 0-360
+	protected int circularInnerRadius = 50;    // 0-200, for Inner Cladogram
+
+	// Spiral layout parameters
+	protected int spiralExtentDegree = 720;    // 0-10000
+	protected int spiralGapFactor = 10;        // 0-50
+	protected int spiralBetaFactor = 100;      // 100-500, unit is 0.01
 
 	// Tree Information (%1)
 	protected boolean showScaleBar = false;
@@ -216,6 +239,108 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
 
 	public void setAxisFont(Font axisFont) {
 		this.axisFont = axisFont;
+	}
+
+	// Layout Settings (%7) - initial layout
+	public TreeLayout getInitialLayout() {
+		return initialLayout;
+	}
+
+	public void setInitialLayout(TreeLayout initialLayout) {
+		this.initialLayout = initialLayout;
+	}
+
+	// Slant layout getters/setters
+	public int getSlantTreeWidth() {
+		return slantTreeWidth;
+	}
+
+	public void setSlantTreeWidth(int slantTreeWidth) {
+		this.slantTreeWidth = slantTreeWidth;
+	}
+
+	public int getSlantLeftMargin() {
+		return slantLeftMargin;
+	}
+
+	public void setSlantLeftMargin(int slantLeftMargin) {
+		this.slantLeftMargin = slantLeftMargin;
+	}
+
+	public int getSlantRotation() {
+		return slantRotation;
+	}
+
+	public void setSlantRotation(int slantRotation) {
+		this.slantRotation = slantRotation;
+	}
+
+	// Radial layout getters/setters
+	public int getRadialRotation() {
+		return radialRotation;
+	}
+
+	public void setRadialRotation(int radialRotation) {
+		this.radialRotation = radialRotation;
+	}
+
+	// Rectangular layout getters/setters
+	public int getRectangularCurvature() {
+		return rectangularCurvature;
+	}
+
+	public void setRectangularCurvature(int rectangularCurvature) {
+		this.rectangularCurvature = rectangularCurvature;
+	}
+
+	// Circular layout getters/setters
+	public int getCircularStartDegree() {
+		return circularStartDegree;
+	}
+
+	public void setCircularStartDegree(int circularStartDegree) {
+		this.circularStartDegree = circularStartDegree;
+	}
+
+	public int getCircularExtentDegree() {
+		return circularExtentDegree;
+	}
+
+	public void setCircularExtentDegree(int circularExtentDegree) {
+		this.circularExtentDegree = circularExtentDegree;
+	}
+
+	public int getCircularInnerRadius() {
+		return circularInnerRadius;
+	}
+
+	public void setCircularInnerRadius(int circularInnerRadius) {
+		this.circularInnerRadius = circularInnerRadius;
+	}
+
+	// Spiral layout getters/setters
+	public int getSpiralExtentDegree() {
+		return spiralExtentDegree;
+	}
+
+	public void setSpiralExtentDegree(int spiralExtentDegree) {
+		this.spiralExtentDegree = spiralExtentDegree;
+	}
+
+	public int getSpiralGapFactor() {
+		return spiralGapFactor;
+	}
+
+	public void setSpiralGapFactor(int spiralGapFactor) {
+		this.spiralGapFactor = spiralGapFactor;
+	}
+
+	public int getSpiralBetaFactor() {
+		return spiralBetaFactor;
+	}
+
+	public void setSpiralBetaFactor(int spiralBetaFactor) {
+		this.spiralBetaFactor = spiralBetaFactor;
 	}
 
 }

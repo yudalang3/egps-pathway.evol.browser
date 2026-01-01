@@ -67,7 +67,6 @@
 |--------------|---------|---------|--------|
 | `root.show` | `F` | Whether to display the root node. | NEW |
 | `root.tip.length` | `10` | The length of the root tip line in pixels. | NEW |
-| `root.show.branch.label` | `F` | Whether to show branch labels. | NEW |
 
 ---
 
@@ -96,13 +95,48 @@
 
 ## Category %7: Layout Settings (布局设置)
 
-控制树的布局方式。
+控制树的布局相关设置。
 
 | Parameter Key | Default | Tooltip | Status |
 |--------------|---------|---------|--------|
-| `layout.initial` | `RECTANGULAR` | Initial tree layout: RECTANGULAR, CIRCULAR, SPIRAL, SLOPE, or RADICAL. | NEW |
-| `layout.radical.rotation` | `0` | Rotation degree for radical layout (0-360). | NEW |
-| `layout.blank.space` | `20,40,80,40` | The blank area of top,left,bottom,right. | EXISTING (was `blank.space`) |
+| `layout.initial` | `RECT_PHYLO_LEFT` | Initial tree layout. Supports enum names or friendly names: RECTANGULAR, CIRCULAR, SPIRAL, SLANT, RADIAL. | NEW |
+| `layout.blank.space` | `20,40,80,40` | The blank area of top,left,bottom,right (pixels). | NEW |
+
+### Category %7.1: Rectangular Layout
+
+| Parameter Key | Default | Range | Tooltip | Status |
+|--------------|---------|-------|---------|--------|
+| `layout.rectangular.curvature` | `0` | 0-100 | Branch curvature. 0 = straight lines, 100 = curved. | NEW |
+
+### Category %7.2: Circular Layout
+
+| Parameter Key | Default | Range | Tooltip | Status |
+|--------------|---------|-------|---------|--------|
+| `layout.circular.start.degree` | `285` | 0-360 | Start angle in degrees. | NEW |
+| `layout.circular.extent.degree` | `360` | 0-360 | Arc extent in degrees. | NEW |
+| `layout.circular.inner.radius` | `50` | 0-200 | Inner circle radius for Inner Cladogram layout (pixels). | NEW |
+
+### Category %7.3: Spiral Layout
+
+| Parameter Key | Default | Range | Tooltip | Status |
+|--------------|---------|-------|---------|--------|
+| `layout.spiral.extent.degree` | `720` | 0-10000 | Total spiral angle in degrees. | NEW |
+| `layout.spiral.gap.factor` | `10` | 0-50 | Gap between spiral arms. | NEW |
+| `layout.spiral.beta.factor` | `100` | 100-500 | Beta mode factor (unit is 0.01). | NEW |
+
+### Category %7.4: Slant Layout
+
+| Parameter Key | Default | Range | Tooltip | Status |
+|--------------|---------|-------|---------|--------|
+| `layout.slant.tree.width` | `100` | 0-100 | Tree width percentage. Smaller values add right margin. | NEW |
+| `layout.slant.left.margin` | `20` | 0-100 | Left margin percentage. | NEW |
+| `layout.slant.rotation` | `0` | 0/90/180/270 | Rotation angle in degrees. | NEW |
+
+### Category %7.5: Radial Layout
+
+| Parameter Key | Default | Range | Tooltip | Status |
+|--------------|---------|-------|---------|--------|
+| `layout.radial.rotation` | `0` | 0-360 | Rotation angle in degrees. | NEW |
 
 ---
 
@@ -177,7 +211,6 @@ public ParamsAssignerAndParser4ModernTreeView() {
     addKeyValueEntryBean("%4", "Root Settings", "");
     addKeyValueEntryBean("root.show", "F", "Whether to display the root node.");
     addKeyValueEntryBean("root.tip.length", "10", "The length of the root tip line in pixels.");
-    addKeyValueEntryBean("root.show.branch.label", "F", "Whether to show branch labels.");
 
     // Category %5: Mouse Wheel
     addKeyValueEntryBean("%5", "Mouse Wheel", "");
@@ -214,12 +247,12 @@ public ParamsAssignerAndParser4ModernTreeView() {
 | %1 Tree Information | 7 | 树信息显示 |
 | %2 Leaf Node | 2 | 叶节点显示 |
 | %3 Inner Node | 3 | 内部节点显示 |
-| %4 Root Settings | 3 | 根节点设置 |
+| %4 Root Settings | 2 | 根节点设置 |
 | %5 Mouse Wheel | 2 | 鼠标滚轮缩放 |
 | %6 Font Settings | 3 | 字体设置 |
-| %7 Layout Settings | 3 | 布局设置 |
+| %7 Layout Settings | 15 | 布局设置 (含子类别) |
 | %8 Advanced | 1 | 高级设置 |
-| **Total** | **29** | 全部参数 |
+| **Total** | **40** | 全部参数 |
 
 ---
 
@@ -237,3 +270,53 @@ public ParamsAssignerAndParser4ModernTreeView() {
 | Show bootstrap toggle | `inner.show.bootstrap` |
 | Height scale toggle | `wheel.height.scale.on` |
 | Width scale toggle | `wheel.width.scale.on` |
+
+---
+
+## Current Implementation Status (2025-12-31)
+
+基于 `ParamsAssignerAndParser4ModernTreeView.java` 检查的实际实现状态。
+
+### ✅ 已实现的参数 (40/40)
+
+| Category | Parameter | Status |
+|----------|-----------|--------|
+| %1 Tree Information | `tree.show.scale.bar` | ✅ 已实现 |
+| %1 Tree Information | `tree.show.axis.bar` | ✅ 已实现 |
+| %1 Tree Information | `tree.show.title` | ✅ 已实现 |
+| %1 Tree Information | `tree.show.width.height` | ✅ 已实现 |
+| %1 Tree Information | `tree.title.string` | ✅ 已实现 |
+| %1 Tree Information | `tree.branch.length.unit` | ✅ 已实现 |
+| %1 Tree Information | `tree.need.reverse.axis` | ✅ 已实现 |
+| %2 Leaf Node | `leaf.show.label` | ✅ 已实现 |
+| %2 Leaf Node | `leaf.label.right.align` | ✅ 已实现 |
+| %3 Inner Node | `inner.show.label` | ✅ 已实现 |
+| %3 Inner Node | `inner.show.bootstrap` | ✅ 已实现 |
+| %3 Inner Node | `inner.show.branch.length` | ✅ 已实现 |
+| %4 Root Settings | `root.show` | ✅ 已实现 |
+| %4 Root Settings | `root.tip.length` | ✅ 已实现 |
+| %5 Mouse Wheel | `wheel.height.scale.on` | ✅ 已实现 |
+| %5 Mouse Wheel | `wheel.width.scale.on` | ✅ 已实现 |
+| %6 Font Settings | `font.global` | ✅ 已实现 |
+| %6 Font Settings | `font.title` | ✅ 已实现 |
+| %6 Font Settings | `font.axis` | ✅ 已实现 |
+| %7 Layout Settings | `layout.initial` | ✅ 已实现 |
+| %7 Layout Settings | `layout.blank.space` | ✅ 已实现 |
+| %7.1 Rectangular | `layout.rectangular.curvature` | ✅ 已实现 |
+| %7.2 Circular | `layout.circular.start.degree` | ✅ 已实现 |
+| %7.2 Circular | `layout.circular.extent.degree` | ✅ 已实现 |
+| %7.2 Circular | `layout.circular.inner.radius` | ✅ 已实现 |
+| %7.3 Spiral | `layout.spiral.extent.degree` | ✅ 已实现 |
+| %7.3 Spiral | `layout.spiral.gap.factor` | ✅ 已实现 |
+| %7.3 Spiral | `layout.spiral.beta.factor` | ✅ 已实现 |
+| %7.4 Slant | `layout.slant.tree.width` | ✅ 已实现 |
+| %7.4 Slant | `layout.slant.left.margin` | ✅ 已实现 |
+| %7.4 Slant | `layout.slant.rotation` | ✅ 已实现 |
+| %7.5 Radial | `layout.radial.rotation` | ✅ 已实现 |
+| %8 Advanced | `advanced.node.visual.config` | ✅ 已实现 |
+
+### 实现比例
+
+- **总参数数**: 40 (设计文档中列出)
+- **已实现**: 40 (100%)
+- **未实现**: 0 (0%)

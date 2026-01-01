@@ -10,6 +10,10 @@ import graphic.engine.colors.EGPSColors;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.ShowInnerNodePropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
+import module.evolview.phylotree.visualization.graphics.struct.SlopeLayoutProperty;
+import module.evolview.phylotree.visualization.graphics.struct.CircularLayoutProperty;
+import module.evolview.phylotree.visualization.graphics.struct.RectangularLayoutProperty;
+import module.evolview.phylotree.visualization.graphics.struct.SprialLayoutProperty;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.apache.commons.lang3.BooleanUtils;
 import tsv.io.TSVReader;
@@ -72,6 +76,32 @@ public class TreePropertiesAssigner {
 
 		// Category %7: Layout Settings
 		treeLayoutProperties.setBlankArea(object.getBlank_space());
+		treeLayoutProperties.setMyLayout(object.getInitialLayout());
+
+		// Category %7.1: Rectangular Layout
+		RectangularLayoutProperty rectangularLayoutProperty = treeLayoutProperties.getRectangularLayoutPropertiy();
+		rectangularLayoutProperty.setCurvature(object.getRectangularCurvature());
+
+		// Category %7.2: Circular Layout
+		CircularLayoutProperty circularLayoutProperty = treeLayoutProperties.getCircularLayoutPropertiy();
+		circularLayoutProperty.setGlobalStartDegree(object.getCircularStartDegree());
+		circularLayoutProperty.setGlobalExtendDegree(object.getCircularExtentDegree());
+		circularLayoutProperty.setInnerCircleRadicus(object.getCircularInnerRadius());
+
+		// Category %7.3: Spiral Layout
+		SprialLayoutProperty spiralLayoutProperty = treeLayoutProperties.getSprialLayoutPropertiy();
+		spiralLayoutProperty.setGlobalExtendingDegree(object.getSpiralExtentDegree());
+		spiralLayoutProperty.setGapSize(object.getSpiralGapFactor());
+		spiralLayoutProperty.setBetaFactor(object.getSpiralBetaFactor() * 0.01);
+
+		// Category %7.4: Slant Layout
+		SlopeLayoutProperty slopeLayoutProperty = treeLayoutProperties.getSlopeLayoutProperety();
+		slopeLayoutProperty.setLeafLocationRightMostRatio(object.getSlantTreeWidth() * 0.01);
+		slopeLayoutProperty.setBlankMarginRatio(object.getSlantLeftMargin() * 0.01);
+		slopeLayoutProperty.setSlopeLayoutRotationDeg(object.getSlantRotation());
+
+		// Category %7.5: Radial Layout
+		treeLayoutProperties.setRadicalLayoutRotationDeg(object.getRadialRotation());
 	}
 
 	public void assignGraphicsNodeEffects(GraphicsNode rootNode, MTVImportInforBean evolTreeImportInfoBean)

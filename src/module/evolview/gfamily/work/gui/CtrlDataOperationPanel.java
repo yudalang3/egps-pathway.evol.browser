@@ -25,12 +25,6 @@ public class CtrlDataOperationPanel extends BaseCtrlPanel {
 	protected JCheckBox chckbxMale;
 	protected JCheckBox chckbxFemale;
 	protected JCheckBox chckbxUnknow;
-	protected JButton btnSexClear;
-
-	/**
-	 * 存放所有过滤相关的状态值
-	 */
-//	protected FilterState filterState = new FilterState();
 
 	public CtrlDataOperationPanel() {
 

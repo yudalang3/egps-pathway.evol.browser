@@ -198,6 +198,51 @@ e.printStackTrace();                 // ❌ WRONG - use log.error() instead
 5. Place in `src/egps2/builtin/modules/yourmodule/` or external JAR
 6. Name the loader class `IndependentModuleLoader` by convention
 
+### GUI Layout with MigLayout
+
+**IMPORTANT: When creating or modifying GUI panels, prefer MigLayout over other layout managers** (unless the existing code already uses a different layout).
+
+MigLayout provides a clean, code-based approach for Swing layouts without requiring GUI designers.
+
+**Import:**
+```java
+import net.miginfocom.swing.MigLayout;
+```
+
+**Basic usage:**
+```java
+// Create panel with MigLayout
+JPanel panel = new JPanel(new MigLayout(
+    "insets 0, gap 4",           // Layout constraints: no padding, 4px gap
+    "[grow,fill][grow,fill]",    // Column constraints: two columns that grow and fill
+    "[][]"                        // Row constraints: two rows
+));
+
+// Add components with constraints
+panel.add(button1);              // First cell
+panel.add(button2, "wrap");      // Second cell, then wrap to next row
+panel.add(button3);              // Third cell (first column, second row)
+panel.add(button4);              // Fourth cell
+```
+
+**Common constraints:**
+- `grow` - Component grows to fill available space
+- `fill` - Component fills its cell
+- `wrap` - Wrap to next row after this component
+- `span 2` - Span across 2 columns
+- `gap 10` - 10px gap after this component
+- `width 100!` - Fixed width of 100px
+- `width 100:200:300` - Min:preferred:max width
+
+**When to use MigLayout:**
+- Creating new panels or dialogs
+- Modifying layout of existing panels (if not already using another layout)
+- Complex layouts that are hard to achieve with GridBagLayout
+
+**When NOT to change to MigLayout:**
+- Existing code already uses GridBagLayout, BorderLayout, etc. and works fine
+- Simple single-component panels
+
 ### HTML Files for Help/Documentation
 
 **IMPORTANT:** Swing's `JEditorPane` only supports **HTML 3.2** with limited CSS 1.0 support.
@@ -286,6 +331,17 @@ if (SwingUtilities.isEventDispatchThread()) {
 - UTF-8 encoding is enforced: `System.setProperty("file.encoding", "UTF-8")`
 - **Test files must be placed in `src/test/` directory**, not in the main source tree (`src/egps2/` or `src/egps/`)
 - No formal unit testing framework (like JUnit); tests are standalone Java classes with main methods
+
+## Dependency JAR Source Code Locations
+
+The core dependency JARs in `dependency-egps/` have their source code in sibling directories:
+
+| JAR File | Source Code Location |
+|----------|---------------------|
+| `egps-base-*.jar` | `/mnt/c/Users/yudal/Documents/project/eGPS2/jars/egps-base` |
+| `egps-shell-*.jar` | `/mnt/c/Users/yudal/Documents/project/eGPS2/jars/egps-main.gui` |
+
+**IMPORTANT:** When you need to understand or modify code from these JARs, read the source files directly from the above paths. Do NOT decompile the JAR files.
 
 ## egps-base Dependency
 

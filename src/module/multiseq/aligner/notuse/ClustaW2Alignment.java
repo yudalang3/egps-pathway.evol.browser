@@ -1,6 +1,6 @@
 package module.multiseq.aligner.notuse;
 
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.BaseMultipleSeqAlignerMain;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -13,10 +13,10 @@ public class ClustaW2Alignment {
 	private String command;
 
 	private String outputFilePath;
-	private MultipleSeqAlignerMain alignmentMain;
+	private BaseMultipleSeqAlignerMain alignmentMain;
 	private String fileName = " ";
 
-	public ClustaW2Alignment(MultipleSeqAlignerMain alignmentMain) {
+	public ClustaW2Alignment(BaseMultipleSeqAlignerMain alignmentMain) {
 		this.alignmentMain = alignmentMain;
 	}
 

@@ -34,7 +34,7 @@ public class IndependentModuleLoader implements IModuleLoader{
 	public ModuleFace getFace() {
 		// 这是有输入框的，下面那个没有，为什么会出现这种情况，因为之前设计的不好。
 		return new IndependentMultipleSeqAlignerMain(this);
-//		return new MultipleSeqAlignerMain(this);
+//		return new BaseMultipleSeqAlignerMain(this);
 	}
 
 	@Override

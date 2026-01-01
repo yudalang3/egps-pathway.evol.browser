@@ -12,7 +12,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 
-public class MultipleSeqAlignerMain extends ComputationalModuleFace {
+public class BaseMultipleSeqAlignerMain extends ComputationalModuleFace {
 
 	private static final long serialVersionUID = 6401202253955992441L;
 
@@ -24,7 +24,7 @@ public class MultipleSeqAlignerMain extends ComputationalModuleFace {
 
 	private String[] info = new String[3];
 
-	protected MultipleSeqAlignerMain(IModuleLoader moduleLoader) {
+	protected BaseMultipleSeqAlignerMain(IModuleLoader moduleLoader) {
 		super(moduleLoader);
 		setLayout(new BorderLayout());
 
@@ -32,9 +32,7 @@ public class MultipleSeqAlignerMain extends ComputationalModuleFace {
 	}
 	
 	protected void addTabbedPanelContents() {
-		// tabbedPane.add("Muscle", new MusclePanel(this));
 		tabbedPane.add("MAFFT", new MafftGUIPanel(this));
-		//tabbedPane.add("ClustalW", new ClustalwGUIPanel(this));
 	}
 
 	private JTabbedPane getTabbedPanel() {
@@ -98,7 +96,7 @@ public class MultipleSeqAlignerMain extends ComputationalModuleFace {
 		return false;
 	}
 
-	public MultipleSeqAlignerMain getController() {
+	public BaseMultipleSeqAlignerMain getController() {
 		return this;
 	}
 

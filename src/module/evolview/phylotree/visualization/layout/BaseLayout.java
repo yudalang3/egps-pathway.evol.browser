@@ -593,7 +593,24 @@ public abstract class BaseLayout implements ITreeLayout {
 
         int yy = (int) (y2 + 0.5 * height);
 
-        if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
+        // Special case: angle = 180 means draw text on LEFT side (for 180° rotated Slant layout)
+        if (angleIfNeeded == 180 || angleIfNeeded == -180) {
+            int stringWidth = fontMetrics.stringWidth(drawString);
+            int xxLeft = (int) (x2 - circleRadius - 4 - stringWidth);
+            g2d.drawString(drawString, xxLeft, yy);
+
+            Color color = leafNameRenderMap.get(node.getID());
+            if (color != null) {
+                g2d.setColor(color);
+                g2d.fillRect(xxLeft, yy - height, stringWidth, height);
+            } else {
+                color = leafNameRenderMap2.get(node.getID());
+                if (color != null) {
+                    g2d.setColor(color);
+                    g2d.fillRect(xxLeft, yy - height, stringWidth, height);
+                }
+            }
+        } else if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
             double radians = Math.toRadians(angleIfNeeded);
             g2d.rotate(-radians, x2, y2);
             g2d.drawString(drawString, xx, yy);

@@ -232,8 +232,14 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	public void initializeLeftPanel() {
 		this.isGlobalPhylogeneticTreePanel = true;
 
-		layoutProp.setMyLayout(TreeLayout.RECT_PHYLO_LEFT);
-		layout = obtainRightLayout(layoutProp.getMyLayout());
+		// Use the layout from TreeLayoutProperties (may be set by parameters)
+		// If not set, default is RECT_PHYLO_LEFT
+		TreeLayout initialLayout = layoutProp.getMyLayout();
+		if (initialLayout == null) {
+			initialLayout = TreeLayout.RECT_PHYLO_LEFT;
+			layoutProp.setMyLayout(initialLayout);
+		}
+		layout = obtainRightLayout(initialLayout);
 
 		updatePhylogeneticTreePanel4fitFrame();
 	}

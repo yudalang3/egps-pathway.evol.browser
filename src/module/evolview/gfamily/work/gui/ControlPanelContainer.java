@@ -53,10 +53,6 @@ public class ControlPanelContainer extends JPanel {
         addJXTaskPanels(taskPaneContainer);
 
         add(new JScrollPane(taskPaneContainer), BorderLayout.CENTER);
-//		jLabel.setBackground(Color.white);
-//		Border createRaisedSoftBevelBorder = BorderFactory.createRaisedSoftBevelBorder();
-//		jLabel.setOpaque(true);
-//		jLabel.setBorder(createRaisedSoftBevelBorder);
     }
 
     protected boolean[] getCollapsePanesArray(int sizeOfJxTaskPanes) {
@@ -82,11 +78,7 @@ public class ControlPanelContainer extends JPanel {
 
     protected void addJXTaskPanels(JXTaskPaneContainer taskPaneContainer) {
         List<JXTaskPane> listOfJxTaskPanes = new LinkedList<>();
-//		listOfJxTaskPanes.add(getDataInfoTaskPanel());
-//		listOfJxTaskPanes.add(getDataOperationTaskPanel());
-//		listOfJxTaskPanes.add(getColorSchemeTaskPanel());
         listOfJxTaskPanes.add(getTreeOperation());
-//		listOfJxTaskPanes.add(getBranchDisplayTaskPanel());
         listOfJxTaskPanes.add(getTreeLayoutTaskPanel());
         listOfJxTaskPanes.add(getGenomeBrowserTaskPanel());
 
@@ -139,109 +131,27 @@ public class ControlPanelContainer extends JPanel {
         return taskPane;
     }
 
-//	protected JXTaskPane getCustomizedBrowserTracksTaskPanel() {
-//		JXTaskPane taskPane = new JXTaskPane();
-//		taskPane.setFont(getTitleFont());
-//		taskPane.setTitle("Customized browser tracks");
-//		LeftCustomizedBrowserTracks panel = new LeftCustomizedBrowserTracks(controller);
-//
-//		taskPane.add(new JScrollPane(panel));
-//		return taskPane;
-//	}
-
-    private JXTaskPane getComponentsPanel() {
-        JXTaskPane taskPane = new JXTaskPane();
-        taskPane.setCollapsed(false);
-        taskPane.setFont(getTitleFont());
-        taskPane.setTitle("Signaling pathway components");
-
-        CtrlSignalingComps debugPanel = new CtrlSignalingComps();
-        debugPanel.setController(controller);
-        taskPane.add(new JScrollPane(debugPanel));
-
-        return taskPane;
-    }
-//	private JXTaskPane getDebugLayoutPanel() {
-//		JXTaskPane taskPane = new JXTaskPane();
-//		taskPane.setCollapsed(false);
-//		taskPane.setFont(getTitleFont());
-//		taskPane.setTitle("New debug panel");
-//		
-//		CtrlDebugPanel debugPanel = new CtrlDebugPanel();
-//		debugPanel.setController(controller);
-//		taskPane.add(new JScrollPane(debugPanel));
-//		
-//		return taskPane;
-//	}
-
     protected JXTaskPane getTreeOperation() {
         JXTaskPane taskPane = new JXTaskPane();
         taskPane.setFont(getTitleFont());
         taskPane.setTitle("Tree operation");
-//		JPanel jPanel = new JPanel(new BorderLayout());
         leftOparetionPanel = new CtrlTreeOperationPanelByMiglayout();
         leftOparetionPanel.setController(controller);
-
-//		jPanel.add(leftOparetionPanel, BorderLayout.CENTER);
 
         taskPane.add(new JScrollPane(leftOparetionPanel));
         return taskPane;
     }
-
-//	protected JXTaskPane getDataInfoTaskPanel() {
-//
-//		JXTaskPane taskPane = new JXTaskPane();
-//		taskPane.setFont(getTitleFont().deriveFont(Font.BOLD));
-//		taskPane.setTitle("Data source");
-//
-//		LeftDataManagerPanel leftDataManagerPanel = new LeftDataManagerPanel(controller);
-//
-//		taskPane.add(new JScrollPane(leftDataManagerPanel));
-//		return taskPane;
-//	}
-
-    private JXTaskPane getColorSchemeTaskPanel() {
-
-        JXTaskPane taskPane = new JXTaskPane();
-
-        taskPane.setFont(getTitleFont());
-        taskPane.setTitle("Color scheme");
-        JPanel jPanel = new JPanel(new BorderLayout());
-
-        colorSchemePanel = new CtrlColorSchemePanel();
-        colorSchemePanel.setController(controller);
-
-        jPanel.add(colorSchemePanel, BorderLayout.WEST);
-        taskPane.add(new JScrollPane(jPanel));
-        return taskPane;
-
-    }
-
-//	protected JXTaskPane getIdentificationNonMutPathTaskPanel() {
-//
-//		JXTaskPane taskPane = new JXTaskPane();
-//		taskPane.setFont(getTitleFont());
-//		taskPane.setTitle("Identification of non-mutated path");
-//		LeftSelectionPanel leftDebugPanel = new LeftSelectionPanel(controller);
-//		taskPane.add(new JScrollPane(leftDebugPanel));
-//
-//		return taskPane;
-//
-//	}
 
     protected JXTaskPane getDataOperationTaskPanel() {
         JXTaskPane taskPane = new JXTaskPane();
 
         taskPane.setFont(getTitleFont());
         taskPane.setTitle("Data operation");
-//		JPanel jPanel = new JPanel(new BorderLayout());
 
         CtrlDataOperationPanel filterPanel = new CtrlDataOperationPanel();
         filterPanel.setController(controller);
         leftDataOperationPanel = filterPanel;
         leftDataOperationPanel.setBorder(null);
-
-        // jPanel.add(leftDataOperationPanel, BorderLayout.WEST);
 
         JScrollPane comp = new JScrollPane(leftDataOperationPanel);
         comp.setBorder(null);
@@ -260,29 +170,6 @@ public class ControlPanelContainer extends JPanel {
 
         return taskPane;
     }
-
-    private JXTaskPane getBranchDisplayTaskPanel() {
-        JXTaskPane taskPane = new JXTaskPane();
-
-        taskPane.setFont(getTitleFont());
-        taskPane.setTitle("Branch display");
-
-        CtrlBranchDisplayPanel view = new CtrlBranchDisplayPanel();
-
-        taskPane.add(new JScrollPane(view));
-        return taskPane;
-    }
-
-//	private JXTaskPane getVisualEffectsTaskPanel() {
-//		JXTaskPane taskPane = new JXTaskPane();
-//
-//		taskPane.setFont(getTitleFont());
-//		taskPane.setTitle("Visual effects");
-//
-//		LeftVisualEffectsPanel view = new LeftVisualEffectsPanel(controller);
-//		taskPane.add(new JScrollPane(view));
-//		return taskPane;
-//	}
 
     public GeneFamilyController getController() {
         return controller;

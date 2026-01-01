@@ -218,7 +218,7 @@ System.setProperty("file.encoding", "UTF-8")
 
 详细的开发者信息，请参阅：
 - [CLAUDE.md](CLAUDE.md) - 开发指南和架构细节
-- [modules_we_have.md](modules_we_have.md) - 详细的模块规范
+- [modules_we_have.md](docs/modules_we_have.md) - 详细的模块规范
 - [docs/](docs/) - 其他文档
 
 ## 贡献指南

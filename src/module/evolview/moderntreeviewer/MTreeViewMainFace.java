@@ -322,7 +322,6 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 		IndependentModuleLoader moduleLoader2 = (IndependentModuleLoader) moduleLoaderOpt.get();
 		GraphicsNode rootNode = moduleLoader2.rootNode;
 		if (rootNode == null) {
-
 			String waitingTextMsg = moduleLoader2.waitingTextMsg;
 			// 添加上用户引导性语句
 			JPanel jPanel = new JPanel() {
@@ -335,8 +334,8 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 				}
 			};
 			this.scrollPane.setViewportView(jPanel);
+			importData();
 		} else {
-
 			// 这个导入过程，如果更改需要注意三处：
 			// VOICE4MTV类的execute()；
 			// GeneFamilyMainFace类的initialize

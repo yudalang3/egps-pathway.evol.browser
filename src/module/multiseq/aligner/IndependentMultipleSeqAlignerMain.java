@@ -11,7 +11,7 @@ import module.multiseq.aligner.gui.IndependentMafftGUIPanel;
  *
  */
 @SuppressWarnings("serial")
-public class IndependentMultipleSeqAlignerMain extends MultipleSeqAlignerMain{
+public class IndependentMultipleSeqAlignerMain extends BaseMultipleSeqAlignerMain {
 
 	protected IndependentMultipleSeqAlignerMain(IModuleLoader moduleLoader) {
 		super(moduleLoader);
@@ -20,6 +20,5 @@ public class IndependentMultipleSeqAlignerMain extends MultipleSeqAlignerMain{
 	@Override
 	protected void addTabbedPanelContents() {
 		tabbedPane.add("MAFFT", new IndependentMafftGUIPanel(this));
-		//tabbedPane.add("ClustalW", new IndependentClustalwGUIPanel(this));
 	}
 }

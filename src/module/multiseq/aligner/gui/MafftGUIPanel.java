@@ -4,7 +4,7 @@ import com.jidesoft.swing.JideSplitPane;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
 import egps2.panels.dialog.EGPSJSpinner;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.BaseMultipleSeqAlignerMain;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
@@ -88,24 +88,10 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 	
 	private List<File> inputFiles;
 
-	public MafftGUIPanel(MultipleSeqAlignerMain alignmentMain) {
+	public MafftGUIPanel(BaseMultipleSeqAlignerMain alignmentMain) {
 		super(alignmentMain);
 		setLayout(new BorderLayout());
-		add(getMainSplitPane());
-	}
-
-	public JSplitPane getMainSplitPane() {
-		if (mainSplitPane == null) {
-			mainSplitPane = new JSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
-			mainSplitPane.setDividerSize(0);
-			mainSplitPane.setDividerLocation(760);
-			mainSplitPane.setBorder(null);
-			mainSplitPane.add(getLeftToolPane());
-			JPanel jPanel = new JPanel();
-			jPanel.setBackground(Color.WHITE);
-			mainSplitPane.add(jPanel);
-		}
-		return mainSplitPane;
+		add(getLeftToolPane(),BorderLayout.CENTER);
 	}
 
 	private JPanel getLeftToolPane() {

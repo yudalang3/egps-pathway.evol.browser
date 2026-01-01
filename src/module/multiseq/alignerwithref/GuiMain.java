@@ -460,10 +460,10 @@ public class GuiMain extends ComputationalModuleFace {
 		ExternalProgramConfigManager.ValidationResult result = configManager.validatePath(path);
 
 		if (result.isValid()) {
-			mafftPathStatusLabel.setText("✓ Configured and executable");
+			mafftPathStatusLabel.setText("Congratulations: Configured and executable");
 			mafftPathStatusLabel.setForeground(new Color(0, 128, 0));
 		} else {
-			mafftPathStatusLabel.setText("✗ " + result.getMessage());
+			mafftPathStatusLabel.setText("Sorry: " + result.getMessage());
 			mafftPathStatusLabel.setForeground(Color.RED);
 		}
 	}

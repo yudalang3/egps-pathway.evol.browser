@@ -218,7 +218,7 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) file for details.
 
 For detailed developer information, see:
 - [CLAUDE.md](CLAUDE.md) - Developer guidance and architecture details
-- [modules_we_have.md](modules_we_have.md) - Detailed module specifications
+- [modules_we_have.md](docs/modules_we_have.md) - Detailed module specifications
 - [docs/](docs/) - Additional documentation
 
 ## Contributing

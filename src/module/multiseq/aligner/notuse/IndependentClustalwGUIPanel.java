@@ -1,7 +1,7 @@
 package module.multiseq.aligner.notuse;
 
 import egps2.frame.gui.comp.DataImportPanel_OneTypeOneFile;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.BaseMultipleSeqAlignerMain;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 @SuppressWarnings("serial")
 public class IndependentClustalwGUIPanel extends ClustalwGUIPanel{
 
-	public IndependentClustalwGUIPanel(MultipleSeqAlignerMain alignmentMain) {
+	public IndependentClustalwGUIPanel(BaseMultipleSeqAlignerMain alignmentMain) {
 		super(alignmentMain);
 	}
 

@@ -16,9 +16,6 @@ public class SubRadicalLayout extends BaseCtrlPanel implements Turn2ThisLayoutPa
 	private JRadioButton rdbtnPhylogram;
 	private JRadioButton rdbtnCladogram;
 
-	private JRadioButton rdbtnEqualDaylightPhylogram;
-	private JRadioButton rdbtnEqualDaylightCladogram;
-
 	public SubRadicalLayout() {
 //        setBorder(new EmptyBorder(0, 10, 0, 10));
 
@@ -168,14 +165,10 @@ public class SubRadicalLayout extends BaseCtrlPanel implements Turn2ThisLayoutPa
 		PhylogeneticTreePanel selectedPhylogeneticTreePanel = controller.getSelectedPhylogeneticTreePanel();
 		if (rdbtnPhylogram.isSelected()) {
 			selectedPhylogeneticTreePanel.updateViewAccording2TreeLayout(TreeLayout.RADIAL_PHYLO);
-		} else if (rdbtnEqualDaylightPhylogram.isSelected()) {
-			selectedPhylogeneticTreePanel.updateViewAccording2TreeLayout(TreeLayout.RADIAL_EQUAL_DAYLIGHT_PHYLO);
-		} else if (rdbtnEqualDaylightCladogram.isSelected()) {
-			selectedPhylogeneticTreePanel.updateViewAccording2TreeLayout(TreeLayout.RADIAL_EQUAL_DAYLIGHT_CLADO);
 		} else {
+			// rdbtnCladogram is selected
 			selectedPhylogeneticTreePanel.updateViewAccording2TreeLayout(TreeLayout.RADIAL_CLADO);
 		}
-
 	}
 
 }

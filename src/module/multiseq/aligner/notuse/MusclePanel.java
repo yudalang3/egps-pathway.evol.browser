@@ -3,7 +3,7 @@ package module.multiseq.aligner.notuse;
 import com.jidesoft.swing.JideSplitPane;
 import egps2.UnifiedAccessPoint;
 import egps2.panels.dialog.EGPSJSpinner;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.BaseMultipleSeqAlignerMain;
 import module.multiseq.aligner.gui.AbstractAlignmentPanel;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
@@ -45,7 +45,7 @@ public class MusclePanel extends AbstractAlignmentPanel {
 	private JLabel advancedOptionsMinDiagLengthJLabelJLabel;
 	private EGPSJSpinner advancedOptionsMinDiagLengthMaxMemoryJSpinner;
 
-	public MusclePanel(MultipleSeqAlignerMain alignmentMain) {
+	public MusclePanel(BaseMultipleSeqAlignerMain alignmentMain) {
 		super(alignmentMain);
 		setLayout(new BorderLayout());
 		add(getMainSplitPane());

@@ -1,6 +1,6 @@
 package module.multiseq.aligner.cli;
 
-import egps2.UnifiedAccessPoint;
+import module.config.externalprograms.ExternalProgramConfigManager;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -94,8 +94,8 @@ public class Mafft2AlignmentCli {
 	}
 
 	public int processNextDefaultMAFFT(String inputPath) throws Exception {
-		final String key = "MAFFT";
-		String runBatPath = UnifiedAccessPoint.getExternalProgramPath().get(key);
+		final String key = ExternalProgramConfigManager.PROGRAM_MAFFT;
+		String runBatPath = ExternalProgramConfigManager.getInstance().getProgramPath(key);
 		switch (osType) {
 		case WINDOWS:
 //			runBatPath = propertiesDir.concat("/softwares/mafft-win/mafft.bat");

@@ -3,7 +3,7 @@ package module.multiseq.aligner.gui;
 import egps2.frame.MainFrameProperties;
 import egps2.modulei.RunningTask;
 import module.evoltrepipline.alignment.SequenceDataForAViewer;
-import module.multiseq.aligner.MultipleSeqAlignerMain;
+import module.multiseq.aligner.BaseMultipleSeqAlignerMain;
 import module.multiseq.aligner.cli.Mafft2AlignmentCli;
 import module.multiseq.alignment.view.Launcher4ModuleLoader;
 import msaoperator.alignment.sequence.Sequence;
@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class PipelineDoAlignByMafftThenToAlignmentView extends Mafft2AlignmentCli implements RunningTask {
 
-	public PipelineDoAlignByMafftThenToAlignmentView(List<String> parameters, MultipleSeqAlignerMain alignmentMain) {
+	public PipelineDoAlignByMafftThenToAlignmentView(List<String> parameters, BaseMultipleSeqAlignerMain alignmentMain) {
 		this(parameters);
 	}
 
