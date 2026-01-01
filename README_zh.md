@@ -12,7 +12,9 @@
 ### 主要功能
 
 - **通路进化浏览器**：具有系统发育上下文的交互式可视化
-- 其它重要的辅助配套工具
+- **系统发育工作流**：从MSA/MAF/距离矩阵构建系统树
+- **MSA工具箱**：MAFFT比对、裁剪与多格式查看
+- **进化距离分析**：距离矩阵计算与热力图展示
 
 ## 系统要求
 
@@ -97,31 +99,31 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 该套件包含18个模块，组织在9个包中：
 
 ### 序列工具
-- **ambigbse**：将IUPAC歧义碱基代码（R、Y、M、K、S、W、H、B、V、D、N）转换为具体序列
+- **ambigbse**：将IUPAC歧义碱基代码（R、Y、M、K、S、W、H、B、V、D、N）转换为具体序列并生成反向互补序列
 
 ### 进化距离分析（3个模块）
-- **evoldist/gene2dist**：从Ensembl/eGPS云序列计算进化距离
-- **evoldist/msa2distview**：从MSA文件计算距离矩阵
+- **evoldist/gene2dist**：从Ensembl/eGPS云序列获取MSA并计算进化距离
+- **evoldist/msa2distview**：从MSA文件计算距离矩阵（JC69、K2P、Tamura-Nei）
 - **evoldist/view**：进化距离矩阵的热力图可视化
 
 ### 进化可视化（3个模块）
-- **evolview/gfamily**：具有系统发育树的交互式基因家族浏览器
+- **evolview/gfamily**：具有系统发育树与序列结构的交互式基因家族浏览器
 - **evolview/moderntreeviewer**：支持多种布局的现代系统树查看器
 - **evolview/pathwaybrowser**：具有系统发育上下文的生物通路可视化
 
 ### 多序列比对（6个模块）
-- **multiseq/aligner**：基于MAFFT的序列比对
+- **multiseq/aligner**：MAFFT多序列比对封装
 - **multiseq/alignerwithref**：基于参考序列的MSA（使用MAFFT）
-- **multiseq/alignment/trimmer**：基于参考序列裁剪比对结果
-- **multiseq/alignment/view**：交互式MSA查看器（支持ClustalW、FASTA、PHYLIP、NEXUS）
-- **multiseq/deversitydescriptor**：比对多样性指标
-- **multiseq/gene2msa**：从Ensembl/eGPS云序列生成MSA
+- **multiseq/alignment/trimmer**：基于参考序列裁剪MSA
+- **multiseq/alignment/view**：交互式MSA查看器（支持ClustalW、FASTA、PHYLIP、NEXUS等）
+- **multiseq/deversitydescriptor**：文本化比对多样性指标
+- **multiseq/gene2msa**：从Ensembl/eGPS云序列获取基因并生成MSA
 
 ### 通路工具
 - **pill**：通路图绘制和编辑工具（通路照亮器）
 
 ### 树构建（4个模块）
-- **treebuilder/gene2tree**：从Ensembl/UCSC序列构建系统树
+- **treebuilder/gene2tree**：从Ensembl/UCSC序列获取MSA并构建系统树
 - **treebuilder/frommsa**：从多序列比对构建系统树
 - **treebuilder/frommaf**：从MAF（多序列比对格式）文件构建系统树
 - **treebuilder/fromdist**：从进化距离矩阵构建系统树
@@ -230,6 +232,11 @@ System.setProperty("file.encoding", "UTF-8")
 5. 为日志记录使用SLF4J
 6. 添加HTML 3.2兼容的文档
 
+## 贡献者
+
+- codex
+- Claude
+
 ## 支持
 
 如有问题、疑问或贡献，请参考[docs/](docs/)目录中的项目文档。
@@ -238,4 +245,4 @@ System.setProperty("file.encoding", "UTF-8")
 
 **项目**：eGPS2 通路进化浏览器
 **版本**：2.2.0
-**最后更新**：2025-12-13
+**最后更新**：2026-01-01
