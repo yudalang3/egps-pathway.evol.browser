@@ -232,6 +232,11 @@ When developing or extending modules:
 5. Use SLF4J for logging
 6. Add HTML 3.2-compliant documentation
 
+## Contributors
+
+- codex
+- Claude
+
 ## Support
 
 For issues, questions, or contributions, please refer to the project documentation in the [docs/](docs/) directory.

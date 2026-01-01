@@ -232,6 +232,11 @@ System.setProperty("file.encoding", "UTF-8")
 5. 为日志记录使用SLF4J
 6. 添加HTML 3.2兼容的文档
 
+## 贡献者
+
+- codex
+- Claude
+
 ## 支持
 
 如有问题、疑问或贡献，请参考[docs/](docs/)目录中的项目文档。
