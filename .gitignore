@@ -38,3 +38,4 @@ backup/
 backup.sh
 dependency-egps/
 debug/
+.claude/

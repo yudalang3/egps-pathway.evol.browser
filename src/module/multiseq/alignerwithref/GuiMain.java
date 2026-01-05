@@ -424,17 +424,11 @@ public class GuiMain extends ComputationalModuleFace {
 		if (result.isValid()) {
 			mafftPathStatusLabel.setText("✓ Valid and executable");
 			mafftPathStatusLabel.setForeground(new Color(0, 128, 0));
-			JOptionPane.showMessageDialog(this,
-				"MAFFT path is valid and executable!",
-				"Path Valid",
-				JOptionPane.INFORMATION_MESSAGE);
+			SwingDialog.showSuccessMSGDialog("Path Valid", "MAFFT path is valid and executable!");
 		} else {
 			mafftPathStatusLabel.setText("✗ " + result.getMessage());
 			mafftPathStatusLabel.setForeground(Color.RED);
-			JOptionPane.showMessageDialog(this,
-				result.getMessage(),
-				"Invalid Path",
-				JOptionPane.ERROR_MESSAGE);
+			SwingDialog.showErrorMSGDialog("Invalid Path", result.getMessage());
 		}
 	}
 

@@ -397,3 +397,18 @@ centerX = width / 2;   // Don't do this!
 centerY = height / 2;  // Don't do this!
 ```
 
+### How to give messages info, error, warnings, success
+
+see docs/how_to_use_MSG_dialog.md file
+
+
+### Use Simple Way to handle GUI demand
+
+For example:
+
+Use `SwingDialog` for displaying messages to users. Internally uses `ModernDialog` with HTML 3.2 + JEditorPane + JScrollPane.
+
+Do not use complex solutions to prevent the GUI errors.
+
+# Font from preference
+Any font get from UnifiedAccessPoint.getLaunchProperty()

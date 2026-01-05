@@ -61,9 +61,8 @@ public class SaveDistanceMatrix {
 				}
 
 				if (selectedF.exists()) {
-					int res = JOptionPane.showConfirmDialog(instanceFrame, "File exists, confirm to overlap?",
-							"Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-					if (res != JOptionPane.OK_OPTION) {
+					boolean confirmed = SwingDialog.showConfirmDialog(instanceFrame, "Warning", "File exists, confirm to overlap?");
+					if (!confirmed) {
 						return;
 					}
 				} else {

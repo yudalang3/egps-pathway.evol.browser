@@ -4,6 +4,7 @@
 
 ![通路进化浏览器 截图](https://github.com/yudalang3/egps-pathway.evol.browser/blob/main/snapshot/ScreenShot_PEBrowser.png?raw=true)
 
+如果您想要一个egps-base, egps-shell和egps-pathway.evol.browser 捆绑在一起的版本，请访问 https://github.com/yudalang3/eGPS2.1
 
 ## 概述
 

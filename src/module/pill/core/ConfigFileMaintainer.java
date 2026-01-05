@@ -1,6 +1,7 @@
 package module.pill.core;
 
 import egps2.EGPSProperties;
+import egps2.panels.dialog.SwingDialog;
 
 import javax.swing.*;
 import java.io.*;
@@ -85,10 +86,7 @@ public class ConfigFileMaintainer {
 			if (skeletonMaker == null) {
 				System.out.println("Success");
 			}else {
-				JOptionPane.showMessageDialog(skeletonMaker,
-					    "Successfully output the content.",
-					    "Export success",
-					    JOptionPane.PLAIN_MESSAGE);
+				SwingDialog.showSuccessMSGDialog("Export success", "Successfully output the content.");
 			}
 			
 		} catch (IOException e) {

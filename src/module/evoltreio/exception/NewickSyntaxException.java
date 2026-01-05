@@ -32,7 +32,7 @@ public class NewickSyntaxException extends NewickParseException {
 	private final String foundToken;
 
 	public NewickSyntaxException(SyntaxErrorType errorType, String newickString, int position) {
-		super(errorType.getDescription(), newickString, position);
+		super(errorType.getDescription(), newickString, position, getSuggestedFixForType(errorType, null));
 		this.errorType = errorType;
 		this.expectedToken = null;
 		this.foundToken = null;
@@ -40,10 +40,27 @@ public class NewickSyntaxException extends NewickParseException {
 
 	public NewickSyntaxException(SyntaxErrorType errorType, String newickString, int position,
 	                             String expectedToken, String foundToken) {
-		super(buildDetailedMessage(errorType, expectedToken, foundToken), newickString, position);
+		super(buildDetailedMessage(errorType, expectedToken, foundToken), newickString, position, expectedToken);
 		this.errorType = errorType;
 		this.expectedToken = expectedToken;
 		this.foundToken = foundToken;
+	}
+
+	/**
+	 * Get a suggested fix string based on the error type when no expected token is provided.
+	 */
+	private static String getSuggestedFixForType(SyntaxErrorType errorType, String expectedToken) {
+		if (expectedToken != null) {
+			return expectedToken;
+		}
+		switch (errorType) {
+			case MISSING_SEMICOLON:
+				return ";";
+			case MISSING_COMMA:
+				return ",";
+			default:
+				return null;
+		}
 	}
 
 	private static String buildDetailedMessage(SyntaxErrorType errorType, String expected, String found) {

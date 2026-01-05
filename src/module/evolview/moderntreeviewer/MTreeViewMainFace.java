@@ -278,6 +278,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 	@Override
 	public void importData() {
 		importHandler.doUserImportAction();
+
 	}
 
 	public VOICE4MTV getImportHandler() {

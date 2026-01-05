@@ -3,6 +3,7 @@ package module.multiseq.alignment.view.io;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.MyFrame;
 import egps2.frame.gui.VectorGraphicsEncoder;
+import egps2.panels.dialog.SwingDialog;
 import egps2.utils.common.model.filefilter.*;
 import egps2.utils.common.util.EGPSPrintUtilities;
 import egps2.utils.common.util.SaveUtil;
@@ -67,9 +68,8 @@ public class AlignmentSaver extends SaveUtil {
 		}
 		File selectedFile = jfc.getSelectedFile();
 		if (selectedFile.exists()) {
-			int res = JOptionPane.showConfirmDialog(instanceFrame, "File exists, confirm to overlap?", "Warning",
-					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-			if (res != JOptionPane.OK_OPTION) {
+			boolean confirmed = SwingDialog.showConfirmDialog(instanceFrame, "Warning", "File exists, confirm to overlap?");
+			if (!confirmed) {
 				return Optional.empty();
 			}
 		}

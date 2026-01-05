@@ -136,7 +136,7 @@ public class CreativeModeTaskPanel extends JPanel {
             return;
         }
         if (!treeLayoutProperties.isCreativeMode()) {
-            JOptionPane.showMessageDialog(main, "You are not in creative mode, you can't load image from clipboard.");
+            SwingDialog.showWarningMSGDialog("Warning", "You are not in creative mode, you can't load image from clipboard.");
             return;
         }
         try {
@@ -144,7 +144,7 @@ public class CreativeModeTaskPanel extends JPanel {
             if (backgroundImage4CreativeMode == null) {
                 Image image = EGPSSwingUtil.getImageFromClipboard();
                 if (image == null) {
-                    JOptionPane.showMessageDialog(main, "You need to copy a image.");
+                    SwingDialog.showWarningMSGDialog("Warning", "You need to copy a image.");
                 } else {
                     treeLayoutProperties.setBackgroundImage4CreativeMode(image);
                 }

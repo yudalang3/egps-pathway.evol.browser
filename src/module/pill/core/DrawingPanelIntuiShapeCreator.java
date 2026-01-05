@@ -1,6 +1,7 @@
 package module.pill.core;
 
 import egps2.frame.gui.EGPSSwingUtil;
+import egps2.panels.dialog.SwingDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -160,7 +161,7 @@ public class DrawingPanelIntuiShapeCreator extends JPanel {
 			image = EGPSSwingUtil.getImageFromClipboard();
 
 			if (image == null) {
-				JOptionPane.showMessageDialog(this, "You need to copy a image.");
+				SwingDialog.showWarningMSGDialog("Warning", "You need to copy a image.");
 				return;
 			}
 

@@ -4,6 +4,7 @@ A comprehensive **Pathway evolutionary browser** module suite for evolutionary a
 
 ![通路进化浏览器 截图](https://github.com/yudalang3/egps-pathway.evol.browser/blob/main/snapshot/ScreenShot_PEBrowser.png?raw=true)
 
+If you would like a bundled version that includes egps-base, egps-shell, and egps-pathway.evol.browser, please visit: https://github.com/yudalang3/eGPS2.1
 
 ## Overview
 
