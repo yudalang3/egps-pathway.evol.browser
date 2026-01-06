@@ -11,6 +11,7 @@ import module.multiseq.alignment.view.gui.*;
 import module.multiseq.alignment.view.gui.leftcontrol.AlignmentColorSchemeLeftPanel;
 import module.multiseq.alignment.view.gui.leftcontrol.AlignmentLayoutLeftPanel;
 import module.multiseq.alignment.view.gui.leftcontrol.LeftPanelMarker;
+import module.multiseq.alignment.view.io.AlignmentExportDialog;
 import module.multiseq.alignment.view.io.AlignmentSaver;
 import module.multiseq.alignment.view.model.AlignmentDrawProperties;
 import module.multiseq.alignment.view.model.SequenceLayout;
@@ -41,7 +42,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 	private JSplitPane mainSplitPane;
 
 	private JPanel leftToolJPanel;
-	private JPanel rightTabbedPanel;
+	private JPanel rightContentPanel;
 
 	private AlignmentColorSchemeLeftPanel colorSchemePane;
 	private JXTaskPane alignmentlayoutPane;
@@ -72,28 +73,36 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 		return alignmentDrawProperties;
 	}
 
+	/**
+	 * 判断当前是否为 Interleaved 布局
+	 */
+	public boolean isInterleavedLayout() {
+		String myLayout = alignmentDrawProperties.getMyLayout();
+		return SequenceLayout.INTERLEAVED.equalsIgnoreCase(myLayout);
+	}
+
 	public void setAlignmentLayout() {
 
 		String myLayout = getAlignmentDrawProperties().getMyLayout();
 
-		JPanel tabbedPanel = getRightTabbedPanel();
+		JPanel contentPanel = getRightContentPanel();
 
-		tabbedPanel.removeAll();
+		contentPanel.removeAll();
 
 		if (myLayout.equalsIgnoreCase(SequenceLayout.CONTINUOUS)) {
-			tabbedPanel.add(new AlignmentViewContinuousRightPanel(this));
+			contentPanel.add(new AlignmentViewContinuousRightPanel(this));
 		} else if (myLayout.equalsIgnoreCase(SequenceLayout.INTERLEAVED)) {
-			tabbedPanel.add(new AlignmentViewInterLeavedPanel(this));
+			contentPanel.add(new AlignmentViewInterLeavedPanel(this));
 		}
 
-		tabbedPanel.updateUI();
+		contentPanel.updateUI();
 	}
 
 	public Optional<AlignmentViewContinuousRightPanel> getAlignmentViewCharDrawingPanel4ContinuousLayout() {
 		AlignmentViewContinuousRightPanel ret = null;
 
-		JPanel tabbedPanel = getRightTabbedPanel();
-		Component[] components = tabbedPanel.getComponents();
+		JPanel contentPanel = getRightContentPanel();
+		Component[] components = contentPanel.getComponents();
 		for (Component component : components) {
 			if (component instanceof AlignmentViewContinuousRightPanel) {
 				ret = (AlignmentViewContinuousRightPanel) component;
@@ -120,19 +129,19 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 		mainSplitPane.setDividerSize(7);
 
 		mainSplitPane.add(getLeftToolJPanel());
-		mainSplitPane.add(getRightTabbedPanel());
+		mainSplitPane.add(getRightContentPanel());
 
 		mainSplitPane.setBorder(null);
 		return mainSplitPane;
 	}
 
-	public JPanel getRightTabbedPanel() {
-		if (rightTabbedPanel == null) {
-			rightTabbedPanel = new JPanel();
-			rightTabbedPanel.setBackground(Color.WHITE);
-			rightTabbedPanel.setLayout(new BorderLayout());
+	public JPanel getRightContentPanel() {
+		if (rightContentPanel == null) {
+			rightContentPanel = new JPanel();
+			rightContentPanel.setBackground(Color.WHITE);
+			rightContentPanel.setLayout(new BorderLayout());
 		}
-		return rightTabbedPanel;
+		return rightContentPanel;
 	}
 
 	private JPanel getLeftToolJPanel() {
@@ -185,7 +194,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 
 			builderTreeButton.addActionListener(e -> {
 
-				JPanel tabbedPanel = getRightTabbedPanel();
+				JPanel tabbedPanel = getRightContentPanel();
 
 				if (tabbedPanel.getComponentCount() > 0) {
 
@@ -216,7 +225,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 			displayJPane.add(calculateDistanceButton, gridBagConstraints);
 			calculateDistanceButton.addActionListener(e -> {
 
-				JPanel tabbedPanel = getRightTabbedPanel();
+				JPanel tabbedPanel = getRightContentPanel();
 
 				if (tabbedPanel.getComponentCount() > 0) {
 
@@ -305,7 +314,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 
 	@Override
 	public void exportData() {
-		new AlignmentSaver(this).saveData(this);
+		AlignmentExportDialog.showDialog(this);
 	}
 
 	@Override
@@ -374,7 +383,7 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 
 	@Override
 	public void adjustFillFont(Font newFont) {
-		if (getRightTabbedPanel().getComponentCount() > 0) {
+		if (getRightContentPanel().getComponentCount() > 0) {
 			getAlignmentViewPort().setFont(newFont);
 			repaint();
 		}
@@ -435,15 +444,18 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 		stringBuilder.append(".");
 		
 		VisulizationDataProperty alignmentViewPort = this.getAlignmentViewPort();
-		List<UserSelectedViewElement> selectionElements = alignmentViewPort.getSelectionElements();
-		if (!selectionElements.isEmpty()) {
-			stringBuilder.append("<br>Following characters are highlighted for the purpose of *:<br>");
-			for (UserSelectedViewElement userSelectedViewElement : selectionElements) {
-				stringBuilder.append(userSelectedViewElement.toString());
-				stringBuilder.append(".");
-				stringBuilder.append("<br>");
+		if (alignmentViewPort != null) {
+			List<UserSelectedViewElement> selectionElements = alignmentViewPort.getSelectionElements();
+			if (!selectionElements.isEmpty()) {
+				stringBuilder.append("<br>Following characters are highlighted for the purpose of *:<br>");
+				for (UserSelectedViewElement userSelectedViewElement : selectionElements) {
+					stringBuilder.append(userSelectedViewElement.toString());
+					stringBuilder.append(".");
+					stringBuilder.append("<br>");
+				}
 			}
 		}
+
 		
 		return stringBuilder.toString();
 	}

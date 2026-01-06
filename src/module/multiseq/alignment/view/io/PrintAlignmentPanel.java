@@ -57,6 +57,14 @@ public class PrintAlignmentPanel extends JPanel {
 
 		Graphics2D g2 = (Graphics2D) g;
 
+		// 设置抗锯齿
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+		// 设置字体和颜色
+		g2.setFont(alignmentViewPort.getFont());
+		g2.setColor(Color.BLACK);
+
 		sequenceData.initializeCurrentPaintSequcences(0, alignmentViewPort.getTotalSequenceCount(), startRes, endRes);
 
 		sequenceData.calculateStaticsOfSpecificColumns(startRes, endRes);

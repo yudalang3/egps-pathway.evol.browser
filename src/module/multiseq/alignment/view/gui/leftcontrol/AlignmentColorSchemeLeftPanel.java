@@ -105,7 +105,7 @@ public class AlignmentColorSchemeLeftPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 
-					JPanel tabbedPanel = aVMian.getRightTabbedPanel();
+					JPanel tabbedPanel = aVMian.getRightContentPanel();
 					if (tabbedPanel.getComponentCount() > 0) {
 
 						AlignmentDrawProperties aDrawProperties = aVMian.getAlignmentDrawProperties();
@@ -130,7 +130,7 @@ public class AlignmentColorSchemeLeftPanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					JPanel tabbedPanel = aVMian.getRightTabbedPanel();
+					JPanel tabbedPanel = aVMian.getRightContentPanel();
 					if (tabbedPanel.getComponentCount() > 0) {
 
 						AlignmentDrawProperties aDrawProperties = aVMian.getAlignmentDrawProperties();
@@ -157,7 +157,7 @@ public class AlignmentColorSchemeLeftPanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					JPanel tabbedPanel = aVMian.getRightTabbedPanel();
+					JPanel tabbedPanel = aVMian.getRightContentPanel();
 					if (tabbedPanel.getComponentCount() > 0) {
 
 						AlignmentDrawProperties aDrawProperties = aVMian.getAlignmentDrawProperties();
@@ -185,7 +185,7 @@ public class AlignmentColorSchemeLeftPanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					JPanel tabbedPanel = aVMian.getRightTabbedPanel();
+					JPanel tabbedPanel = aVMian.getRightContentPanel();
 					if (tabbedPanel.getComponentCount() > 0) {
 
 						AlignmentDrawProperties aDrawProperties = aVMian.getAlignmentDrawProperties();
@@ -211,7 +211,7 @@ public class AlignmentColorSchemeLeftPanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					JPanel tabbedPanel = aVMian.getRightTabbedPanel();
+					JPanel tabbedPanel = aVMian.getRightContentPanel();
 					if (tabbedPanel.getComponentCount() > 0) {
 						AlignmentDrawProperties aDrawProperties = aVMian.getAlignmentDrawProperties();
 
@@ -235,7 +235,7 @@ public class AlignmentColorSchemeLeftPanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					JPanel tabbedPanel = aVMian.getRightTabbedPanel();
+					JPanel tabbedPanel = aVMian.getRightContentPanel();
 					if (tabbedPanel.getComponentCount() > 0) {
 
 						AlignmentDrawProperties aDrawProperties = aVMian.getAlignmentDrawProperties();

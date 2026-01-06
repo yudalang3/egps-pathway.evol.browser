@@ -216,72 +216,49 @@ public class PDF2AlignmentUtil {
 		VisulizationDataProperty alignmentViewPort = alignmentViewMain.getAlignmentViewPort();
 
 		int charHeight = alignmentViewPort.getCharHeight();
-
 		int charWidth = alignmentViewPort.getCharWidth();
-
-		JPanel jPanel = new JPanel();
-
-		int yOf = jPanel.getFontMetrics(alignmentViewPort.getFont()).getDescent();
-
-		int scaleHeight = yOf * 2 + charHeight - yOf;
-
 		int totalSequenceCount = alignmentViewPort.getTotalSequenceCount();
-
-		int sequenceHeight = totalSequenceCount * charHeight;
-
-		int sequenceAnnotationHeighty = 50;
-
-		int blockDistance = 20;
-
-		int blockHeight = scaleHeight + sequenceHeight + charHeight + sequenceAnnotationHeighty + charHeight
-				+ blockDistance;
-
-		Rectangle a4 = PageSize.A4;
-
-		float pageHeight = a4.getHeight();
-
-		int pageShowBlockCount = (int) Math.ceil(pageHeight / blockHeight);
-
-		int width = ((int) a4.getWidth()) - alignmentViewPort.getBaseNameLenght() - 50;
-
-		int showDataLength = (int) Math.floor(width * 1.0 / charWidth);
-
-		if (showDataLength > 10 && showDataLength % 10 != 0) {
-
-			showDataLength = showDataLength / 10 * 10;
-		}
 		int totalSequenceLength = alignmentViewPort.getTotalSequenceLength();
+		int baseNameLength = alignmentViewPort.getBaseNameLenght();
 
-		int blockCount = (int) Math.ceil(totalSequenceLength * 1.0 / showDataLength);
+		// 计算完整面板尺寸
+		int leftDistance = 10;
+		int sequenceAnnotationHeight = 50;
+		int scaleHeight = 21;
 
-		int pageCount = (int) Math.ceil(blockCount * 1.0 / pageShowBlockCount);
+		int panelWidth = baseNameLength + leftDistance + 7 + (totalSequenceLength * charWidth) + 20;
+		int panelHeight = scaleHeight + (totalSequenceCount * charHeight) + charHeight
+				+ sequenceAnnotationHeight + charHeight + 20;
 
+		// 创建 PrintAlignmentPanel 渲染完整内容
+		PrintAlignmentPanel printPanel = new PrintAlignmentPanel(alignmentViewMain, alignmentViewPort);
+		printPanel.setCharWidth(charWidth);
+		printPanel.setCharHeight(charHeight);
+		printPanel.setStartRes(0);
+		printPanel.setEndRes(totalSequenceLength);
+		printPanel.setSize(panelWidth, panelHeight);
+
+		// 创建 PDF 文档
 		OutputStream stream = new FileOutputStream(outputFile);
-
-		Rectangle2D bounds = component.getBounds();
-
-		Document document = new Document(new Rectangle((float) bounds.getWidth(), (float) component.getHeight() * 5));
-
+		Document document = new Document(new Rectangle(panelWidth, panelHeight));
 		PdfWriter writer = PdfWriter.getInstance(document, stream);
 
 		document.open();
-
 		PdfContentByte cb = writer.getDirectContent();
-		PdfTemplate tp = cb.createTemplate((float) bounds.getWidth(), (float) component.getHeight() * 5);
+		PdfTemplate tp = cb.createTemplate(panelWidth, panelHeight);
+		Graphics2D g2d = tp.createGraphics(panelWidth, panelHeight, new DefaultFontMapper());
 
-		for (int i = 0; i < pageCount; i++) {
-			// boolean newPage = document.newPage();
-			Graphics2D g2d = tp.createGraphics((float) bounds.getWidth(), (float) component.getHeight() * i,
-					new DefaultFontMapper());
-			// if (newPage) {
-			component.print(g2d);
-			float index = i * component.getHeight();
-			cb.addTemplate(tp, 0, index);
-			// }
-			g2d.dispose();
-		}
+		// 白色背景
+		g2d.setColor(Color.WHITE);
+		g2d.fillRect(0, 0, panelWidth, panelHeight);
 
+		// 渲染对齐内容
+		printPanel.paint(g2d);
+		g2d.dispose();
+
+		cb.addTemplate(tp, 0, 0);
 		document.close();
+		stream.close();
 	}
 
 	private Component component;

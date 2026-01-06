@@ -39,3 +39,8 @@ backup.sh
 dependency-egps/
 debug/
 .claude/
+
+build_jar_and_move.sh
+
+CLAUDE.md
+AGENTS.md

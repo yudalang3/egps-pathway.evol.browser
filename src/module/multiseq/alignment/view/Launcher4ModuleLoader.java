@@ -15,6 +15,7 @@ public class Launcher4ModuleLoader implements IModuleLoader{
 	String moduleLaunchWay = "Module launched by click the open button.";
 	String whatDataInvoked;
 
+	ModuleVersion version = new ModuleVersion(0, 0, 1);
 	private SequenceDataForAViewer sequenceDataForAViewer;
 
 	@Override
@@ -56,7 +57,7 @@ public class Launcher4ModuleLoader implements IModuleLoader{
 
 	@Override
 	public ModuleVersion getVersion() {
-		return EGPSProperties.MAINFRAME_CORE_VERSION;
+		return version;
 	}
 
 	public SequenceDataForAViewer getSequenceDataForAViewer() {

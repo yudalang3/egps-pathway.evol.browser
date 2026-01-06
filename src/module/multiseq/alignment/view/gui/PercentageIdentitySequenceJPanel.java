@@ -23,6 +23,10 @@ public class PercentageIdentitySequenceJPanel extends AbstractSequenceColor {
 		if (seq == null) {
 			return; // fix for racecondition
 		}
+
+		// 保存原始颜色
+		Color originalColor = g2.getColor();
+
 		List<SequenceComponentRatio> ratios = sequenceData.getRatio();
 
 		for (int i = 0; i < seq.length; i++) {
@@ -35,24 +39,23 @@ public class PercentageIdentitySequenceJPanel extends AbstractSequenceColor {
 
 			if (base2 == seq[i]) {
 				int percentage = sequenceRatio.getPercentage();
+				Color bgColor;
 				if (percentage > 80) {
-					g2.setBackground(new Color(100, 100, 255));
+					bgColor = new Color(100, 100, 255);
 				} else if (percentage > 60) {
-					g2.setBackground(new Color(153, 153, 255));
+					bgColor = new Color(153, 153, 255);
 				} else if (percentage > 40) {
-					g2.setBackground(new Color(204, 204, 255));
+					bgColor = new Color(204, 204, 255);
 				} else {
-					g2.setBackground(Color.white);
+					bgColor = Color.WHITE;
 				}
 
-				g2.clearRect(XPos , yOffset - charHeight, charWidth, charHeight);
+				g2.setColor(bgColor);
+				g2.fillRect(XPos, yOffset - charHeight, charWidth, charHeight);
+				g2.setColor(originalColor);
 			}
 
-//			if (base == null || "".equals(base)) {
-//				base = "-";
-//			}
-			//y参数要yOffset要做一点调整值，这样字可以落在方框比较中心的位置，否则g显示的时候会被遮挡
-			g2.drawString(base, start + XPos,(int)(yOffset-charHeight*0.15));
+			g2.drawString(base, start + XPos, (int)(yOffset-charHeight*0.15));
 		}
 
 	}
