@@ -53,6 +53,9 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 	private AlignmentDrawProperties alignmentDrawProperties;
 	private LeftPanelMarker leftMarkerPanel;
 
+	/** 导出对话框实例，用于保持状态 */
+	private AlignmentExportDialog exportDialog;
+
 	private final String[] FEATURES = new String[] { "Tow layout exchange", "Color scheme rendering", "Mark sequence" };
 
 	protected AlignmentViewMain(IModuleLoader moduleLoader) {
@@ -79,6 +82,14 @@ public class AlignmentViewMain extends ComputationalModuleFace implements Adjust
 	public boolean isInterleavedLayout() {
 		String myLayout = alignmentDrawProperties.getMyLayout();
 		return SequenceLayout.INTERLEAVED.equalsIgnoreCase(myLayout);
+	}
+
+	public AlignmentExportDialog getExportDialog() {
+		return exportDialog;
+	}
+
+	public void setExportDialog(AlignmentExportDialog exportDialog) {
+		this.exportDialog = exportDialog;
 	}
 
 	public void setAlignmentLayout() {

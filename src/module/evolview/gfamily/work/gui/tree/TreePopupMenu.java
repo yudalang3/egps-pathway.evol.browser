@@ -183,7 +183,29 @@ public class TreePopupMenu {
 		recolor.setIcon(IconObtainer.get("color.png"));
 		recolor.setToolTipText("Recolor this node and its descendents, including internal nodes and leafs.");
 		ActionListener recolorActionListener = e -> {
-//			CustomizedRenderUtil.actions4Recolor2all(controller, currNode);
+			// 直接弹出颜色选择器，不依赖controller
+			Color initialColor = currNode != null ? currNode.getDrawUnit().getLineColor() : Color.BLACK;
+			Color newColor = JColorChooser.showDialog(null, "Choose Color", initialColor);
+			if (newColor != null && currNode != null) {
+				// 只有内节点（有子节点）才询问是否应用到子节点
+				boolean applyToDescendants = false;
+				if (currNode.getChildCount() > 0) {
+					int result = JOptionPane.showConfirmDialog(null,
+							"Apply to all descendant nodes?",
+							"Recolor",
+							JOptionPane.YES_NO_OPTION);
+					applyToDescendants = (result == JOptionPane.YES_OPTION);
+				}
+
+				if (applyToDescendants) {
+					TreeOperationUtil.recursiveIterateTreeIF(currNode, node -> {
+						node.getDrawUnit().setLineColor(newColor);
+					});
+				} else {
+					currNode.getDrawUnit().setLineColor(newColor);
+				}
+				phylogeneticTreePanel.refreshViewPort();
+			}
 		};
 		recolor.addActionListener(recolorActionListener);
 		return recolor;

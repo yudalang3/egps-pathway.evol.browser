@@ -27,10 +27,15 @@ public class AlignmentExporter {
 
 	private final AlignmentViewMain main;
 	private final VisulizationDataProperty viewPort;
+	private boolean drawConsensus = true;
 
 	public AlignmentExporter(AlignmentViewMain main) {
 		this.main = main;
 		this.viewPort = main.getAlignmentViewPort();
+	}
+
+	public void setDrawConsensus(boolean drawConsensus) {
+		this.drawConsensus = drawConsensus;
 	}
 
 	/**
@@ -39,8 +44,8 @@ public class AlignmentExporter {
 	public void export(File outputFile, AlignmentExportDialog.DataType dataType,
 			AlignmentExportDialog.LayoutMode layoutMode) throws Exception {
 
-		log.info("Exporting alignment: type={}, layout={}, file={}",
-				dataType, layoutMode, outputFile.getName());
+		log.info("Exporting alignment: type={}, layout={}, file={}, drawConsensus={}",
+				dataType, layoutMode, outputFile.getName(), drawConsensus);
 
 		if (dataType.isSequenceFormat()) {
 			exportSequence(outputFile, dataType, layoutMode);
@@ -162,15 +167,16 @@ public class AlignmentExporter {
 
 		// 计算完整面板尺寸
 		int leftDistance = 10;
-		int sequenceAnnotationHeight = 50;
+		int sequenceAnnotationHeight = drawConsensus ? 50 : 0;
+		int consensusCharHeight = drawConsensus ? charHeight : 0;
 		int scaleHeight = 21;
 
 		int panelWidth = baseNameLength + leftDistance + 7 + (totalSeqLength * charWidth) + 20;
 		int panelHeight = scaleHeight + (totalSeqCount * charHeight) + charHeight
-				+ sequenceAnnotationHeight + charHeight + 20;
+				+ sequenceAnnotationHeight + consensusCharHeight + 20;
 
-		log.info("Exporting bitmap: {}x{} pixels, {} sequences, {} positions",
-				panelWidth, panelHeight, totalSeqCount, totalSeqLength);
+		log.info("Exporting bitmap: {}x{} pixels, {} sequences, {} positions, drawConsensus={}",
+				panelWidth, panelHeight, totalSeqCount, totalSeqLength, drawConsensus);
 
 		// 创建渲染面板
 		PrintAlignmentPanel printPanel = new PrintAlignmentPanel(main, viewPort);
@@ -178,6 +184,7 @@ public class AlignmentExporter {
 		printPanel.setCharHeight(charHeight);
 		printPanel.setStartRes(0);
 		printPanel.setEndRes(totalSeqLength);
+		printPanel.setDrawConsensus(drawConsensus);
 		printPanel.setSize(panelWidth, panelHeight);
 
 		// 创建图像
@@ -242,18 +249,20 @@ public class AlignmentExporter {
 		int baseNameLength = viewPort.getBaseNameLenght();
 
 		int leftDistance = 10;
-		int sequenceAnnotationHeight = 50;
+		int sequenceAnnotationHeight = drawConsensus ? 50 : 0;
+		int consensusCharHeight = drawConsensus ? charHeight : 0;
 		int scaleHeight = 21;
 
 		int panelWidth = baseNameLength + leftDistance + 7 + (totalSeqLength * charWidth) + 20;
 		int panelHeight = scaleHeight + (totalSeqCount * charHeight) + charHeight
-				+ sequenceAnnotationHeight + charHeight + 20;
+				+ sequenceAnnotationHeight + consensusCharHeight + 20;
 
 		PrintAlignmentPanel printPanel = new PrintAlignmentPanel(main, viewPort);
 		printPanel.setCharWidth(charWidth);
 		printPanel.setCharHeight(charHeight);
 		printPanel.setStartRes(0);
 		printPanel.setEndRes(totalSeqLength);
+		printPanel.setDrawConsensus(drawConsensus);
 		printPanel.setSize(panelWidth, panelHeight);
 
 		// 直接将 PrintAlignmentPanel 传给矢量图编码器，这样可以捕获真正的绘图命令
@@ -285,6 +294,7 @@ public class AlignmentExporter {
 		Component component = main.getRightContentPanel().getComponent(0);
 		pdfUtil.setSequenceDataPanel(component);
 		pdfUtil.setAlignmentViewMain(main);
+		pdfUtil.setDrawConsensus(drawConsensus);
 
 		// 获取不带扩展名的路径
 		String pathWithoutExt = outputFile.getAbsolutePath();
@@ -303,6 +313,7 @@ public class AlignmentExporter {
 		Component component = main.getRightContentPanel().getComponent(0);
 		pdfUtil.setSequenceDataPanel(component);
 		pdfUtil.setAlignmentViewMain(main);
+		pdfUtil.setDrawConsensus(drawConsensus);
 
 		String pathWithoutExt = outputFile.getAbsolutePath();
 		if (pathWithoutExt.toLowerCase().endsWith(".pdf")) {
@@ -320,6 +331,8 @@ public class AlignmentExporter {
 		Component component = main.getRightContentPanel().getComponent(0);
 		pdfUtil.setSequenceDataPanel(component);
 		pdfUtil.setAlignmentViewMain(main);
+		// Note: Current View mode captures the actual screen component,
+		// drawConsensus option has no effect here
 
 		String pathWithoutExt = outputFile.getAbsolutePath();
 		if (pathWithoutExt.toLowerCase().endsWith(".pdf")) {

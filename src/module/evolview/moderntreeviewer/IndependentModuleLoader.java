@@ -20,6 +20,8 @@ public class IndependentModuleLoader implements IModuleLoader {
 	String whatDataInvoked = "";
 
 	String waitingTextMsg = "Please click the import button in the toolbar to load data";
+
+	ModuleVersion version = new ModuleVersion(0, 0, 2);
 	
 	@Override
 	public String getTabName() {
@@ -74,6 +76,6 @@ public class IndependentModuleLoader implements IModuleLoader {
 
 	@Override
 	public ModuleVersion getVersion() {
-		return EGPSProperties.MAINFRAME_CORE_VERSION;
+		return version;
 	}
 }

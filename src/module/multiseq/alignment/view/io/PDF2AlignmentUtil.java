@@ -23,9 +23,14 @@ import java.io.OutputStream;
 public class PDF2AlignmentUtil {
 
 	private AlignmentViewMain alignmentViewMain;
+	private boolean drawConsensus = true;
 
 	public void setAlignmentViewMain(AlignmentViewMain alignmentViewMain) {
 		this.alignmentViewMain = alignmentViewMain;
+	}
+
+	public void setDrawConsensus(boolean drawConsensus) {
+		this.drawConsensus = drawConsensus;
 	}
 
 	public void exportDataWithSelectedFormat(String path, String defaultSuffix, SaveFilterPDFDescription description)
@@ -223,12 +228,13 @@ public class PDF2AlignmentUtil {
 
 		// 计算完整面板尺寸
 		int leftDistance = 10;
-		int sequenceAnnotationHeight = 50;
+		int sequenceAnnotationHeight = drawConsensus ? 50 : 0;
+		int consensusCharHeight = drawConsensus ? charHeight : 0;
 		int scaleHeight = 21;
 
 		int panelWidth = baseNameLength + leftDistance + 7 + (totalSequenceLength * charWidth) + 20;
 		int panelHeight = scaleHeight + (totalSequenceCount * charHeight) + charHeight
-				+ sequenceAnnotationHeight + charHeight + 20;
+				+ sequenceAnnotationHeight + consensusCharHeight + 20;
 
 		// 创建 PrintAlignmentPanel 渲染完整内容
 		PrintAlignmentPanel printPanel = new PrintAlignmentPanel(alignmentViewMain, alignmentViewPort);
@@ -236,6 +242,7 @@ public class PDF2AlignmentUtil {
 		printPanel.setCharHeight(charHeight);
 		printPanel.setStartRes(0);
 		printPanel.setEndRes(totalSequenceLength);
+		printPanel.setDrawConsensus(drawConsensus);
 		printPanel.setSize(panelWidth, panelHeight);
 
 		// 创建 PDF 文档
@@ -315,11 +322,12 @@ public class PDF2AlignmentUtil {
 
 			int sequenceHeight = totalSequenceCount * charHeight;
 
-			int sequenceAnnotationHeighty = 50;
+			int sequenceAnnotationHeighty = drawConsensus ? 50 : 0;
+			int consensusCharHeight = drawConsensus ? charHeight : 0;
 
 			int blockDistance = 20;
 
-			blockHeight = scaleHeight + sequenceHeight + charHeight + sequenceAnnotationHeighty + charHeight
+			blockHeight = scaleHeight + sequenceHeight + charHeight + sequenceAnnotationHeighty + consensusCharHeight
 					+ blockDistance;
 
 			a4 = PageSize.A4;
@@ -388,6 +396,8 @@ public class PDF2AlignmentUtil {
 					printAlignmentPanel.setStartRes(startRes);
 
 					printAlignmentPanel.setEndRes(endRes);
+
+					printAlignmentPanel.setDrawConsensus(drawConsensus);
 
 					printAlignmentPanel.setPreferredSize(new Dimension((int) a4.getWidth(), blockHeight));
 

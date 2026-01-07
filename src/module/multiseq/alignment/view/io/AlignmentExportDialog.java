@@ -56,6 +56,9 @@ public class AlignmentExportDialog extends JDialog {
 	private JButton btnBrowse;
 	private File selectedDirectory;
 
+	// 导出选项
+	private JCheckBox chkDrawConsensus;
+
 	// 操作按钮
 	private JButton btnExport;
 	private JButton btnOnlyExport;
@@ -165,7 +168,7 @@ public class AlignmentExportDialog extends JDialog {
 		initDefaultValues();
 
 		pack();
-		setMinimumSize(new Dimension(480, 320));
+		setMinimumSize(new Dimension(480, 360));
 		setLocationRelativeTo(getOwner());
 	}
 
@@ -197,6 +200,9 @@ public class AlignmentExportDialog extends JDialog {
 		txtFileName = new JTextField(20);
 		btnBrowse = new JButton("Choose dir.");
 
+		// Export options
+		chkDrawConsensus = new JCheckBox("Draw Consensus area", true);
+
 		// Action buttons
 		btnExport = new JButton("Export & Close");
 		btnOnlyExport = new JButton("Only Export");
@@ -215,7 +221,7 @@ public class AlignmentExportDialog extends JDialog {
 	}
 
 	private void layoutComponents() {
-		JPanel mainPanel = new JPanel(new MigLayout("insets 15, gap 10", "[grow,fill]", "[]10[]10[]15[]"));
+		JPanel mainPanel = new JPanel(new MigLayout("insets 15, gap 10", "[grow,fill]", "[]10[]10[]10[]15[]"));
 
 		// Layout panel
 		JPanel layoutPanel = new JPanel(new MigLayout("insets 5, gap 5", "[grow,fill][grow,fill][grow,fill]", "[]"));
@@ -233,6 +239,12 @@ public class AlignmentExportDialog extends JDialog {
 		dataTypePanel.add(btnBitmap, "wrap");
 		dataTypePanel.add(cmbFormat, "span 3, growx");
 		mainPanel.add(dataTypePanel, "wrap");
+
+		// Options panel
+		JPanel optionsPanel = new JPanel(new MigLayout("insets 5, gap 5", "[grow,fill]", "[]"));
+		optionsPanel.setBorder(new TitledBorder("Options"));
+		optionsPanel.add(chkDrawConsensus);
+		mainPanel.add(optionsPanel, "wrap");
 
 		// File panel
 		JPanel filePanel = new JPanel(new MigLayout("insets 5, gap 5", "[][grow,fill][]", "[]"));
@@ -254,13 +266,21 @@ public class AlignmentExportDialog extends JDialog {
 	}
 
 	private void setupListeners() {
+		// Layout change listeners - 更新 checkbox 状态
+		btnContinuous.addActionListener(e -> updateDrawConsensusState());
+		btnInterleaved.addActionListener(e -> updateDrawConsensusState());
+		btnCurrentView.addActionListener(e -> updateDrawConsensusState());
+
 		// Data type category change listeners
 		btnSequence.addActionListener(e -> updateFormatComboBox(DataTypeCategory.SEQUENCE));
 		btnBitmap.addActionListener(e -> updateFormatComboBox(DataTypeCategory.BITMAP));
 		btnVector.addActionListener(e -> updateFormatComboBox(DataTypeCategory.VECTOR));
 
 		// Format change listener
-		cmbFormat.addActionListener(e -> updateLayoutButtonsState());
+		cmbFormat.addActionListener(e -> {
+			updateLayoutButtonsState();
+			updateDrawConsensusState();
+		});
 
 		// Browse button
 		btnBrowse.addActionListener(this::onBrowse);
@@ -270,7 +290,7 @@ public class AlignmentExportDialog extends JDialog {
 		btnOnlyExport.addActionListener(e -> doExport(false));
 
 		// Cancel button
-		btnCancel.addActionListener(e -> dispose());
+		btnCancel.addActionListener(e -> setVisible(false));
 
 		// Enter key on filename field
 		txtFileName.addActionListener(e -> doExport(true));
@@ -291,6 +311,29 @@ public class AlignmentExportDialog extends JDialog {
 
 		// 默认文件名
 		txtFileName.setText("alignment");
+
+		// 更新 checkbox 状态
+		updateDrawConsensusState();
+	}
+
+	/**
+	 * 更新 Draw Consensus checkbox 的启用状态
+	 * Current View 模式不支持此选项
+	 */
+	private void updateDrawConsensusState() {
+		DataType type = (DataType) cmbFormat.getSelectedItem();
+		boolean isCurrentView = btnCurrentView.isSelected();
+
+		// Current View 模式不支持隐藏 Consensus
+		// PPTX 也是 Current View 模式
+		boolean supported = !isCurrentView && (type != DataType.PPTX);
+
+		chkDrawConsensus.setEnabled(supported);
+		if (!supported) {
+			chkDrawConsensus.setToolTipText("Not supported in Current View mode");
+		} else {
+			chkDrawConsensus.setToolTipText(null);
+		}
 	}
 
 	private void updateFormatComboBox(DataTypeCategory category) {
@@ -426,6 +469,7 @@ public class AlignmentExportDialog extends JDialog {
 		try {
 			// 执行导出
 			AlignmentExporter exporter = new AlignmentExporter(main);
+			exporter.setDrawConsensus(chkDrawConsensus.isSelected());
 			exporter.export(outputFile, type, layoutMode);
 
 			// 记住导出目录（内存 + 持久化）
@@ -436,7 +480,7 @@ public class AlignmentExportDialog extends JDialog {
 			SwingDialog.showSuccessMSGDialog("Success", "Exported to: " + outputFile.getName());
 
 			if (closeAfterExport) {
-				dispose();
+				setVisible(false);
 			}
 
 		} catch (Exception ex) {
@@ -461,9 +505,15 @@ public class AlignmentExportDialog extends JDialog {
 
 	/**
 	 * 显示对话框并返回导出的文件
+	 * 使用 AlignmentViewMain 中缓存的实例，保持状态
 	 */
 	public static Optional<File> showDialog(AlignmentViewMain main) {
-		AlignmentExportDialog dialog = new AlignmentExportDialog(main);
+		AlignmentExportDialog dialog = main.getExportDialog();
+		if (dialog == null) {
+			dialog = new AlignmentExportDialog(main);
+			main.setExportDialog(dialog);
+		}
+		dialog.setLocationRelativeTo(dialog.getOwner());
 		dialog.setVisible(true);
 		return dialog.getExportedFile();
 	}

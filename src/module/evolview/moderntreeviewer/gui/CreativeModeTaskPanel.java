@@ -27,6 +27,8 @@ public class CreativeModeTaskPanel extends JPanel {
 
     private MTreeViewMainFace main;
 
+    private ToggleButton toggleButtonCreative;
+
     /**
      * Create the panel.
      */
@@ -48,7 +50,7 @@ public class CreativeModeTaskPanel extends JPanel {
         gbc_lblNewLabel_1.gridy = 0;
         add(lblNewLabel_1, gbc_lblNewLabel_1);
 
-        ToggleButton toggleButtonCreative = getToggleButtonCreative(defaultFont);
+        toggleButtonCreative = getToggleButtonCreative(defaultFont);
         GridBagConstraints gbc_toggleButtonCreative = new GridBagConstraints();
         gbc_toggleButtonCreative.fill = GridBagConstraints.BOTH;
         gbc_toggleButtonCreative.insets = new Insets(0, 0, 5, 0);
@@ -248,6 +250,10 @@ public class CreativeModeTaskPanel extends JPanel {
 
     public void setTreeLayoutProperties(TreeLayoutProperties treeLayoutProperties) {
         this.treeLayoutProperties = treeLayoutProperties;
+        // 数据导入后重置按钮状态为未选中
+        if (toggleButtonCreative != null) {
+            toggleButtonCreative.setSelected(false);
+        }
     }
 
     public void setMain(MTreeViewMainFace mainFace) {

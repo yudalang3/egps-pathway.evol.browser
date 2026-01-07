@@ -4,6 +4,8 @@ import module.multiseq.alignment.view.AlignmentViewMain;
 import module.multiseq.alignment.view.gui.VisulizationDataProperty;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
 import msaoperator.alignment.sequence.SequenceI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,8 +26,10 @@ import java.util.List;
  */
 public class PrintAlignmentPanel extends JPanel {
 
+	private static final Logger log = LoggerFactory.getLogger(PrintAlignmentPanel.class);
+
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -318906856510282041L;
 
@@ -46,6 +50,8 @@ public class PrintAlignmentPanel extends JPanel {
 
 	private int charHeight;
 
+	private boolean drawConsensus = true;
+
 	public PrintAlignmentPanel(AlignmentViewMain alignmentViewMain, VisulizationDataProperty alignmentViewPort) {
 		this.alignmentViewMain = alignmentViewMain;
 		this.alignmentViewPort = alignmentViewPort;
@@ -54,6 +60,8 @@ public class PrintAlignmentPanel extends JPanel {
 
 	@Override
 	public void paint(Graphics g) {
+
+		log.info("PrintAlignmentPanel.paint() called, drawConsensus={}", drawConsensus);
 
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -75,7 +83,9 @@ public class PrintAlignmentPanel extends JPanel {
 
 		drawSequence(g2, charWidth, charHeight);
 
-		drawSequenceAnnotation(g2, charWidth, charHeight);
+		if (drawConsensus) {
+			drawSequenceAnnotation(g2, charWidth, charHeight);
+		}
 	}
 
 	private void drawSequenceName(Graphics2D g2, int charWidth, int charHeight) {
@@ -218,6 +228,10 @@ public class PrintAlignmentPanel extends JPanel {
 	public void setCharHeight(int charHeight) {
 
 		this.charHeight = charHeight;
+	}
+
+	public void setDrawConsensus(boolean drawConsensus) {
+		this.drawConsensus = drawConsensus;
 	}
 
 }
