@@ -2,29 +2,54 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title></title>
+<title>基因到距离矩阵</title>
 </head>
 <body>
+<blockquote>
 
-	<blockquote>
-		<h3>解决的问题</h3>
-		<p>从Ensembl RESTful服务或eGPS cloud获取多序列比对(MSA)数据，然后计算进化距离并构建基因的系统发生树。本模块集成了网络数据获取、序列比对和进化分析功能。</p>
+<h1><font color="#2c3e50">基因到距离矩阵</font></h1>
+<p>从网络服务获取MSA并计算进化距离。</p>
 
-		<h3>快速开始</h3>
-		<p>所有操作都比较直观、易懂。请按照图形用户界面的指示进行操作。</p>
+<hr>
 
-		<ol>
-			<li>在参数输入区域查看所需输入数据。</li>
-			<li>用户输入所需参数。</li>
-			<li>点击执行按钮查看结果。</li>
-		</ol>
+<!-- ==================== 第1节 ==================== -->
+<h2><font color="#16a085">1. 快速开始</font></h2>
+<ol>
+	<li>在参数输入区域查看所需输入数据</li>
+	<li>输入所需参数</li>
+	<li>点击 <b>执行</b> 查看结果</li>
+</ol>
 
-		<h3>主要组件</h3>
-		<ol>
-			<li><b>PLWeb2GeneticDist：</b>介导式面板，引导用户从web服务获取数据并计算进化距离。</li>
-			<li><b>PLWeb2AlignmentView：</b>展示从网络获取的比对结果。</li>
-			<li><b>DistMatrixViewMainForGene2Dist：</b>可视化进化距离矩阵。</li>
-		</ol>
-	</blockquote>
+<hr>
+
+<!-- ==================== 第2节 ==================== -->
+<h2><font color="#2c3e50">2. 功能概述</font></h2>
+<p>从Ensembl RESTful服务或eGPS cloud获取多序列比对(MSA)数据，然后计算进化距离并构建基因的系统发生树。本模块集成了网络数据获取、序列比对和进化分析功能。</p>
+
+<hr>
+
+<!-- ==================== 第3节 ==================== -->
+<h2><font color="#8e44ad">3. 主要组件</font></h2>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#8e44ad">
+	<th><font color="white">组件</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><b>PLWeb2GeneticDist</b></td>
+	<td>介导式面板，引导用户从web服务获取数据并计算进化距离</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>PLWeb2AlignmentView</b></td>
+	<td>展示从网络获取的比对结果</td>
+</tr>
+<tr>
+	<td><b>DistMatrixViewMainForGene2Dist</b></td>
+	<td>可视化进化距离矩阵</td>
+</tr>
+</table>
+
+</blockquote>
 </body>
 </html>

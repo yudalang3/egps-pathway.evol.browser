@@ -2,38 +2,84 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title></title>
+<title>进化树构建器：从MSA</title>
 </head>
 <body>
+<blockquote>
 
-	<blockquote>
-		<h1>进化树构建器：从MSA</h1>
+<h1><font color="#2c3e50">进化树构建器：从MSA</font></h1>
+<p>从多序列比对（MSA）文件重建系统发育树。</p>
 
-		<h3>解决的问题</h3>
-		<p>本模块用于从多序列比对（MSA）文件重建系统发育树。程序会先根据比对结果计算进化距离（由所选距离模型和缺口/缺失处理方式决定），再用距离法构树（Neighbor‑Joining、Swift Neighbor‑Joining 或 UPGMA）。最终树自动 mid‑point 定根，并在 Modern Tree Viewer 中打开。</p>
+<hr>
 
-		<h3>输入格式</h3>
-		<p>输入一个已经对齐的 MSA 文件，并在 <b>Data type</b> 下拉框中选择对应格式（下拉框中列出全部支持格式）。比对序列应等长，可包含缺口符号 <code>-</code>。</p>
+<!-- ==================== 第1节 ==================== -->
+<h2><font color="#16a085">1. 快速开始</font></h2>
+<ol>
+	<li>加载对齐好的 MSA 文件并选择正确的格式</li>
+	<li>按需调整距离与构树参数</li>
+	<li>点击 <b>执行</b> 查看结果</li>
+</ol>
 
-		<h3>参数说明</h3>
-		<ol>
-			<li><b>Input：</b>MSA 文件路径。</li>
-			<li><b>Data type：</b>选择文件格式（如 aligned FASTA、CLUSTAL、PHYLIP 等，以界面列表为准）。</li>
-			<li><b>Substitution model：</b>选择进化距离模型（Model/Method）。</li>
-			<li><b>Gaps/Missing Data Treatment：</b>缺口/缺失处理：Complete deletion、Pairwise deletion 或 Partial deletion（可设置 Site Coverage Cutoff）。</li>
-			<li><b>Variance Estimation Method：</b>若需要 bootstrap 支持度，选择 <i>Bootstrap method</i> 并设置 <i>No. of Bootstrap replications</i>，支持度会标注在内部节点上。</li>
-			<li><b>Distance based method：</b>构树算法：Neighbor‑Joining（默认）、Swift Neighbor‑Joining 或 UPGMA。</li>
-			<li><b>Genetic code / IUPAC treatment：</b>控制距离计算时对模糊碱基的处理方式。</li>
-		</ol>
+<hr>
 
-		<h3>快速开始</h3>
-		<p>所有操作都比较直观、易懂。请按照图形用户界面的指示进行操作。</p>
+<!-- ==================== 第2节 ==================== -->
+<h2><font color="#2c3e50">2. 功能概述</font></h2>
+<p>本模块用于从多序列比对（MSA）文件重建系统发育树。程序会先根据比对结果计算进化距离（由所选距离模型和缺口/缺失处理方式决定），再用距离法构树（Neighbor-Joining、Swift Neighbor-Joining 或 UPGMA）。最终树自动 mid-point 定根，并在 Modern Tree Viewer 中打开。</p>
 
-		<ol>
-			<li>加载对齐好的 MSA 文件并选择正确的格式。</li>
-			<li>按需调整距离与构树参数。</li>
-			<li>点击执行按钮查看结果。</li>
-		</ol>
-	</blockquote>
+<hr>
+
+<!-- ==================== 第3节 ==================== -->
+<h2><font color="#8e44ad">3. 输入格式</font></h2>
+<p>输入一个已经对齐的 MSA 文件，并在 <b>Data type</b> 下拉框中选择对应格式。比对序列应等长，可包含缺口符号 <code>-</code>。</p>
+
+<h3>3.1 支持的格式</h3>
+<ul>
+	<li>Aligned FASTA</li>
+	<li>CLUSTAL</li>
+	<li>PHYLIP</li>
+	<li>以及下拉框中列出的其他格式</li>
+</ul>
+
+<hr>
+
+<!-- ==================== 第4节 ==================== -->
+<h2><font color="#e67e22">4. 参数说明</font></h2>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e67e22">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><b>Input</b></td>
+	<td>MSA 文件路径</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Data type</b></td>
+	<td>选择文件格式（如 aligned FASTA、CLUSTAL、PHYLIP 等）</td>
+</tr>
+<tr>
+	<td><b>Substitution model</b></td>
+	<td>选择进化距离模型（Model/Method）</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Gaps/Missing Data Treatment</b></td>
+	<td>缺口/缺失处理：Complete deletion、Pairwise deletion 或 Partial deletion（可设置 Site Coverage Cutoff）</td>
+</tr>
+<tr>
+	<td><b>Variance Estimation Method</b></td>
+	<td>若需要 bootstrap 支持度，选择 Bootstrap method 并设置 No. of Bootstrap replications</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Distance based method</b></td>
+	<td>构树算法：Neighbor-Joining（默认）、Swift Neighbor-Joining 或 UPGMA</td>
+</tr>
+<tr>
+	<td><b>Genetic code / IUPAC treatment</b></td>
+	<td>控制距离计算时对模糊碱基的处理方式</td>
+</tr>
+</table>
+
+</blockquote>
 </body>
 </html>

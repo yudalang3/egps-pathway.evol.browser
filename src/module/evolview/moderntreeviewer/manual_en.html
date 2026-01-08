@@ -7,12 +7,13 @@
 <body>
 <blockquote>
 
-<h2><font color="#2c3e50">Modern Tree Viewer</font></h2>
+<h1><font color="#2c3e50">Modern Tree Viewer</font></h1>
 <p>Interactive visualization and operation of phylogenetic trees. Supports multiple tree layouts, color configurations, and graphical annotations with high-quality vector graphics export.</p>
 
 <hr>
 
-<h3><font color="#16a085">Quick Start</font></h3>
+<!-- ==================== Section 1 ==================== -->
+<h2><font color="#16a085">1. Quick Start</font></h2>
 <ol>
 	<li>Click <b>Example</b> to see sample input data</li>
 	<li>Click <b>Execute</b> to visualize the tree</li>
@@ -21,9 +22,10 @@
 
 <hr>
 
-<h2><font color="#2c3e50">Input Parameters</font></h2>
+<!-- ==================== Section 2 ==================== -->
+<h2><font color="#2c3e50">2. Input Parameters</font></h2>
 
-<h3><font color="#8e44ad">Tree Input Methods</font></h3>
+<h3><font color="#8e44ad">2.1 Tree Input Methods</font></h3>
 <p>Three ways to input a phylogenetic tree (in priority order):</p>
 
 <table border="1" cellpadding="8" cellspacing="0" width="100%">
@@ -45,14 +47,14 @@
 </tr>
 </table>
 
-<h4>Newick String Example:</h4>
+<h4>2.1.1 Newick String Example</h4>
 <p>Great Apes phylogeny with divergence times in Million Years Ago (MYA):</p>
 <pre>
 (((Human:6.5,(Chimpanzee:1.5,Bonobo:1.5):5):2,Gorilla:8.5):4,Orangutan:12.5);
 </pre>
 <p><i>Human-Chimp: ~6.5 MYA, Chimp-Bonobo: ~1.5 MYA, Human/Chimp-Gorilla: ~8.5 MYA, Homininae-Orangutan: ~12.5 MYA</i></p>
 
-<h4>Table-like Format Example:</h4>
+<h4>2.1.2 Table-like Format Example</h4>
 <pre>
 root:0    A:0.1,B:0.2
 A:0.1     C:0.3,D:0.4
@@ -63,7 +65,75 @@ D:0.4
 
 <hr>
 
-<h3><font color="#8e44ad">Newick Format (nwk.format)</font></h3>
+<h3><font color="#e74c3c">2.2 Newick Format Standard</font></h3>
+<p><b>Important:</b> Newick format has strict rules for node names (per Wikipedia/PHYLIP standard).</p>
+
+<h4>2.2.1 Grammar Rules</h4>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e74c3c">
+	<th colspan="2"><font color="white">Grammar Rules</font></th>
+</tr>
+<tr>
+	<td width="30%"><code>Tree -> Subtree ";"</code></td>
+	<td>Tree <b>must</b> end with semicolon</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>Name -> empty | string</code></td>
+	<td>Node names can be empty or a string</td>
+</tr>
+<tr>
+	<td><code>Length -> empty | ":" number</code></td>
+	<td>Branch length follows colon</td>
+</tr>
+</table>
+
+<h4>2.2.2 Forbidden Characters in Unquoted Names</h4>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr bgcolor="#f39c12">
+	<th><font color="white">Character</font></th>
+	<th><font color="white">Name</font></th>
+	<th><font color="white">Reason</font></th>
+</tr>
+<tr><td><code>( )</code></td><td>Parentheses</td><td>Define tree structure</td></tr>
+<tr bgcolor="#ecf0f1"><td><code>[ ]</code></td><td>Square brackets</td><td>Comments (NHX format)</td></tr>
+<tr><td><code>'</code></td><td>Single quote</td><td>String quoting delimiter</td></tr>
+<tr bgcolor="#ecf0f1"><td><code>:</code></td><td>Colon</td><td>Separates name from length</td></tr>
+<tr><td><code>;</code></td><td>Semicolon</td><td>Tree terminator</td></tr>
+<tr bgcolor="#ecf0f1"><td><code>,</code></td><td>Comma</td><td>Separates sibling nodes</td></tr>
+<tr><td><code>space, tab, newline</code></td><td>Whitespace</td><td>Not allowed in unquoted names</td></tr>
+</table>
+
+<h4>2.2.3 Special Rules</h4>
+<ul>
+	<li><b>Underscore conversion:</b> Underscore (<code>_</code>) in unquoted strings is converted to blank space</li>
+	<li><b>Quoting:</b> Use single quotes for names with special characters: <code>'name with spaces'</code></li>
+	<li><b>Escaping quotes:</b> Single quote inside quoted string = two consecutive quotes: <code>'it''s'</code> -> <code>it's</code></li>
+</ul>
+
+<h4>2.2.4 Node Name Escaping Examples</h4>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr bgcolor="#27ae60">
+	<th><font color="white">Original Name</font></th>
+	<th><font color="white">Newick Format</font></th>
+</tr>
+<tr><td>abc</td><td><code>abc</code></td></tr>
+<tr bgcolor="#ecf0f1"><td>a b (with space)</td><td><code>a_b</code> or <code>'a b'</code></td></tr>
+<tr><td>a_b (preserve underscore)</td><td><code>'a_b'</code></td></tr>
+<tr bgcolor="#ecf0f1"><td>a (b</td><td><code>'a (b'</code></td></tr>
+<tr><td>a()[],;:</td><td><code>'a()[],;:'</code></td></tr>
+<tr bgcolor="#ecf0f1"><td>a'b (with quote)</td><td><code>'a''b'</code></td></tr>
+<tr><td>bacteria;archaea</td><td><code>'bacteria;archaea'</code></td></tr>
+</table>
+
+<h4>2.2.5 References</h4>
+<ul>
+	<li><a href="https://en.wikipedia.org/wiki/Newick_format">Wikipedia: Newick format</a></li>
+	<li><a href="https://phylipweb.github.io/phylip/newicktree.html">PHYLIP Newick Standard</a></li>
+</ul>
+
+<hr>
+
+<h3><font color="#8e44ad">2.3 Newick Format Types (nwk.format)</font></h3>
 <p><b>Default:</b> 0 | <b>Range:</b> 0-9</p>
 <p><font color="#e74c3c"><b>Note:</b></font> Bootstrap values should be in <b>0-100</b> range (e.g., 90), not decimal (0.9).</p>
 
@@ -122,10 +192,11 @@ D:0.4
 
 <hr>
 
-<h2><font color="#2c3e50">Advanced Parameters</font></h2>
+<!-- ==================== Section 3 ==================== -->
+<h2><font color="#2c3e50">3. Advanced Parameters</font></h2>
 <p>These parameters allow fine-grained control over tree visualization.</p>
 
-<h3><font color="#27ae60">%1 Tree Information</font></h3>
+<h3><font color="#27ae60">3.1 Tree Information</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#27ae60">
 	<th><font color="white">Parameter</font></th>
@@ -169,7 +240,7 @@ D:0.4
 </tr>
 </table>
 
-<h3><font color="#3498db">%2 Leaf Node</font></h3>
+<h3><font color="#3498db">3.2 Leaf Node</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#3498db">
 	<th><font color="white">Parameter</font></th>
@@ -188,7 +259,7 @@ D:0.4
 </tr>
 </table>
 
-<h3><font color="#e67e22">%3 Inner Node</font></h3>
+<h3><font color="#e67e22">3.3 Inner Node</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#e67e22">
 	<th><font color="white">Parameter</font></th>
@@ -212,7 +283,7 @@ D:0.4
 </tr>
 </table>
 
-<h3><font color="#9b59b6">%4 Root Settings</font></h3>
+<h3><font color="#9b59b6">3.4 Root Settings</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#9b59b6">
 	<th><font color="white">Parameter</font></th>
@@ -231,7 +302,7 @@ D:0.4
 </tr>
 </table>
 
-<h3><font color="#1abc9c">%5 Mouse Wheel</font></h3>
+<h3><font color="#1abc9c">3.5 Mouse Wheel</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#1abc9c">
 	<th><font color="white">Parameter</font></th>
@@ -250,7 +321,7 @@ D:0.4
 </tr>
 </table>
 
-<h3><font color="#e74c3c">%6 Font Settings</font></h3>
+<h3><font color="#e74c3c">3.6 Font Settings</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#e74c3c">
 	<th><font color="white">Parameter</font></th>
@@ -275,7 +346,7 @@ D:0.4
 </table>
 <p><b>Font format:</b> <code>FontName,Style,Size</code> (e.g., <code>Arial,0,12</code> where style: 0=plain, 1=bold, 2=italic)</p>
 
-<h3><font color="#34495e">%7 Layout Settings</font></h3>
+<h3><font color="#34495e">3.7 Layout Settings</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#34495e">
 	<th><font color="white">Parameter</font></th>
@@ -289,7 +360,7 @@ D:0.4
 </tr>
 </table>
 
-<h3><font color="#7f8c8d">%8 Advanced</font></h3>
+<h3><font color="#7f8c8d">3.8 Advanced</font></h3>
 <table border="1" cellpadding="6" cellspacing="0" width="100%">
 <tr bgcolor="#7f8c8d">
 	<th><font color="white">Parameter</font></th>
@@ -303,7 +374,7 @@ D:0.4
 </tr>
 </table>
 
-<h4>Node Visual Config File Format (TSV):</h4>
+<h4>3.8.1 Node Visual Config File Format (TSV)</h4>
 <pre>
 name	fillColor	circleRadius	lineThickness	displayName
 leaf1	#FF00FF	2	2	T
@@ -312,7 +383,10 @@ leaf2	#00FF00	3	1	F
 
 <hr>
 
-<h3><font color="#16a085">Boolean Values</font></h3>
+<!-- ==================== Section 4 ==================== -->
+<h2><font color="#16a085">4. Appendix</font></h2>
+
+<h3>4.1 Boolean Values</h3>
 <p>Use <b>T</b> (True) or <b>F</b> (False) for all boolean parameters.</p>
 
 </blockquote>

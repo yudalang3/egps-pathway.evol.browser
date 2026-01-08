@@ -2,41 +2,76 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>low volume text editor</title>
+<title>Tree Builder: from Distance Matrix</title>
 </head>
 <body>
+<blockquote>
 
-	<blockquote>
-		<h1>Tree builder: from Dist</h1>
-		<h3>Task to resolve</h3>
-		<p>This module reconstructs a phylogenetic tree from a precomputed evolutionary distance matrix. It supports three distance‑based reconstruction methods (Neighbor‑Joining, Swift Neighbor‑Joining, UPGMA) and roots the final tree automatically using the mid‑point method. The result opens in the Modern Tree Viewer.</p>
+<h1><font color="#2c3e50">Tree Builder: from Distance Matrix</font></h1>
+<p>Reconstruct phylogenetic trees from precomputed evolutionary distance matrices using distance-based methods.</p>
 
-		<h3>Input format</h3>
-		<p>The distance file must follow the eGPS lower‑triangular matrix format (diagonal included). Blank lines and lines starting with <code>#</code> are ignored.</p>
-		<pre>
+<hr>
+
+<!-- ==================== Section 1 ==================== -->
+<h2><font color="#16a085">1. Quick Start</font></h2>
+<ol>
+	<li>View the required input data in the parameter input area</li>
+	<li>Enter the required parameters</li>
+	<li>Click <b>Execute</b> to see the results</li>
+</ol>
+
+<hr>
+
+<!-- ==================== Section 2 ==================== -->
+<h2><font color="#2c3e50">2. Overview</font></h2>
+<p>This module reconstructs a phylogenetic tree from a precomputed evolutionary distance matrix. It supports three distance-based reconstruction methods (Neighbor-Joining, Swift Neighbor-Joining, UPGMA) and roots the final tree automatically using the mid-point method. The result opens in the Modern Tree Viewer.</p>
+
+<hr>
+
+<!-- ==================== Section 3 ==================== -->
+<h2><font color="#8e44ad">3. Input Format</font></h2>
+<p>The distance file must follow the eGPS lower-triangular matrix format (diagonal included). Blank lines and lines starting with <code>#</code> are ignored.</p>
+
+<h3>3.1 Format Example</h3>
+<pre>
 # number of taxa
 3
 sp1 0
 sp2 0.12 0
 sp3 0.20 0.18 0
-		</pre>
-		<p>The first value is the number of taxa (N). Each subsequent line contains a taxon name followed by N values for that row (only the lower triangle is read). Values must be numeric, contain no NaN, and not all be zero.</p>
+</pre>
 
-		<h3>Parameters</h3>
-		<ol>
-			<li><b>Input:</b> path to the evolutionary distance file.</li>
-			<li><b>Distance based method:</b> Neighbor‑Joining (default), Swift Neighbor‑Joining, or UPGMA.</li>
-			<li><b>Genetic code / IUPAC treatment:</b> shared global settings for distance calculation in other modules; they do not modify an already computed distance matrix here.</li>
-		</ol>
+<h3>3.2 Format Rules</h3>
+<ul>
+	<li>The first value is the number of taxa (N)</li>
+	<li>Each subsequent line contains a taxon name followed by N values for that row (only the lower triangle is read)</li>
+	<li>Values must be numeric, contain no NaN, and not all be zero</li>
+</ul>
 
-		<h3>Quick start</h3>
-		<p>Any actions are straightforward. Please follow the GUI instructions.</p>
+<hr>
 
-		<ol>
-			<li>View the required input data in the parameter input area.</li>
-			<li>The user enters the required parameters.</li>
-			<li>Click the Execute button to see the results.</li>
-		</ol>
-	</blockquote>
+<!-- ==================== Section 4 ==================== -->
+<h2><font color="#e67e22">4. Parameters</font></h2>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e67e22">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><b>Input</b></td>
+	<td>Path to the evolutionary distance file</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Distance based method</b></td>
+	<td>Neighbor-Joining (default), Swift Neighbor-Joining, or UPGMA</td>
+</tr>
+<tr>
+	<td><b>Genetic code / IUPAC treatment</b></td>
+	<td>Shared global settings for distance calculation in other modules; they do not modify an already computed distance matrix here</td>
+</tr>
+</table>
+
+</blockquote>
 </body>
 </html>

@@ -4,198 +4,391 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>现代化树形视图手册</title>
 </head>
-
 <body>
-	<blockquote>
-		<h1>现代化树形视图</h1>
-		<h3>解决的问题</h3>
-		<p>绘制进化树的可视化图片，优势在于高度交互式。支持多种树形布局、颜色配置和图形标注，可导出高质量矢量图形。</p>
+<blockquote>
 
-		<h3>快速开始：</h3>
-		<p>所有操作都比较直观、易懂。请按照图形用户界面的指示进行操作。</p>
+<h1><font color="#2c3e50">现代化树形视图</font></h1>
+<p>交互式可视化和操作进化树。支持多种树形布局、颜色配置和图形标注，可导出高质量矢量图形。</p>
 
-		<ol>
-			<li>点击示例按钮查看输入数据。</li>
-			<li>点击执行按钮查看结果。</li>
-		</ol>
+<hr>
 
-		<h3>图形界面中控制面板新特性：</h3>
-		<ol>
-			<li>现代化的图形界面，不是之前灰蒙蒙的状态。可记忆一些用户操作</li>
-			<li>控制面板按钮，分为四类：
-				<ol type="i">
-					<li>第一类：手势按钮</li>
-					<li>第二类：正常按钮</li>
-					<li>第三类：会计数的手势按钮</li>
-					<li>第四类：Swing Toggle按钮</li>
-				</ol>
-			</li>
-			<li>力推这个有苹果桌面风格的Toggle按钮，在Tree layout和Creative mode面板中有所应用</li>
-			<li>VOICM解决参数爆炸：
-				<ol type="a">
-					<li>可以记录的Bookmark书签，支持自由操作，导入导出</li>
-					<li>在输入面板处可以设置所有参数</li>
-				</ol>
-			</li>
-		</ol>
+<!-- ==================== 第1节 ==================== -->
+<h2><font color="#16a085">1. 快速开始</font></h2>
+<ol>
+	<li>点击 <b>示例</b> 查看示例输入数据</li>
+	<li>点击 <b>执行</b> 查看可视化结果</li>
+	<li>使用左侧控制面板调整显示选项</li>
+</ol>
 
-		<hr>
-		<h2>输入参数参考</h2>
+<hr>
 
-		<h3>进化树输入方式</h3>
-		<p>有三种方式可以输入进化树（按优先级排序）：</p>
+<!-- ==================== 第2节 ==================== -->
+<h2><font color="#2c3e50">2. 输入参数</font></h2>
 
-		<h4>1. input.nwk.string</h4>
-		<p><b>说明：</b> 直接输入Newick格式字符串。优先级最高。</p>
-		<p><b>示例：</b></p>
-		<pre>
-# 带分支长度的简单树
-(A:0.1,B:0.2,(C:0.3,D:0.4):0.5);
+<h3><font color="#8e44ad">2.1 进化树输入方式</font></h3>
+<p>有三种方式可以输入进化树（按优先级排序）：</p>
 
-# 带内部节点名称的树
-(A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F;
+<table border="1" cellpadding="8" cellspacing="0" width="100%">
+<tr bgcolor="#3498db">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>input.nwk.string</code></td>
+	<td>直接输入Newick格式字符串（优先级最高）</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>input.nwk.path</code></td>
+	<td>Newick文件路径（.nwk, .newick, .tree）</td>
+</tr>
+<tr>
+	<td><code>input.tableLike.path</code></td>
+	<td>表格式树文件路径（ITP格式）</td>
+</tr>
+</table>
 
-# 带支持度值的树
-(A:0.1,B:0.2,(C:0.3,D:0.4)100:0.5);
-		</pre>
+<h4>2.1.1 Newick字符串示例</h4>
+<p>类人猿进化树，分支长度为百万年前（MYA）：</p>
+<pre>
+(((Human:6.5,(Chimpanzee:1.5,Bonobo:1.5):5):2,Gorilla:8.5):4,Orangutan:12.5);
+</pre>
+<p><i>人类-黑猩猩: ~6.5 MYA, 黑猩猩-倭黑猩猩: ~1.5 MYA, 人类/黑猩猩-大猩猩: ~8.5 MYA, 人族-红毛猩猩: ~12.5 MYA</i></p>
 
-		<h4>2. input.nwk.path</h4>
-		<p><b>说明：</b> Newick格式树文件的路径（.nwk, .newick, .tree）。</p>
-		<p><b>文件内容示例：</b></p>
-		<pre>
-# SpeciesTree.nwk
-((Human:0.1,Chimp:0.08)Hominini:0.2,(Gorilla:0.15,Orangutan:0.25)GreatApes:0.3)Hominidae;
-		</pre>
-
-		<h4>3. input.tableLike.path</h4>
-		<p><b>说明：</b> 表格式树文件的路径（直观树格式，ITP）。</p>
-		<p>这种格式对人类更易读，也更方便手动编辑。</p>
-		<p><b>格式规则：</b></p>
-		<ul>
-			<li>制表符（<code>\t</code>）分隔父节点和子节点</li>
-			<li>逗号（<code>,</code>）分隔同级节点</li>
-			<li>冒号（<code>:</code>）分隔节点名称和分支长度（与Newick格式相同）</li>
-			<li>第一行定义根节点</li>
-			<li>叶节点的子节点为空（或只有节点名称）</li>
-		</ul>
-		<p><b>示例1 - 不带分支长度的简单树：</b></p>
-		<pre>
-root	A,B
-A	C,D
-B	E,F
-C
-D
-E
-F
-		</pre>
-		<p>对应的Newick格式: ((C,D)A,(E,F)B)root;</p>
-
-		<p><b>示例2 - 带分支长度的树：</b></p>
-		<pre>
-root:0	A:0.1,B:0.2
-A:0.1	C:0.3,D:0.4
-B:0.2	E:0.15,F:0.25
+<h4>2.1.2 表格式格式示例</h4>
+<pre>
+root:0    A:0.1,B:0.2
+A:0.1     C:0.3,D:0.4
+B:0.2
 C:0.3
 D:0.4
-E:0.15
-F:0.25
-		</pre>
+</pre>
 
-		<p><b>示例3 - 物种树：</b></p>
-		<pre>
-Hominidae:0	Hominini:0.2,GreatApes:0.3
-Hominini:0.2	Human:0.1,Chimp:0.08
-GreatApes:0.3	Gorilla:0.15,Orangutan:0.25
-Human:0.1
-Chimp:0.08
-Gorilla:0.15
-Orangutan:0.25
-		</pre>
+<hr>
 
-		<hr>
-		<h3>Newick格式选项</h3>
+<h3><font color="#e74c3c">2.2 Newick格式标准</font></h3>
+<p><b>重要：</b> Newick格式对节点名称有严格规定（依据 Wikipedia/PHYLIP 标准）。</p>
 
-		<h4>nwk.format</h4>
-		<p><b>说明：</b> 指定解析时使用的Newick格式类型。参考：ETE3/ETE4格式定义。</p>
-		<p><b>默认值：</b> 0（灵活格式，带支持度值）</p>
-		<p><b>支持度值说明：</b> Bootstrap/支持度值应使用 <b>0-100</b> 范围（如：90, 95, 100），
-		   而非小数格式（0.0-1.0）。例如，使用 <code>90</code> 表示90%的bootstrap支持度，而不是 <code>0.9</code>。</p>
-		<table border="1" cellpadding="5">
-			<tr bgcolor="#e0e0e0">
-				<th>格式</th>
-				<th>叶节点</th>
-				<th>内部节点</th>
-				<th>示例</th>
-			</tr>
-			<tr>
-				<td><b>0</b></td>
-				<td>名称:距离</td>
-				<td>支持度:距离</td>
-				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">90</font>:0.4);</td>
-			</tr>
-			<tr>
-				<td><b>1</b></td>
-				<td>名称:距离</td>
-				<td>名称:距离</td>
-				<td>(A:0.1,(B:0.2,C:0.3)<font color="blue">NodeX</font>:0.4);</td>
-			</tr>
-			<tr>
-				<td><b>2</b></td>
-				<td>名称:距离（严格）</td>
-				<td>支持度:距离（严格）</td>
-				<td>与0相同，但所有字段必填</td>
-			</tr>
-			<tr>
-				<td><b>3</b></td>
-				<td>名称:距离（严格）</td>
-				<td>名称:距离（严格）</td>
-				<td>与1相同，但所有字段必填</td>
-			</tr>
-			<tr>
-				<td><b>4</b></td>
-				<td>名称:距离</td>
-				<td>-（无）</td>
-				<td>(A:0.1,(B:0.2,C:0.3));</td>
-			</tr>
-			<tr>
-				<td><b>5</b></td>
-				<td>名称:距离</td>
-				<td>仅:距离</td>
-				<td>(A:0.1,(B:0.2,C:0.3):0.4);</td>
-			</tr>
-			<tr>
-				<td><b>6</b></td>
-				<td>名称:距离</td>
-				<td>仅名称</td>
-				<td>(A:0.1,(B:0.2,C:0.3)NodeX);</td>
-			</tr>
-			<tr>
-				<td><b>7</b></td>
-				<td>仅名称</td>
-				<td>仅名称</td>
-				<td>(A,(B,C)NodeX);</td>
-			</tr>
-			<tr>
-				<td><b>8</b></td>
-				<td>仅名称</td>
-				<td>-（无）</td>
-				<td>(A,(B,C));</td>
-			</tr>
-			<tr>
-				<td><b>9</b></td>
-				<td>-（无）</td>
-				<td>-（无）</td>
-				<td>(,(,));</td>
-			</tr>
-		</table>
+<h4>2.2.1 语法规则</h4>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e74c3c">
+	<th colspan="2"><font color="white">语法规则</font></th>
+</tr>
+<tr>
+	<td width="30%"><code>Tree → Subtree ";"</code></td>
+	<td>树 <b>必须</b> 以分号结尾</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>Name → empty | string</code></td>
+	<td>节点名称可以为空或字符串</td>
+</tr>
+<tr>
+	<td><code>Length → empty | ":" number</code></td>
+	<td>分支长度跟在冒号后面</td>
+</tr>
+</table>
 
-		<h4>nwk.remove.whitespace</h4>
-		<p><b>说明：</b> 是否在解析前移除Newick文件中的空白字符（空格、制表符、回车符和换行符）。</p>
-		<p><b>默认值：</b> F（False，不移除）</p>
-		<p><b>可选值：</b> T（True，移除）或 F（False，不移除）</p>
-		<p><b>使用场景：</b> 当您的Newick文件包含换行或格式化空白需要忽略时，设置为T。</p>
+<h4>2.2.2 未引用名称中禁止使用的字符</h4>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr bgcolor="#f39c12">
+	<th><font color="white">字符</font></th>
+	<th><font color="white">名称</font></th>
+	<th><font color="white">原因</font></th>
+</tr>
+<tr><td><code>( )</code></td><td>圆括号</td><td>定义树结构</td></tr>
+<tr bgcolor="#ecf0f1"><td><code>[ ]</code></td><td>方括号</td><td>注释（NHX格式）</td></tr>
+<tr><td><code>'</code></td><td>单引号</td><td>字符串引用分隔符</td></tr>
+<tr bgcolor="#ecf0f1"><td><code>:</code></td><td>冒号</td><td>分隔名称和长度</td></tr>
+<tr><td><code>;</code></td><td>分号</td><td>树终止符</td></tr>
+<tr bgcolor="#ecf0f1"><td><code>,</code></td><td>逗号</td><td>分隔兄弟节点</td></tr>
+<tr><td><code>空格、制表符、换行符</code></td><td>空白字符</td><td>未引用名称中不允许</td></tr>
+</table>
 
-	</blockquote>
+<h4>2.2.3 特殊规则</h4>
+<ul>
+	<li><b>下划线转换：</b> 未引用字符串中的下划线（<code>_</code>）会被转换为空格</li>
+	<li><b>引用规则：</b> 使用单引号包含特殊字符的名称：<code>'含空格的名称'</code></li>
+	<li><b>引号转义：</b> 引用字符串中的单引号用两个连续单引号表示：<code>'it''s'</code> → <code>it's</code></li>
+</ul>
+
+<h4>2.2.4 节点名称转义示例</h4>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr bgcolor="#27ae60">
+	<th><font color="white">原始名称</font></th>
+	<th><font color="white">Newick格式</font></th>
+</tr>
+<tr><td>abc</td><td><code>abc</code></td></tr>
+<tr bgcolor="#ecf0f1"><td>a b（含空格）</td><td><code>a_b</code> 或 <code>'a b'</code></td></tr>
+<tr><td>a_b（保留下划线）</td><td><code>'a_b'</code></td></tr>
+<tr bgcolor="#ecf0f1"><td>a (b</td><td><code>'a (b'</code></td></tr>
+<tr><td>a()[],;:</td><td><code>'a()[],;:'</code></td></tr>
+<tr bgcolor="#ecf0f1"><td>a'b（含引号）</td><td><code>'a''b'</code></td></tr>
+<tr><td>bacteria;archaea</td><td><code>'bacteria;archaea'</code></td></tr>
+</table>
+
+<h4>2.2.5 参考资料</h4>
+<ul>
+	<li><a href="https://en.wikipedia.org/wiki/Newick_format">Wikipedia: Newick format</a></li>
+	<li><a href="https://phylipweb.github.io/phylip/newicktree.html">PHYLIP Newick 标准</a></li>
+</ul>
+
+<hr>
+
+<h3><font color="#8e44ad">2.3 Newick格式类型 (nwk.format)</font></h3>
+<p><b>默认值：</b> 0 | <b>范围：</b> 0-9</p>
+<p><font color="#e74c3c"><b>注意：</b></font> Bootstrap支持度值应使用 <b>0-100</b> 范围（如：90），而非小数格式（0.9）。</p>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#9b59b6">
+	<th><font color="white">格式</font></th>
+	<th><font color="white">叶节点</font></th>
+	<th><font color="white">内部节点</font></th>
+	<th><font color="white">示例</font></th>
+</tr>
+<tr>
+	<td align="center"><b>0</b></td>
+	<td>名称:距离</td>
+	<td>支持度:距离</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3)<font color="blue">90</font>:0.4);</code></td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>1</b></td>
+	<td>名称:距离</td>
+	<td>名称:距离</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3)<font color="blue">NodeX</font>:0.4);</code></td>
+</tr>
+<tr>
+	<td align="center"><b>2-3</b></td>
+	<td colspan="3">格式0-1的严格版本（所有字段必填）</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>4</b></td>
+	<td>名称:距离</td>
+	<td>无</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3));</code></td>
+</tr>
+<tr>
+	<td align="center"><b>5</b></td>
+	<td>名称:距离</td>
+	<td>仅:距离</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3):0.4);</code></td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>6</b></td>
+	<td>名称:距离</td>
+	<td>仅名称</td>
+	<td><code>(A:0.1,(B:0.2,C:0.3)NodeX);</code></td>
+</tr>
+<tr>
+	<td align="center"><b>7</b></td>
+	<td>仅名称</td>
+	<td>仅名称</td>
+	<td><code>(A,(B,C)NodeX);</code></td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td align="center"><b>8-9</b></td>
+	<td colspan="3">仅名称(8) 或 无(9)</td>
+</tr>
+</table>
+
+<hr>
+
+<!-- ==================== 第3节 ==================== -->
+<h2><font color="#2c3e50">3. 高级参数</font></h2>
+<p>这些参数允许精细控制树的可视化效果。</p>
+
+<h3><font color="#27ae60">3.1 树信息</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#27ae60">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>tree.show.scale.bar</code></td>
+	<td>F</td>
+	<td>显示绘图比例尺</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>tree.show.axis.bar</code></td>
+	<td>T</td>
+	<td>显示x轴</td>
+</tr>
+<tr>
+	<td><code>tree.show.title</code></td>
+	<td>T</td>
+	<td>在底部显示标题说明</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>tree.show.width.height</code></td>
+	<td>F</td>
+	<td>显示宽度/高度（适用于圆形布局）</td>
+</tr>
+<tr>
+	<td><code>tree.title.string</code></td>
+	<td><i>The phylogenetic tree with {0}...</i></td>
+	<td>标题文本（{0} = 叶节点数量）</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>tree.branch.length.unit</code></td>
+	<td><i>空</i></td>
+	<td>分支长度单位（如：mya）</td>
+</tr>
+<tr>
+	<td><code>tree.need.reverse.axis</code></td>
+	<td>F</td>
+	<td>反转坐标轴方向</td>
+</tr>
+</table>
+
+<h3><font color="#3498db">3.2 叶节点</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#3498db">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>leaf.show.label</code></td>
+	<td>T</td>
+	<td>显示叶节点标签</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>leaf.label.right.align</code></td>
+	<td>T</td>
+	<td>叶节点标签右对齐</td>
+</tr>
+</table>
+
+<h3><font color="#e67e22">3.3 内部节点</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e67e22">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>inner.show.label</code></td>
+	<td>F</td>
+	<td>显示内部节点标签</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>inner.show.bootstrap</code></td>
+	<td>F</td>
+	<td>显示bootstrap值</td>
+</tr>
+<tr>
+	<td><code>inner.show.branch.length</code></td>
+	<td>F</td>
+	<td>显示分支长度</td>
+</tr>
+</table>
+
+<h3><font color="#9b59b6">3.4 根节点设置</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#9b59b6">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>root.show</code></td>
+	<td>F</td>
+	<td>显示根节点</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>root.tip.length</code></td>
+	<td>10</td>
+	<td>根尖线长度（像素）</td>
+</tr>
+</table>
+
+<h3><font color="#1abc9c">3.5 鼠标滚轮</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#1abc9c">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>wheel.height.scale.on</code></td>
+	<td>T</td>
+	<td>启用鼠标滚轮缩放高度</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>wheel.width.scale.on</code></td>
+	<td>T</td>
+	<td>启用鼠标滚轮缩放宽度</td>
+</tr>
+</table>
+
+<h3><font color="#e74c3c">3.6 字体设置</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e74c3c">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>font.global</code></td>
+	<td><i>系统字体, 14pt</i></td>
+	<td>标签全局字体</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><code>font.title</code></td>
+	<td><i>标题字体</i></td>
+	<td>标题说明字体</td>
+</tr>
+<tr>
+	<td><code>font.axis</code></td>
+	<td><i>全局字体</i></td>
+	<td>坐标轴和比例尺字体</td>
+</tr>
+</table>
+<p><b>字体格式：</b> <code>字体名,样式,大小</code>（如：<code>Arial,0,12</code>，其中样式：0=普通, 1=粗体, 2=斜体）</p>
+
+<h3><font color="#34495e">3.7 布局设置</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#34495e">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>layout.blank.space</code></td>
+	<td>20,40,80,40</td>
+	<td>空白区域：上,左,下,右（像素）</td>
+</tr>
+</table>
+
+<h3><font color="#7f8c8d">3.8 高级</font></h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#7f8c8d">
+	<th><font color="white">参数</font></th>
+	<th><font color="white">默认值</font></th>
+	<th><font color="white">说明</font></th>
+</tr>
+<tr>
+	<td><code>advanced.node.visual.config</code></td>
+	<td><i>空</i></td>
+	<td>节点视觉配置文件（TSV格式）</td>
+</tr>
+</table>
+
+<h4>3.8.1 节点视觉配置文件格式（TSV）</h4>
+<pre>
+name	fillColor	circleRadius	lineThickness	displayName
+leaf1	#FF00FF	2	2	T
+leaf2	#00FF00	3	1	F
+</pre>
+
+<hr>
+
+<!-- ==================== 第4节 ==================== -->
+<h2><font color="#16a085">4. 附录</font></h2>
+
+<h3>4.1 布尔值</h3>
+<p>所有布尔参数使用 <b>T</b>（True）或 <b>F</b>（False）。</p>
+
+</blockquote>
 </body>
-
 </html>

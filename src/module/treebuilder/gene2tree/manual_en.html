@@ -2,42 +2,93 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>low volume text editor</title>
+<title>Gene to Gene Tree</title>
 </head>
 <body>
+<blockquote>
 
-	<blockquote>
-		<h1>Gene to Gene Tree</h1>
-		<h3>Task to resolve</h3>
-		<p>This pipeline retrieves orthologous sequences from Ensembl/UCSC/eGPS cloud using a gene symbol or genomic region, builds a multiple sequence alignment, computes evolutionary distances, and reconstructs a phylogenetic tree. Tree reconstruction supports Neighbor‑Joining, Swift Neighbor‑Joining, and UPGMA with optional bootstrap. The final tree opens in the Modern Tree Viewer.</p>
+<h1><font color="#2c3e50">Gene to Gene Tree</font></h1>
+<p>Retrieve orthologous sequences and reconstruct phylogenetic trees from gene symbols or genomic regions.</p>
 
-		<h3>Inputs</h3>
-		<ol>
-			<li><b>Web query gene symbol:</b> a gene name such as <code>TP53</code>.</li>
-			<li><b>Web query genomic region:</b> an interval such as <code>17:7661779-7687550</code> (chr:start-end). Either gene symbol or region is required.</li>
-		</ol>
+<hr>
 
-		<h3>Parameters</h3>
-		<ol>
-			<li><b>Species set for MSA:</b> choose the ortholog set (e.g., Mammals, Primates, Fish, Sauropsids, Amniotes, or eGPS Cloud 1000 species) and a reference genome from the dropdown.</li>
-			<li><b>Considered gene regions:</b> align Exon, Intron, CDS, 4‑fold sites, or Whole gene.</li>
-			<li><b>Web connection:</b> set REST timeout (3–60 seconds).</li>
-			<li><b>Substitution model / Gaps &amp; missing data:</b> choose Model/Method and deletion strategy for distance calculation.</li>
-			<li><b>Variance estimation:</b> enable <i>Bootstrap method</i> and set <i>No. of Bootstrap replications</i> for support values.</li>
-			<li><b>Distance based method:</b> Neighbor‑Joining (default), Swift Neighbor‑Joining, or UPGMA.</li>
-			<li><b>Genetic code / IUPAC treatment:</b> controls ambiguous base handling.</li>
-		</ol>
-		<p>Note: this module requires network access to the selected web resources.</p>
+<!-- ==================== Section 1 ==================== -->
+<h2><font color="#16a085">1. Quick Start</font></h2>
+<ol>
+	<li>Enter a gene symbol or genomic region</li>
+	<li>Select a species set and reference genome</li>
+	<li>Adjust distance/tree/bootstrapping settings if needed</li>
+	<li>Click <b>Execute</b> to see the results</li>
+</ol>
 
-		<h3>Quick start</h3>
-		<p>Any actions are straightforward. Please follow the GUI instructions.</p>
+<hr>
 
-		<ol>
-			<li>Enter a gene symbol or genomic region.</li>
-			<li>Select a species set and reference genome.</li>
-			<li>Adjust distance/tree/bootstrapping settings if needed.</li>
-			<li>Click the Execute button to see the results.</li>
-		</ol>
-	</blockquote>
+<!-- ==================== Section 2 ==================== -->
+<h2><font color="#2c3e50">2. Overview</font></h2>
+<p>This pipeline retrieves orthologous sequences from Ensembl/UCSC/eGPS cloud using a gene symbol or genomic region, builds a multiple sequence alignment, computes evolutionary distances, and reconstructs a phylogenetic tree. Tree reconstruction supports Neighbor-Joining, Swift Neighbor-Joining, and UPGMA with optional bootstrap. The final tree opens in the Modern Tree Viewer.</p>
+
+<p><font color="#e74c3c"><b>Note:</b></font> This module requires network access to the selected web resources.</p>
+
+<hr>
+
+<!-- ==================== Section 3 ==================== -->
+<h2><font color="#8e44ad">3. Inputs</font></h2>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#8e44ad">
+	<th><font color="white">Input</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><b>Web query gene symbol</b></td>
+	<td>A gene name such as <code>TP53</code></td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Web query genomic region</b></td>
+	<td>An interval such as <code>17:7661779-7687550</code> (chr:start-end). Either gene symbol or region is required.</td>
+</tr>
+</table>
+
+<hr>
+
+<!-- ==================== Section 4 ==================== -->
+<h2><font color="#e67e22">4. Parameters</font></h2>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e67e22">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><b>Species set for MSA</b></td>
+	<td>Choose the ortholog set (e.g., Mammals, Primates, Fish, Sauropsids, Amniotes, or eGPS Cloud 1000 species) and a reference genome from the dropdown</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Considered gene regions</b></td>
+	<td>Align Exon, Intron, CDS, 4-fold sites, or Whole gene</td>
+</tr>
+<tr>
+	<td><b>Web connection</b></td>
+	<td>Set REST timeout (3-60 seconds)</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Substitution model / Gaps &amp; missing data</b></td>
+	<td>Choose Model/Method and deletion strategy for distance calculation</td>
+</tr>
+<tr>
+	<td><b>Variance estimation</b></td>
+	<td>Enable Bootstrap method and set No. of Bootstrap replications for support values</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Distance based method</b></td>
+	<td>Neighbor-Joining (default), Swift Neighbor-Joining, or UPGMA</td>
+</tr>
+<tr>
+	<td><b>Genetic code / IUPAC treatment</b></td>
+	<td>Controls ambiguous base handling</td>
+</tr>
+</table>
+
+</blockquote>
 </body>
 </html>

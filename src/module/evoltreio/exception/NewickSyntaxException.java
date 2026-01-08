@@ -14,7 +14,8 @@ public class NewickSyntaxException extends NewickParseException {
 		MISSING_COMMA("Missing comma between siblings"),
 		EXTRA_COMMA("Extra comma found"),
 		EMPTY_NODE_NAME("Empty node name where name is required"),
-		INVALID_SUPPORT_VALUE("Invalid support value format");
+		INVALID_SUPPORT_VALUE("Invalid support value format"),
+		INVALID_NODE_NAME("Invalid character in node name");
 
 		private final String description;
 

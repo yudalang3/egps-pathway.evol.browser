@@ -2,29 +2,66 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title></title>
+<title>Ambiguous Base Expander</title>
 </head>
 <body>
+<blockquote>
 
-	<blockquote>
-		<h3>Task to resolve</h3>
-		<p>A convenient graphic tool to make the nucleotide sequence to concrete sequence. This module provides two core functions:</p>
-		<ol>
-			<li><b>Ambiguous Nucleotide Base Enumeration (AmbiguousNuclBase):</b> Expands sequences containing IUPAC ambiguous base codes into all possible concrete sequences. Supported ambiguous bases include: R(A/G), Y(C/T), M(A/C), K(G/T), S(C/G), W(A/T), H(A/C/T), B(C/G/T), V(A/C/G), D(A/G/T), N(A/C/G/T).</li>
-			<li><b>DNA Complement Generation (DNAComplement):</b> Computes the reverse complement of a given DNA sequence.</li>
-		</ol>
-		
-		<h3>Quick start</h3>
-		<p>All user actions are straightforward. Please follow the GUI instructions.</p>
+<h1><font color="#2c3e50">Ambiguous Base Expander</font></h1>
+<p>Expand sequences with IUPAC ambiguous bases into all possible concrete sequences.</p>
 
-		<ol>
-			<li>View the required input data in the parameter input area. When the module provides more than one example, you can click the example button to see the next.</li>
-			<li>The user enters the required parameters.</li>
-			<li>Click the Execute button to see the results.</li>
-		</ol>
+<hr>
 
-		<h3>Technical notes</h3>
-		<p>This module uses a recursive algorithm to expand ambiguous bases, generating all possible base combinations for each position's ambiguous code. Output is in FASTA format with automatically numbered sequence names.</p>
-	</blockquote>
+<!-- ==================== Section 1 ==================== -->
+<h2><font color="#16a085">1. Quick Start</font></h2>
+<ol>
+	<li>View the required input data in the parameter input area (click Example to see more examples)</li>
+	<li>Enter the required parameters</li>
+	<li>Click <b>Execute</b> to see the results</li>
+</ol>
+
+<hr>
+
+<!-- ==================== Section 2 ==================== -->
+<h2><font color="#2c3e50">2. Overview</font></h2>
+<p>A convenient graphic tool to make the nucleotide sequence to concrete sequence. This module provides two core functions:</p>
+
+<h3>2.1 Ambiguous Nucleotide Base Enumeration</h3>
+<p>Expands sequences containing IUPAC ambiguous base codes into all possible concrete sequences.</p>
+
+<h3>2.2 DNA Complement Generation</h3>
+<p>Computes the reverse complement of a given DNA sequence.</p>
+
+<hr>
+
+<!-- ==================== Section 3 ==================== -->
+<h2><font color="#8e44ad">3. IUPAC Ambiguous Bases</font></h2>
+
+<table border="1" cellpadding="6" cellspacing="0">
+<tr bgcolor="#8e44ad">
+	<th><font color="white">Code</font></th>
+	<th><font color="white">Bases</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr><td><b>R</b></td><td>A/G</td><td>Purine</td></tr>
+<tr bgcolor="#ecf0f1"><td><b>Y</b></td><td>C/T</td><td>Pyrimidine</td></tr>
+<tr><td><b>M</b></td><td>A/C</td><td>Amino</td></tr>
+<tr bgcolor="#ecf0f1"><td><b>K</b></td><td>G/T</td><td>Keto</td></tr>
+<tr><td><b>S</b></td><td>C/G</td><td>Strong</td></tr>
+<tr bgcolor="#ecf0f1"><td><b>W</b></td><td>A/T</td><td>Weak</td></tr>
+<tr><td><b>H</b></td><td>A/C/T</td><td>Not G</td></tr>
+<tr bgcolor="#ecf0f1"><td><b>B</b></td><td>C/G/T</td><td>Not A</td></tr>
+<tr><td><b>V</b></td><td>A/C/G</td><td>Not T</td></tr>
+<tr bgcolor="#ecf0f1"><td><b>D</b></td><td>A/G/T</td><td>Not C</td></tr>
+<tr><td><b>N</b></td><td>A/C/G/T</td><td>Any base</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== Section 4 ==================== -->
+<h2><font color="#e67e22">4. Technical Notes</font></h2>
+<p>This module uses a recursive algorithm to expand ambiguous bases, generating all possible base combinations for each position's ambiguous code. Output is in FASTA format with automatically numbered sequence names.</p>
+
+</blockquote>
 </body>
 </html>

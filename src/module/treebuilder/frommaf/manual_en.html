@@ -2,43 +2,88 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title></title>
+<title>Tree Builder: from MAF</title>
 </head>
 <body>
+<blockquote>
 
-	<blockquote>
-		<h1>Tree builder: from MAF</h1>
-		<h3>Task to resolve</h3>
-		<p>This module reconstructs a phylogenetic tree from UCSC MAF (Multiple Alignment Format) blocks. It parses all MAF blocks, computes pairwise evolutionary distances across blocks, then builds a distance‑based tree (Neighbor‑Joining, Swift Neighbor‑Joining, or UPGMA). The final tree is rooted by the mid‑point method and opened in the Modern Tree Viewer.</p>
+<h1><font color="#2c3e50">Tree Builder: from MAF</font></h1>
+<p>Reconstruct phylogenetic trees from UCSC MAF (Multiple Alignment Format) blocks.</p>
 
-		<h3>Input format</h3>
-		<p><b>Input</b> should be a directory containing MAF files. The module loads all files ending with <code>.maf</code> (or <code>.maf.gz</code> if <b>Is Gzip</b> is checked). Each file must be standard MAF with blocks separated by a blank line and sequence lines starting with <code>s</code>:</p>
-		<pre>
+<hr>
+
+<!-- ==================== Section 1 ==================== -->
+<h2><font color="#16a085">1. Quick Start</font></h2>
+<ol>
+	<li>Select the folder that contains your MAF (or MAF.GZ) files</li>
+	<li>Adjust distance and tree reconstruction parameters if needed</li>
+	<li>Click <b>Execute</b> to see the results</li>
+</ol>
+
+<hr>
+
+<!-- ==================== Section 2 ==================== -->
+<h2><font color="#2c3e50">2. Overview</font></h2>
+<p>This module reconstructs a phylogenetic tree from UCSC MAF (Multiple Alignment Format) blocks. It parses all MAF blocks, computes pairwise evolutionary distances across blocks, then builds a distance-based tree (Neighbor-Joining, Swift Neighbor-Joining, or UPGMA). The final tree is rooted by the mid-point method and opened in the Modern Tree Viewer.</p>
+
+<hr>
+
+<!-- ==================== Section 3 ==================== -->
+<h2><font color="#8e44ad">3. Input Format</font></h2>
+<p><b>Input</b> should be a directory containing MAF files. The module loads all files ending with <code>.maf</code> (or <code>.maf.gz</code> if <b>Is Gzip</b> is checked).</p>
+
+<h3>3.1 MAF Format Example</h3>
+<pre>
 a score=...
 s hg38.chr1  ... ACTG--A...
 s panTro4.chr1 ... ACTG--A...
 s ponAbe2.chr1 ... ACTG--A...
-		</pre>
-		<p>Only blocks that contain all required assemblies are used. In the current GUI, the assemblies are fixed to <code>panTro4</code>, <code>hg38</code>, and <code>ponAbe2</code>.</p>
+</pre>
 
-		<h3>Parameters</h3>
-		<ol>
-			<li><b>Input:</b> folder path containing MAF files.</li>
-			<li><b>Is Gzip:</b> check if files end with <code>.maf.gz</code>.</li>
-			<li><b>Substitution model / Gaps &amp; missing data:</b> choose the evolutionary distance model (Model/Method) and deletion strategy (Complete/Pairwise/Partial deletion).</li>
-			<li><b>Variance estimation:</b> set <i>Variance Estimation Method</i> to <i>Bootstrap method</i> and choose <i>No. of Bootstrap replications</i> to obtain bootstrap supports.</li>
-			<li><b>Distance based method:</b> Neighbor‑Joining (default), Swift Neighbor‑Joining, or UPGMA.</li>
-			<li><b>Genetic code / IUPAC treatment:</b> controls how ambiguous bases are treated when distances are computed from blocks.</li>
-		</ol>
+<h3>3.2 Format Rules</h3>
+<ul>
+	<li>Each file must be standard MAF with blocks separated by a blank line</li>
+	<li>Sequence lines start with <code>s</code></li>
+	<li>Only blocks that contain all required assemblies are used</li>
+	<li>In the current GUI, the assemblies are fixed to <code>panTro4</code>, <code>hg38</code>, and <code>ponAbe2</code></li>
+</ul>
 
-		<h3>Quick start</h3>
-		<p>Any actions are straightforward. Please follow the GUI instructions.</p>
+<hr>
 
-		<ol>
-			<li>Select the folder that contains your MAF (or MAF.GZ) files.</li>
-			<li>Adjust distance and tree reconstruction parameters if needed.</li>
-			<li>Click the Execute button to see the results.</li>
-		</ol>
-	</blockquote>
+<!-- ==================== Section 4 ==================== -->
+<h2><font color="#e67e22">4. Parameters</font></h2>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#e67e22">
+	<th><font color="white">Parameter</font></th>
+	<th><font color="white">Description</font></th>
+</tr>
+<tr>
+	<td><b>Input</b></td>
+	<td>Folder path containing MAF files</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Is Gzip</b></td>
+	<td>Check if files end with <code>.maf.gz</code></td>
+</tr>
+<tr>
+	<td><b>Substitution model / Gaps &amp; missing data</b></td>
+	<td>Choose the evolutionary distance model (Model/Method) and deletion strategy (Complete/Pairwise/Partial deletion)</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Variance estimation</b></td>
+	<td>Set to Bootstrap method and choose No. of Bootstrap replications to obtain bootstrap supports</td>
+</tr>
+<tr>
+	<td><b>Distance based method</b></td>
+	<td>Neighbor-Joining (default), Swift Neighbor-Joining, or UPGMA</td>
+</tr>
+<tr bgcolor="#ecf0f1">
+	<td><b>Genetic code / IUPAC treatment</b></td>
+	<td>Controls how ambiguous bases are treated when distances are computed from blocks</td>
+</tr>
+</table>
+
+</blockquote>
 </body>
 </html>

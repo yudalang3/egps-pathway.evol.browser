@@ -26,43 +26,7 @@ public class TreeCoder {
     public TreeCoder() {
     }
     
-//    public static String code(Node root) {
-//        if (root.getChildCount() == 0) {
-//            String name = root.getLeafName();
-//            if (name == null) name = "NoName";
-//            String str = name + ":";
-//            if (decimal == null) {
-//                str += root.getBranch().getLength();
-//            }
-//            else {
-//                str += decimal.format(root.getBranch().getLength());
-//            }
-//            return str;
-//        }
-//        
-//        String code = "(";
-//        for (int i = 0; i < root.getChildCount(); i ++) {
-//            code += code(root.getChildAt(i));
-//            if (i < root.getChildCount() - 1) code += ",";
-//        }
-//        // Edited by GF
-//        if(root.getBs()!=0) {
-//        	code = code +")";
-//        	code = code+ root.getBs();
-//        	code = code +":";
-//        } else {
-//        	code = code +"):";
-//        }
-//        
-//        if (decimal == null) {
-//            code += root.getBranch().getLength();
-//        }
-//        else {
-//            code += decimal.format(root.getBranch().getLength());
-//        }
-//        return code+";";
-//    }
-    
+
     public static String code(NodeEGPSv1 root) {
     	return codeForInternalUse(root) + ";";
     }
