@@ -91,7 +91,8 @@ public class ViewAreaSequenceNameJPanel extends JPanel implements MouseListener,
 			return; // fix for racecondition
 		}
 
-		g2.drawString(seqName, 10, yOffset);
+		int charHeight = alignmentViewPort.getCharHeight();
+		g2.drawString(seqName, 10, AbstractSequenceColor.calcTextY(g2, yOffset, charHeight));
 
 	}
 

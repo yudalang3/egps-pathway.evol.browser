@@ -1,6 +1,7 @@
 package module.multiseq.alignment.view.io;
 
 import module.multiseq.alignment.view.AlignmentViewMain;
+import module.multiseq.alignment.view.gui.AbstractSequenceColor;
 import module.multiseq.alignment.view.gui.VisulizationDataProperty;
 import msaoperator.alignment.sequence.SequenceComponentRatio;
 import msaoperator.alignment.sequence.SequenceI;
@@ -89,8 +90,9 @@ public class PrintAlignmentPanel extends JPanel {
 	}
 
 	private void drawSequenceName(Graphics2D g2, int charWidth, int charHeight) {
-
-		int yOffset = SCALEHEIGHT;
+		// 使用与 drawSequence 相同的 yOffset 计算方式，确保对齐
+		int yOf = getFontMetrics(alignmentViewPort.getFont()).getDescent();
+		int yOffset = yOf * 2 + charHeight - yOf;
 
 		List<SequenceI> dataSequences = sequenceData.getPaintSequences();
 
@@ -107,7 +109,7 @@ public class PrintAlignmentPanel extends JPanel {
 				continue;// fix for racecondition
 			}
 
-			g2.drawString(seqName, LEFTDISTANCE, yOffset);
+			g2.drawString(seqName, LEFTDISTANCE, AbstractSequenceColor.calcTextY(g2, yOffset, charHeight));
 		}
 
 	}
@@ -120,7 +122,9 @@ public class PrintAlignmentPanel extends JPanel {
 		List<SequenceI> dataSequences = sequenceData.getPaintSequences();
 
 		for (SequenceI sequence : dataSequences) {
-
+			if (sequence == null) {
+				continue;
+			}
 			yOffset += charHeight;
 
 			int xOffsetStart = alignmentViewPort.getBaseNameLenght() + LEFTDISTANCE + 7;

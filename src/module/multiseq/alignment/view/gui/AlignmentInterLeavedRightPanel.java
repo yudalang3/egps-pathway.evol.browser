@@ -211,7 +211,7 @@ public class AlignmentInterLeavedRightPanel extends JPanel {
 				continue;// fix for racecondition
 			}
 
-			g2.drawString(seqName, LEFTDISTANCE, yOffset);
+			g2.drawString(seqName, LEFTDISTANCE, AbstractSequenceColor.calcTextY(g2, yOffset, charHeight));
 		}
 
 	}
@@ -222,7 +222,9 @@ public class AlignmentInterLeavedRightPanel extends JPanel {
 		List<SequenceI> dataSequences = sequenceData.getPaintSequences();
 
 		for (SequenceI sequence : dataSequences) {
-
+			if (sequence == null) {
+				continue;
+			}
 			yOffset += charHeight;
 
 			int xOffsetStart = alignmentViewPort.getBaseNameLenght() + LEFTDISTANCE + 7;

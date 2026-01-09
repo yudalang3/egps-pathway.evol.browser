@@ -2,18 +2,24 @@ package module.evolview.pathwaybrowser.gui.analysis.panel;
 
 import egps2.UnifiedAccessPoint;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tsv.io.ExcelReaderTemplate;
-import tsv.io.KitTable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,34 +154,86 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
     /**
      * Read Excel file (xlsx or xls) and convert to ParsedTsv format.
      * Only reads the first sheet of the workbook.
+     * Correctly handles empty cells by using index-based iteration.
      *
      * @param file the Excel file to read
      * @return ParsedTsv containing headers and rows
      * @throws IOException if file cannot be read or parsed
      */
     private ParsedTsv readExcelFile(File file) throws IOException {
-        ExcelReaderTemplate reader = new ExcelReaderTemplate();
-        KitTable table = reader.readExcelFirstSheet(file.getAbsolutePath());
-        if (table == null) {
-            throw new IOException("Failed to parse Excel file: " + file.getName());
-        }
+        String fileName = file.getName().toLowerCase();
+        boolean isXlsx = fileName.endsWith(".xlsx");
 
-        List<String> headers = table.getHeaderNames();
-        if (headers == null || headers.isEmpty()) {
-            return new ParsedTsv(List.of(), List.of());
-        }
+        try (FileInputStream fis = new FileInputStream(file);
+             Workbook workbook = isXlsx ? new XSSFWorkbook(fis) : new HSSFWorkbook(fis)) {
 
-        int headerSize = headers.size();
-        List<List<String>> rows = new ArrayList<>();
-        for (List<String> srcRow : table.getContents()) {
-            String[] normalized = new String[headerSize];
-            for (int i = 0; i < headerSize; i++) {
-                String val = (srcRow != null && i < srcRow.size()) ? srcRow.get(i) : null;
-                normalized[i] = (val != null) ? val : "";
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet == null || sheet.getPhysicalNumberOfRows() == 0) {
+                return new ParsedTsv(List.of(), List.of());
             }
-            rows.add(List.of(normalized));
+
+            // Determine the maximum number of columns from the header row
+            Row headerRow = sheet.getRow(sheet.getFirstRowNum());
+            if (headerRow == null) {
+                return new ParsedTsv(List.of(), List.of());
+            }
+
+            int columnCount = headerRow.getLastCellNum();
+            if (columnCount <= 0) {
+                return new ParsedTsv(List.of(), List.of());
+            }
+
+            // Read headers
+            List<String> headers = new ArrayList<>(columnCount);
+            for (int col = 0; col < columnCount; col++) {
+                Cell cell = headerRow.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                headers.add(convertCellToString(cell));
+            }
+
+            // Read data rows
+            List<List<String>> rows = new ArrayList<>();
+            int firstDataRow = sheet.getFirstRowNum() + 1;
+            int lastRow = sheet.getLastRowNum();
+
+            for (int rowIdx = firstDataRow; rowIdx <= lastRow; rowIdx++) {
+                Row row = sheet.getRow(rowIdx);
+                if (row == null) {
+                    continue;
+                }
+
+                String[] rowData = new String[columnCount];
+                for (int col = 0; col < columnCount; col++) {
+                    Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                    rowData[col] = convertCellToString(cell);
+                }
+                rows.add(List.of(rowData));
+            }
+
+            return new ParsedTsv(headers, rows);
         }
-        return new ParsedTsv(List.copyOf(headers), rows);
+    }
+
+    /**
+     * Convert a cell value to string, handling null and various cell types.
+     */
+    private String convertCellToString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue();
+            case NUMERIC -> {
+                double value = cell.getNumericCellValue();
+                if (value == Math.floor(value) && !Double.isInfinite(value)) {
+                    yield new DecimalFormat("0").format(value);
+                }
+                yield String.valueOf(value);
+            }
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> cell.getCellFormula();
+            case BLANK -> "";
+            default -> "";
+        };
     }
 
     /**

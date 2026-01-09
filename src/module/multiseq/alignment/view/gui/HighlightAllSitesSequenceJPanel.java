@@ -41,7 +41,7 @@ public class HighlightAllSitesSequenceJPanel extends AbstractSequenceColor {
 
 			// 恢复前景色绘制文字
 			g2.setColor(originalColor);
-			g2.drawString(base, start + XPos + xOffset, (int)(yOffset-charHeight*0.15));
+			g2.drawString(base, start + XPos + xOffset, calcTextY(g2, yOffset, charHeight));
 		}
 	}
 	

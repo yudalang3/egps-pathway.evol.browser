@@ -36,7 +36,7 @@ public class NoColorSequenceJPanel extends AbstractSequenceColor {
 //				base = "-";
 //			}
 			//y参数要yOffset要做一点调整值，这样字可以落在方框比较中心的位置，否则g显示的时候会被遮挡
-			g2.drawString(base, XPos, (int)(yOffset-charHeight*0.15));
+			g2.drawString(base, XPos, calcTextY(g2, yOffset, charHeight));
 		}
 
 	}

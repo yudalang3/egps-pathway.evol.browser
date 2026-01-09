@@ -48,7 +48,7 @@ public class HighlightPolymorphlicSitesSequenceJPanel extends AbstractSequenceCo
 				g2.setColor(originalColor);
 			}
 
-			g2.drawString(base, start + XPos, (int)(yOffset-charHeight*0.15));
+			g2.drawString(base, start + XPos, calcTextY(g2, yOffset, charHeight));
 		}
 
 	}
