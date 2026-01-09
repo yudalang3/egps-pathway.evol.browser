@@ -481,7 +481,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 	protected JSplitPane getMainSplitPane() {
 		if (mainSplitPane == null) {
 			mainSplitPane = new JSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
-			mainSplitPane.setDividerSize(7);
+			mainSplitPane.setDividerSize(10);
 			mainSplitPane.setOneTouchExpandable(true);
 		}
 		return mainSplitPane;

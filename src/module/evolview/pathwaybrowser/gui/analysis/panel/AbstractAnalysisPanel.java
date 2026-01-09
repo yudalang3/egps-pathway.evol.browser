@@ -25,4 +25,14 @@ public abstract class AbstractAnalysisPanel extends JPanel {
     protected final void analysisPanelClicked(String nodeName) {
 //        controller.fireAnalysisPanelClicked(nodeName);
     }
+
+    /**
+     * Notify the tree to select a node by name.
+     * Called when user clicks a row in the analysis table.
+     *
+     * @param nodeName the name of the node to select in the tree
+     */
+    protected final void notifyTreeToSelectNode(String nodeName) {
+        controller.selectNodeInTree(nodeName);
+    }
 }

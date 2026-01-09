@@ -28,6 +28,7 @@ public class AlignmentExporter {
 	private final AlignmentViewMain main;
 	private final VisulizationDataProperty viewPort;
 	private boolean drawConsensus = true;
+	private int basePairPerLine = -1; // -1 表示自动计算
 
 	public AlignmentExporter(AlignmentViewMain main) {
 		this.main = main;
@@ -36,6 +37,10 @@ public class AlignmentExporter {
 
 	public void setDrawConsensus(boolean drawConsensus) {
 		this.drawConsensus = drawConsensus;
+	}
+
+	public void setBasePairPerLine(int basePairPerLine) {
+		this.basePairPerLine = basePairPerLine;
 	}
 
 	/**
@@ -314,6 +319,7 @@ public class AlignmentExporter {
 		pdfUtil.setSequenceDataPanel(component);
 		pdfUtil.setAlignmentViewMain(main);
 		pdfUtil.setDrawConsensus(drawConsensus);
+		pdfUtil.setBasePairPerLine(basePairPerLine);
 
 		String pathWithoutExt = outputFile.getAbsolutePath();
 		if (pathWithoutExt.toLowerCase().endsWith(".pdf")) {

@@ -58,6 +58,8 @@ public class AlignmentExportDialog extends JDialog {
 
 	// 导出选项
 	private JCheckBox chkDrawConsensus;
+	private JSpinner spnBasePairPerLine;
+	private JLabel lblBasePairPerLine;
 
 	// 操作按钮
 	private JButton btnExport;
@@ -203,6 +205,14 @@ public class AlignmentExportDialog extends JDialog {
 		// Export options
 		chkDrawConsensus = new JCheckBox("Draw Consensus area", true);
 
+		// Base pair per line spinner
+		int currentViewLength = viewPort.getLength();
+		int totalLength = viewPort.getTotalSequenceLength();
+		int defaultValue = currentViewLength > 0 ? currentViewLength : 80;
+		SpinnerNumberModel spinnerModel = new SpinnerNumberModel(defaultValue, 10, totalLength, 10);
+		spnBasePairPerLine = new JSpinner(spinnerModel);
+		lblBasePairPerLine = new JLabel("Base pairs per line for PDF document:");
+
 		// Action buttons
 		btnExport = new JButton("Export & Close");
 		btnOnlyExport = new JButton("Only Export");
@@ -241,9 +251,11 @@ public class AlignmentExportDialog extends JDialog {
 		mainPanel.add(dataTypePanel, "wrap");
 
 		// Options panel
-		JPanel optionsPanel = new JPanel(new MigLayout("insets 5, gap 5", "[grow,fill]", "[]"));
+		JPanel optionsPanel = new JPanel(new MigLayout("insets 5, gap 5", "[][grow,fill]", "[]5[]"));
 		optionsPanel.setBorder(new TitledBorder("Options"));
-		optionsPanel.add(chkDrawConsensus);
+		optionsPanel.add(chkDrawConsensus, "span 2, wrap");
+		optionsPanel.add(lblBasePairPerLine);
+		optionsPanel.add(spnBasePairPerLine, "width 80!");
 		mainPanel.add(optionsPanel, "wrap");
 
 		// File panel
@@ -266,10 +278,10 @@ public class AlignmentExportDialog extends JDialog {
 	}
 
 	private void setupListeners() {
-		// Layout change listeners - 更新 checkbox 状态
-		btnContinuous.addActionListener(e -> updateDrawConsensusState());
-		btnInterleaved.addActionListener(e -> updateDrawConsensusState());
-		btnCurrentView.addActionListener(e -> updateDrawConsensusState());
+		// Layout change listeners - 更新 checkbox 和 spinner 状态
+		btnContinuous.addActionListener(e -> updateOptionsState());
+		btnInterleaved.addActionListener(e -> updateOptionsState());
+		btnCurrentView.addActionListener(e -> updateOptionsState());
 
 		// Data type category change listeners
 		btnSequence.addActionListener(e -> updateFormatComboBox(DataTypeCategory.SEQUENCE));
@@ -279,7 +291,7 @@ public class AlignmentExportDialog extends JDialog {
 		// Format change listener
 		cmbFormat.addActionListener(e -> {
 			updateLayoutButtonsState();
-			updateDrawConsensusState();
+			updateOptionsState();
 		});
 
 		// Browse button
@@ -312,8 +324,16 @@ public class AlignmentExportDialog extends JDialog {
 		// 默认文件名
 		txtFileName.setText("alignment");
 
-		// 更新 checkbox 状态
+		// 更新 options 状态
+		updateOptionsState();
+	}
+
+	/**
+	 * 更新 Options 区域的启用状态
+	 */
+	private void updateOptionsState() {
 		updateDrawConsensusState();
+		updateBasePairSpinnerState();
 	}
 
 	/**
@@ -333,6 +353,24 @@ public class AlignmentExportDialog extends JDialog {
 			chkDrawConsensus.setToolTipText("Not supported in Current View mode");
 		} else {
 			chkDrawConsensus.setToolTipText(null);
+		}
+	}
+
+	/**
+	 * 更新 Base pair per line spinner 的启用状态
+	 * 仅 PDF + Interleaved 模式支持
+	 */
+	private void updateBasePairSpinnerState() {
+		DataType type = (DataType) cmbFormat.getSelectedItem();
+		boolean isPdfInterleaved = (type == DataType.PDF) && btnInterleaved.isSelected();
+
+		lblBasePairPerLine.setEnabled(isPdfInterleaved);
+		spnBasePairPerLine.setEnabled(isPdfInterleaved);
+
+		if (!isPdfInterleaved) {
+			spnBasePairPerLine.setToolTipText("Only available for PDF + Interleaved mode");
+		} else {
+			spnBasePairPerLine.setToolTipText(null);
 		}
 	}
 
@@ -470,6 +508,7 @@ public class AlignmentExportDialog extends JDialog {
 			// 执行导出
 			AlignmentExporter exporter = new AlignmentExporter(main);
 			exporter.setDrawConsensus(chkDrawConsensus.isSelected());
+			exporter.setBasePairPerLine((Integer) spnBasePairPerLine.getValue());
 			exporter.export(outputFile, type, layoutMode);
 
 			// 记住导出目录（内存 + 持久化）
@@ -513,9 +552,22 @@ public class AlignmentExportDialog extends JDialog {
 			dialog = new AlignmentExportDialog(main);
 			main.setExportDialog(dialog);
 		}
+		dialog.updateBasePairSpinnerValue();
 		dialog.setLocationRelativeTo(dialog.getOwner());
 		dialog.setVisible(true);
 		return dialog.getExportedFile();
+	}
+
+	/**
+	 * 更新 Base pair per line spinner 的值为当前视图的碱基数量
+	 */
+	private void updateBasePairSpinnerValue() {
+		int currentViewLength = viewPort.getLength();
+		int totalLength = viewPort.getTotalSequenceLength();
+		int newValue = currentViewLength > 0 ? currentViewLength : 80;
+		SpinnerNumberModel model = (SpinnerNumberModel) spnBasePairPerLine.getModel();
+		model.setMaximum(totalLength);
+		model.setValue(newValue);
 	}
 
 	/**

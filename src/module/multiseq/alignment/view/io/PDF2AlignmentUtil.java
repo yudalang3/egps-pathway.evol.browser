@@ -24,6 +24,7 @@ public class PDF2AlignmentUtil {
 
 	private AlignmentViewMain alignmentViewMain;
 	private boolean drawConsensus = true;
+	private int basePairPerLine = -1; // -1 表示自动计算
 
 	public void setAlignmentViewMain(AlignmentViewMain alignmentViewMain) {
 		this.alignmentViewMain = alignmentViewMain;
@@ -31,6 +32,10 @@ public class PDF2AlignmentUtil {
 
 	public void setDrawConsensus(boolean drawConsensus) {
 		this.drawConsensus = drawConsensus;
+	}
+
+	public void setBasePairPerLine(int basePairPerLine) {
+		this.basePairPerLine = basePairPerLine;
 	}
 
 	public void exportDataWithSelectedFormat(String path, String defaultSuffix, SaveFilterPDFDescription description)
@@ -303,6 +308,8 @@ public class PDF2AlignmentUtil {
 
 		private int showDataLength;
 
+		private float pageWidth;
+
 		public DataWithInterleavedAllWriteFile(File outputFile) throws Exception {
 			this.outputFile = outputFile;
 
@@ -336,13 +343,19 @@ public class PDF2AlignmentUtil {
 
 			pageShowBlockCount = (int) Math.ceil(pageHeight / blockHeight);
 
-			int width = ((int) a4.getWidth()) - alignmentViewPort.getBaseNameLenght() - 50;
-
-			showDataLength = (int) Math.floor(width * 1.0 / charWidth);
-
-			if (showDataLength > 10 && showDataLength % 10 != 0) {
-
-				showDataLength = showDataLength / 10 * 10;
+			// 使用用户指定的每行碱基数，或自动计算
+			if (basePairPerLine > 0) {
+				showDataLength = basePairPerLine;
+				// 根据碱基数量计算页面宽度
+				int leftDistance = 10;
+				pageWidth = alignmentViewPort.getBaseNameLenght() + leftDistance + 7 + (showDataLength * charWidth) + 20;
+			} else {
+				pageWidth = a4.getWidth();
+				int width = ((int) pageWidth) - alignmentViewPort.getBaseNameLenght() - 50;
+				showDataLength = (int) Math.floor(width * 1.0 / charWidth);
+				if (showDataLength > 10 && showDataLength % 10 != 0) {
+					showDataLength = showDataLength / 10 * 10;
+				}
 			}
 			totalSequenceLength = alignmentViewPort.getTotalSequenceLength();
 
@@ -352,7 +365,7 @@ public class PDF2AlignmentUtil {
 
 			OutputStream stream = new FileOutputStream(outputFile);
 
-			document = new Document(new Rectangle(a4.getWidth(), pageShowBlockCount * blockHeight));
+			document = new Document(new Rectangle(pageWidth, pageShowBlockCount * blockHeight));
 
 			writer = PdfWriter.getInstance(document, stream);
 
@@ -370,7 +383,7 @@ public class PDF2AlignmentUtil {
 				for (int j = 0; j < pageShowBlockCount; j++) {
 					PdfContentByte cb = writer.getDirectContent();
 
-					PdfTemplate tp = cb.createTemplate(a4.getWidth(), blockHeight);
+					PdfTemplate tp = cb.createTemplate(pageWidth, blockHeight);
 
 					int currentShowBlock = blockIndex * pageShowBlockCount + j;
 
@@ -399,9 +412,9 @@ public class PDF2AlignmentUtil {
 
 					printAlignmentPanel.setDrawConsensus(drawConsensus);
 
-					printAlignmentPanel.setPreferredSize(new Dimension((int) a4.getWidth(), blockHeight));
+					printAlignmentPanel.setPreferredSize(new Dimension((int) pageWidth, blockHeight));
 
-					Graphics2D g2d = tp.createGraphics(a4.getWidth(), (float) blockHeight, new DefaultFontMapper());
+					Graphics2D g2d = tp.createGraphics(pageWidth, (float) blockHeight, new DefaultFontMapper());
 
 					printAlignmentPanel.print(g2d);
 

@@ -47,16 +47,16 @@ public class SpeciesTraitPanel extends AbstractTsvBasedAnalysisPanel {
 
         ParsedTsv parsed;
         try {
-            parsed = readTsvUtf8(new File(inputFile));
+            parsed = readSpreadsheet(new File(inputFile));
         } catch (MalformedInputException e) {
-            log.error("TSV file is not UTF-8 encoded: {}", inputFile, e);
+            log.error("Data file encoding error: {}", inputFile, e);
             add(buildErrorPanel("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry."));
             revalidate();
             repaint();
             return;
         } catch (IOException e) {
-            log.error("Error loading tsv file", e);
-            add(buildErrorPanel("Error loading tsv file."));
+            log.error("Error loading data file", e);
+            add(buildErrorPanel("Error loading data file."));
             revalidate();
             repaint();
             return;

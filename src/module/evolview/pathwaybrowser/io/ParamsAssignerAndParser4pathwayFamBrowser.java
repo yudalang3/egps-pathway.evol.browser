@@ -3,6 +3,7 @@ package module.evolview.pathwaybrowser.io;
 import egps2.UnifiedAccessPoint;
 import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
+import module.evoltreio.NewickFormatConfig;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 
@@ -29,6 +30,8 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 		addKeyValueEntryBean("input.nwk.path",
 				propertiesDir + "/bioData/example/9_model_species_evolution.nwk",
 				"Input the Tree nwk file path.");
+		addKeyValueEntryBean("nwk.format", String.valueOf(NewickFormatConfig.DEFAULT_FORMAT),
+				"Newick format type (0-9). Format 0: support:dist for internal. Format 1: name:dist for internal. See help for all formats.");
 
 		StringBuilder sBuilder = new StringBuilder();
 		sBuilder.append("\n");
@@ -42,17 +45,17 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 
 		addKeyValueEntryBean("pathway.species.info.path",
 				"False",
-				"Input the file path of the species information, tsv format. Must has the Name column. F/False or annotated for none");
+				"Input the species information file (TSV or XLSX). Must have a 'Name' column. F/False to disable.");
 
 		sBuilder.setLength(0);
-		sBuilder.append("Input the file path of the species components, tsv format. Must has the Name column. F/False or annotated for none");
+		sBuilder.append("Input the pathway component counts file (TSV or XLSX). Must have a 'Name' column. F/False to disable.");
 		sBuilder.append("\n## Species for rows and gene for columns. For examples:");
 		sBuilder.append("\n## Name    AXIN2    WNT3A    DVL3");
 		sBuilder.append("\n## human    2    18    3");
 		addKeyValueEntryBean("pathway.component.counts.path",
 				"False", sBuilder.toString());
 		addKeyValueEntryBean("species.traits.path",
-				"False", "Input the file path of the species components, tsv format. Must has the Name column. F/False or annotated for none");
+				"False", "Input the species traits file (TSV or XLSX). Must have a 'Name' column. F/False to disable.");
 
 
 		addKeyValueEntryBean("^", "", "");

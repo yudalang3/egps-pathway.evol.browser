@@ -3,6 +3,7 @@ package module.evolview.gfamily.work.io;
 import egps2.EGPSProperties;
 import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
+import module.evoltreio.NewickFormatConfig;
 import module.evolview.gfamily.work.beans.RequiredGeneData;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
@@ -34,6 +35,8 @@ public class ParamsAssignerAndParser4GeneFamilyBrowser extends ParamsAssignerAnd
 		String propertiesDir = EGPSProperties.PROPERTIES_DIR;
 		addKeyValueEntryBean("input.nwk.path", propertiesDir + "/bioData/gfamily/input.tree.nwk",
 				"Input the nwk file path.");
+		addKeyValueEntryBean("nwk.format", String.valueOf(NewickFormatConfig.DEFAULT_FORMAT),
+				"Newick format type (0-9). Format 0: support:dist for internal. Format 1: name:dist for internal. See help for all formats.");
 
 		// Genome browser parameters removed - genebrowser module not included
 		// Map<String, VoiceValueParameterBean> parserMapBean2 = mapperOfGeneBrowser.getRequiredParams();

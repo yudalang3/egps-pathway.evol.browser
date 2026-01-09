@@ -390,10 +390,37 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			Point point = new Point();
 			point.setLocation(xSelf, ySelf);
 			continuouslyZoomInOrOut(heightChange, widthChange, point);
+
+			// Scroll to center the selected node in the viewport
+			SwingUtilities.invokeLater(() -> scrollNodeToCenter(node));
 		} else {
 			SwingDialog.showInfoMSGDialog("Choose node first", "Your need to choose node first");
 		}
 
+	}
+
+	/**
+	 * Scroll the viewport so that the specified node is centered.
+	 *
+	 * @param node the node to center in the viewport
+	 */
+	public void scrollNodeToCenter(GraphicsNode node) {
+		JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
+		if (viewport == null) {
+			return;
+		}
+
+		int nodeX = (int) node.getXSelf();
+		int nodeY = (int) node.getYSelf();
+
+		int viewWidth = viewport.getWidth();
+		int viewHeight = viewport.getHeight();
+
+		// Calculate target position to center the node
+		int targetX = Math.max(0, nodeX - viewWidth / 2);
+		int targetY = Math.max(0, nodeY - viewHeight / 2);
+
+		viewport.setViewPosition(new Point(targetX, targetY));
 	}
 
 	public TreeLayoutProperties getLayoutProperties() {

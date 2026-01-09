@@ -4,6 +4,8 @@ import egps2.UnifiedAccessPoint;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tsv.io.ExcelReaderTemplate;
+import tsv.io.KitTable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -47,6 +49,9 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	private Font displayFont;
 	private Font displayTitleFont;
 
+	/** Flag to prevent circular notification when tree updates the table selection */
+	private boolean isUpdatingFromTree = false;
+
     public SpeciesInfoPanel(PathwayBrowserController controller, File tsvFile) {
         super(controller);
         this.inputFile = tsvFile;
@@ -70,16 +75,16 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 
 		ParsedTsv parsed;
 		try {
-			parsed = readTsvUtf8(inputFile);
+			parsed = readSpreadsheet(inputFile);
 		} catch (MalformedInputException e) {
-			log.error("TSV file is not UTF-8 encoded: {}", inputFile.getAbsolutePath(), e);
+			log.error("Data file encoding error: {}", inputFile.getAbsolutePath(), e);
 			add(buildErrorPanel("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry."));
 			revalidate();
 			repaint();
 			return;
 		} catch (IOException e) {
-			log.error("Error loading tsv file", e);
-			add(buildErrorPanel("Error loading tsv file."));
+			log.error("Error loading data file", e);
+			add(buildErrorPanel("Error loading data file."));
 			revalidate();
 			repaint();
 			return;
@@ -92,7 +97,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		List<String> headerNames = parsed.headers;
 		nameColumnIndex = headerNames.indexOf(mustHaveName);
 		if (nameColumnIndex < 0) {
-			add(buildErrorPanel("Error: tsv file must have a column named \"" + mustHaveName + "\"."));
+			add(buildErrorPanel("Error: Data file must have a column named \"" + mustHaveName + "\"."));
 			revalidate();
 			repaint();
 			return;
@@ -130,7 +135,14 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		if (nodeName == null || nodeName.isEmpty() || table == null || tableModel == null) {
 			return;
 		}
-		SwingUtilities.invokeLater(() -> highlightRowByName(nodeName));
+		SwingUtilities.invokeLater(() -> {
+			isUpdatingFromTree = true;
+			try {
+				highlightRowByName(nodeName);
+			} finally {
+				isUpdatingFromTree = false;
+			}
+		});
     }
 
 	private JPanel buildTopBar(String fileName) {
@@ -297,6 +309,19 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 
 		installContextMenu();
 		adjustInitialColumnWidths(headers, contents);
+
+		// Add table row selection listener for reverse interaction (table -> tree)
+		table.getSelectionModel().addListSelectionListener(e -> {
+			if (!e.getValueIsAdjusting() && !isUpdatingFromTree && table.getSelectedRow() >= 0) {
+				int viewRow = table.getSelectedRow();
+				int modelRow = table.convertRowIndexToModel(viewRow);
+				Object nameObj = tableModel.getValueAt(modelRow, nameColumnIndex);
+				if (nameObj != null) {
+					String nodeName = nameObj.toString();
+					notifyTreeToSelectNode(nodeName);
+				}
+			}
+		});
 	}
 
 	private void installNumericSorters(String[] headers, List<List<String>> contents, TableRowSorter<TableModel> sorter) {
@@ -561,6 +586,49 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		}
 
 		return new ParsedTsv(headers, rows);
+	}
+
+	/**
+	 * Read and parse a spreadsheet file (TSV or Excel format).
+	 * Automatically detects format based on file extension.
+	 */
+	private ParsedTsv readSpreadsheet(File file) throws IOException {
+		String fileName = file.getName().toLowerCase();
+		if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+			log.debug("Reading Excel file: {}", file.getAbsolutePath());
+			return readExcelFile(file);
+		}
+		log.debug("Reading TSV file: {}", file.getAbsolutePath());
+		return readTsvUtf8(file);
+	}
+
+	/**
+	 * Read Excel file and convert to ParsedTsv format.
+	 * Only reads the first sheet.
+	 */
+	private ParsedTsv readExcelFile(File file) throws IOException {
+		ExcelReaderTemplate reader = new ExcelReaderTemplate();
+		KitTable table = reader.readExcelFirstSheet(file.getAbsolutePath());
+		if (table == null) {
+			throw new IOException("Failed to parse Excel file: " + file.getName());
+		}
+
+		List<String> headers = table.getHeaderNames();
+		if (headers == null || headers.isEmpty()) {
+			return new ParsedTsv(List.of(), List.of());
+		}
+
+		int headerSize = headers.size();
+		List<List<String>> rows = new ArrayList<>();
+		for (List<String> srcRow : table.getContents()) {
+			String[] normalized = new String[headerSize];
+			for (int i = 0; i < headerSize; i++) {
+				String val = (srcRow != null && i < srcRow.size()) ? srcRow.get(i) : null;
+				normalized[i] = (val != null) ? val : "";
+			}
+			rows.add(List.of(normalized));
+		}
+		return new ParsedTsv(List.copyOf(headers), rows);
 	}
 
 	private String[] splitTsvLine(String line) {

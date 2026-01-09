@@ -22,6 +22,7 @@ public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
     public ImporterBean4PathwayFamilyBrowser(MTVImportInforBean object) {
 
         this.setInput_nwk_path(object.getInput_nwk_path());
+        this.setNwkFormat(object.getNwkFormat());
         this.setShowLeafLabel(object.isShowLeafLabel());
         this.setShouldLeafNameRightAlign(object.isShouldLeafNameRightAlign());
         this.setNeedReverseAxisBar(object.isNeedReverseAxisBar());

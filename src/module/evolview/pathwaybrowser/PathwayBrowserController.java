@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * PathwayBrowser Controller - Independent from GeneFamilyController
@@ -500,5 +501,59 @@ public class PathwayBrowserController {
     public void fireLayoutChanged() {
         // Hook for layout change events
         log.debug("fireLayoutChanged called");
+    }
+
+    /**
+     * Select a node in the tree by name. Called from analysis panels.
+     * If node not found, show message in status bar.
+     *
+     * @param nodeName the name of the node to select
+     */
+    public void selectNodeInTree(String nodeName) {
+        if (nodeName == null || nodeName.isEmpty() || treeLayoutProperties == null) {
+            return;
+        }
+
+        GraphicsNode rootNode = treeLayoutProperties.getOriginalRootNode();
+        if (rootNode == null) {
+            return;
+        }
+
+        // Search for node by name (case-insensitive)
+        Optional<GraphicsNode> foundNode = EvolNodeUtil.searchNodeWithReturn(rootNode,
+                node -> nodeName.equalsIgnoreCase(node.getName()));
+
+        if (foundNode.isPresent()) {
+            GraphicsNode node = foundNode.get();
+
+            // Clear previous selection
+            List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
+            for (GraphicsNode n : selectedNodes) {
+                n.getDrawUnit().setBranchSelected(false);
+            }
+            selectedNodes.clear();
+
+            // Select the new node
+            node.getDrawUnit().setBranchSelected(true);
+            selectedNodes.add(node);
+
+            // Show info in status bar
+            StringBuilder sb = new StringBuilder();
+            sb.append("Node \"").append(node.getName()).append("\" selected");
+            sb.append(", child count: ").append(node.getChildCount());
+            sb.append(", branch length: ").append(node.getLength());
+            instanceFrame.showTipsOnBottomStatusBar(sb.toString());
+
+            // Scroll to center the node
+            if (globalPhylogeneticTreePanel != null) {
+                globalPhylogeneticTreePanel.scrollNodeToCenter(node);
+            }
+
+            refreshPhylogeneticTree();
+        } else {
+            // Node not found - show message in status bar
+            instanceFrame.showTipsOnBottomStatusBar(
+                    "Node \"" + nodeName + "\" not found in the tree.");
+        }
     }
 }

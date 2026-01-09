@@ -52,6 +52,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 	private boolean whetherScaleBarSelectedInDrag = false;
 
 	private Point origin;
+	private boolean isDragging = false;
 
 	private final StringBuilder sBuilder = new StringBuilder(1024);
 	private final String templateHeader = "<html><body font size='5'>";
@@ -142,6 +143,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 						Math.abs(endPoint.x - origin.x), Math.abs(endPoint.y - origin.y));
 				phylogeneticTreePanel.repaint();
 			} else {
+				isDragging = true;
 				moveTheDrawingArea(arg0);
 			}
 
@@ -260,7 +262,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		arg0.getComponent().setCursor(Cursor.getDefaultCursor());
 
 		// 鼠标释放后，可以决定是否保留这个矩形，或者执行其他逻辑
-		origin = null; // 重置起始点
+		Point releasePoint = arg0.getPoint();
 
 		if (rect4selectArea.getWidth() > 0) {
 			List<GraphicsNode> selectedNodes = new LinkedList<>();
@@ -282,11 +284,22 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 		}
 
+		// Clear selection only if: no drag happened AND click was on empty area (no node)
+		if (!isDragging && !SwingUtilities.isRightMouseButton(arg0)) {
+			Optional<GraphicsNode> optRet = judgeSelectedNode(releasePoint);
+			if (optRet.isEmpty()) {
+				// Clicked on empty area without dragging - clear selection
+				dealWithSelectedNodes(null);
+				phylogeneticTreePanel.refreshViewPort();
+			}
+		}
+
 		rect4selectArea.setSize(0, 0);
+		origin = null;
+		isDragging = false;
+
 		// ref
 		phylogeneticTreePanel.weakRefreshViewPort();
-
-
 
 	}
 
@@ -377,13 +390,14 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				if (optRet.isPresent()) {
 					GraphicsNode selectedNode = optRet.get();
 					dealWithSelectedNodes(selectedNode);
-					
+
 					for (Consumer<GraphicsNode> consumer : tree2AnalyzingPanelInteractions) {
 						consumer.accept(selectedNode);
 					}
-				} else {
-					dealWithSelectedNodes(null);
 				}
+				// Note: Don't clear selection here on empty area click.
+				// Selection clearing for empty area is handled in mouseReleased()
+				// to allow drag without losing selection.
 
 			}
 		}

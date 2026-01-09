@@ -26,7 +26,7 @@ public class NewickFormatConfig {
 
 	public static final int MIN_FORMAT = 0;
 	public static final int MAX_FORMAT = 9;
-	public static final int DEFAULT_FORMAT = 0;
+	public static final int DEFAULT_FORMAT = 1;
 
 	/**
 	 * Node field types that can appear in Newick format.
