@@ -52,7 +52,7 @@ public class VOICE4AlignmentView extends JPanel {
         JideTabbedPane jideTabbedPane = new JideTabbedPane();
         jideTabbedPane.addTab("Text input", getTextInputPanel());
         JPanel importDataDialog = importDataHandler.generateImportDataDialogGUI();
-        jideTabbedPane.addTab("Versatile open input click remnant", importDataDialog);
+        jideTabbedPane.addTab("Versatile open input click execute style input", importDataDialog);
 
         jideTabbedPane.setSelectedTabFont(titleFont);
         add(jideTabbedPane, BorderLayout.CENTER);
