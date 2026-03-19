@@ -42,3 +42,11 @@
 | MAFFT 路径集成 | [mafft_path_config_integration.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\mafft_path_config_integration.md) | [mafft_path_config_integration_zh.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\mafft_path_config_integration_zh.md) |
 | MigLayout 界面模式 | [miglayout_ui_improvements.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\miglayout_ui_improvements.md) | [miglayout_ui_improvements_zh.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\miglayout_ui_improvements_zh.md) |
 | 消息对话框用法 | [how_to_use_msg_dialog.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\how_to_use_msg_dialog.md) | [how_to_use_msg_dialog_zh.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\how_to_use_msg_dialog_zh.md) |
+
+---
+
+## 外部语言 API
+
+| 主题 | English | 中文 |
+|------|---------|------|
+| R/Python 桥接入口 | [external_language_api.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\external_language_api.md) | [external_language_api_zh.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\external_language_api_zh.md) |

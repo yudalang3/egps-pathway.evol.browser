@@ -43,7 +43,8 @@ egps-pathway.evol.browser/
 │   ├── evoltrepipline/          # 共享管道组件
 │   └── [其他工具]/
 ├── dependency-egps/              # 外部JAR依赖
-├── docs/                         # 文档（current/history）
+├── docs/                         # 文档（current）
+├── src/api/rpython/             # 面向 R/Python 工作流的外部语言桥接 API
 ├── out/                          # 编译输出
 ├── CLAUDE.md                    # 开发指南
 └── compile.sh                   # 编译脚本
@@ -161,6 +162,17 @@ public ModuleVersion getVersion() {
 - **模块发现**：自动类路径扫描和插件加载
 - **MAFFT集成**：自动检测MAFFT安装路径
 
+## 外部语言集成
+
+Java 侧的 R 和 Python 桥接入口现在统一集中在 `src/api/rpython/`。
+
+当前示例包括：
+
+- `API4R`
+- `RlangInterfaceEGPS`
+- `ModernTreeViewPyLauncher`
+- `EvolTreeManipulator`
+
 ## 开发指南
 
 ### 日志记录
@@ -221,7 +233,7 @@ System.setProperty("file.encoding", "UTF-8")
 - [CLAUDE.md](CLAUDE.md) - 开发指南和架构细节
 - [modules_we_have.md](docs/current/modules_we_have.md) - 详细的模块规范
 - [docs/current/](docs/current/) - 当前文档
-- [docs/history/](docs/history/) - 历史版本
+- [src/api/rpython/README_zh.md](src/api/rpython/README_zh.md) - R/Python 桥接入口说明
 
 ## 贡献指南
 
@@ -241,7 +253,7 @@ System.setProperty("file.encoding", "UTF-8")
 
 ## 支持
 
-如有问题、疑问或贡献，请参考[docs/current/](docs/current/)和[docs/history/](docs/history/)中的项目文档。
+如有问题、疑问或贡献，请参考[docs/current/](docs/current/)中的项目文档。
 
 ---
 

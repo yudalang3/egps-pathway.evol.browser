@@ -80,7 +80,7 @@ It is another reminder that MTV initialization is partly synchronous and partly 
 
 ### 6. External R entry point
 
-`src/module/RlangInterfaceEGPS.java` currently opens the MTV module shell through `IndependentModuleLoader`.
+`src/api/rpython/RlangInterfaceEGPS.java` currently opens the MTV module shell through `IndependentModuleLoader`.
 
 At the moment it does not yet parse the incoming JSON into tree data, but it still belongs to the initialization surface because it creates the module and defines another way the module can be entered from outside the normal GUI workflow.
 

@@ -43,7 +43,8 @@ egps-pathway.evol.browser/
 │   ├── evoltrepipline/          # Shared pipeline components
 │   └── [other utilities]/
 ├── dependency-egps/              # External JAR dependencies
-├── docs/                         # Documentation (current/history)
+├── docs/                         # Documentation (current)
+├── src/api/rpython/             # External language bridge APIs for R/Python workflows
 ├── out/                          # Build output
 ├── CLAUDE.md                    # Developer guidance
 └── compile.sh                   # Build script
@@ -161,6 +162,17 @@ User configuration is stored in `~/.egps/`:
 - **Module discovery**: Automatic classpath scanning and plugin loading
 - **MAFFT integration**: Auto-detection of MAFFT installation paths
 
+## External Language Integration
+
+Java-side R and Python bridge entry points are centralized under `src/api/rpython/`.
+
+Current examples include:
+
+- `API4R`
+- `RlangInterfaceEGPS`
+- `ModernTreeViewPyLauncher`
+- `EvolTreeManipulator`
+
 ## Development
 
 ### Logging
@@ -221,7 +233,7 @@ For detailed developer information, see:
 - [CLAUDE.md](CLAUDE.md) - Developer guidance and architecture details
 - [modules_we_have.md](docs/current/modules_we_have.md) - Detailed module specifications
 - [docs/current/](docs/current/) - Current documentation
-- [docs/history/](docs/history/) - Historical versions
+- [src/api/rpython/README.md](src/api/rpython/README.md) - R/Python bridge entry-point guide
 
 ## Contributing
 
@@ -241,7 +253,7 @@ When developing or extending modules:
 
 ## Support
 
-For issues, questions, or contributions, please refer to the project documentation in [docs/current/](docs/current/) and [docs/history/](docs/history/).
+For issues, questions, or contributions, please refer to the project documentation in [docs/current/](docs/current/).
 
 ---
 

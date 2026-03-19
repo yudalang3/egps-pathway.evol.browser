@@ -13,15 +13,16 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Python-side launcher for opening Modern Tree View from a VOICE config file.
+ */
 public class ModernTreeViewPyLauncher {
 
-    public static void main(String[] args) throws Exception {
+    public static void launchFromConfigFile(String configFilePath) throws Exception {
         Launcher.main(new String[]{});
 
         DefaultParamsAssignerAndParserHandler4VOICE defaultVoiceInputParamHandler = new DefaultParamsAssignerAndParserHandler4VOICE();
         VoiceParameterParser parser = defaultVoiceInputParamHandler.getParameterParser();
-        String configFilePath = args[0];
-//        String configFilePath = "C:\\Users\\yudal\\Documents\\project\\eGPS2\\CLI\\modernTreeView\\input_config.txt";
         String inputs = FileUtils.readFileToString(new File(configFilePath), StandardCharsets.UTF_8);
         OrganizedParameterGetter organizedParameterGetter = parser.getOrganizedParameterGetter(inputs);
 
@@ -37,5 +38,12 @@ public class ModernTreeViewPyLauncher {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length == 0) {
+            throw new IllegalArgumentException("A config file path is required.");
+        }
+        launchFromConfigFile(args[0]);
     }
 }
