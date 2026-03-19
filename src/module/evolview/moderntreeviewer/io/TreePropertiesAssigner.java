@@ -8,8 +8,8 @@ import evoltree.struct.util.EvolNodeUtil;
 import evoltree.txtdisplay.TreeDrawUnit;
 import graphic.engine.colors.EGPSColors;
 import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.layout.LeafLabelStateInitializer;
 import module.evolview.phylotree.visualization.graphics.struct.ShowInnerNodePropertiesInfo;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.SlopeLayoutProperty;
 import module.evolview.phylotree.visualization.graphics.struct.CircularLayoutProperty;
 import module.evolview.phylotree.visualization.graphics.struct.RectangularLayoutProperty;
@@ -38,19 +38,7 @@ public class TreePropertiesAssigner {
 		treeLayoutProperties.setNeedReverseAxisBar(object.isNeedReverseAxisBar());
 
 		// Category %2: Leaf Node
-		ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
-		showLeafPropertiesInfo.setShowLeafLabel(object.isShowLeafLabel());
-		if (object.isShowLeafLabel()) {
-			showLeafPropertiesInfo.setNeedChange4showLabel(true);
-			showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-			List<GraphicsNode> leaves = treeLayoutProperties.getLeaves();
-			for (GraphicsNode node : leaves) {
-				node.getDrawUnit().setDrawName(true);
-			}
-		} else {
-			showLeafPropertiesInfo.setNeedChange4showLabel(false);
-			showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-		}
+		LeafLabelStateInitializer.applyInitialLeafLabelState(treeLayoutProperties, object.isShowLeafLabel());
 		treeLayoutProperties.setShouldLeafNameRightAlign(object.isShouldLeafNameRightAlign());
 
 		// Category %3: Inner Node

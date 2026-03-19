@@ -1,362 +1,115 @@
-# Distance Tree Configuration Management System
+# Distance Tree Configuration Reference
 
 ## Overview
 
-**Purpose:** Centralized management of distance tree building configuration files
+This document describes the current configuration-management mechanism used by the distance-tree workflow.
 
-**Location:** `module.evoltreio` package
+The configuration layer is centered on `module.evoltreio.DistanceTreeConfigManager` and stores user-level configuration under:
 
-**Configuration Directory:** `~/.egps/distance_tree_storage/`
-
-**Status:** Implemented
-
----
-
-## Configuration Files
-
-The system manages 4 JSON configuration files:
-
-| File Name | Purpose | Type |
-|-----------|---------|------|
-| `build.tree.setting.json` | Tree building parameters | Map<String, String> |
-| `ucsc.species.info.json` | UCSC species information | Map<String, String> |
-| `ensembl.species.info.json` | Ensembl species information | Map<String, String> |
-| `species_properties.json` | Species group properties | SpeciesProperties (JSON) |
-
----
-
-## Directory Structure
-
-### User Configuration Directory
+```text
+~/.egps/distance_tree_storage/
 ```
-~/.egps/                                    (EGPSProperties.PROPERTIES_DIR)
-└── distance_tree_storage/                  (DistanceTreeConfigManager.DEFAULT_CONFIG_DIR_NAME)
+
+---
+
+## Current Managed Files
+
+The configuration manager currently maintains four JSON files:
+
+| File | Purpose |
+|------|---------|
+| `build.tree.setting.json` | Tree-building parameters |
+| `ucsc.species.info.json` | UCSC species information |
+| `ensembl.species.info.json` | Ensembl species information |
+| `species_properties.json` | Species grouping and species-set metadata |
+
+---
+
+## Current Storage Layout
+
+### User configuration directory
+
+```text
+~/.egps/
+└── distance_tree_storage/
     ├── build.tree.setting.json
     ├── ucsc.species.info.json
     ├── ensembl.species.info.json
     └── species_properties.json
 ```
 
-### JAR Internal Default Configurations
+### Default bundled resources
+
+```text
+src/module/evoltreio/default_configs/
 ```
-src/module/evoltreio/
-└── default_configs/
-    ├── build.tree.setting.default.json
-    ├── ucsc.species.info.default.json
-    ├── ensembl.species.info.default.json
-    └── species_properties.default.json
-```
+
+These bundled defaults are copied into the user directory when initialization is needed.
 
 ---
 
-## Core Classes
+## Current Core Classes
 
-### 1. DistanceTreeConfigManager
+### `DistanceTreeConfigManager`
 
-**Location:** `module.evoltreio.DistanceTreeConfigManager`
+This is the current central access point for the distance-tree configuration layer.
 
-**Purpose:** Central configuration management with automatic initialization
+It is responsible for:
 
-**Key Features:**
-- Automatic directory creation on first use
-- Default configuration deployment from JAR resources
-- Unified API for all configuration files
-- Support for custom configuration directories (testing)
+- creating the configuration directory when needed
+- copying bundled default JSON files
+- loading current user configuration
+- saving updated user configuration
+- resetting configuration to defaults
 
-**Usage:**
-```java
-// Use default directory: ~/.egps/distance_tree_storage/
-DistanceTreeConfigManager manager = new DistanceTreeConfigManager();
+### `SpeciesProperties`
 
-// Read configurations
-Map<String, String> buildSettings = manager.getBuildTreeSettings();
-Map<String, String> ucscInfo = manager.getUCSCSpeciesInfo();
-Map<String, String> ensemblInfo = manager.getEnsemblSpeciesInfo();
-SpeciesProperties species = manager.getSpeciesProperties();
+This class is the structured model for species grouping data stored in `species_properties.json`.
 
-// Save configurations
-manager.saveBuildTreeSettings(buildSettings);
-manager.saveUCSCSpeciesInfo(ucscInfo);
-manager.saveEnsemblSpeciesInfo(ensemblInfo);
-manager.saveSpeciesProperties(species);
+It provides typed access to:
 
-// Utility methods
-manager.resetToDefaults();              // Reset all configs
-String dir = manager.getConfigDir();    // Get config directory path
-boolean exists = manager.configDirExists();  // Check if initialized
-```
+- all configured groups
+- group-level species sets
+- flattened species lists
 
-**Custom Directory (for testing):**
-```java
-DistanceTreeConfigManager manager = new DistanceTreeConfigManager();
-manager.setConfigDir("/custom/path");  // Auto-initializes new directory
-```
+### `TreeParameterHandler`
+
+This class acts as a higher-level consumer-facing wrapper and delegates persistence work to `DistanceTreeConfigManager`.
 
 ---
 
-### 2. SpeciesProperties
+## Current Initialization Behavior
 
-**Location:** `module.evoltreio.SpeciesProperties`
+When the distance-tree configuration layer is first accessed:
 
-**Purpose:** Type-safe model for species group configuration
+1. the manager checks whether `~/.egps/distance_tree_storage/` exists
+2. if the directory is missing, it creates it
+3. bundled default JSON files are copied into the directory
+4. subsequent reads use the copied user-level files
 
-**JSON Structure:**
-```json
-{
-  "groups": [
-    {
-      "id": "mammals",
-      "species_set_group": "collection",
-      "name": "Mammals",
-      "method": "EPO",
-      "species_set": [
-        "homo_sapiens",
-        "mus_musculus",
-        "pan_troglodytes"
-      ]
-    }
-  ]
-}
-```
-
-**Usage:**
-```java
-// Load from JSON
-SpeciesProperties props = SpeciesProperties.fromJson(jsonString);
-
-// Access all species (flattened)
-List<String> allSpecies = props.getAllSpecies();
-
-// Access by group
-List<String> mammals = props.getSpeciesByGroup("Mammals");
-
-// Convert to JSON
-String json = props.toJson();  // Pretty-printed
-```
+This means the runtime always works from the user configuration directory rather than directly reading mutable state from bundled resources.
 
 ---
 
-### 3. TreeParameterHandler
+## Current Design Characteristics
 
-**Location:** `module.evoltrepipline.TreeParameterHandler`
+The current configuration mechanism has these properties:
 
-**Purpose:** High-level API for tree parameter operations
-
-**Refactored Implementation:**
-```java
-public class TreeParameterHandler {
-    private final DistanceTreeConfigManager configManager;
-
-    public TreeParameterHandler() {
-        this.configManager = new DistanceTreeConfigManager();
-    }
-
-    // Build tree parameters
-    public Map<String, String> getBuildTreeParametersMap() {
-        return configManager.getBuildTreeSettings();
-    }
-
-    public void saveBuildTreeParametersMap(Map<String, String> map) {
-        configManager.saveBuildTreeSettings(map);
-    }
-
-    // UCSC species
-    public Map<String, String> getUCSCSpeciesPropertiesMap() {
-        return configManager.getUCSCSpeciesInfo();
-    }
-
-    public void saveUCSCSpeciesPropertiesMap(Map<String, String> map) {
-        configManager.saveUCSCSpeciesInfo(map);
-    }
-
-    // Ensembl species
-    public Map<String, String> getEnsembelSpeciesPropertiesMap() {
-        return configManager.getEnsemblSpeciesInfo();
-    }
-
-    public void saveEnsembelSpeciesPropertiesMap(Map<String, String> map) {
-        configManager.saveEnsemblSpeciesInfo(map);
-    }
-}
-```
+- **centralized**: one manager controls all distance-tree configuration files
+- **JSON-based**: all persisted files use JSON rather than mixed formats
+- **user-local**: active configuration lives in the user profile directory
+- **recoverable**: missing defaults can be recreated from bundled resources
+- **typed where needed**: `SpeciesProperties` provides structured access instead of raw ad hoc parsing
 
 ---
 
-## Initialization Flow
+## Practical Usage Pattern
 
-### First-Time Launch
-1. User launches application
-2. `DistanceTreeConfigManager` constructor called
-3. Checks if `~/.egps/distance_tree_storage/` exists
-4. If not exists:
-   - Creates directory
-   - Copies 4 default JSON files from JAR resources
-   - Logs initialization
-5. Returns ready-to-use manager
+Typical usage is:
 
-### Subsequent Launches
-1. `DistanceTreeConfigManager` constructor called
-2. Directory exists → Skip initialization
-3. Returns ready-to-use manager
+1. construct `DistanceTreeConfigManager`
+2. read one or more config objects
+3. modify values in memory
+4. save them back through the manager
 
-### Configuration Reset
-```java
-manager.resetToDefaults();  // Re-copies all default configs
-```
-
----
-
-## Migration from XML to JSON
-
-### Before (XML-based)
-```java
-// Panel4WebResources.java (old implementation)
-private void findSpeciesValue() throws DocumentException {
-    SAXReader reader = new SAXReader();
-    Document document = reader.read(
-        new File(EGPSProperties.PROPERTIES_DIR + "/species_properties.xml")
-    );
-    Element root = document.getRootElement();
-    List<Element> configList = root.elements();
-
-    for (Element e : configList) {
-        for (Iterator<Element> i = e.elementIterator("species_set"); i.hasNext();) {
-            Element element = (Element) i.next();
-            speciesList.add((String) element.getData());
-        }
-    }
-}
-```
-
-### After (JSON-based)
-```java
-// Panel4WebResources.java (new implementation)
-private final DistanceTreeConfigManager configManager = new DistanceTreeConfigManager();
-
-private void findSpeciesValue() {
-    SpeciesProperties props = configManager.getSpeciesProperties();
-    speciesList.addAll(props.getAllSpecies());
-}
-```
-
-**Benefits:**
-- ✅ No XML parsing dependencies (dom4j removed)
-- ✅ Type-safe with SpeciesProperties model
-- ✅ Simpler, cleaner code
-- ✅ Unified JSON format across all configs
-
----
-
-## Architecture Benefits
-
-### Centralized Management
-- ✅ Single directory for all distance tree configs
-- ✅ Unified API through DistanceTreeConfigManager
-- ✅ Easy to test with custom directories
-
-### Automatic Initialization
-- ✅ First-time launch auto-creates configs
-- ✅ Missing configs auto-recovered
-- ✅ Default configs bundled in JAR
-
-### Type Safety
-- ✅ SpeciesProperties provides structured access
-- ✅ Compile-time checks for species data
-- ✅ IDE auto-completion support
-
-### Maintainability
-- ✅ All config logic in one class
-- ✅ Clear separation: evoltreio (config) vs evoltre (business logic)
-- ✅ Simple JSON format (human-readable and editable)
-
----
-
-## Implementation Details
-
-### Default Config Resource Loading
-```java
-private void copyResourceToFile(String resourcePath, String targetPath) throws IOException {
-    try (InputStream in = getClass().getResourceAsStream(resourcePath)) {
-        if (in == null) {
-            throw new IOException("Resource not found: " + resourcePath);
-        }
-        Files.copy(in, Paths.get(targetPath), StandardCopyOption.REPLACE_EXISTING);
-    }
-}
-```
-
-### SpeciesProperties JSON Serialization
-Uses FastJSON for JSON operations:
-```java
-// Serialize
-public String toJson() {
-    return JSON.toJSONString(this, true);  // Pretty-print
-}
-
-// Deserialize
-public static SpeciesProperties fromJson(String json) {
-    return JSON.parseObject(json, SpeciesProperties.class);
-}
-```
-
-### Configuration File Access
-Uses existing `MapPersistence` utility:
-```java
-// Load Map<String, String> from JSON
-Map<String, String> map = MapPersistence.getStr2StrMapFromJSON(path);
-
-// Save Map<String, String> to JSON
-MapPersistence.saveStr2StrMapToJSON(map, path);
-```
-
----
-
-## Testing
-
-### Unit Test Example
-```java
-@Test
-public void testCustomDirectory() {
-    DistanceTreeConfigManager manager = new DistanceTreeConfigManager();
-    manager.setConfigDir("/tmp/test_config");
-
-    // Verify initialization
-    assertTrue(manager.configDirExists());
-
-    // Test read/write
-    Map<String, String> settings = manager.getBuildTreeSettings();
-    assertNotNull(settings);
-
-    settings.put("test_key", "test_value");
-    manager.saveBuildTreeSettings(settings);
-
-    // Verify persistence
-    Map<String, String> reloaded = manager.getBuildTreeSettings();
-    assertEquals("test_value", reloaded.get("test_key"));
-
-    // Cleanup
-    FileUtils.deleteDirectory(new File("/tmp/test_config"));
-}
-```
-
----
-
-## Files Modified/Created
-
-### Created (3 files)
-1. `src/module/evoltreio/DistanceTreeConfigManager.java` - Main config manager
-2. `src/module/evoltreio/SpeciesProperties.java` - Species data model
-3. `src/module/evoltreio/default_configs/` - Default JSON configs (4 files)
-
-### Refactored (1 file)
-4. `src/module/evoltrepipline/TreeParameterHandler.java` - Simplified using manager
-
-### Total Impact
-- **New code:** ~450 lines (manager + model + tests)
-- **Removed code:** ~100 lines (XML parsing + hardcoded paths)
-- **Net improvement:** Cleaner, more maintainable architecture
-
----
-
-*Design implemented: 2025-12-11*
-*Document updated: 2025-12-12*
+The higher-level distance-tree workflow should treat the manager as the persistence boundary and avoid scattering direct file-path logic across business code.

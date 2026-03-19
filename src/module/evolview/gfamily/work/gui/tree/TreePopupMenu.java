@@ -16,6 +16,7 @@ import module.evolview.model.tree.NodeUtils;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
 import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
 import module.evolview.phylotree.visualization.layout.BaseLayout;
+import module.evolview.phylotree.visualization.layout.LeafLabelStateInitializer;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
@@ -531,6 +532,9 @@ public class TreePopupMenu {
 					GraphicsNode graphicsNode = selectedNodes.get(0);
 					GraphicsNode convertBasicNode2graphicsNode = NodeUtils.convertBasicNode2graphicsNode(graphicsNode);
 
+					TreeLayoutProperties subtreeProperties = LeafLabelStateInitializer
+							.createSubtreeViewProperties(convertBasicNode2graphicsNode, getTreeLayoutProperties());
+
 					IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
 					independentModuleLoader.setHowModuleLaunchedWithData(
 							"Module launched by right click internal node.",
@@ -539,7 +543,7 @@ public class TreePopupMenu {
 					 * treeLayoutProperties 可选，如果输入为null，会自动根据 root生成 treeLayoutProperties
 					 * 开发者也可以自己生成 TreeLayoutProperties类示例，进而设置一些参数
 					 */
-					independentModuleLoader.setModuleData(convertBasicNode2graphicsNode, null);
+					independentModuleLoader.setModuleData(convertBasicNode2graphicsNode, subtreeProperties);
 					MainFrameProperties.loadTheModuleFromIModuleLoader(independentModuleLoader);
 				}
 			});

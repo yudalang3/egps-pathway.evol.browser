@@ -20,7 +20,7 @@ import module.evolview.moderntreeviewer.gui.CreativeModeTaskPanel;
 import module.evolview.moderntreeviewer.para.TextInputDialogWithOKCancel;
 import module.evolview.phylotree.visualization.graphics.phylogeny.PhyloGraphicsTreeEncoderDecoder;
 import module.evolview.phylotree.visualization.graphics.struct.AdvancedParametersBean;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
+import module.evolview.phylotree.visualization.layout.LeafLabelStateInitializer;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jdesktop.swingx.JXTaskPane;
@@ -341,19 +341,8 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			// VOICE4MTV类的execute()；
 			// GeneFamilyMainFace类的initialize
 			// 和MTreeViewMainFace的initializeGraphics()
-			TreeLayoutProperties treeLayoutProperties = moduleLoader2.treeLayoutProperties;
-			if (treeLayoutProperties == null) {
-				treeLayoutProperties = new TreeLayoutProperties(rootNode);
-			}
-			ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
-			boolean isShowLeafLabel = false;
-			if (isShowLeafLabel) {
-				showLeafPropertiesInfo.setNeedChange4showLabel(true);
-				showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-			} else {
-				showLeafPropertiesInfo.setNeedChange4showLabel(false);
-				showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-			}
+			TreeLayoutProperties treeLayoutProperties = LeafLabelStateInitializer
+					.resolveDirectLaunchProperties(rootNode, moduleLoader2.treeLayoutProperties);
 
 			creativeModeTaskPanel.setTreeLayoutProperties(treeLayoutProperties);
 			// 导入之后及时清除数据，避免对下次载入模块产生影响。

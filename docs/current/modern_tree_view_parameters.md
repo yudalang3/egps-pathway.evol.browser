@@ -1,322 +1,209 @@
-# Modern Tree View Parameters Design Document
+# Modern Tree View Parameter Reference
 
-本文档列出 Modern Tree View 模块的所有可参数化选项。参数按类别组织，使用 `%N` 前缀格式在 VOICE 参数系统中分组。
+## Overview
 
-**实现状态**: ✅ 已完成
+This document lists the parameter surface currently exposed by Modern Tree View through the VOICE parameter system. Parameters are grouped with the `%N` category convention used by `ParamsAssignerAndParser4ModernTreeView`.
+
+**Implementation coverage:** all 40 documented parameters are currently implemented.
 
 ---
 
-## 必需参数（不归类）
+## Required Input Parameters
 
-这些是输入数据的必需参数，保持在顶层：
+These parameters stay at the top level because they define the input tree source.
 
 | Parameter Key | Default | Description |
 |--------------|---------|-------------|
-| `input.nwk.string` | `""` | Way1: Direct input the nwk string content. Highest priority. |
-| `input.nwk.path` | `<example path>` | Way2: Input the nwk file path. Medium priority. |
-| `nwk.format` | `0` | Newick format type (0-9). |
-| `nwk.remove.whitespace` | `F` | Whether remove whitespace for the nwk file. |
-| `input.tableLike.path` | `""` | Way3: Input the table-like tree file path. |
+| `input.nwk.string` | `""` | Highest-priority input. Directly provide the Newick string content. |
+| `input.nwk.path` | `<example path>` | Medium-priority input. Provide a Newick file path. |
+| `nwk.format` | `0` | Newick interpretation mode. Supported values are `0-9`. |
+| `nwk.remove.whitespace` | `F` | Remove whitespace before parsing the Newick content. |
+| `input.tableLike.path` | `""` | Alternative tree input in the table-like tree format. |
 
 ---
 
-## Category %1: Tree Information (树信息显示)
+## Category `%1`: Tree Information
 
-控制树的整体信息显示。
+Controls tree-wide informational elements.
 
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `tree.show.scale.bar` | `F` | Show the plotting scale for the phylogram. | NEW |
-| `tree.show.axis.bar` | `T` | Show the x-axis. | NEW |
-| `tree.show.title` | `T` | Show the statement at the bottom of the tree. | NEW |
-| `tree.show.width.height` | `F` | Show width and height in the drawing panel. Useful for circular layout. | NEW |
-| `tree.title.string` | `The phylogenetic tree with {0} high-quality sequenced samples.` | Statement displayed at the bottom. | EXISTING (was `bottom.title.string`) |
-| `tree.branch.length.unit` | `""` | The unit of branch (e.g., mya). | EXISTING (was `branch.length.unit`) |
-| `tree.need.reverse.axis` | `F` | Whether reverse the axis bar. In some cases, the time is years ago. | EXISTING (was `need.reverse.axis.bar`) |
-
----
-
-## Category %2: Leaf Node (叶节点显示)
-
-控制叶节点的显示设置。
-
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `leaf.show.label` | `T` | Whether display the leaf label on the tree. | EXISTING (was `show.leaf.label`) |
-| `leaf.label.right.align` | `T` | Whether right align the leaf labels. | EXISTING (was `leaf.label.right.align`) |
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `tree.show.scale.bar` | `F` | Show the phylogram scale bar. | New-style key |
+| `tree.show.axis.bar` | `T` | Show the axis bar. | New-style key |
+| `tree.show.title` | `T` | Show the bottom title. | New-style key |
+| `tree.show.width.height` | `F` | Show width and height in the drawing panel. Useful in circular layouts. | New-style key |
+| `tree.title.string` | `The phylogenetic tree with {0} high-quality sequenced samples.` | Bottom title template. `{0}` is replaced with the leaf count. | Renamed |
+| `tree.branch.length.unit` | `""` | Display unit for branch lengths, for example `mya`. | Renamed |
+| `tree.need.reverse.axis` | `F` | Reverse the axis direction, useful for time-ago scales. | Renamed |
 
 ---
 
-## Category %3: Inner Node (内部节点显示)
+## Category `%2`: Leaf Node
 
-控制内部节点的显示设置。
+Controls leaf-label visibility.
 
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `inner.show.label` | `F` | Show internal node label. | NEW |
-| `inner.show.bootstrap` | `F` | Show internal node bootstrap value. | NEW |
-| `inner.show.branch.length` | `F` | Show node branch length. | NEW |
-
----
-
-## Category %4: Root Settings (根节点设置)
-
-控制根节点相关显示。
-
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `root.show` | `F` | Whether to display the root node. | NEW |
-| `root.tip.length` | `10` | The length of the root tip line in pixels. | NEW |
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `leaf.show.label` | `T` | Show leaf labels. | Renamed |
+| `leaf.label.right.align` | `T` | Right-align leaf labels. | Existing |
 
 ---
 
-## Category %5: Mouse Wheel (鼠标滚轮缩放)
+## Category `%3`: Inner Node
 
-控制鼠标滚轮缩放行为。
+Controls internal-node display.
 
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `wheel.height.scale.on` | `T` | Whether mouse wheel scale on for height. | EXISTING (was `height.scale.on`) |
-| `wheel.width.scale.on` | `T` | Whether mouse wheel scale on for width. | EXISTING (was `width.scale.on`) |
-
----
-
-## Category %6: Font Settings (字体设置)
-
-控制各种字体显示。
-
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `font.global` | `<system font, 14>` | The font for global, leaf label names employ it. | EXISTING (was `tree.global.font`) |
-| `font.title` | `<title font>` | The font for bottom title. | EXISTING (was `bottom.title.font`) |
-| `font.axis` | `<global font>` | The font for x-axis and plotting scale. | NEW |
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `inner.show.label` | `F` | Show internal-node labels. | New-style key |
+| `inner.show.bootstrap` | `F` | Show bootstrap/support values. | New-style key |
+| `inner.show.branch.length` | `F` | Show branch lengths at internal nodes. | New-style key |
 
 ---
 
-## Category %7: Layout Settings (布局设置)
+## Category `%4`: Root Settings
 
-控制树的布局相关设置。
+Controls root-node display behavior.
 
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `layout.initial` | `RECT_PHYLO_LEFT` | Initial tree layout. Supports enum names or friendly names: RECTANGULAR, CIRCULAR, SPIRAL, SLANT, RADIAL. | NEW |
-| `layout.blank.space` | `20,40,80,40` | The blank area of top,left,bottom,right (pixels). | NEW |
-
-### Category %7.1: Rectangular Layout
-
-| Parameter Key | Default | Range | Tooltip | Status |
-|--------------|---------|-------|---------|--------|
-| `layout.rectangular.curvature` | `0` | 0-100 | Branch curvature. 0 = straight lines, 100 = curved. | NEW |
-
-### Category %7.2: Circular Layout
-
-| Parameter Key | Default | Range | Tooltip | Status |
-|--------------|---------|-------|---------|--------|
-| `layout.circular.start.degree` | `285` | 0-360 | Start angle in degrees. | NEW |
-| `layout.circular.extent.degree` | `360` | 0-360 | Arc extent in degrees. | NEW |
-| `layout.circular.inner.radius` | `50` | 0-200 | Inner circle radius for Inner Cladogram layout (pixels). | NEW |
-
-### Category %7.3: Spiral Layout
-
-| Parameter Key | Default | Range | Tooltip | Status |
-|--------------|---------|-------|---------|--------|
-| `layout.spiral.extent.degree` | `720` | 0-10000 | Total spiral angle in degrees. | NEW |
-| `layout.spiral.gap.factor` | `10` | 0-50 | Gap between spiral arms. | NEW |
-| `layout.spiral.beta.factor` | `100` | 100-500 | Beta mode factor (unit is 0.01). | NEW |
-
-### Category %7.4: Slant Layout
-
-| Parameter Key | Default | Range | Tooltip | Status |
-|--------------|---------|-------|---------|--------|
-| `layout.slant.tree.width` | `100` | 0-100 | Tree width percentage. Smaller values add right margin. | NEW |
-| `layout.slant.left.margin` | `20` | 0-100 | Left margin percentage. | NEW |
-| `layout.slant.rotation` | `0` | 0/90/180/270 | Rotation angle in degrees. | NEW |
-
-### Category %7.5: Radial Layout
-
-| Parameter Key | Default | Range | Tooltip | Status |
-|--------------|---------|-------|---------|--------|
-| `layout.radial.rotation` | `0` | 0-360 | Rotation angle in degrees. | NEW |
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `root.show` | `F` | Show the root node explicitly. | New-style key |
+| `root.tip.length` | `10` | Root tip length in pixels. | New-style key |
 
 ---
 
-## Category %8: Advanced (高级设置)
+## Category `%5`: Mouse Wheel
 
-其他高级配置。
+Controls independent wheel scaling on the two axes.
 
-| Parameter Key | Default | Tooltip | Status |
-|--------------|---------|---------|--------|
-| `advanced.node.visual.config` | `""` | Node specific visual annotations config file path. | EXISTING (was `node.visual.config.path`) |
-
----
-
-## 参数重命名映射表
-
-| 旧参数名 | 新参数名 | 分类 |
-|---------|---------|------|
-| `tree.global.font` | `font.global` | %6 Font Settings |
-| `bottom.title.font` | `font.title` | %6 Font Settings |
-| `blank.space` | `layout.blank.space` | %7 Layout Settings |
-| `height.scale.on` | `wheel.height.scale.on` | %5 Mouse Wheel |
-| `width.scale.on` | `wheel.width.scale.on` | %5 Mouse Wheel |
-| `show.leaf.label` | `leaf.show.label` | %2 Leaf Node |
-| `leaf.label.right.align` | `leaf.label.right.align` | %2 Leaf Node |
-| `need.reverse.axis.bar` | `tree.need.reverse.axis` | %1 Tree Information |
-| `bottom.title.string` | `tree.title.string` | %1 Tree Information |
-| `branch.length.unit` | `tree.branch.length.unit` | %1 Tree Information |
-| `node.visual.config.path` | `advanced.node.visual.config` | %8 Advanced |
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `wheel.height.scale.on` | `T` | Enable wheel scaling for height. | Renamed |
+| `wheel.width.scale.on` | `T` | Enable wheel scaling for width. | Renamed |
 
 ---
 
-## Implementation Code Template
+## Category `%6`: Font Settings
 
-### ParamsAssignerAndParser4ModernTreeView.java 构造函数
+Controls the main fonts used by the viewer.
 
-```java
-public ParamsAssignerAndParser4ModernTreeView() {
-    super();
-
-    Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(14f);
-    Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
-    String codeFont = EGPSFonts.codeFont(defaultFont);
-    String codeTitleFont = EGPSFonts.codeFont(defaultTitleFont);
-
-    // Category %1: Tree Information
-    addKeyValueEntryBean("%1", "Tree Information", "");
-    addKeyValueEntryBean("tree.show.scale.bar", "F", "Show the plotting scale for the phylogram.");
-    addKeyValueEntryBean("tree.show.axis.bar", "T", "Show the x-axis.");
-    addKeyValueEntryBean("tree.show.title", "T", "Show the statement at the bottom of the tree.");
-    addKeyValueEntryBean("tree.show.width.height", "F",
-            "Show width and height in the drawing panel. Useful for circular layout.");
-    addKeyValueEntryBean("tree.title.string",
-            "The phylogenetic tree with {0} high-quality sequenced samples.",
-            "Statement displayed at the bottom. {0} will be replaced with number of leaves.");
-    addKeyValueEntryBean("tree.branch.length.unit", "",
-            "The unit of branch, for example mya(million years ago) or evolutionary rate.");
-    addKeyValueEntryBean("tree.need.reverse.axis", "F",
-            "Whether reverse the axis bar. In some cases, the time is years ago.");
-
-    // Category %2: Leaf Node
-    addKeyValueEntryBean("%2", "Leaf Node", "");
-    addKeyValueEntryBean("leaf.show.label", "T", "Whether display the leaf label on the tree.");
-    addKeyValueEntryBean("leaf.label.right.align", "T", "Whether right align the leaf labels.");
-
-    // Category %3: Inner Node
-    addKeyValueEntryBean("%3", "Inner Node", "");
-    addKeyValueEntryBean("inner.show.label", "F", "Show internal node label.");
-    addKeyValueEntryBean("inner.show.bootstrap", "F", "Show internal node bootstrap value.");
-    addKeyValueEntryBean("inner.show.branch.length", "F", "Show node branch length.");
-
-    // Category %4: Root Settings
-    addKeyValueEntryBean("%4", "Root Settings", "");
-    addKeyValueEntryBean("root.show", "F", "Whether to display the root node.");
-    addKeyValueEntryBean("root.tip.length", "10", "The length of the root tip line in pixels.");
-
-    // Category %5: Mouse Wheel
-    addKeyValueEntryBean("%5", "Mouse Wheel", "");
-    addKeyValueEntryBean("wheel.height.scale.on", "T", "Whether mouse wheel scale on for height.");
-    addKeyValueEntryBean("wheel.width.scale.on", "T", "Whether mouse wheel scale on for width.");
-
-    // Category %6: Font Settings
-    addKeyValueEntryBean("%6", "Font Settings", "");
-    addKeyValueEntryBean("font.global", codeFont, "The font for global, leaf label names employ it.");
-    addKeyValueEntryBean("font.title", codeTitleFont, "The font for bottom title.");
-    addKeyValueEntryBean("font.axis", "", "The font for x-axis and plotting scale. Leave empty to use global font.");
-
-    // Category %7: Layout Settings
-    addKeyValueEntryBean("%7", "Layout Settings", "");
-    addKeyValueEntryBean("layout.initial", "RECTANGULAR",
-            "Initial tree layout: RECTANGULAR, CIRCULAR, SPIRAL, SLANT, or RADIAL.");
-    addKeyValueEntryBean("layout.radial.rotation", "0", "Rotation degree for radial layout (0-360).");
-    addKeyValueEntryBean("layout.blank.space", "20,40,80,40", "The blank area of top,left,bottom,right (pixels).");
-
-    // Category %8: Advanced
-    addKeyValueEntryBean("%8", "Advanced", "");
-    addKeyValueEntryBean("advanced.node.visual.config", "",
-            "Node specific visual annotations config file path.");
-}
-```
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `font.global` | `<system font, 14>` | Global font used by leaf labels and general text. | Renamed |
+| `font.title` | `<title font>` | Bottom-title font. | Renamed |
+| `font.axis` | `<global font>` | Axis and scale-bar font. Empty means reuse the global font. | New-style key |
 
 ---
 
-## Summary 汇总
+## Category `%7`: Layout Settings
 
-| Category | Parameter Count | Description |
-|----------|----------------|-------------|
-| Essential (必需) | 5 | 输入数据参数 |
-| %1 Tree Information | 7 | 树信息显示 |
-| %2 Leaf Node | 2 | 叶节点显示 |
-| %3 Inner Node | 3 | 内部节点显示 |
-| %4 Root Settings | 2 | 根节点设置 |
-| %5 Mouse Wheel | 2 | 鼠标滚轮缩放 |
-| %6 Font Settings | 3 | 字体设置 |
-| %7 Layout Settings | 15 | 布局设置 (含子类别) |
-| %8 Advanced | 1 | 高级设置 |
-| **Total** | **40** | 全部参数 |
+Controls initial layout selection and layout-specific options.
+
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `layout.initial` | `RECT_PHYLO_LEFT` | Initial layout. Supports layout enum names and friendly names such as `RECTANGULAR`, `CIRCULAR`, `SPIRAL`, `SLANT`, and `RADIAL`. | New-style key |
+| `layout.blank.space` | `20,40,80,40` | Blank area in `top,left,bottom,right` pixels. | New-style key |
+
+### Category `%7.1`: Rectangular Layout
+
+| Parameter Key | Default | Range | Description |
+|--------------|---------|-------|-------------|
+| `layout.rectangular.curvature` | `0` | `0-100` | Branch curvature. `0` means straight lines. `100` means maximally curved. |
+
+### Category `%7.2`: Circular Layout
+
+| Parameter Key | Default | Range | Description |
+|--------------|---------|-------|-------------|
+| `layout.circular.start.degree` | `285` | `0-360` | Start angle in degrees. |
+| `layout.circular.extent.degree` | `360` | `0-360` | Arc extent in degrees. |
+| `layout.circular.inner.radius` | `50` | `0-200` | Inner radius used by inner-cladogram style rendering. |
+
+### Category `%7.3`: Spiral Layout
+
+| Parameter Key | Default | Range | Description |
+|--------------|---------|-------|-------------|
+| `layout.spiral.extent.degree` | `720` | `0-10000` | Total spiral angle in degrees. |
+| `layout.spiral.gap.factor` | `10` | `0-50` | Gap between spiral arms. |
+| `layout.spiral.beta.factor` | `100` | `100-500` | Beta-mode factor, stored in `0.01` units. |
+
+### Category `%7.4`: Slant Layout
+
+| Parameter Key | Default | Range | Description |
+|--------------|---------|-------|-------------|
+| `layout.slant.tree.width` | `100` | `0-100` | Tree width percentage. Smaller values keep more right margin. |
+| `layout.slant.left.margin` | `20` | `0-100` | Left margin percentage. |
+| `layout.slant.rotation` | `0` | `0/90/180/270` | Rotation angle in degrees. |
+
+### Category `%7.5`: Radial Layout
+
+| Parameter Key | Default | Range | Description |
+|--------------|---------|-------|-------------|
+| `layout.radial.rotation` | `0` | `0-360` | Rotation angle in degrees. |
 
 ---
 
-## GUI Button to Parameter Mapping
+## Category `%8`: Advanced
 
-| GUI Button | New Parameter Key |
-|------------|------------------|
+| Parameter Key | Default | Description | Status |
+|--------------|---------|-------------|--------|
+| `advanced.node.visual.config` | `""` | TSV or equivalent configuration for node-specific visual annotations. | Renamed |
+
+---
+
+## Legacy-to-Current Key Mapping
+
+| Legacy Key | Current Key | Category |
+|------------|-------------|----------|
+| `tree.global.font` | `font.global` | `%6` Font Settings |
+| `bottom.title.font` | `font.title` | `%6` Font Settings |
+| `blank.space` | `layout.blank.space` | `%7` Layout Settings |
+| `height.scale.on` | `wheel.height.scale.on` | `%5` Mouse Wheel |
+| `width.scale.on` | `wheel.width.scale.on` | `%5` Mouse Wheel |
+| `show.leaf.label` | `leaf.show.label` | `%2` Leaf Node |
+| `leaf.label.right.align` | `leaf.label.right.align` | `%2` Leaf Node |
+| `need.reverse.axis.bar` | `tree.need.reverse.axis` | `%1` Tree Information |
+| `bottom.title.string` | `tree.title.string` | `%1` Tree Information |
+| `branch.length.unit` | `tree.branch.length.unit` | `%1` Tree Information |
+| `node.visual.config.path` | `advanced.node.visual.config` | `%8` Advanced |
+
+---
+
+## Parameter Summary
+
+| Category | Parameter Count | Purpose |
+|----------|----------------|---------|
+| Required input | 5 | Tree source and parsing mode |
+| `%1` Tree Information | 7 | Tree-wide informational elements |
+| `%2` Leaf Node | 2 | Leaf-label visibility |
+| `%3` Inner Node | 3 | Internal-node display |
+| `%4` Root Settings | 2 | Root-node display |
+| `%5` Mouse Wheel | 2 | Wheel scaling |
+| `%6` Font Settings | 3 | Typography |
+| `%7` Layout Settings | 15 | Layout selection and layout-specific tuning |
+| `%8` Advanced | 1 | Per-node visual configuration |
+| **Total** | **40** | Entire current parameter surface |
+
+---
+
+## GUI Toggle to Parameter Mapping
+
+| GUI Control | Parameter Key |
+|-------------|---------------|
 | Scale bar toggle | `tree.show.scale.bar` |
-| Axis button toggle | `tree.show.axis.bar` |
-| Display title toggle | `tree.show.title` |
-| W&H toggle | `tree.show.width.height` |
-| Show leaf label toggle | `leaf.show.label` |
-| Show inner node label toggle | `inner.show.label` |
-| Show branch length toggle | `inner.show.branch.length` |
-| Show bootstrap toggle | `inner.show.bootstrap` |
-| Height scale toggle | `wheel.height.scale.on` |
-| Width scale toggle | `wheel.width.scale.on` |
+| Axis toggle | `tree.show.axis.bar` |
+| Bottom title toggle | `tree.show.title` |
+| Width-and-height toggle | `tree.show.width.height` |
+| Leaf-label toggle | `leaf.show.label` |
+| Inner-node label toggle | `inner.show.label` |
+| Internal branch-length toggle | `inner.show.branch.length` |
+| Bootstrap toggle | `inner.show.bootstrap` |
+| Height wheel toggle | `wheel.height.scale.on` |
+| Width wheel toggle | `wheel.width.scale.on` |
 
 ---
 
-## Current Implementation Status (2025-12-31)
+## Current Status
 
-基于 `ParamsAssignerAndParser4ModernTreeView.java` 检查的实际实现状态。
-
-### ✅ 已实现的参数 (40/40)
-
-| Category | Parameter | Status |
-|----------|-----------|--------|
-| %1 Tree Information | `tree.show.scale.bar` | ✅ 已实现 |
-| %1 Tree Information | `tree.show.axis.bar` | ✅ 已实现 |
-| %1 Tree Information | `tree.show.title` | ✅ 已实现 |
-| %1 Tree Information | `tree.show.width.height` | ✅ 已实现 |
-| %1 Tree Information | `tree.title.string` | ✅ 已实现 |
-| %1 Tree Information | `tree.branch.length.unit` | ✅ 已实现 |
-| %1 Tree Information | `tree.need.reverse.axis` | ✅ 已实现 |
-| %2 Leaf Node | `leaf.show.label` | ✅ 已实现 |
-| %2 Leaf Node | `leaf.label.right.align` | ✅ 已实现 |
-| %3 Inner Node | `inner.show.label` | ✅ 已实现 |
-| %3 Inner Node | `inner.show.bootstrap` | ✅ 已实现 |
-| %3 Inner Node | `inner.show.branch.length` | ✅ 已实现 |
-| %4 Root Settings | `root.show` | ✅ 已实现 |
-| %4 Root Settings | `root.tip.length` | ✅ 已实现 |
-| %5 Mouse Wheel | `wheel.height.scale.on` | ✅ 已实现 |
-| %5 Mouse Wheel | `wheel.width.scale.on` | ✅ 已实现 |
-| %6 Font Settings | `font.global` | ✅ 已实现 |
-| %6 Font Settings | `font.title` | ✅ 已实现 |
-| %6 Font Settings | `font.axis` | ✅ 已实现 |
-| %7 Layout Settings | `layout.initial` | ✅ 已实现 |
-| %7 Layout Settings | `layout.blank.space` | ✅ 已实现 |
-| %7.1 Rectangular | `layout.rectangular.curvature` | ✅ 已实现 |
-| %7.2 Circular | `layout.circular.start.degree` | ✅ 已实现 |
-| %7.2 Circular | `layout.circular.extent.degree` | ✅ 已实现 |
-| %7.2 Circular | `layout.circular.inner.radius` | ✅ 已实现 |
-| %7.3 Spiral | `layout.spiral.extent.degree` | ✅ 已实现 |
-| %7.3 Spiral | `layout.spiral.gap.factor` | ✅ 已实现 |
-| %7.3 Spiral | `layout.spiral.beta.factor` | ✅ 已实现 |
-| %7.4 Slant | `layout.slant.tree.width` | ✅ 已实现 |
-| %7.4 Slant | `layout.slant.left.margin` | ✅ 已实现 |
-| %7.4 Slant | `layout.slant.rotation` | ✅ 已实现 |
-| %7.5 Radial | `layout.radial.rotation` | ✅ 已实现 |
-| %8 Advanced | `advanced.node.visual.config` | ✅ 已实现 |
-
-### 实现比例
-
-- **总参数数**: 40 (设计文档中列出)
-- **已实现**: 40 (100%)
-- **未实现**: 0 (0%)
+- `ParamsAssignerAndParser4ModernTreeView.java` defines the full set of 40 documented parameters.
+- All documented parameters are implemented in the current source tree.
+- The parameter surface now aligns with the current initialization rules described in `modern_tree_view_initial_mechanism.md`.

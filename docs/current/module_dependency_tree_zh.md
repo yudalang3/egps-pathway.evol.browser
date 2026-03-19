@@ -1,25 +1,25 @@
-# Module Dependency Tree
+# 模块依赖树
 
-## Overview
+## 概览
 
-This document describes the current package-level dependency tree for the `module.evolview.pathwaybrowser` module ecosystem.
+本文描述 `module.evolview.pathwaybrowser` 模块生态当前的包级依赖树。
 
-**Current status**
+**当前状态**
 
-- **Strict DAG:** yes
-- **Total packages:** 18
-- **Packages containing modules:** 8
-- **Utility packages:** 10
-- **Total modules:** 18
-- **Architecture depth:** 7 dependency layers
+- **严格 DAG：** 是
+- **包总数：** 18
+- **包含模块的包：** 8
+- **工具包：** 10
+- **模块总数：** 18
+- **架构深度：** 7 层依赖
 
 ---
 
-## Package Breakdown
+## 包结构拆分
 
-### Packages Containing Modules
+### 包含模块的包
 
-**Direct module packages**
+**直接模块包**
 
 1. `pathwaybrowser`
 2. `gfamily`
@@ -27,13 +27,13 @@ This document describes the current package-level dependency tree for the `modul
 4. `ambigbse`
 5. `pill`
 
-**Parent packages with submodules**
+**带子模块的父包**
 
-6. `evoldist` with 3 modules
-7. `multiseq` with 6 modules
-8. `treebuilder` with 4 modules
+6. `evoldist`，包含 3 个模块
+7. `multiseq`，包含 6 个模块
+8. `treebuilder`，包含 4 个模块
 
-### Utility Packages
+### 工具包
 
 1. `evolview.model`
 2. `evolview.phylotree`
@@ -48,9 +48,9 @@ This document describes the current package-level dependency tree for the `modul
 
 ---
 
-## Layered Dependency Structure
+## 分层依赖结构
 
-### Level 0: Base Utilities
+### Level 0：基础工具层
 
 - `ambigbse` [module]
 - `genome` [utility]
@@ -58,43 +58,43 @@ This document describes the current package-level dependency tree for the `modul
 - `pill` [module]
 - `webmsaoperator` [utility]
 
-### Level 1: Shared Infrastructure
+### Level 1：共享基础设施
 
 - `evoltrepipline` [utility]
 
-### Level 2: Core Algorithms
+### Level 2：核心算法层
 
 - `evoldist` [3 modules] -> `evoltrepipline`
 - `remnant` [utility] -> `evoltrepipline`, `evoldist`
 - `parsimonytre` [utility] -> `evoldist`
 
-### Level 3: Process Orchestration
+### Level 3：流程编排层
 
 - `evoltre` [utility] -> `parsimonytre`
 - `multiseq` [6 modules] -> `evoltrepipline`, `evoltre`, `webmsaoperator`
 - `treebuilder` [4 modules] -> `evoltrepipline`, `remnant`, `multiseq`, `evoldist`
 
-### Level 4: Model Layer
+### Level 4：模型层
 
 - `evolview.model` [utility]
 - `evolview.phylotree` [utility] -> `evolview.model`
 
-### Level 5: I/O Layer
+### Level 5：I/O 层
 
 - `evoltreio` [utility] -> `evolview.model`
 
-### Level 6: Application Layer
+### Level 6：应用层
 
 - `evolview.moderntreeviewer` [module] -> `evolview.model`, `evoltreio`, `pill`
 - `evolview.gfamily` [module] -> `evolview.model`, `evolview.phylotree`, `evolknow`, `evoltre`, `multiseq`
 
-### Level 7: Target Module
+### Level 7：目标模块
 
 - `evolview.pathwaybrowser` [module] -> `gfamily`, `evolview.model`, `moderntreeviewer`, `evolview.phylotree`
 
 ---
 
-## Complete Dependency Tree
+## 完整依赖树
 
 ```
 module.evolview.pathwaybrowser [MODULE]
@@ -128,17 +128,17 @@ Base dependencies:
 └─ module.treebuilder [4 MODULES] -> evoltrepipline, remnant, multiseq, evoldist
 ```
 
-Legend:
+图例：
 
-- `[MODULE]` means the package contains `IModuleLoader` implementations
-- `[UTILITY]` means the package provides shared support code
-- `->` means "depends on"
+- `[MODULE]` 表示该包包含 `IModuleLoader` 实现
+- `[UTILITY]` 表示该包提供共享支撑代码
+- `->` 表示“依赖于”
 
 ---
 
-## Compilation Order
+## 编译顺序
 
-Because the dependency graph is acyclic, the packages can be compiled in strict order:
+由于当前依赖图无环，包可以按严格顺序编译：
 
 ```text
 1. genome, evolknow, ambigbse, pill, webmsaoperator
@@ -159,9 +159,9 @@ Because the dependency graph is acyclic, the packages can be compiled in strict 
 
 ---
 
-## Current Design Summary
+## 当前设计摘要
 
-- The package graph is strictly acyclic.
-- Core algorithms remain below application-layer viewers and browsers.
-- Tree visualization infrastructure is shared through `evolview.phylotree` and `evolview.model`.
-- `pathwaybrowser` remains the top-level consumer in this dependency surface.
+- 当前包图是严格无环的。
+- 核心算法层始终位于应用层 viewer 和 browser 之下。
+- 树可视化基础设施通过 `evolview.phylotree` 与 `evolview.model` 共享。
+- `pathwaybrowser` 在这一依赖面中仍然是最顶层消费者。

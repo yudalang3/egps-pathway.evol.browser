@@ -1,317 +1,138 @@
-# Spiral Layout Architecture Design
+# Spiral Layout Reference
 
-## 1. Mathematical Foundation
+## Overview
 
-### Archimedean Spiral Formula
+This document describes the current spiral-layout mechanism used by the phylogenetic tree visualization layer.
 
+The implementation is based on the Archimedean spiral formula:
+
+```text
+r = alpha + beta * theta
 ```
-r = α + β × θ
-```
 
-| Symbol | Name | Description |
-|--------|------|-------------|
-| `r` | radius | Distance from center point |
-| `α` (alpha) | initial radius | Starting radius when θ=0 |
-| `β` (beta) | growth rate | Radius increase per radian |
-| `θ` (theta) | angle | Angle in radians |
+where:
 
-### Coordinate Conversion (Polar → Cartesian)
+- `r` is the radius from the layout center
+- `alpha` controls the starting offset
+- `beta` controls spiral growth
+- `theta` is the angle in radians
+
+---
+
+## Current Layout Variants
+
+The current codebase keeps two spiral variants.
+
+### Alpha-based spiral
+
+This variant changes `alpha` while keeping `beta` fixed.
+
+**Effect**
+
+- branch length is expressed as radial offset
+- spiral arms keep the same growth rate
+- the result looks closer to concentric spiral bands
+
+**Typical use**
+
+- trees with relatively small branch-length variation
+- layouts where parallel-looking spiral tracks are easier to read
+
+### Beta-based spiral
+
+This variant changes `beta` while keeping `alpha` fixed.
+
+**Effect**
+
+- branch length is expressed as spiral steepness
+- different branches grow outward at different rates
+- the result looks more divergent and cone-like
+
+**Typical use**
+
+- trees with larger branch-length variation
+- layouts where stronger visual separation is useful
+
+---
+
+## Coordinate Calculation
+
+The current spiral location calculation follows this pattern:
 
 ```java
-// GuiCalculator.calculateSpiralLocation(alpha, beta, angleDeg, centerX, centerY)
 double radians = Math.toRadians(angleDeg);
 double r = alpha + beta * radians;
 double x = centerX + r * Math.cos(radians);
-double y = centerY - r * Math.sin(radians);  // Y-axis inverted in screen coordinates
+double y = centerY - r * Math.sin(radians);
 ```
+
+The negative sign on `y` is required because the screen coordinate system grows downward.
 
 ---
 
-## 2. Two Layout Variants
+## Current Drawing Responsibilities
 
-### Overview
+The spiral layout implementation currently handles:
 
-| | Alpha Layout | Beta Layout |
-|--|-------------|-------------|
-| **Variable** | α (starting radius) | β (growth rate) |
-| **Fixed** | β (growth rate) | α (starting radius) |
-| **Branch Length Encoding** | Radial offset | Spiral steepness |
-| **Visual Effect** | Concentric spirals | Diverging spiral curves |
+- assigning node coordinates
+- generating spiral paths for tree branches
+- generating spiral-ring regions for clade highlighting
+- drawing bottom-axis reference spirals
+- converting tree branch-length space into screen distance
 
-### Alpha Layout (`SpiralPhyloWithAlpha`)
+The main shared methods are:
 
-```
-r = currentAlpha + beta × θ
-    └── varies      └── fixed
-```
-
-**Characteristics:**
-- All nodes follow spirals with the **same growth rate (β)**
-- Branch length determines **radial offset (α)**
-- Produces **concentric-like spiral rings**
-- Best for: Trees with small branch length variations
-
-**Key Variables:**
-```java
-double beta;           // Global fixed growth rate
-double maxAlpha;       // Maximum alpha value (outermost spiral)
-double rootTipLength;  // Minimum alpha value (innermost spiral)
-```
-
-### Beta Layout (`SpiralPhyloWithBeta`)
-
-```
-r = alpha + currentBeta × θ
-    └── fixed  └── varies
-```
-
-**Characteristics:**
-- Each node follows a spiral with **different growth rate (β)**
-- Branch length determines **spiral steepness**
-- Produces **diverging cone-like pattern**
-- Best for: Trees with large branch length variations
-
-**Key Variables:**
-```java
-double alpha;      // Global fixed starting radius
-double maxBeta;    // Maximum beta value (steepest spiral)
-double minBeta;    // Minimum beta value (flattest spiral)
-double betaFactor; // Multiplier for visual adjustment (default: 2.5)
-```
+- `produceSpiral(...)`
+- `produceSpiralRing(...)`
+- layout-specific `assignLocation(...)`
+- layout-specific `drawBottomAxis(...)`
 
 ---
 
-## 3. Axis Reference Lines (drawBottomAxis)
+## Scale and Axis Behavior
 
-### Purpose
-Draw faint spiral reference lines to help users understand branch length scale.
+Spiral layouts use different width calculations depending on which parameter varies.
 
-### Algorithm
+### Alpha-based layout
 
-#### Alpha Layout
-```java
-// Alpha varies from rootTipLength to maxAlpha
-double totalAvailableAlpha = maxAlpha - rootTipLength;
+When `alpha` varies, the visible radial difference is effectively constant:
 
-for (int i = 0; i < count; i++) {
-    // Map display value to alpha range
-    double currentAlpha = (displayValue - first) / range * totalAvailableAlpha + rootTipLength;
-
-    // Draw spiral with varying alpha, fixed beta
-    produceSpiral(globalStartDegree, totalDegree, currentAlpha, beta);
-}
+```text
+delta_r = delta_alpha
 ```
 
-#### Beta Layout
-```java
-// Beta varies from minBeta to maxBeta
-double totalAvailableBeta = maxBeta - minBeta;
+This makes scale-bar width easier to map directly from the available alpha range.
 
-for (int i = 0; i < count; i++) {
-    // Map display value to beta range
-    double currentBeta = (displayValue - first) / range * totalAvailableBeta + minBeta;
+### Beta-based layout
 
-    // Draw spiral with fixed alpha, varying beta
-    produceSpiral(globalStartDegree, totalDegree, rootTipLength, currentBeta);
-}
+When `beta` varies, the visible radial difference depends on the outer angle:
+
+```text
+delta_r = delta_beta * theta
 ```
 
-### Important: Why Beta Layout Needs Special Handling
-
-In Beta layout, larger β values cause rapid radius growth:
-- When β is large and θ reaches 630° (~11 radians)
-- Radius `r = α + β × 11` can exceed canvas bounds
-
-**Solution**: Beta layout should limit axis lines to reasonable angle ranges or use different visualization strategies.
+That is why beta-based layouts must compute scale width against the effective maximum angle instead of treating it as constant.
 
 ---
 
-## 4. Class Hierarchy
+## Current Configuration Surface
 
-```
-BaseLayout (abstract)
-├── blankArea: BlankArea
-├── centerX, centerY
-├── canvas2logicRatio
-│
-├── CicularLayout (abstract)
-│   └── CircularPhylo
-│       └── biggestCircleRadicus
-│
-└── SprialLayout (abstract)
-    ├── biggestCircleRadicus
-    ├── globalStartDegree
-    ├── increseDeg
-    ├── produceSpiral(startDeg, extendDeg, alpha, beta)
-    ├── produceSpiralRing(startDeg, extendDeg, minAlpha, minBeta, maxAlpha, maxBeta)
-    │
-    ├── SpiralPhyloWithAlpha
-    │   ├── beta (fixed)
-    │   ├── maxAlpha (variable max)
-    │   └── drawBottomAxis() → varies alpha
-    │
-    └── SpiralPhyloWithBeta
-        ├── alpha (fixed)
-        ├── minBeta, maxBeta (variable range)
-        ├── betaFactor
-        └── drawBottomAxis() → varies beta
-```
+The active spiral-layout configuration includes:
+
+| Parameter | Meaning |
+|-----------|---------|
+| `globalStartDegree` | Start angle |
+| `globalExtendingDegree` | Total angular extent |
+| `gapSize` | Spiral gap spacing |
+| `betaFactor` | Beta multiplier used by beta-mode rendering |
+| `rootTipLength` | Minimum visual root-tip distance |
 
 ---
 
-## 5. Key Methods
+## Practical Guidance
 
-### produceSpiral
-```java
-/**
- * Generate a spiral path from startDeg to startDeg+extendDeg
- *
- * @param startDeg   Starting angle in degrees
- * @param extendDeg  Angular extent in degrees
- * @param alpha      Initial radius (r when θ=0)
- * @param beta       Growth rate (Δr per radian)
- * @return GeneralPath representing the spiral curve
- */
-protected GeneralPath produceSpiral(double startDeg, double extendDeg, double alpha, double beta)
-```
+Use the alpha-based spiral when you want a more regular spiral structure and easier distance comparison.
 
-### produceSpiralRing
-```java
-/**
- * Generate a ring-shaped region between two spirals
- * Used for clade highlighting/annotation
- *
- * @param startDeg   Starting angle
- * @param extendDeg  Angular extent
- * @param minAlpha   Inner spiral's alpha
- * @param minBeta    Inner spiral's beta
- * @param maxAlpha   Outer spiral's alpha
- * @param maxBeta    Outer spiral's beta
- * @return GeneralPath representing the ring region
- */
-protected GeneralPath produceSpiralRing(...)
-```
+Use the beta-based spiral when you want larger branch-length differences to open up visually.
 
-### assignLocation (Alpha)
-```java
-// r = alpha (varies by branch length) + beta * theta
-Double pos = GuiCalculator.calculateSpiralLocation(
-    node.getRadicusIfNeeded(),  // alpha - varies
-    beta,                        // fixed
-    currentNodeAngle,
-    centerX, centerY
-);
-```
-
-### assignLocation (Beta)
-```java
-// r = alpha + beta (varies by branch length) * theta
-Double pos = GuiCalculator.calculateSpiralLocation(
-    alpha,                              // fixed
-    betaFactor * node.getRadicusIfNeeded(),  // beta - varies
-    currentNodeAngle,
-    centerX, centerY
-);
-```
-
----
-
-## 6. Scale Bar Configuration (workWidth)
-
-The `configureBottomScaleBarDrawProperty()` method requires the actual screen pixel distance available for drawing branch lengths.
-
-### Alpha Layout
-```java
-// Alpha varies from rootTipLength to maxAlpha
-// The screen distance is constant regardless of theta
-int workWidth = (int) (maxAlpha - rootTipLength);
-```
-
-### Beta Layout
-```java
-// Beta varies from minBeta to maxBeta
-// At different theta, the screen distance varies!
-// Must calculate at maximum theta for proper scaling
-// Currently globalStartDegree is always 0, but keep full formula for robustness
-double thetaMax = Math.toRadians(globalStartDegree + globalExtendingDegree);
-int workWidth = (int) ((maxBeta - minBeta) * thetaMax);
-```
-
-**Why the difference?**
-
-Using spiral formula `r = α + β × θ`:
-
-| Layout | What Varies | Screen Distance Formula |
-|--------|-------------|------------------------|
-| Alpha | α (starting radius) | `Δr = Δα` (constant) |
-| Beta | β (growth rate) | `Δr = Δβ × θ` (varies with angle) |
-
-For Beta layout, the screen distance between inner and outer spirals increases as θ increases. We use `thetaMax` to ensure the scale bar reflects the maximum spread at the outermost ring.
-
----
-
-## 7. Configuration Parameters
-
-| Parameter | Property Class | Description | Default |
-|-----------|---------------|-------------|---------|
-| `globalStartDegree` | SprialLayoutProperty | Starting angle | 0 |
-| `globalExtendingDegree` | SprialLayoutProperty | Total angle span | 630 |
-| `gapSize` | SprialLayoutProperty | Gap size for spacing | 10 |
-| `betaFactor` | SprialLayoutProperty | Beta multiplier (Beta layout only) | 2.5 |
-| `rootTipLength` | TreeLayoutProperties | Root tip display length | 10-15 |
-
----
-
-## 8. Debugging
-
-Both layouts include debug visualization blocks:
-
-```java
-@Override
-protected void specificTreeDrawingProcess(Graphics2D g2d) {
-    // Draw the whole region of the spiral, for debug
-    if (false) {
-        generalPath = produceSpiralRing(0, totolDeg, ...);
-        g2d.setColor(Color.lightGray);
-        g2d.draw(generalPath);
-    }
-
-    // Draw time lines, for debug
-    if (false) {
-        // Multiple spirals at different alpha/beta values
-        generalPath = produceSpiral(0, totolDeg, ...);
-        g2d.setColor(Color.red);
-        g2d.draw(generalPath);
-        // ...
-    }
-
-    drawBottomAxis(g2d);
-}
-```
-
-Change `if (false)` to `if (true)` to enable debug visualization.
-
----
-
-## 9. When to Use Each Layout
-
-### Use Alpha Layout When:
-- Branch length variations are relatively small
-- You want visually "parallel" spiral tracks
-- Comparing distances between taxa is important
-
-### Use Beta Layout When:
-- Branch length variations are large
-- You want a "spreading" cone-like effect
-- Visual separation of deep vs shallow branches is important
-
-### Use Circular Layout Instead When:
-- Tree has < 30 taxa
-- Precise branch length comparison is needed
-- You need traditional annotation bars
-
----
-
-## 10. Maintenance Notes
-
-- Debug drawing blocks are intentionally guarded by `if (false)`; temporarily switch to `if (true)` for visualization during development.
+If the tree is small or precise branch-length reading matters more than compact spiral presentation, a non-spiral layout is often clearer.
