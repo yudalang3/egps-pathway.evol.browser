@@ -77,23 +77,9 @@ public class EvolTreeManipulator {
 	}
 
 	/**
-	 * Backward-compatible alias for legacy external callers.
-	 */
-	public String[] getNodeNames(String tree_path, String targetHTU, boolean getOTU, boolean getHTU) throws Exception {
-		return extractNodeNames(tree_path, targetHTU, getOTU, getHTU);
-	}
-
-	/**
 	 * Human-readable description of this API.
 	 */
 	public String describe() {
 		return "External API for extracting node names from phylogenetic trees in Newick format.";
-	}
-
-	/**
-	 * Backward-compatible legacy string method.
-	 */
-	public String getString() {
-		return describe();
 	}
 }

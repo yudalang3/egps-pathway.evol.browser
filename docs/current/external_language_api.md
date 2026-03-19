@@ -34,8 +34,6 @@ This directory is the current home for project-facing Java entry points intended
 | `EvolTreeManipulator` | `extractNodeNames(...)`, `describe()` |
 | `TestJFrame` | `showDemoWindow(...)`, `renderDemoImageAsPng(...)` |
 
-Legacy names are still retained for backward compatibility.
-
 ---
 
 ## Current Boundary

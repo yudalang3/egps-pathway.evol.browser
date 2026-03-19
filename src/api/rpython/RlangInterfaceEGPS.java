@@ -24,25 +24,11 @@ public class RlangInterfaceEGPS {
     }
 
     /**
-     * Backward-compatible legacy method.
-     */
-    public String launch() throws Exception {
-        return launchDesktop();
-    }
-
-    /**
      * Show a payload in a dialog and return its length for quick bridge testing.
      */
     public String showPayloadAndReturnLength(String jsonPayload) {
         SwingUtilities.invokeLater(() -> SwingDialog.showInfoMSGDialog("Info", jsonPayload));
         return String.valueOf(jsonPayload.length());
-    }
-
-    /**
-     * Backward-compatible legacy method.
-     */
-    public String callTest(String jsonStr) {
-        return showPayloadAndReturnLength(jsonStr);
     }
 
     /**
@@ -53,12 +39,5 @@ public class RlangInterfaceEGPS {
             IndependentModuleLoader loader = new IndependentModuleLoader();
             MainFrameProperties.loadTheModuleFromIModuleLoader(loader);
         });
-    }
-
-    /**
-     * Backward-compatible legacy method.
-     */
-    public void modernTreeView(String jsonStr) {
-        openModernTreeView(jsonStr);
     }
 }

@@ -16,20 +16,23 @@ public class ExternalLanguageApiStructureTest {
         assertClassName(TestJFrame.class, "api.rpython.TestJFrame");
 
         assertSuperclass(API4R.class, EvolTreeManipulator.class);
-        assertMethodExists(API4R.class, "getNodeNames", String.class, String.class, boolean.class, boolean.class);
         assertMethodExists(API4R.class, "describe");
-        assertMethodExists(API4R.class, "getString");
         assertMethodExists(RlangInterfaceEGPS.class, "launchDesktop");
         assertMethodExists(RlangInterfaceEGPS.class, "showPayloadAndReturnLength", String.class);
         assertMethodExists(RlangInterfaceEGPS.class, "openModernTreeView", String.class);
-        assertMethodExists(RlangInterfaceEGPS.class, "launch");
-        assertMethodExists(RlangInterfaceEGPS.class, "callTest", String.class);
-        assertMethodExists(RlangInterfaceEGPS.class, "modernTreeView", String.class);
         assertMethodExists(ModernTreeViewPyLauncher.class, "launchFromConfigFile", String.class);
         assertMethodExists(EvolTreeManipulator.class, "extractNodeNames", String.class, String.class, boolean.class, boolean.class);
         assertMethodExists(EvolTreeManipulator.class, "describe");
         assertMethodExists(TestJFrame.class, "showDemoWindow", String.class);
         assertMethodExists(TestJFrame.class, "renderDemoImageAsPng", int.class, int.class);
+
+        assertMethodMissing(API4R.class, "getNodeNames", String.class, String.class, boolean.class, boolean.class);
+        assertMethodMissing(API4R.class, "getString");
+        assertMethodMissing(RlangInterfaceEGPS.class, "launch");
+        assertMethodMissing(RlangInterfaceEGPS.class, "callTest", String.class);
+        assertMethodMissing(RlangInterfaceEGPS.class, "modernTreeView", String.class);
+        assertMethodMissing(TestJFrame.class, "test1", String.class);
+        assertMethodMissing(TestJFrame.class, "test_picture", int.class, int.class);
     }
 
     private static void assertClassName(Class<?> clazz, String expectedName) {
@@ -50,6 +53,15 @@ public class ExternalLanguageApiStructureTest {
             clazz.getMethod(methodName, parameterTypes);
         } catch (NoSuchMethodException e) {
             throw new AssertionError("Missing method " + methodName + " on " + clazz.getName(), e);
+        }
+    }
+
+    private static void assertMethodMissing(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+        try {
+            clazz.getMethod(methodName, parameterTypes);
+            throw new AssertionError("Expected method to be removed: " + methodName + " on " + clazz.getName());
+        } catch (NoSuchMethodException e) {
+            // expected
         }
     }
 }

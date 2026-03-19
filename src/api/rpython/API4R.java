@@ -12,9 +12,4 @@ public class API4R extends EvolTreeManipulator {
     public String describe() {
         return "Compatibility-oriented R API for extracting node names from phylogenetic trees.";
     }
-
-    @Override
-    public String getString() {
-        return "Hello, World!";
-    }
 }

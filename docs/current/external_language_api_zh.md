@@ -34,8 +34,6 @@ src/api/rpython/
 | `EvolTreeManipulator` | `extractNodeNames(...)`、`describe()` |
 | `TestJFrame` | `showDemoWindow(...)`、`renderDemoImageAsPng(...)` |
 
-旧名字仍然保留，用于兼容已有调用方。
-
 ---
 
 ## 当前边界

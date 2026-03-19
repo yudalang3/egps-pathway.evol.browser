@@ -30,8 +30,6 @@
 | `EvolTreeManipulator` | `extractNodeNames(...)`、`describe()` |
 | `TestJFrame` | `showDemoWindow(...)`、`renderDemoImageAsPng(...)` |
 
-旧方法名仍然保留，用于兼容已有调用方。
-
 ---
 
 ## 边界

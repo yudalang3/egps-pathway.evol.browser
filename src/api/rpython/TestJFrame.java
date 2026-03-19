@@ -42,24 +42,10 @@ public class TestJFrame {
     }
 
     /**
-     * Backward-compatible legacy method.
-     */
-    public static void test1(String content) {
-        showDemoWindow(content);
-    }
-
-    /**
      * Generate a demo PNG image and return it as a byte array.
      */
     public static byte[] renderDemoImageAsPng(int width, int height) {
         return renderToBytes(width, height);
-    }
-
-    /**
-     * Backward-compatible legacy method.
-     */
-    public static byte[] test_picture(int width, int height) {
-        return renderDemoImageAsPng(width, height);
     }
 
     private static byte[] renderToBytes(int width, int height) {

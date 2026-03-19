@@ -30,8 +30,6 @@ These classes are the current external-language integration surface for this rep
 | `EvolTreeManipulator` | `extractNodeNames(...)`, `describe()` |
 | `TestJFrame` | `showDemoWindow(...)`, `renderDemoImageAsPng(...)` |
 
-Legacy method names are still kept for backward compatibility.
-
 ---
 
 ## Boundary
