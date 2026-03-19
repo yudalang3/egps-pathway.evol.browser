@@ -8,15 +8,7 @@
 
 **Configuration Directory:** `~/.egps/distance_tree_storage/`
 
-**Status:** Implemented (2025-12-11)
-
----
-
-## Agent Review (2025-12-12)
-
-- Verified the four managed JSON files and their default resources exist at `src/module/evoltreio/default_configs/`.
-- Verified `DistanceTreeConfigManager`, `SpeciesProperties`, and `TreeParameterHandler` are present and wired as described.
-- Caveat: the Javadoc in `DistanceTreeConfigManager` mentions `ensembl.genome.msa.species.info.json`, but no constant/default resource exists for it; treat this as a TODO or remove the comment if not planned.
+**Status:** Implemented
 
 ---
 

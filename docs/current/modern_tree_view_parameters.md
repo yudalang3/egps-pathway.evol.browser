@@ -226,8 +226,8 @@ public ParamsAssignerAndParser4ModernTreeView() {
     // Category %7: Layout Settings
     addKeyValueEntryBean("%7", "Layout Settings", "");
     addKeyValueEntryBean("layout.initial", "RECTANGULAR",
-            "Initial tree layout: RECTANGULAR, CIRCULAR, SPIRAL, SLOPE, or RADICAL.");
-    addKeyValueEntryBean("layout.radical.rotation", "0", "Rotation degree for radical layout (0-360).");
+            "Initial tree layout: RECTANGULAR, CIRCULAR, SPIRAL, SLANT, or RADIAL.");
+    addKeyValueEntryBean("layout.radial.rotation", "0", "Rotation degree for radial layout (0-360).");
     addKeyValueEntryBean("layout.blank.space", "20,40,80,40", "The blank area of top,left,bottom,right (pixels).");
 
     // Category %8: Advanced

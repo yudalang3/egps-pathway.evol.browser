@@ -43,7 +43,7 @@ egps-pathway.evol.browser/
 │   ├── evoltrepipline/          # Shared pipeline components
 │   └── [other utilities]/
 ├── dependency-egps/              # External JAR dependencies
-├── docs/                         # Documentation
+├── docs/                         # Documentation (current/history)
 ├── out/                          # Build output
 ├── CLAUDE.md                    # Developer guidance
 └── compile.sh                   # Build script
@@ -219,8 +219,9 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) file for details.
 
 For detailed developer information, see:
 - [CLAUDE.md](CLAUDE.md) - Developer guidance and architecture details
-- [modules_we_have.md](docs/modules_we_have.md) - Detailed module specifications
-- [docs/](docs/) - Additional documentation
+- [modules_we_have.md](docs/current/modules_we_have.md) - Detailed module specifications
+- [docs/current/](docs/current/) - Current documentation
+- [docs/history/](docs/history/) - Historical versions
 
 ## Contributing
 
@@ -240,7 +241,7 @@ When developing or extending modules:
 
 ## Support
 
-For issues, questions, or contributions, please refer to the project documentation in the [docs/](docs/) directory.
+For issues, questions, or contributions, please refer to the project documentation in [docs/current/](docs/current/) and [docs/history/](docs/history/).
 
 ---
 

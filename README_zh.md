@@ -43,7 +43,7 @@ egps-pathway.evol.browser/
 │   ├── evoltrepipline/          # 共享管道组件
 │   └── [其他工具]/
 ├── dependency-egps/              # 外部JAR依赖
-├── docs/                         # 文档
+├── docs/                         # 文档（current/history）
 ├── out/                          # 编译输出
 ├── CLAUDE.md                    # 开发指南
 └── compile.sh                   # 编译脚本
@@ -219,8 +219,9 @@ System.setProperty("file.encoding", "UTF-8")
 
 详细的开发者信息，请参阅：
 - [CLAUDE.md](CLAUDE.md) - 开发指南和架构细节
-- [modules_we_have.md](docs/modules_we_have.md) - 详细的模块规范
-- [docs/](docs/) - 其他文档
+- [modules_we_have.md](docs/current/modules_we_have.md) - 详细的模块规范
+- [docs/current/](docs/current/) - 当前文档
+- [docs/history/](docs/history/) - 历史版本
 
 ## 贡献指南
 
@@ -240,7 +241,7 @@ System.setProperty("file.encoding", "UTF-8")
 
 ## 支持
 
-如有问题、疑问或贡献，请参考[docs/](docs/)目录中的项目文档。
+如有问题、疑问或贡献，请参考[docs/current/](docs/current/)和[docs/history/](docs/history/)中的项目文档。
 
 ---
 

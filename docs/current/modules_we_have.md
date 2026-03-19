@@ -9,7 +9,9 @@ This project contains **18 modules** implementing the `IModuleLoader` interface,
   - multiseq (6 modules)
   - treebuilder (4 modules)
 
-**Architecture**: ✅ DAG (Directed Acyclic Graph) - All circular dependencies resolved (2025-12-11)
+**Architecture**: ✅ DAG (Directed Acyclic Graph) - All circular dependencies resolved
+
+This snapshot reflects the 18 current `IModuleLoader` implementations under `src/module/**`.
 
 ---
 
@@ -52,7 +54,7 @@ This project contains **18 modules** implementing the `IModuleLoader` interface,
 
 ### Evolutionary Visualization (evolview package - 3 modules)
 - **gfamily** - Gene family browser with interactive phylogenetic trees and sequence structures
-- **moderntreeviewer** - Modern tree viewer with multiple layouts and VOICM parameter management
+- **moderntreeviewer** - Modern tree viewer with multiple layouts and VOICE parameter management
 - **pathwaybrowser** - Biological pathway visualization with phylogenetic context
 
 ### Multiple Sequence Alignment (multiseq package - 6 modules)
@@ -73,14 +75,3 @@ This project contains **18 modules** implementing the `IModuleLoader` interface,
 - **fromdist** - Construct phylogenetic tree from evolutionary distance matrix
 
 ---
-
-## Agent Review (2025-12-12)
-
-- The module list matches all `IModuleLoader` implementations in `src/module/**` (18 loaders).
-- `src/module/treebuilder/fromvcf/` exists but is currently empty and not counted as a module.
-- Strict DAG now holds in the current source:
-  - `parsimonytre` visualization demos live in `module.evolview.demo.parsimonytre`.
-  - Shared alignment models were moved to `module.evoltrepipline.alignment`.
-  - `TreeParameterHandler` was moved to `module.evoltrepipline`.
-
-*Last updated: 2025-12-12*

@@ -1,10 +1,10 @@
-# Modern Tree View vs. FigTree：功能差距评估（ModernTreeViewer 模块）
+# Modern Tree View vs FigTree Gap Analysis
 
 > 目标：从“终端用户可见功能”的角度，系统梳理 eGPS `Modern tree view`（`module.evolview.moderntreeviewer`）相对 FigTree 仍缺失/不足的能力，并给出优先级建议。
 >
 > 评估依据：仅基于本仓库可见源码与内置说明（不含 `dependency-egps/*` 未跟踪依赖的实际能力）。若某些导出/渲染能力在外部依赖中实现，本报告中相关条目可能需要回填为“已支持/部分支持”。
 >
-> FigTree 对标版本：**最新 release 为 `v1.4.4`（2018-11-25）**；同时参考了 FigTree **master 分支源码**中可直接定位到的功能实现（见第 6 节）。
+> FigTree 参考基线：公开仓库和可直接定位到的功能实现；本文是源码快照，不假设外部版本状态恒定不变。
 
 ---
 
@@ -14,7 +14,7 @@
 
 - Newick 输入：支持字符串与文件路径输入；支持多种 `nwk.format`（0-9）。入口：`src/module/evolview/moderntreeviewer/VOICE4MTV.java`、`src/module/evolview/moderntreeviewer/io/TreeParser4MTV.java`。
 - “表格式树”(ITP/TPV 类) 输入：支持 table-like tree file（用于更易读/可手工编辑的树输入）。入口同上。
-- 参数化导入：VOIC(E) 参数面板，支持示例与（VOICM 体系中的）书签/导入导出。入口：`src/module/evolview/moderntreeviewer/VOICE4MTV.java`、`src/module/evolview/moderntreeviewer/io/ParamsAssignerAndParser4ModernTreeView.java`。
+- 参数化导入：VOICE 参数面板，支持示例与书签/导入导出。入口：`src/module/evolview/moderntreeviewer/VOICE4MTV.java`、`src/module/evolview/moderntreeviewer/io/ParamsAssignerAndParser4ModernTreeView.java`。
 
 ### 1.2 树布局与显示
 
@@ -91,9 +91,7 @@
 | 折叠 | cartoon（triangle）/ collapse-as-single-taxon | 常用 | 部分支持 | 当前 collapse 有 triangle 属性；未见 “single taxon 代表 clade” 模式 |
 | 样式 | 手工设色/线宽/节点大小 | 常用 | 已支持 | 操作面板 + `GeneFamilyController` |
 | 样式 | 按属性映射（Colour By / Width By / Node Shape） | 常用 | 缺失 | 现有 TSV 偏“点名式”（name -> style），缺少按列映射与交互配置 |
-| 样式 | Legend（属性/配色图例） | 常用 | 缺失 | 未见 legend 绘制或 UI |
 | 交互 | Copy selection to clipboard（taxon labels / subtree as NEXUS） | 常用 | 缺失 | 未见剪贴板导出入口 |
-| 样式 | 图例/legend | 常用 | 缺失 | 未见 legend 绘制或 UI |
 | 标注 | clade annotation/label | 常用 | 已支持（增强） | `NodeAnnotationDialogContainer`（多类注释） |
 | 导出 | PDF/SVG/EPS（矢量） | 常用 | 待确认/缺失 | `exportPicturesOrData()` 空；模块 Export 仅 `.nwk` |
 | 导出 | PNG/JPG（位图） | 常用 | 待确认/缺失 | 同上 |
