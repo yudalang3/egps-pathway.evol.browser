@@ -56,7 +56,7 @@ public class GeneBrowserMainFace extends GeneFamilyMainFace {
     private static final Logger log = LoggerFactory.getLogger(GeneBrowserMainFace.class);
     private final String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/geneBrowserFace.json");
 
-    private VOICM4GeneBrowser importHandler = new VOICM4GeneBrowser(this);
+    private final VOICM4GeneBrowser importHandler = new VOICM4GeneBrowser(this);
 
     GeneBrowserMainFace(IModuleLoader moduleLoader) {
         super(moduleLoader);

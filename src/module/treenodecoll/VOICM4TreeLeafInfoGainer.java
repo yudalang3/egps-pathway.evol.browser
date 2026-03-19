@@ -57,7 +57,7 @@ public class VOICM4TreeLeafInfoGainer extends AbstractGuiBaseVoiceFeaturedPanel 
 		DefaultPhyNode phyloTree;
 		try {
 			Optional<DefaultPhyNode> tree = treeParser4Evoltree.getTree(bean);
-			if (!tree.isPresent()) {
+			if (tree.isEmpty()) {
 				SwingDialog.showErrorMSGDialog("Parse error", "Input parameter error, please check.");
 				return;
 			}
