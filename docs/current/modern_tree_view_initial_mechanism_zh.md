@@ -67,7 +67,7 @@ Modern Tree View（MTV）不只是一个独立的可视化模块。在这个项�
 
 ### 5. 外部 Python 启动器
 
-`src/api/rpython/ModernTreeViewPyLauncher.java` 会先打开 MTV，再在主界面 ready 之后，通过程序调用执行 `VOICE4MTV`。
+`src/api/rpython/ModernTreeViewPyLauncher.java` 会先打开 MTV，再在主界面 ready 之后，通过程序调用导入 VOICE 配置。
 
 这条路径混合了：
 
@@ -80,7 +80,7 @@ Modern Tree View（MTV）不只是一个独立的可视化模块。在这个项�
 
 ### 6. 外部 R 入口
 
-`src/api/rpython/RlangInterfaceEGPS.java` 当前也可以通过 `IndependentModuleLoader` 打开 MTV 模块。
+`src/api/rpython/RlangInterfaceEGPS.java` 现在会复用同一条基于配置文件的 MTV 导入路径，因此 R 和 Python 走的是同一套入口。
 
 虽然它目前还没有真正把传入 JSON 解析成树数据，但它依然属于初始化表面的一部分，因为它代表了另一种从正常 GUI 工作流之外进入 MTV 的方式。
 

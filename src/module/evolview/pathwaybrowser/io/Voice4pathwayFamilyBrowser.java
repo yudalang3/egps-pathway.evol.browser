@@ -33,7 +33,7 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 	}
 
 	@Override
-	protected void execute(OrganizedParameterGetter o) throws Exception {
+	public void execute(OrganizedParameterGetter o) throws Exception {
 
 		ImporterBean4PathwayFamilyBrowser importBeanInfo = paramsAssignerAndParser4pathwayFamBrowser
 				.getImportBeanInfo(o);

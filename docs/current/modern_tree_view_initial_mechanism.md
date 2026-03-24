@@ -67,7 +67,7 @@ This path is easy to overlook because the source tree already exists, but the ta
 
 ### 5. External Python launcher
 
-`src/api/rpython/ModernTreeViewPyLauncher.java` opens MTV first, then executes `VOICE4MTV` programmatically after the main frame is ready.
+`src/api/rpython/ModernTreeViewPyLauncher.java` opens MTV and then imports the VOICE config programmatically after the main frame is ready.
 
 This path mixes:
 
@@ -80,7 +80,7 @@ It is another reminder that MTV initialization is partly synchronous and partly 
 
 ### 6. External R entry point
 
-`src/api/rpython/RlangInterfaceEGPS.java` currently opens the MTV module shell through `IndependentModuleLoader`.
+`src/api/rpython/RlangInterfaceEGPS.java` now delegates to the same config-driven MTV launcher, so R and Python share the same import path.
 
 At the moment it does not yet parse the incoming JSON into tree data, but it still belongs to the initialization surface because it creates the module and defines another way the module can be entered from outside the normal GUI workflow.
 

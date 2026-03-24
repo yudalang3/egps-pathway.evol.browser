@@ -171,6 +171,7 @@ Current examples include:
 - `API4R`
 - `RlangInterfaceEGPS`
 - `ModernTreeViewPyLauncher`
+- `PathwayFamilyBrowserPyLauncher`
 - `EvolTreeManipulator`
 
 ## Development

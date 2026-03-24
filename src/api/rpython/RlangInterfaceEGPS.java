@@ -3,9 +3,8 @@ package api.rpython;
 import egps2.EGPSProperties;
 import egps2.Launcher;
 import egps2.Launcher4Dev;
-import egps2.frame.MainFrameProperties;
 import egps2.panels.dialog.SwingDialog;
-import module.evolview.moderntreeviewer.IndependentModuleLoader;
+import egps2.UnifiedAccessPoint;
 
 import javax.swing.SwingUtilities;
 
@@ -18,8 +17,10 @@ public class RlangInterfaceEGPS {
      * Launch the desktop application from an R-side call.
      */
     public String launchDesktop() throws Exception {
-        Launcher4Dev.main(new String[]{});
         Launcher.isLaunchFromR = true;
+        if (!UnifiedAccessPoint.isGULaunched()) {
+            Launcher4Dev.main(new String[]{});
+        }
         return "Hello this is eGPS desktop, version: ".concat(EGPSProperties.EGPS_VERSION);
     }
 
@@ -32,12 +33,16 @@ public class RlangInterfaceEGPS {
     }
 
     /**
-     * Open the Modern Tree View module shell from an R-side call.
+     * Open Modern Tree View from a config file path.
      */
-    public void openModernTreeView(String jsonPayload) {
-        SwingUtilities.invokeLater(() -> {
-            IndependentModuleLoader loader = new IndependentModuleLoader();
-            MainFrameProperties.loadTheModuleFromIModuleLoader(loader);
-        });
+    public void openModernTreeView(String configFilePath) throws Exception {
+        ModernTreeViewPyLauncher.launchFromConfigFile(configFilePath);
+    }
+
+    /**
+     * Open Pathway Family Browser from a config file path.
+     */
+    public void openPathwayFamilyBrowser(String configFilePath) throws Exception {
+        PathwayFamilyBrowserPyLauncher.launchFromConfigFile(configFilePath);
     }
 }

@@ -3,6 +3,7 @@ package test.api.rpython;
 import api.rpython.EvolTreeManipulator;
 import api.rpython.API4R;
 import api.rpython.ModernTreeViewPyLauncher;
+import api.rpython.PathwayFamilyBrowserPyLauncher;
 import api.rpython.RlangInterfaceEGPS;
 import api.rpython.TestJFrame;
 
@@ -12,6 +13,7 @@ public class ExternalLanguageApiStructureTest {
         assertClassName(API4R.class, "api.rpython.API4R");
         assertClassName(RlangInterfaceEGPS.class, "api.rpython.RlangInterfaceEGPS");
         assertClassName(ModernTreeViewPyLauncher.class, "api.rpython.ModernTreeViewPyLauncher");
+        assertClassName(PathwayFamilyBrowserPyLauncher.class, "api.rpython.PathwayFamilyBrowserPyLauncher");
         assertClassName(EvolTreeManipulator.class, "api.rpython.EvolTreeManipulator");
         assertClassName(TestJFrame.class, "api.rpython.TestJFrame");
 
@@ -20,7 +22,9 @@ public class ExternalLanguageApiStructureTest {
         assertMethodExists(RlangInterfaceEGPS.class, "launchDesktop");
         assertMethodExists(RlangInterfaceEGPS.class, "showPayloadAndReturnLength", String.class);
         assertMethodExists(RlangInterfaceEGPS.class, "openModernTreeView", String.class);
+        assertMethodExists(RlangInterfaceEGPS.class, "openPathwayFamilyBrowser", String.class);
         assertMethodExists(ModernTreeViewPyLauncher.class, "launchFromConfigFile", String.class);
+        assertMethodExists(PathwayFamilyBrowserPyLauncher.class, "launchFromConfigFile", String.class);
         assertMethodExists(EvolTreeManipulator.class, "extractNodeNames", String.class, String.class, boolean.class, boolean.class);
         assertMethodExists(EvolTreeManipulator.class, "describe");
         assertMethodExists(TestJFrame.class, "showDemoWindow", String.class);

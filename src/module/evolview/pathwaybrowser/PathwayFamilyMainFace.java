@@ -100,6 +100,10 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		voiceDataHandler.doUserImportAction();
 	}
 
+	public Voice4pathwayFamilyBrowser getImportHandler() {
+		return voiceDataHandler;
+	}
+
 	@Override
 	public boolean canExport() {
 		return true;

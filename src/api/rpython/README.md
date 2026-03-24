@@ -2,46 +2,36 @@
 
 ## Overview
 
-This directory contains the Java-side bridge classes intended for R or Python-driven workflows.
-
-These classes are the current external-language integration surface for this repository.
-
----
+`src/api/rpython/` contains the Java bridge surface intended to be called from Python or R wrappers.
 
 ## Current Classes
 
 | Class | Role |
 |------|------|
-| `API4R` | Compatibility-oriented R API for tree node extraction |
-| `RlangInterfaceEGPS` | R-side desktop bridge for launching eGPS and opening Modern Tree View |
-| `ModernTreeViewPyLauncher` | Python-side launcher for starting eGPS and driving MTV import from a config file |
-| `EvolTreeManipulator` | Utility API for extracting node names from Newick trees |
-| `TestJFrame` | Local helper/test UI class in the same integration area |
+| `API4R` | Compatibility-oriented tree utility bridge |
+| `EvolTreeManipulator` | Base utility API for extracting node names from Newick trees |
+| `RlangInterfaceEGPS` | R-facing desktop bridge for launching eGPS and opening the two primary GUI modules |
+| `ModernTreeViewPyLauncher` | Python-facing launcher for starting eGPS and importing Modern Tree View from a VOICE config file |
+| `PathwayFamilyBrowserPyLauncher` | Python-facing launcher for starting eGPS and importing Pathway Family Browser from a VOICE config file |
+| `TestJFrame` | Local helper/test UI bridge |
 
----
-
-## Preferred Entry Methods
+## Preferred Methods
 
 | Class | Preferred methods |
 |------|-------------------|
 | `API4R` | `extractNodeNames(...)`, `describe()` |
-| `RlangInterfaceEGPS` | `launchDesktop()`, `showPayloadAndReturnLength(...)`, `openModernTreeView(...)` |
-| `ModernTreeViewPyLauncher` | `launchFromConfigFile(...)` |
 | `EvolTreeManipulator` | `extractNodeNames(...)`, `describe()` |
+| `RlangInterfaceEGPS` | `launchDesktop()`, `showPayloadAndReturnLength(...)`, `openModernTreeView(...)`, `openPathwayFamilyBrowser(...)` |
+| `ModernTreeViewPyLauncher` | `launchFromConfigFile(...)` |
+| `PathwayFamilyBrowserPyLauncher` | `launchFromConfigFile(...)` |
 | `TestJFrame` | `showDemoWindow(...)`, `renderDemoImageAsPng(...)` |
-
----
 
 ## Boundary
 
-Only external-language bridge entry points and support utilities belong here.
-
-Internal visualization classes should remain in their subsystem packages even if their names include `rpython`, unless they are promoted into a real external API.
-
----
+Only public bridge entry points and small bridge helpers should live here. Internal visualization implementation classes stay in their subsystem packages unless they are promoted into real external APIs.
 
 ## Maintenance Rules
 
-1. New R/Python-facing Java bridge classes should be added under `src/api/rpython`.
-2. Keep this directory focused on entry points and small bridge utilities.
-3. If an external workflow depends on a class here, document it in `docs/current/external_language_api.md`.
+1. New R/Python-facing Java bridge classes belong under `src/api/rpython`.
+2. Keep the package focused on entry points and lightweight helpers.
+3. If a wrapper depends on a class here, document it in `docs/current/external_language_api.md`.

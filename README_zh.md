@@ -171,6 +171,7 @@ Java 侧的 R 和 Python 桥接入口现在统一集中在 `src/api/rpython/`。
 - `API4R`
 - `RlangInterfaceEGPS`
 - `ModernTreeViewPyLauncher`
+- `PathwayFamilyBrowserPyLauncher`
 - `EvolTreeManipulator`
 
 ## 开发指南
