@@ -8,7 +8,7 @@ If you would like a bundled version that includes egps-base, egps-shell, and egp
 
 ## Overview
 
-**eGPS Pathway Evolution Browser** is a plugin module for the eGPS2 platform that provides 18 integrated bioinformatics tools. The module suite supports a complete workflow from gene sequence retrieval to phylogenetic tree construction and evolutionary distance analysis.
+**eGPS Pathway Evolution Browser** is a plugin module for the eGPS2 platform that provides 23 module-loader entry points, including the core bioinformatics workflow tools and additional tree/evolution visualization utilities. The module suite supports a complete workflow from gene sequence retrieval to phylogenetic tree construction and evolutionary distance analysis.
 
 ### Key Features
 
@@ -36,7 +36,7 @@ egps-pathway.evol.browser/
 ├── src/module/                    # Source code modules
 │   ├── ambigbse/                 # Ambiguous nucleotide tools
 │   ├── evoldist/                 # Evolutionary distance (3 modules)
-│   ├── evolview/                 # Evolution visualization (3 modules)
+│   ├── evolview/                 # Evolution visualization modules
 │   ├── multiseq/                 # Multiple sequence alignment (6 modules)
 │   ├── pill/                     # Pathway illuminator
 │   ├── treebuilder/              # Tree construction (4 modules)
@@ -47,12 +47,21 @@ egps-pathway.evol.browser/
 ├── src/api/rpython/             # External language bridge APIs for R/Python workflows
 ├── out/                          # Build output
 ├── CLAUDE.md                    # Developer guidance
-└── compile.sh                   # Build script
+├── compile.sh                   # Linux/macOS bash build script
+└── compile.bat                  # Windows cmd.exe build script
 ```
 
 ## Build & Compilation
 
 ### Automatic Compilation
+
+**Windows (cmd.exe or PowerShell):**
+
+```bat
+compile.bat
+```
+
+**Linux/macOS/Git Bash/WSL:**
 
 ```bash
 bash compile.sh
@@ -60,8 +69,24 @@ bash compile.sh
 
 ### Manual Compilation
 
+**Windows PowerShell:**
+
+```powershell
+Get-ChildItem -Path src -Recurse -Filter *.java |
+  ForEach-Object { $_.FullName } |
+  Set-Content -Path "$env:TEMP\egps_pathway_sources.txt" -Encoding ASCII
+
+javac -encoding UTF-8 `
+  -d out\production\egps-pathway.evol.browser `
+  -cp "dependency-egps/*" `
+  "@$env:TEMP\egps_pathway_sources.txt"
+```
+
+**Linux/macOS/Git Bash/WSL:**
+
 ```bash
-javac -d ./out/production/egps-pathway.evol.browser \
+javac -encoding UTF-8 \
+  -d ./out/production/egps-pathway.evol.browser \
   -cp "dependency-egps/*" \
   $(find src -name "*.java")
 ```
@@ -74,6 +99,16 @@ Compiled classes: `./out/production/egps-pathway.evol.browser`
 
 ### Development Mode
 
+**Windows:**
+
+```powershell
+java -cp "out\production\egps-pathway.evol.browser;dependency-egps/*" `
+  -Xmx12g @eGPS.args `
+  egps2.Launcher4Dev
+```
+
+**Linux/macOS/Git Bash/WSL:**
+
 ```bash
 java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
   -Xmx12g @eGPS.args \
@@ -81,6 +116,16 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 ```
 
 ### Production Mode
+
+**Windows:**
+
+```powershell
+java -cp "out\production\egps-pathway.evol.browser;dependency-egps/*" `
+  -Xmx12g @eGPS.args `
+  egps2.Launcher
+```
+
+**Linux/macOS/Git Bash/WSL:**
 
 ```bash
 java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
@@ -90,6 +135,16 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 
 ### Launch Specific Module
 
+**Windows:**
+
+```powershell
+java -cp "out\production\egps-pathway.evol.browser;dependency-egps/*" `
+  -Xmx12g @eGPS.args `
+  egps2.Launcher com.package.ModuleClassName
+```
+
+**Linux/macOS/Git Bash/WSL:**
+
 ```bash
 java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
   -Xmx12g @eGPS.args \
@@ -98,7 +153,7 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 
 ## Modules
 
-The suite contains 18 modules organized in 9 packages:
+The suite currently contains 23 module-loader entry points. The core documented workflow modules are organized as follows:
 
 ### Sequence Tools
 - **ambigbse**: Converts IUPAC ambiguous nucleotide codes (R, Y, M, K, S, W, H, B, V, D, N) to concrete sequences and reverse complements
@@ -130,6 +185,13 @@ The suite contains 18 modules organized in 9 packages:
 - **treebuilder/frommaf**: Construct phylogenetic trees from MAF (Multiple Alignment Format) files
 - **treebuilder/fromdist**: Construct phylogenetic trees from evolutionary distance matrices
 
+### Additional Tree and Evolution Utilities
+- **treeconveop**: Tree conversion and node-information operations
+- **treenodecoll**: Tree node collection utilities
+- **treetanglegram**: Tanglegram visualization tools
+- **evolview/genebrowser**: Gene browser visualization
+- **evolview/treebarplot**: Tree-associated bar plot visualization
+
 ## Architecture
 
 ### Module System
@@ -157,7 +219,7 @@ The codebase maintains a **Directed Acyclic Graph (DAG)** architecture—no circ
 
 ## Configuration
 
-User configuration is stored in `~/.egps/`:
+User configuration is managed by the eGPS shell/mainframe dependency through `EGPSProperties.PROPERTIES_DIR`:
 - **First-time launch**: Creates configuration directory structure
 - **Module discovery**: Automatic classpath scanning and plugin loading
 - **MAFFT integration**: Auto-detection of MAFFT installation paths

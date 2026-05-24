@@ -8,7 +8,7 @@
 
 ## 概述
 
-**eGPS 通路进化浏览器**是eGPS2平台的插件模块，提供18个集成生物信息学工具。该模块套件支持完整的工作流程，从基因序列获取到系统树构建和进化距离分析。
+**eGPS 通路进化浏览器**是 eGPS2 平台的插件模块，提供 23 个模块加载入口，包括核心生物信息学工作流工具，以及额外的系统树/进化可视化工具。该模块套件支持完整的工作流程，从基因序列获取到系统树构建和进化距离分析。
 
 ### 主要功能
 
@@ -36,7 +36,7 @@ egps-pathway.evol.browser/
 ├── src/module/                    # 源代码模块
 │   ├── ambigbse/                 # 歧义碱基工具
 │   ├── evoldist/                 # 进化距离（3个模块）
-│   ├── evolview/                 # 进化可视化（3个模块）
+│   ├── evolview/                 # 进化可视化模块
 │   ├── multiseq/                 # 多序列比对（6个模块）
 │   ├── pill/                     # 通路照亮器
 │   ├── treebuilder/              # 树构建（4个模块）
@@ -47,12 +47,21 @@ egps-pathway.evol.browser/
 ├── src/api/rpython/             # 面向 R/Python 工作流的外部语言桥接 API
 ├── out/                          # 编译输出
 ├── CLAUDE.md                    # 开发指南
-└── compile.sh                   # 编译脚本
+├── compile.sh                   # Linux/macOS bash 编译脚本
+└── compile.bat                  # Windows cmd.exe 编译脚本
 ```
 
 ## 构建与编译
 
 ### 自动编译
+
+**Windows（cmd.exe 或 PowerShell）：**
+
+```bat
+compile.bat
+```
+
+**Linux/macOS/Git Bash/WSL：**
 
 ```bash
 bash compile.sh
@@ -60,8 +69,24 @@ bash compile.sh
 
 ### 手动编译
 
+**Windows PowerShell：**
+
+```powershell
+Get-ChildItem -Path src -Recurse -Filter *.java |
+  ForEach-Object { $_.FullName } |
+  Set-Content -Path "$env:TEMP\egps_pathway_sources.txt" -Encoding ASCII
+
+javac -encoding UTF-8 `
+  -d out\production\egps-pathway.evol.browser `
+  -cp "dependency-egps/*" `
+  "@$env:TEMP\egps_pathway_sources.txt"
+```
+
+**Linux/macOS/Git Bash/WSL：**
+
 ```bash
-javac -d ./out/production/egps-pathway.evol.browser \
+javac -encoding UTF-8 \
+  -d ./out/production/egps-pathway.evol.browser \
   -cp "dependency-egps/*" \
   $(find src -name "*.java")
 ```
@@ -74,6 +99,16 @@ javac -d ./out/production/egps-pathway.evol.browser \
 
 ### 开发模式
 
+**Windows：**
+
+```powershell
+java -cp "out\production\egps-pathway.evol.browser;dependency-egps/*" `
+  -Xmx12g @eGPS.args `
+  egps2.Launcher4Dev
+```
+
+**Linux/macOS/Git Bash/WSL：**
+
 ```bash
 java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
   -Xmx12g @eGPS.args \
@@ -81,6 +116,16 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 ```
 
 ### 生产模式
+
+**Windows：**
+
+```powershell
+java -cp "out\production\egps-pathway.evol.browser;dependency-egps/*" `
+  -Xmx12g @eGPS.args `
+  egps2.Launcher
+```
+
+**Linux/macOS/Git Bash/WSL：**
 
 ```bash
 java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
@@ -90,6 +135,16 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 
 ### 启动特定模块
 
+**Windows：**
+
+```powershell
+java -cp "out\production\egps-pathway.evol.browser;dependency-egps/*" `
+  -Xmx12g @eGPS.args `
+  egps2.Launcher com.package.ModuleClassName
+```
+
+**Linux/macOS/Git Bash/WSL：**
+
 ```bash
 java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
   -Xmx12g @eGPS.args \
@@ -98,7 +153,7 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 
 ## 模块组成
 
-该套件包含18个模块，组织在9个包中：
+该套件当前包含 23 个模块加载入口。核心文档化工作流模块如下：
 
 ### 序列工具
 - **ambigbse**：将IUPAC歧义碱基代码（R、Y、M、K、S、W、H、B、V、D、N）转换为具体序列并生成反向互补序列
@@ -130,6 +185,13 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
 - **treebuilder/frommaf**：从MAF（多序列比对格式）文件构建系统树
 - **treebuilder/fromdist**：从进化距离矩阵构建系统树
 
+### 额外系统树与进化工具
+- **treeconveop**：系统树转换与节点信息操作
+- **treenodecoll**：系统树节点集合工具
+- **treetanglegram**：Tanglegram 可视化工具
+- **evolview/genebrowser**：基因浏览器可视化
+- **evolview/treebarplot**：系统树关联柱状图可视化
+
 ## 架构
 
 ### 模块系统
@@ -157,7 +219,7 @@ public ModuleVersion getVersion() {
 
 ## 配置
 
-用户配置存储在`~/.egps/`中：
+用户配置由 eGPS shell/mainframe 依赖通过 `EGPSProperties.PROPERTIES_DIR` 管理：
 - **首次启动**：创建配置目录结构
 - **模块发现**：自动类路径扫描和插件加载
 - **MAFFT集成**：自动检测MAFFT安装路径
