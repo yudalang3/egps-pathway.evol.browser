@@ -37,36 +37,53 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
     }
 
     @Override
+    protected String getInputFilePath() {
+        return inputFile;
+    }
+
+    @Override
     public void reInitializeGUI() {
-        // Load and parse TSV data, but don't display the table yet
-        removeAll();
-        setLayout(new BorderLayout());
-        setBackground(Color.white);
+        preparePanelForLoading();
 
-        initializeFonts();
-
-        ParsedTsv parsed;
+        PreparedNameRows prepared;
         try {
-            parsed = readSpreadsheet(new File(inputFile));
+            prepared = prepareNameRows(readSpreadsheet(new File(inputFile)));
         } catch (MalformedInputException e) {
             log.error("Data file encoding error: {}", inputFile, e);
-            add(buildErrorPanel("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry."));
-            revalidate();
-            repaint();
+            showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
             return;
         } catch (IOException e) {
             log.error("Error loading data file", e);
-            add(buildErrorPanel("Error loading data file."));
+            showErrorMessage("Error loading data file.");
+            return;
+        }
+
+        applyPreparedData(prepared);
+    }
+
+    @Override
+    public void reInitializeGUIAsync() {
+        executeAsyncLoad("Loading pathway components...");
+    }
+
+    @Override
+    protected PreparedNameRows doPrepareDataInBackground() throws Exception {
+        return prepareNameRows(readSpreadsheet(new File(inputFile)));
+    }
+
+    @Override
+    protected void applyPreparedData(PreparedNameRows prepared) {
+        preparePanelForLoading();
+        headerNames = prepared.headers();
+        nameColumnIndex = prepared.nameColumnIndex();
+        if (nameColumnIndex < 0) {
+            add(buildErrorPanel("Error: Data file must have a column named \"Name\"."));
             revalidate();
             repaint();
             return;
         }
 
-        if (!validateNameColumn(parsed)) {
-            return;
-        }
-
-        List<List<String>> contents = parsed.rows();
+        List<List<String>> contents = prepared.rows();
         if (contents == null || contents.isEmpty()) {
             add(buildInfoPanel("No rows found in pathway component table."));
             revalidate();
@@ -74,19 +91,8 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
             return;
         }
 
-        // Build name to row data mapping
-        Map<String, List<String>> tmpMap = new HashMap<>();
-        for (List<String> row : contents) {
-            if (row != null && nameColumnIndex < row.size()) {
-                String name = row.get(nameColumnIndex);
-                if (name != null && !name.isEmpty()) {
-                    tmpMap.put(name, row);
-                }
-            }
-        }
-        name2RowData = Collections.unmodifiableMap(tmpMap);
+        name2RowData = prepared.name2RowData();
 
-        // Show initial prompt message
         add(buildInfoPanel("Please select a node from the tree to view pathway components."));
         revalidate();
         repaint();
@@ -94,7 +100,6 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
 
     @Override
     public void treeNodeClicked(String nodeName) {
-        // Display the single row matching nodeName
         if (nodeName == null || nodeName.isEmpty()) {
             return;
         }

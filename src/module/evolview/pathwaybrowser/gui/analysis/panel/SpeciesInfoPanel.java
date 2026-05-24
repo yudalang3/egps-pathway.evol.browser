@@ -1,6 +1,7 @@
 package module.evolview.pathwaybrowser.gui.analysis.panel;
 
 import egps2.UnifiedAccessPoint;
+import module.evolview.common.SwingDebouncer;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.concurrent.ExecutionException;
 import java.util.*;
 import java.util.List;
 
@@ -48,6 +50,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	private Map<String, Integer> name2ModelRowIndex = Collections.emptyMap();
 	private Font displayFont;
 	private Font displayTitleFont;
+	private final SwingDebouncer filterDebouncer = new SwingDebouncer(160, this::applyFilter);
 
 	/** Flag to prevent circular notification when tree updates the table selection */
 	private boolean isUpdatingFromTree = false;
@@ -64,6 +67,65 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 
     @Override
     public void reInitializeGUI() {
+		preparePanelForLoading();
+
+		PreparedTableData prepared;
+		try {
+			prepared = prepareTableData(readSpreadsheet(inputFile));
+		} catch (MalformedInputException e) {
+			log.error("Data file encoding error: {}", inputFile.getAbsolutePath(), e);
+			showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
+			return;
+		} catch (IOException e) {
+			log.error("Error loading data file", e);
+			showErrorMessage("Error loading data file.");
+			return;
+		}
+
+		showPreparedData(prepared);
+    }
+
+	@Override
+	public void reInitializeGUIAsync() {
+		int version = nextLoadVersion();
+		runOnEdt(() -> {
+			if (!isLoadCurrent(version)) {
+				return;
+			}
+			preparePanelForLoading();
+			add(buildInfoPanel("Loading species information..."));
+			revalidate();
+			repaint();
+		});
+
+		new SwingWorker<PreparedTableData, Void>() {
+			@Override
+			protected PreparedTableData doInBackground() throws Exception {
+				return prepareTableData(readSpreadsheet(inputFile));
+			}
+
+			@Override
+			protected void done() {
+				if (!isLoadCurrent(version)) {
+					return;
+				}
+				try {
+					showPreparedData(get());
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					if (isLoadCurrent(version)) {
+						showErrorMessage("Loading was interrupted.");
+					}
+				} catch (ExecutionException e) {
+					if (isLoadCurrent(version)) {
+						handleLoadingFailure(e.getCause());
+					}
+				}
+			}
+		}.execute();
+	}
+
+	private void preparePanelForLoading() {
 		removeAll();
 		setLayout(new BorderLayout());
 		setBackground(Color.white);
@@ -72,30 +134,14 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		Font globalDefaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 		displayFont = chooseCjkCapableFont(globalDefaultFont != null ? globalDefaultFont : UIManager.getFont("Label.font"));
 		displayTitleFont = chooseCjkCapableFont(globalDefaultTitleFont != null ? globalDefaultTitleFont : displayFont);
+	}
 
-		ParsedTsv parsed;
-		try {
-			parsed = readSpreadsheet(inputFile);
-		} catch (MalformedInputException e) {
-			log.error("Data file encoding error: {}", inputFile.getAbsolutePath(), e);
-			add(buildErrorPanel("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry."));
-			revalidate();
-			repaint();
-			return;
-		} catch (IOException e) {
-			log.error("Error loading data file", e);
-			add(buildErrorPanel("Error loading data file."));
-			revalidate();
-			repaint();
-			return;
-		}
-
-
-
+	private void showPreparedData(PreparedTableData prepared) {
+		preparePanelForLoading();
 		final String mustHaveName = "Name";
 
-		List<String> headerNames = parsed.headers;
-		nameColumnIndex = headerNames.indexOf(mustHaveName);
+		String[] headers = prepared.headers;
+		nameColumnIndex = prepared.nameColumnIndex;
 		if (nameColumnIndex < 0) {
 			add(buildErrorPanel("Error: Data file must have a column named \"" + mustHaveName + "\"."));
 			revalidate();
@@ -103,7 +149,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 			return;
 		}
 
-		List<List<String>> contents = parsed.rows;
+		List<List<String>> contents = prepared.rows;
 		if (contents == null || contents.isEmpty()) {
 			add(buildInfoPanel("No rows found in species info table."));
 			revalidate();
@@ -115,7 +161,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		JPanel topBar = buildTopBar(inputFile.getName());
 		add(topBar, BorderLayout.NORTH);
 
-		buildTable(headerNames, contents);
+		buildTable(prepared);
 		JScrollPane tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_GRID));
 		tableScrollPane.getViewport().setBackground(Color.white);
@@ -127,7 +173,24 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 
 		revalidate();
 		repaint();
-    }
+	}
+
+	private void handleLoadingFailure(Throwable throwable) {
+		if (throwable instanceof MalformedInputException) {
+			log.error("Data file encoding error: {}", inputFile.getAbsolutePath(), throwable);
+			showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
+			return;
+		}
+		log.error("Error loading data file", throwable);
+		showErrorMessage("Error loading data file.");
+	}
+
+	private void showErrorMessage(String message) {
+		preparePanelForLoading();
+		add(buildErrorPanel(message));
+		revalidate();
+		repaint();
+	}
 
     @Override
     public void treeNodeClicked(String nodeName) {
@@ -191,9 +254,9 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		}
 		filterField.setToolTipText("Filter rows by matching any column.");
 		filterField.getDocument().addDocumentListener(new DocumentListener() {
-			@Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
-			@Override public void removeUpdate(DocumentEvent e) { applyFilter(); }
-			@Override public void changedUpdate(DocumentEvent e) { applyFilter(); }
+			@Override public void insertUpdate(DocumentEvent e) { filterDebouncer.restart(); }
+			@Override public void removeUpdate(DocumentEvent e) { filterDebouncer.restart(); }
+			@Override public void changedUpdate(DocumentEvent e) { filterDebouncer.restart(); }
 		});
 		searchPanel.add(filterField, BorderLayout.CENTER);
 
@@ -215,24 +278,11 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		return topBar;
 	}
 
-	private void buildTable(List<String> headerNames, List<List<String>> contents) {
-		String[] headers = headerNames.toArray(new String[0]);
-		Object[][] data = new Object[contents.size()][headers.length];
-		HashMap<String, Integer> tmpIndex = new HashMap<>();
-
-		for (int r = 0; r < contents.size(); r++) {
-			List<String> row = contents.get(r);
-			for (int c = 0; c < headers.length; c++) {
-				String v = (row != null && c < row.size()) ? row.get(c) : "";
-				data[r][c] = v == null ? "" : v;
-			}
-			Object nameObj = data[r][nameColumnIndex];
-			if (nameObj != null) {
-				String name = nameObj.toString();
-				tmpIndex.putIfAbsent(name, r);
-			}
-		}
-		name2ModelRowIndex = Collections.unmodifiableMap(tmpIndex);
+	private void buildTable(PreparedTableData prepared) {
+		String[] headers = prepared.headers;
+		List<List<String>> contents = prepared.rows;
+		Object[][] data = prepared.data;
+		name2ModelRowIndex = prepared.name2ModelRowIndex;
 
 		tableModel = new DefaultTableModel(data, headers) {
 			@Override
@@ -562,7 +612,38 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		return p;
 	}
 
-	private record ParsedTsv(List<String> headers, List<List<String>> rows) {}
+	record ParsedTsv(List<String> headers, List<List<String>> rows) {}
+
+	record PreparedTableData(
+			String[] headers,
+			List<List<String>> rows,
+			Object[][] data,
+			Map<String, Integer> name2ModelRowIndex,
+			int nameColumnIndex) {}
+
+	static PreparedTableData prepareTableData(ParsedTsv parsed) {
+		String[] headers = parsed.headers.toArray(new String[0]);
+		List<List<String>> rows = parsed.rows;
+		int nameColumnIndex = parsed.headers.indexOf("Name");
+		Object[][] data = new Object[rows.size()][headers.length];
+		HashMap<String, Integer> tmpIndex = new HashMap<>();
+
+		for (int r = 0; r < rows.size(); r++) {
+			List<String> row = rows.get(r);
+			for (int c = 0; c < headers.length; c++) {
+				String v = (row != null && c < row.size()) ? row.get(c) : "";
+				data[r][c] = v == null ? "" : v;
+			}
+			if (nameColumnIndex >= 0) {
+				Object nameObj = data[r][nameColumnIndex];
+				if (nameObj != null) {
+					String name = nameObj.toString();
+					tmpIndex.putIfAbsent(name, r);
+				}
+			}
+		}
+		return new PreparedTableData(headers, rows, data, Collections.unmodifiableMap(tmpIndex), nameColumnIndex);
+	}
 
 	private ParsedTsv readTsvUtf8(File file) throws IOException {
 		List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);

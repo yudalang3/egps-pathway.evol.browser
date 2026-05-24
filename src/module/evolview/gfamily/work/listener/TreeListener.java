@@ -10,6 +10,7 @@ import module.evolview.gfamily.work.gui.ScaleBarRectObject;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.gui.tree.RectObj;
 import module.evolview.gfamily.work.gui.tree.TreePopupMenu;
+import module.evolview.common.SwingDebouncer;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.model.tree.ScaleBarProperty;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
@@ -57,6 +58,10 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 	private final StringBuilder sBuilder = new StringBuilder(1024);
 	private final String templateHeader = "<html><body font size='5'>";
 	private final String templatefooter = "</body></html>";
+	private final SwingDebouncer wheelZoomDebouncer = new SwingDebouncer(40, this::applyPendingWheelZoom);
+	private int pendingWheelHeightChange;
+	private int pendingWheelWidthChange;
+	private Point pendingWheelPoint;
 
 	private final Rectangle rect4selectArea = new Rectangle();
 	private final String gestureActionHint = new String(
@@ -537,7 +542,22 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 		int heightScrollAmout = whetherHeightScaleOnMouseWheel ? scrollAmount : 0;
 		int widthScrollAmout = whetherWidthScaleOnMouseWheel ? scrollAmount : 0;
-		phylogeneticTreePanel.continuouslyZoomInOrOut(heightScrollAmout, widthScrollAmout, e.getPoint());
+		pendingWheelHeightChange += heightScrollAmout;
+		pendingWheelWidthChange += widthScrollAmout;
+		pendingWheelPoint = e.getPoint();
+		wheelZoomDebouncer.restart();
+	}
+
+	private void applyPendingWheelZoom() {
+		int heightChange = pendingWheelHeightChange;
+		int widthChange = pendingWheelWidthChange;
+		Point point = pendingWheelPoint;
+		pendingWheelHeightChange = 0;
+		pendingWheelWidthChange = 0;
+		pendingWheelPoint = null;
+		if (point != null && (heightChange != 0 || widthChange != 0)) {
+			phylogeneticTreePanel.continuouslyZoomInOrOut(heightChange, widthChange, point);
+		}
 	}
 
 	@Override

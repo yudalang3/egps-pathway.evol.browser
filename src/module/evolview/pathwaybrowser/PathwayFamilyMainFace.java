@@ -390,11 +390,9 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 
 
-		SwingUtilities.invokeLater(() -> {
-			for (AbstractAnalysisPanel analysisPanel : analysisPanels){
-				analysisPanel.reInitializeGUI();
-			}
-		});
+		for (AbstractAnalysisPanel analysisPanel : analysisPanels){
+			analysisPanel.reInitializeGUIAsync();
+		}
 		SwingUtilities.invokeLater(() -> phylogeneticTreePanel.initializeLeftPanel());
 	}
 

@@ -105,6 +105,32 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
      */
     protected record ParsedTsv(List<String> headers, List<List<String>> rows) {}
 
+    protected record PreparedNameRows(
+            List<String> headers,
+            List<List<String>> rows,
+            int nameColumnIndex,
+            java.util.Map<String, List<String>> name2RowData) {}
+
+    static PreparedNameRows prepareNameRows(ParsedTsv parsed) {
+        List<String> headers = parsed.headers();
+        List<List<String>> rows = parsed.rows();
+        int nameColumnIndex = headers.indexOf("Name");
+        if (nameColumnIndex < 0 || rows == null || rows.isEmpty()) {
+            return new PreparedNameRows(headers, rows, nameColumnIndex, java.util.Collections.emptyMap());
+        }
+
+        java.util.Map<String, List<String>> tmpMap = new java.util.HashMap<>();
+        for (List<String> row : rows) {
+            if (row != null && nameColumnIndex < row.size()) {
+                String name = row.get(nameColumnIndex);
+                if (name != null && !name.isEmpty()) {
+                    tmpMap.put(name, row);
+                }
+            }
+        }
+        return new PreparedNameRows(headers, rows, nameColumnIndex, java.util.Collections.unmodifiableMap(tmpMap));
+    }
+
     /**
      * Read and parse a TSV file with UTF-8 encoding.
      */
@@ -308,4 +334,103 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
      * Get the logger for the specific subclass.
      */
     protected abstract Logger getLogger();
+
+    // ----- Async loading support -----
+
+    /**
+     * Prepare the panel for loading state: clear components, set layout, initialize fonts.
+     */
+    protected void preparePanelForLoading() {
+        removeAll();
+        setLayout(new BorderLayout());
+        setBackground(Color.white);
+        initializeFonts();
+    }
+
+    /**
+     * Show an error message in the panel.
+     */
+    protected void showErrorMessage(String message) {
+        preparePanelForLoading();
+        add(buildErrorPanel(message));
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Handle loading failure by logging and showing appropriate error message.
+     */
+    protected void handleLoadingFailure(Throwable throwable, String inputFile) {
+        if (throwable instanceof java.nio.charset.MalformedInputException) {
+            getLogger().error("Data file encoding error: {}", inputFile, throwable);
+            showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
+            return;
+        }
+        getLogger().error("Error loading data file", throwable);
+        showErrorMessage("Error loading data file.");
+    }
+
+    /**
+     * Execute async data loading using SwingWorker.
+     * Subclasses provide the data preparation logic via {@link #doPrepareDataInBackground()}.
+     *
+     * @param loadingMessage the message to show while loading
+     */
+    protected void executeAsyncLoad(String loadingMessage) {
+        int version = nextLoadVersion();
+        runOnEdt(() -> {
+            if (!isLoadCurrent(version)) {
+                return;
+            }
+            preparePanelForLoading();
+            add(buildInfoPanel(loadingMessage));
+            revalidate();
+            repaint();
+        });
+
+        new SwingWorker<PreparedNameRows, Void>() {
+            @Override
+            protected PreparedNameRows doInBackground() throws Exception {
+                return doPrepareDataInBackground();
+            }
+
+            @Override
+            protected void done() {
+                if (!isLoadCurrent(version)) {
+                    return;
+                }
+                try {
+                    PreparedNameRows result = get();
+                    applyPreparedData(result);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    if (isLoadCurrent(version)) {
+                        showErrorMessage("Loading was interrupted.");
+                    }
+                } catch (java.util.concurrent.ExecutionException e) {
+                    if (isLoadCurrent(version)) {
+                        handleLoadingFailure(e.getCause(), getInputFilePath());
+                    }
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Prepare data in background thread. Called by {@link #executeAsyncLoad(String)}.
+     * Subclasses must implement this to perform the actual data loading and preparation.
+     */
+    protected abstract PreparedNameRows doPrepareDataInBackground() throws Exception;
+
+    /**
+     * Apply prepared data to the panel on EDT. Called after successful background loading.
+     * Subclasses must implement this to display the prepared data.
+     */
+    protected abstract void applyPreparedData(PreparedNameRows prepared);
+
+    /**
+     * Get the input file path for error messages.
+     * Subclasses should override to provide the actual file path.
+     */
+    protected abstract String getInputFilePath();
 }
