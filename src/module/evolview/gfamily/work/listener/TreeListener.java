@@ -614,6 +614,9 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		}
 
 		dealWithSelectedNodes(selectedNode);
+		for (Consumer<GraphicsNode> consumer : tree2AnalyzingPanelInteractions) {
+			consumer.accept(selectedNode);
+		}
 
 		String tooltipString = null;
 		if (isLeaf) {

@@ -55,6 +55,8 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
     // Data fields
     protected int nameColumnIndex = -1;
     protected List<String> headerNames;
+    private static final int LOADING_MESSAGE_DELAY_MILLISECONDS = 200;
+    private Timer loadingMessageTimer;
 
     public AbstractTsvBasedAnalysisPanel(PathwayBrowserController controller) {
         super(controller);
@@ -378,15 +380,7 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
      */
     protected void executeAsyncLoad(String loadingMessage) {
         int version = nextLoadVersion();
-        runOnEdt(() -> {
-            if (!isLoadCurrent(version)) {
-                return;
-            }
-            preparePanelForLoading();
-            add(buildInfoPanel(loadingMessage));
-            revalidate();
-            repaint();
-        });
+        scheduleLoadingMessage(version, loadingMessage);
 
         new SwingWorker<PreparedNameRows, Void>() {
             @Override
@@ -399,6 +393,7 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
                 if (!isLoadCurrent(version)) {
                     return;
                 }
+                cancelLoadingMessage();
                 try {
                     PreparedNameRows result = get();
                     applyPreparedData(result);
@@ -414,6 +409,30 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
                 }
             }
         }.execute();
+    }
+
+    private void scheduleLoadingMessage(int version, String loadingMessage) {
+        runOnEdt(() -> {
+            cancelLoadingMessage();
+            loadingMessageTimer = new Timer(LOADING_MESSAGE_DELAY_MILLISECONDS, e -> {
+                if (!isLoadCurrent(version)) {
+                    return;
+                }
+                preparePanelForLoading();
+                add(buildInfoPanel(loadingMessage));
+                revalidate();
+                repaint();
+            });
+            loadingMessageTimer.setRepeats(false);
+            loadingMessageTimer.start();
+        });
+    }
+
+    private void cancelLoadingMessage() {
+        if (loadingMessageTimer != null) {
+            loadingMessageTimer.stop();
+            loadingMessageTimer = null;
+        }
     }
 
     /**

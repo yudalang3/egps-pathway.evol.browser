@@ -51,6 +51,8 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	private Font displayFont;
 	private Font displayTitleFont;
 	private final SwingDebouncer filterDebouncer = new SwingDebouncer(160, this::applyFilter);
+	private static final int LOADING_MESSAGE_DELAY_MILLISECONDS = 200;
+	private javax.swing.Timer loadingMessageTimer;
 
 	/** Flag to prevent circular notification when tree updates the table selection */
 	private boolean isUpdatingFromTree = false;
@@ -88,15 +90,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	@Override
 	public void reInitializeGUIAsync() {
 		int version = nextLoadVersion();
-		runOnEdt(() -> {
-			if (!isLoadCurrent(version)) {
-				return;
-			}
-			preparePanelForLoading();
-			add(buildInfoPanel("Loading species information..."));
-			revalidate();
-			repaint();
-		});
+		scheduleLoadingMessage(version, "Loading species information...");
 
 		new SwingWorker<PreparedTableData, Void>() {
 			@Override
@@ -109,6 +103,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 				if (!isLoadCurrent(version)) {
 					return;
 				}
+				cancelLoadingMessage();
 				try {
 					showPreparedData(get());
 				} catch (InterruptedException e) {
@@ -123,6 +118,30 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 				}
 			}
 		}.execute();
+	}
+
+	private void scheduleLoadingMessage(int version, String loadingMessage) {
+		runOnEdt(() -> {
+			cancelLoadingMessage();
+			loadingMessageTimer = new javax.swing.Timer(LOADING_MESSAGE_DELAY_MILLISECONDS, e -> {
+				if (!isLoadCurrent(version)) {
+					return;
+				}
+				preparePanelForLoading();
+				add(buildInfoPanel(loadingMessage));
+				revalidate();
+				repaint();
+			});
+			loadingMessageTimer.setRepeats(false);
+			loadingMessageTimer.start();
+		});
+	}
+
+	private void cancelLoadingMessage() {
+		if (loadingMessageTimer != null) {
+			loadingMessageTimer.stop();
+			loadingMessageTimer = null;
+		}
 	}
 
 	private void preparePanelForLoading() {
@@ -469,7 +488,15 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		int viewRow = table.convertRowIndexToView(modelRow);
 		if (viewRow < 0 && filterField != null && !filterField.getText().isBlank()) {
 			filterField.setText("");
+			filterDebouncer.stop();
+			if (rowSorter != null) {
+				rowSorter.setRowFilter(null);
+			}
+			updateStatusLabel();
 			viewRow = table.convertRowIndexToView(modelRow);
+			if (viewRow >= 0 && statusLabel != null) {
+				statusLabel.setText("Filter cleared to show: " + nodeName);
+			}
 		}
 		if (viewRow < 0) return;
 

@@ -1,6 +1,7 @@
 package module.evolview.pathwaybrowser.gui.analysis.panel;
 
 import module.evolview.pathwaybrowser.PathwayBrowserController;
+import module.evolview.common.SwingDebouncer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,8 @@ public class SpeciesTraitPanel extends AbstractTsvBasedAnalysisPanel {
     private final String inputFile;
 
     private Map<String, List<String>> name2RowData = Collections.emptyMap();
+    private final SwingDebouncer nodeClickDebouncer = new SwingDebouncer(60, this::displayPendingNode);
+    private String pendingNodeName;
 
     public SpeciesTraitPanel(PathwayBrowserController controller, String tsvFilePath) {
         super(controller);
@@ -103,7 +106,16 @@ public class SpeciesTraitPanel extends AbstractTsvBasedAnalysisPanel {
         if (nodeName == null || nodeName.isEmpty()) {
             return;
         }
-        SwingUtilities.invokeLater(() -> displayRowForNode(nodeName));
+        pendingNodeName = nodeName;
+        nodeClickDebouncer.restart();
+    }
+
+    private void displayPendingNode() {
+        String nodeName = pendingNodeName;
+        pendingNodeName = null;
+        if (nodeName != null && !nodeName.isEmpty()) {
+            displayRowForNode(nodeName);
+        }
     }
 
     private void displayRowForNode(String nodeName) {
