@@ -48,3 +48,5 @@ AGENTS.md
 launch.md
 
 *~
+## 忽略临时的jar文件，注意：版本号可能变化
+egps-pathway.browser-*.jar

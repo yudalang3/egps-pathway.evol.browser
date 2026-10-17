@@ -151,6 +151,28 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
   egps2.Launcher com.package.ModuleClassName
 ```
 
+### 模块启动脚本
+
+`launchers/` 为全部 23 个模块提供成对的 `launch_module_<模块名>.bat` / `.sh`，启动 eGPS2 后自动打开并选中目标模块。可从其他目录调用，脚本会自动定位项目根目录。
+
+Windows 可双击 `.bat`，或在 PowerShell 中运行：
+
+```powershell
+.\launchers\launch_module_modern_tree_view.bat
+.\launchers\launch_module_pathway_family_browser.bat
+```
+
+WSL 使用 Linux JDK 25 或更高版本，并需要 WSLg 或已配置的 X Server。在项目根目录运行：
+
+```bash
+bash launchers/launch_module_modern_tree_view.sh
+bash launchers/launch_module_pathway_family_browser.sh
+```
+
+脚本优先使用 `JAVA_HOME`，否则从 `PATH` 查找 Java；WSL 入口不使用 Windows Java。请先完成对应平台的编译和资源复制（Windows：`compile.bat`；WSL：`bash compile.sh`），并准备 `dependency-egps/` 中的依赖。脚本不会自动编译，默认内存上限为 `12g`；额外参数不会传给 Launcher，数据通过模块界面导入。Windows 启动失败时暂停显示错误并保留退出码。WSL 脚本未做运行验证，由使用者自行验证。
+
+可用的文件名后缀：`ambiguous_nucleotide`, `evolutionary_distance_view`, `gene_to_distance`, `msa_to_distance`, `gene_browser`, `gene_family_browser`, `modern_tree_view`, `pathway_family_browser`, `tree_barplot`, `mafft_aligner`, `reference_aligner`, `alignment_trimmer`, `alignment_view`, `alignment_diversity`, `gene_to_msa`, `pathway_illuminator`, `tree_from_distance`, `tree_from_maf`, `tree_from_msa`, `gene_to_tree`, `tree_operator`, `tree_node_collector`, `tree_tanglegram`。
+
 ## 模块组成
 
 该套件当前包含 23 个模块加载入口。核心文档化工作流模块如下：

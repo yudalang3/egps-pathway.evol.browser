@@ -30,3 +30,6 @@
 # =========================
 docs/* linguist-documentation
 
+# Module launchers
+launchers/*.bat text eol=crlf
+launchers/*.sh text eol=lf

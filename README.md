@@ -151,6 +151,28 @@ java -cp "out/production/egps-pathway.evol.browser:dependency-egps/*" \
   egps2.Launcher com.package.ModuleClassName
 ```
 
+### Module Launcher Scripts
+
+`launchers/` contains a `launch_module_<name>.bat` / `.sh` pair for each of the 23 modules. Each entry starts the eGPS2 desktop and opens and selects its target module. Scripts locate the project root automatically, including when invoked from another directory.
+
+On Windows, double-click a `.bat` file or run it from PowerShell:
+
+```powershell
+.\launchers\launch_module_modern_tree_view.bat
+.\launchers\launch_module_pathway_family_browser.bat
+```
+
+WSL requires Linux JDK 25 or newer and WSLg or a configured X server. From the project root:
+
+```bash
+bash launchers/launch_module_modern_tree_view.sh
+bash launchers/launch_module_pathway_family_browser.sh
+```
+
+Scripts prefer `JAVA_HOME`, then Java on `PATH`; the WSL entries reject Windows Java. First compile and copy resources for the target platform (`compile.bat` on Windows; `bash compile.sh` in WSL) and provide the JARs in `dependency-egps/`. Launchers do not build automatically and use a `12g` maximum heap. Extra arguments are not forwarded to Launcher; import data through the module UI. Windows failures pause to display the error and preserve the exit code. WSL runtime validation is left to the user.
+
+Available filename suffixes: `ambiguous_nucleotide`, `evolutionary_distance_view`, `gene_to_distance`, `msa_to_distance`, `gene_browser`, `gene_family_browser`, `modern_tree_view`, `pathway_family_browser`, `tree_barplot`, `mafft_aligner`, `reference_aligner`, `alignment_trimmer`, `alignment_view`, `alignment_diversity`, `gene_to_msa`, `pathway_illuminator`, `tree_from_distance`, `tree_from_maf`, `tree_from_msa`, `gene_to_tree`, `tree_operator`, `tree_node_collector`, `tree_tanglegram`.
+
 ## Modules
 
 The suite currently contains 23 module-loader entry points. The core documented workflow modules are organized as follows:
