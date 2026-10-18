@@ -113,4 +113,16 @@ public class TreeLayoutSwitcher extends BaseCtrlPanel{
 	}
 
 
+
+    public void selectLayout(TreeLayoutEnum layout) {
+        JToggleButton button = switch (layout) {
+            case RECTANGULAR_LAYOUT -> standardPhylogram;
+            case CIRCULAR_LAYOUT -> circularPhylogram;
+            case SPRIAL_LAYOUT -> spiralPhyloWithAlphaPhylogram;
+            case SLOPE_LAYOUT -> slopeCladogram;
+            case RADICAL_LAYOUT -> radialCladogram;
+        };
+        button.setSelected(true);
+        prevButton = button;
+    }
 }

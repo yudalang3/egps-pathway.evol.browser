@@ -22,6 +22,9 @@ import java.util.function.Function;
  *
  */
 public class SpiralPhyloWithBeta extends SprialLayout {
+	@Override
+	public boolean supportsAxisBar() { return true; }
+
 
 	protected double maxBeta;
 	private double minBeta;

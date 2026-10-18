@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.primitives.Doubles;
 import evoltree.struct.io.AbstractNodeCoderDecoder;
 import module.evolview.model.tree.DefaultGraphicsPhyloNode;
-import utils.string.EGPSStringUtil;
 
 import java.util.InputMismatchException;
 
@@ -26,54 +25,36 @@ public class NWKGraphicsInternalCoderDecoder<T extends DefaultGraphicsPhyloNode>
 
 	@Override
 	public void parseNode(T node, String str) {
-
-		if (str.isEmpty()) {
+		if (str.isEmpty()) return;
+		String[] parts = str.split(":", -1);
+		if (parts.length < 2 || parts.length > 3)
+			throw new InputMismatchException("Invalid internal node: " + str);
+		node.clearBootstrapValue();
+		node.setName("");
+		if (parts.length == 3) {
+			node.setName(parts[0]);
+			if (!parts[1].isEmpty()) node.setBootstrapValue(Double.parseDouble(parts[1]));
+			node.setLength(Double.parseDouble(parts[2]));
 			return;
 		}
-		String[] split = EGPSStringUtil.split(str, ':');
-
-		if (split.length < 2) {
-			throw new InputMismatchException("Sorry, please check your nwk format: ".concat(str));
-		}
-
-		if (split.length == 3) {
-			node.setName(split[0]);
-			node.setBootstrapValue(Double.parseDouble(split[1]));
-			node.setLength(Double.parseDouble(split[2]));
-		}
-
-		// has bootstrap
-		String firstStr = split[0];
-		Double tryParse = Doubles.tryParse(firstStr);
-		if (tryParse == null) {
-			node.setName(firstStr);
-		} else {
-			node.setBootstrapValue(tryParse);
-		}
-
-		node.setLength(Double.parseDouble(split[1]));
-
+		Double support = Doubles.tryParse(parts[0]);
+		if (support == null) node.setName(parts[0]);
+		else node.setBootstrapValue(support);
+		node.setLength(Double.parseDouble(parts[1]));
 	}
 
 	@Override
 	public String codeNode(T node) {
-
 		sBuilder.setLength(0);
-
-		if (!Strings.isNullOrEmpty(node.getName())) {
-			sBuilder.append(node.getName());
+		String name = node.isNameBootstrap() ? "" : node.getName();
+		if (!Strings.isNullOrEmpty(name)) sBuilder.append(name);
+		if (node.hasBootstrapValue()) {
+			if (sBuilder.length() > 0) sBuilder.append(COLON);
+			sBuilder.append(java.math.BigDecimal.valueOf(node.getBootstrapValue()).stripTrailingZeros().toPlainString());
+		} else if (!Strings.isNullOrEmpty(name) && Doubles.tryParse(name) != null) {
+			sBuilder.append(COLON);
 		}
-
-		if (node.getBootstrapValue() != 0) {
-			if (sBuilder.length() > 0) {
-				sBuilder.append(COLON);
-			}
-			sBuilder.append(Double.toString(node.getLength()));
-		}
-
-		sBuilder.append(COLON);
-		sBuilder.append(convertRate2Decimal(node.getLength()));
-
+		sBuilder.append(COLON).append(convertRate2Decimal(node.getLength()));
 		return sBuilder.toString();
 	}
 

@@ -268,6 +268,10 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		tabbedPhylogeneticTreePane.setSelectedTabFont(controller.getTitleFont());
 		tabbedPhylogeneticTreePane.setShowCloseButtonOnTab(true);
 		tabbedPhylogeneticTreePane.setBoldActiveTab(true);
+        tabbedPhylogeneticTreePane.addChangeListener(e -> {
+            if (controller.getTreeLayoutProperties() != null && controller.getTreeLayoutPanel() != null)
+                controller.syncTreeControlsFromModel();
+        });
 
 		rightSplitPanel.setLeftComponent(tabbedPhylogeneticTreePane);
 

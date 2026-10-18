@@ -10,7 +10,6 @@ import module.evolview.model.enums.BranchLengthType;
 import module.evolview.model.enums.ColorScheme;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.annotation.*;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import module.evolview.phylotree.visualization.layout.BaseLayout;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.util.TreeOperationUtil;
@@ -25,6 +24,40 @@ import java.util.List;
 import java.util.Locale;
 
 public class GeneFamilyController {
+    private PhylogeneticTreePanel controlsTree;
+    protected boolean synchronizingTreeControls;
+    private final java.beans.PropertyChangeListener treeControlsListener = e -> syncTreeControlsFromModel();
+
+    public TreeLayoutProperties getActiveTreeLayoutProperties() {
+        if (getTreeLayoutProperties() == null) return null;
+        PhylogeneticTreePanel panel = getSelectedPhylogeneticTreePanel();
+        return panel == null ? null : panel.getLayoutProperties();
+    }
+
+    protected void bindSelectedTreeControls() {
+        PhylogeneticTreePanel tree = getActiveTreeLayoutProperties() == null ? null : getSelectedPhylogeneticTreePanel();
+        if (controlsTree == tree) return;
+        if (controlsTree != null) controlsTree.removePropertyChangeListener("treeViewState", treeControlsListener);
+        controlsTree = tree;
+        if (tree != null) tree.addPropertyChangeListener("treeViewState", treeControlsListener);
+    }
+
+    public void syncTreeControlsFromModel() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::syncTreeControlsFromModel);
+            return;
+        }
+        if (synchronizingTreeControls) return;
+        synchronizingTreeControls = true;
+        try {
+            bindSelectedTreeControls();
+            if (leftControlPanelContainner != null) {
+                if (getTreeLayoutPanel() != null) getTreeLayoutPanel().reInitializeGUIAccording2treeLayoutProperties();
+                if (getLeftOparetionPanel() != null) getLeftOparetionPanel().reInitializeGUIAccording2treeLayoutProperties();
+            }
+        } finally { synchronizingTreeControls = false; }
+    }
+
     final GeneFamilyMainFace main;
 
     protected PhylogeneticTreePanel globalPhylogeneticTreePanel;
@@ -85,6 +118,11 @@ public class GeneFamilyController {
 
     public GeneFamilyMainFace getMain() {
         return main;
+    }
+
+    public void reCalculateTreeLayoutPreservingZoom() {
+        PhylogeneticTreePanel panel = getSelectedPhylogeneticTreePanel();
+        if (panel != null) panel.recalculatePreservingZoom();
     }
 
     public void reCalculateTreeLayoutAndRefreshViewPort() {
@@ -418,24 +456,12 @@ public class GeneFamilyController {
      * 在Tree operation面板中点击show leave label的图标后激发的动作
      */
     public void showLeaveLabel(boolean selected) {
-
-        ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
-        List<GraphicsNode> leaves = treeLayoutProperties.getLeaves();
-        for (GraphicsNode graphicsNode : leaves) {
-            graphicsNode.getDrawUnit().setDrawName(selected);
-        }
-        // showLeafPropertiesInfo.isShowLeafLabel() 一定和 selected相反，因为现在已经完成了 leaf label
-        // GUI随Properties一起刷新的功能
-        if (selected) {
-            showLeafPropertiesInfo.setNeedChange4showLabel(true);
-            showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-        } else {
-            showLeafPropertiesInfo.setNeedChange4showLabel(false);
-            showLeafPropertiesInfo.setNeedChange4hideLabel(true);
-        }
-        showLeafPropertiesInfo.setShowLeafLabel(selected);
-
+        PhylogeneticTreePanel panel = getSelectedPhylogeneticTreePanel();
+        if (panel == null) return;
+        panel.setLeafLabelsVisible(selected);
+        panel.recalculatePreservingZoom();
     }
+
 
     public void setBranchLengthType(BranchLengthType branchLengthType) {
 //
@@ -766,6 +792,7 @@ public class GeneFamilyController {
      * Layout布局切换的时候会调用这个方法
      */
     public void fireLayoutChanged() {
+        syncTreeControlsFromModel();
 
     }
 

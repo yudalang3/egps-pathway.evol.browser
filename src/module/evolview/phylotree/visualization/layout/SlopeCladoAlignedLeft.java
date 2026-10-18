@@ -7,12 +7,14 @@ import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.phylotree.visualization.graphics.struct.SlopeLayoutProperty;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import module.evolview.phylotree.visualization.util.DrawUtil;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
+import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -42,19 +44,7 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 		SlopeLayoutProperty slopeLayoutProperety = treeLayoutProperties.getSlopeLayoutProperety();
 		int slopeLayoutRotationDeg = slopeLayoutProperety.getSlopeLayoutRotationDeg();
 
-		// For 90° and 270° rotations, use a square bounding box based on the smaller dimension
-		// This ensures the tree fits within bounds after rotation
-		int calcWidth, calcHeight;
-		if (slopeLayoutRotationDeg == 90 || slopeLayoutRotationDeg == 270) {
-			int minDim = Math.min(width, height);
-			calcWidth = minDim;
-			calcHeight = minDim;
-		} else {
-			calcWidth = width;
-			calcHeight = height;
-		}
-
-		beforeCalculate(calcWidth, calcHeight);
+		beforeCalculate(width, height);
 
 		rootNode.setDisplayedBranchLength(0);
 
@@ -81,27 +71,29 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 
 		prepareStep2AllocateLocationRatio(rootNode);
 
-		realHeight = blankArea.getWorkHeight((int) currentHeight);
-		realWidth = blankArea.getWorkWidth((int) currentWidth) - blankMarginRatio * currentWidth;
+		boolean quarterTurn = slopeLayoutRotationDeg == 90 || slopeLayoutRotationDeg == 270;
+		double logicalWidth = quarterTurn ? blankArea.getWorkHeight(height) : blankArea.getWorkWidth(width);
+		double logicalHeight = quarterTurn ? blankArea.getWorkWidth(width) : blankArea.getWorkHeight(height);
+		FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+		int labelReserve = visibleLabelWidth(metrics) + 12;
+		realHeight = Math.max(1, logicalHeight - metrics.getHeight() - 8);
+		realWidth = Math.max(1, logicalWidth * (1 - blankMarginRatio) - labelReserve);
 		iterateTurnDrawRatio2DrawLength(rootNode);
 
 		afterCalculation();
 
-		// For 90°/270°, first translate to center of actual canvas, then rotate
-		if (slopeLayoutRotationDeg == 90 || slopeLayoutRotationDeg == 270) {
-			// Offset to center the square tree in the actual canvas
-			double offsetX = (width - calcWidth) / 2.0;
-			double offsetY = (height - calcHeight) / 2.0;
-			translateTree(rootNode, offsetX, offsetY);
-		}
-
-		// Apply rotation transform around the center of the actual canvas
-		DrawUtil.rotationTransform(rootNode, slopeLayoutRotationDeg, width, height);
-
-		// For 180° rotation, reset text angles to 0 so text remains readable
-		// (otherwise text would be upside down)
-		if (slopeLayoutRotationDeg == 180) {
-			setTextAnglesForLeftSide(rootNode);
+		// Use one local transform for nodes, annotations and tracing graphics.
+		AffineTransform transform = AffineTransform.getRotateInstance(Math.toRadians(slopeLayoutRotationDeg));
+		transformNodes(rootNode, transform, slopeLayoutRotationDeg);
+		Rectangle2D bounds = getVisibleTreeBounds();
+		double dx = blankArea.getLeft() + blankArea.getWorkWidth(width) / 2.0 - bounds.getCenterX();
+		double dy = blankArea.getTop() + blankArea.getWorkHeight(height) / 2.0 - bounds.getCenterY();
+		AffineTransform translation = AffineTransform.getTranslateInstance(dx, dy);
+		transformNodes(rootNode, translation, 0);
+		transform.preConcatenate(translation);
+		for (TracingPaintingProperty tracing : tracingPaintingShapes) {
+			tracing.path.transform(transform);
+			transform.transform(tracing.pointOfNode, tracing.pointOfNode);
 		}
 
 		// 下面是一些绘图注释的功能，现在先不用
@@ -116,7 +108,7 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 			for (DrawPropInternalNode2LeafAnno tt : internalNode2LeafAnnos) {
 				if (tt.shouldConfigurateAndPaint()) {
 					Shape shape = tt.getDrawShape();
-					Shape transformed = DrawUtil.affineTransform.createTransformedShape(shape);
+					Shape transformed = transform.createTransformedShape(shape);
 					tt.setDrawShape(transformed);
 				}
 			}
@@ -125,12 +117,12 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 			for (DrawPropOutterSidewardAnno tt : outterSidewardAnnos) {
 				if (tt.shouldConfigurateAndPaint()) {
 					Shape shape = tt.getShape();
-					Shape transformed = DrawUtil.affineTransform.createTransformedShape(shape);
+					Shape transformed = transform.createTransformedShape(shape);
 					tt.setShape(transformed);
 
 					Double textLocation = tt.getTextLocation();
-					DrawUtil.affineTransform.transform(textLocation, dest);
-					tt.setTextLocation(dest);
+					transform.transform(textLocation, dest);
+					tt.setTextLocation(new Double(dest.x, dest.y));
 				}
 			}
 			List<DrawPropInternalNodeInsituAnno> internalNode2LeafInsituAnnos = annotationsProperties
@@ -138,7 +130,7 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 			for (DrawPropInternalNodeInsituAnno tt : internalNode2LeafInsituAnnos) {
 				if (tt.shouldConfigurateAndPaint()) {
 					Shape shape = tt.getDrawShape();
-					Shape transformed = DrawUtil.affineTransform.createTransformedShape(shape);
+					Shape transformed = transform.createTransformedShape(shape);
 					tt.setDrawShape(transformed);
 				}
 			}
@@ -151,24 +143,24 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 					.getInternalNode2leafAnno4LinageTypes();
 			for (DrawPropOutterSidewardAnno4LinageType tt : internalNode2leafAnno4LinageTypes) {
 				Shape shape = tt.getShape();
-				Shape transformed = DrawUtil.affineTransform.createTransformedShape(shape);
+				Shape transformed = transform.createTransformedShape(shape);
 				tt.setShape(transformed);
 
 				Double textLocation = tt.getTextLocation();
-				DrawUtil.affineTransform.transform(textLocation, dest);
-				tt.setTextLocation(dest);
+				transform.transform(textLocation, dest);
+				tt.setTextLocation(new Double(dest.x, dest.y));
 			}
 
 			List<DrawPropOutterSidewardAnno4LinageType> outterSidewardAnnos = linageTypeAnnotationsProperties
 					.getOutterSidewardAnnos();
 			for (DrawPropOutterSidewardAnno4LinageType tt : outterSidewardAnnos) {
 				Shape shape = tt.getShape();
-				Shape transformed = DrawUtil.affineTransform.createTransformedShape(shape);
+				Shape transformed = transform.createTransformedShape(shape);
 				tt.setShape(transformed);
 
 				Double textLocation = tt.getTextLocation();
-				DrawUtil.affineTransform.transform(textLocation, dest);
-				tt.setTextLocation(dest);
+				transform.transform(textLocation, dest);
+				tt.setTextLocation(new Double(dest.x, dest.y));
 				// System.out.println(textLocation+" "+dest);
 			}
 
@@ -177,7 +169,7 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 
 			for (DrawPropInternalNodeInsituAnno tt : internalNode2LeafInsituAnnos) {
 				Shape shape = tt.getDrawShape();
-				Shape transformed = DrawUtil.affineTransform.createTransformedShape(shape);
+				Shape transformed = transform.createTransformedShape(shape);
 				tt.setDrawShape(transformed);
 			}
 		}
@@ -359,33 +351,59 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 		return a;
 	}
 
-	/**
-	 * Translate all node coordinates by the given offset.
-	 */
-	private void translateTree(GraphicsNode node, double offsetX, double offsetY) {
-		node.setXSelf(node.getXSelf() + offsetX);
-		node.setYSelf(node.getYSelf() + offsetY);
-		node.setXParent(node.getXParent() + offsetX);
-		node.setYParent(node.getYParent() + offsetY);
-
-		int count = node.getChildCount();
-		for (int i = 0; i < count; i++) {
-			translateTree((GraphicsNode) node.getChildAt(i), offsetX, offsetY);
+	private int visibleLabelWidth(FontMetrics metrics) {
+		int width = 0;
+		for (GraphicsNode leaf : GraphicTreePropertyCalculator.getLeaves(rootNode)) {
+			if (leaf.getDrawUnit().isDrawName() && leaf.getChildCount() == 0 && leaf.getName() != null)
+				width = Math.max(width, metrics.stringWidth(leaf.getName()));
 		}
+		return width;
 	}
 
-	/**
-	 * Reset text angles to 0 for all nodes so text remains readable after 180° rotation.
-	 * Use angle = 180 as a signal to draw text on the LEFT side.
-	 */
-	private void setTextAnglesForLeftSide(GraphicsNode node) {
-		// Use 180 as a special signal: text should be on LEFT side, but not rotated
-		node.setAngleIfNeeded(180.0);
+	@Override
+	public Dimension getRequiredCanvasSize(int width, int height) {
+		FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+		int alongBranches = visibleLabelWidth(metrics) + 100;
+		int acrossBranches = GraphicTreePropertyCalculator.getLeaves(rootNode).size() * (metrics.getHeight() + 2) + 8;
+		int rotation = treeLayoutProperties.getSlopeLayoutProperety().getSlopeLayoutRotationDeg();
+		boolean quarterTurn = rotation == 90 || rotation == 270;
+		return new Dimension(Math.max(width, (quarterTurn ? acrossBranches : alongBranches) + blankArea.getLeft() + blankArea.getRight()),
+				Math.max(height, (quarterTurn ? alongBranches : acrossBranches) + blankArea.getTop() + blankArea.getBottom()));
+	}
 
-		int count = node.getChildCount();
-		for (int i = 0; i < count; i++) {
-			setTextAnglesForLeftSide((GraphicsNode) node.getChildAt(i));
-		}
+	/** The same label offsets and angles used by BaseLayout's column-label renderer. */
+	public Rectangle2D getVisibleTreeBounds() {
+		FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+		Rectangle2D bounds = new Rectangle2D.Double(rootNode.getXSelf(), rootNode.getYSelf(), 0, 0);
+		int maxName = visibleLabelWidth(metrics);
+		recursive2doSth4eachNode(rootNode, node -> {
+			double x = node.getXSelf(), y = node.getYSelf();
+			int radius = node.getDrawUnit().getCircleRadius();
+			bounds.add(new Rectangle2D.Double(x - radius, y - radius, radius * 2, radius * 2));
+			if (node.getChildCount() != 0 || !node.getDrawUnit().isDrawName() || node.getName() == null || node.getName().isEmpty()) return;
+			int nameWidth = metrics.stringWidth(node.getName());
+			double angle = node.getAngleIfNeeded();
+			double left = x + radius + 4;
+			if (treeLayoutProperties.isShouldLeafNameRightAlign()) left += maxName - nameWidth;
+			if (Math.abs(angle) == 180) left = x - radius - 4 - nameWidth;
+			Rectangle2D label = new Rectangle2D.Double(left, y - metrics.getAscent() / 2.0,
+					nameWidth, metrics.getAscent() + metrics.getDescent());
+			Shape visible = Math.abs(angle) == 180 ? label
+					: AffineTransform.getRotateInstance(-Math.toRadians(angle), x, y).createTransformedShape(label);
+			bounds.add(visible.getBounds2D());
+		});
+		return bounds;
+	}
+
+	private void transformNodes(GraphicsNode node, AffineTransform transform, int degrees) {
+		Point2D.Double point = new Point2D.Double(node.getXSelf(), node.getYSelf());
+		transform.transform(point, point);
+		node.setXSelf(point.x); node.setYSelf(point.y);
+		point.setLocation(node.getXParent(), node.getYParent());
+		transform.transform(point, point);
+		node.setXParent(point.x); node.setYParent(point.y);
+		node.setAngleIfNeeded(node.getAngleIfNeeded() - degrees);
+		for (int i = 0; i < node.getChildCount(); i++) transformNodes((GraphicsNode) node.getChildAt(i), transform, degrees);
 	}
 
 	@Override

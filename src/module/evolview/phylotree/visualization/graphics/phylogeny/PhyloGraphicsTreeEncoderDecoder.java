@@ -17,12 +17,12 @@ public class PhyloGraphicsTreeEncoderDecoder {
     }
 
     public String encode(DefaultGraphicsPhyloNode tree) {
-        TreeCoder<DefaultGraphicsPhyloNode> coder = new TreeCoder<>(new NWKGraphicsInternalCoderDecoder<>(), new NWKGraphicsLeafCoderDecoder<>());
+        TreeCoder<DefaultGraphicsPhyloNode> coder = new TreeCoder<>(new NWKGraphicsLeafCoderDecoder<>(), new NWKGraphicsInternalCoderDecoder<>());
         return coder.code(tree);
     }
 
     public DefaultGraphicsPhyloNode decode(String line) throws Exception {
-        PrimaryNodeTreeDecoder<DefaultGraphicsPhyloNode> decoder = new PrimaryNodeTreeDecoder<>(new NWKGraphicsInternalCoderDecoder<>(), new NWKGraphicsLeafCoderDecoder<>());
+        PrimaryNodeTreeDecoder<DefaultGraphicsPhyloNode> decoder = new PrimaryNodeTreeDecoder<>(new NWKGraphicsLeafCoderDecoder<>(), new NWKGraphicsInternalCoderDecoder<>());
         return decoder.decode(line);
     }
 }

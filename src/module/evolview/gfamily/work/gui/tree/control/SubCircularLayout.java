@@ -16,10 +16,14 @@ import java.awt.event.MouseEvent;
 
 @SuppressWarnings("serial")
 public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutPanel,ItemListener {
+	private boolean synchronizing;
+
 	private JCheckBox chckbxAlignToTip;
 	private JSpinner spinnerRootLength;
 	private JSlider sliderRootLength;
 	private ChangeListener spinnerRootLengthChangeListener;
+	private JSlider sliderStartDegree;
+	private JSlider sliderExtentDegree;
 	private JSpinner spinnerStartDegree;
 	private ChangeListener spinnerStartDegreeChangeListener;
 	private ChangeListener spinnerExtentDegreeChangeListener;
@@ -57,7 +61,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		rdbtnPhylogram.addItemListener(this);
 		buttonGroup.add(rdbtnPhylogram);
 
-		chckbxAlignToTip = new JCheckBox("Align");
+		chckbxAlignToTip = new JCheckBox("Align tips");
 		chckbxAlignToTip.setFocusable(false);
 		chckbxAlignToTip.setFont(globalFont);
 		GridBagConstraints gbc_chckbxAlignToTip = new GridBagConstraints();
@@ -131,12 +135,13 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		gbc_checkBoxShowOutgroup.gridy = 5;
 		add(checkBoxShowOutgroup, gbc_checkBoxShowOutgroup);
 		checkBoxShowOutgroup.addItemListener(e -> {
+			if (synchronizing || controller == null) return;
 			boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
-			TreeLayoutProperties treeLayoutProperties = controller.getTreeLayoutProperties();
+			TreeLayoutProperties treeLayoutProperties = controller.getActiveTreeLayoutProperties();
 			treeLayoutProperties.setShowRoot(selected);
 			sliderRootLength.setEnabled(selected);
 			spinnerRootLength.setEnabled(selected);
-			controller.refreshPhylogeneticTree();
+			controller.reCalculateTreeLayoutPreservingZoom();
 		});
 		final int theMaxValueOfRootLength = 200;
 		sliderRootLength = new JSlider(0,theMaxValueOfRootLength, 15);
@@ -167,11 +172,12 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		gbc_spinnerRootLength.gridy = 6;
 		add(spinnerRootLength, gbc_spinnerRootLength);
 		spinnerRootLengthChangeListener = e -> {
+			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
 			int value = (int) source.getValue();
 			sliderRootLength.setValue(value);
-			controller.getTreeLayoutProperties().setRootTipLength(value);
-			controller.reCalculateTreeLayoutAndRefreshViewPort();
+			controller.getActiveTreeLayoutProperties().setRootTipLength(value);
+			controller.reCalculateTreeLayoutPreservingZoom();
 		};
 		spinnerRootLength.addChangeListener(spinnerRootLengthChangeListener);
 
@@ -184,7 +190,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		gbc_lblStartDegree.gridy = 7;
 		add(lblStartDegree, gbc_lblStartDegree);
 
-		JSlider sliderStartDegree = new JSlider();
+		sliderStartDegree = new JSlider();
 		sliderStartDegree.setFocusable(false);
 		sliderStartDegree.setValue(285);
 		sliderStartDegree.setMaximum(360);
@@ -214,11 +220,12 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		gbc_spinnerStartDegree.gridy = 8;
 		add(spinnerStartDegree, gbc_spinnerStartDegree);
 		spinnerStartDegreeChangeListener = e -> {
+			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
 			int value = (int) source.getValue();
 			sliderStartDegree.setValue(value);
-			controller.getTreeLayoutProperties().getCircularLayoutPropertiy().setGlobalStartDegree(value);
-			controller.reCalculateTreeLayoutAndRefreshViewPort();
+			controller.getActiveTreeLayoutProperties().getCircularLayoutPropertiy().setGlobalStartDegree(value);
+			controller.reCalculateTreeLayoutPreservingZoom();
 		};
 		spinnerStartDegree.addChangeListener(spinnerStartDegreeChangeListener);
 
@@ -231,10 +238,10 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		gbc_lblNewLabel.gridy = 9;
 		add(lblNewLabel, gbc_lblNewLabel);
 
-		JSlider sliderExtentDegree = new JSlider();
+		sliderExtentDegree = new JSlider();
 		sliderExtentDegree.setFocusable(false);
 		sliderExtentDegree.setMaximum(360);
-		sliderExtentDegree.setValue(330);
+		sliderExtentDegree.setValue(360);
 		sliderExtentDegree.setPreferredSize(new Dimension(100, 23));
 		GridBagConstraints gbc_sliderExtentDegree = new GridBagConstraints();
 		gbc_sliderExtentDegree.anchor = GridBagConstraints.WEST;
@@ -261,11 +268,12 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		add(spinnerExtentDegree, gbc_spinnerExtentDegree);
 
 		spinnerExtentDegreeChangeListener = e -> {
+			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
 			int value = (int) source.getValue();
 			sliderExtentDegree.setValue(value);
-			controller.getTreeLayoutProperties().getCircularLayoutPropertiy().setGlobalExtendDegree(value);
-			controller.reCalculateTreeLayoutAndRefreshViewPort();
+			controller.getActiveTreeLayoutProperties().getCircularLayoutPropertiy().setGlobalExtendDegree(value);
+			controller.reCalculateTreeLayoutPreservingZoom();
 		};
 		spinnerExtentDegree.addChangeListener(spinnerExtentDegreeChangeListener);
 
@@ -279,6 +287,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 
 	@Override
 	public void actionsTurn2ThisLayout(TreeLayoutEnum layoutInfo) {
+		if (synchronizing || controller == null || controller.getSelectedPhylogeneticTreePanel() == null) return;
 
 		PhylogeneticTreePanel selectedTreePanel = controller.getSelectedPhylogeneticTreePanel();
 		if (rdbtnPhylogram.isSelected()) {
@@ -300,7 +309,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 			chckbxAlignToTip.setEnabled(false);
 		}
 
-		TreeLayoutProperties treeLayoutProperties = controller.getTreeLayoutProperties();
+		TreeLayoutProperties treeLayoutProperties = controller.getActiveTreeLayoutProperties();
 		boolean showRoot = treeLayoutProperties.isShowRoot();
 		checkBoxShowOutgroup.setSelected(showRoot);
 	}
@@ -312,4 +321,39 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		}
 	}
 
+
+    @Override
+    public void setController(module.evolview.gfamily.GeneFamilyController controller) {
+        super.setController(controller);
+        reInitializeGUIAccording2treeLayoutProperties();
+    }
+
+    @Override
+    public void reInitializeGUIAccording2treeLayoutProperties() {
+        if (controller == null || controller.getActiveTreeLayoutProperties() == null) return;
+        var properties = controller.getActiveTreeLayoutProperties();
+        synchronizing = true;
+        try {
+            var layout = properties.getMyLayout();
+            if (layout.name().contains("CIR_")) {
+                rdbtnPhylogram.setSelected(layout == TreeLayout.OUTER_CIR_PHYLO || layout == TreeLayout.OUTER_CIR_PHYLO_ALIGNED);
+                rdbtnCladogramAlign2tip.setSelected(layout == TreeLayout.OUTER_CIR_CLADO_ALIGNED);
+                rdbtnCladogramWithEqualLength.setSelected(layout == TreeLayout.OUTER_CIR_CLADO_EQUAL);
+                rdbtnInnerCladogram.setSelected(layout == TreeLayout.INNER_CIR_CLADO);
+                chckbxAlignToTip.setSelected(layout == TreeLayout.OUTER_CIR_PHYLO_ALIGNED);
+            }
+            chckbxAlignToTip.setEnabled(rdbtnPhylogram.isSelected());
+            checkBoxShowOutgroup.setSelected(properties.isShowRoot());
+            spinnerRootLength.setValue((int) Math.round(properties.getRootTipLength()));
+            sliderRootLength.setValue((int) spinnerRootLength.getValue());
+            spinnerRootLength.setEnabled(properties.isShowRoot());
+            sliderRootLength.setEnabled(properties.isShowRoot());
+            var circular = properties.getCircularLayoutPropertiy();
+            spinnerStartDegree.setValue(circular.getGlobalStartDegree());
+            sliderStartDegree.setValue(circular.getGlobalStartDegree());
+            spinnerExtentDegree.setValue(circular.getGlobalExtendDegree());
+            sliderExtentDegree.setValue(circular.getGlobalExtendDegree());
+
+        } finally { synchronizing = false; }
+    }
 }

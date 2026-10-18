@@ -31,4 +31,30 @@ public class CircularInnerPhylo extends CircularPhylo{
 		return radicus;
 	}
 
+
+	@Override
+	protected double getTipLabelReserve() {
+		return Math.max(super.getTipLabelReserve(), treeLayoutProperties.isShowRoot()
+				? Math.max(0, treeLayoutProperties.getRootTipLength()) + 2 : 0);
+	}
+
+	@Override
+	protected double minimumTreeRadius() {
+		return treeLayoutProperties.getCircularLayoutPropertiy().getInnerCircleRadicus() + 50;
+	}
+
+	@Override
+	protected void configureRootBranch() {
+		super.configureRootBranch();
+		double radius = rootNode.getRadicusIfNeeded() + Math.max(0, treeLayoutProperties.getRootTipLength());
+		java.awt.geom.Point2D.Double endpoint = graphic.engine.guicalculator.GuiCalculator.calculateCircularLocation(
+				rootNode.getAngleIfNeeded(), radius, centerX, centerY);
+		rootNode.setXParent(endpoint.x);
+		rootNode.setYParent(endpoint.y);
+	}
+
+	@Override
+	protected void rootDrawingProcess(java.awt.Graphics2D graphics, GraphicsNode node) {
+		if (treeLayoutProperties.getRootTipLength() > 0) super.rootDrawingProcess(graphics, node);
+	}
 }

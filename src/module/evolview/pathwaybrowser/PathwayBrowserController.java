@@ -13,7 +13,6 @@ import module.evolview.pathwaybrowser.gui.CtrlTreeOperationPanelByMiglayout;
 import module.evolview.pathwaybrowser.gui.TreeLayoutSwitcher;
 import module.evolview.pathwaybrowser.gui.render.CustomizedSaveBean;
 import module.evolview.phylotree.visualization.annotation.*;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 import org.slf4j.Logger;
@@ -34,6 +33,40 @@ import java.util.Optional;
  * Manages tree visualization and interaction for Pathway Browser
  */
 public class PathwayBrowserController {
+    private PhylogeneticTreePanel controlsTree;
+    protected boolean synchronizingTreeControls;
+    private final java.beans.PropertyChangeListener treeControlsListener = e -> syncTreeControlsFromModel();
+
+    public TreeLayoutProperties getActiveTreeLayoutProperties() {
+        if (getTreeLayoutProperties() == null) return null;
+        PhylogeneticTreePanel panel = getSelectedPhylogeneticTreePanel();
+        return panel == null ? null : panel.getLayoutProperties();
+    }
+
+    protected void bindSelectedTreeControls() {
+        PhylogeneticTreePanel tree = getActiveTreeLayoutProperties() == null ? null : getSelectedPhylogeneticTreePanel();
+        if (controlsTree == tree) return;
+        if (controlsTree != null) controlsTree.removePropertyChangeListener("treeViewState", treeControlsListener);
+        controlsTree = tree;
+        if (tree != null) tree.addPropertyChangeListener("treeViewState", treeControlsListener);
+    }
+
+    public void syncTreeControlsFromModel() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::syncTreeControlsFromModel);
+            return;
+        }
+        if (synchronizingTreeControls) return;
+        synchronizingTreeControls = true;
+        try {
+            bindSelectedTreeControls();
+            if (leftControlPanelContainner != null) {
+                if (getTreeLayoutPanel() != null) getTreeLayoutPanel().reInitializeGUIAccording2treeLayoutProperties();
+                if (getLeftOparetionPanel() != null) getLeftOparetionPanel().reInitializeGUIAccording2treeLayoutProperties();
+            }
+        } finally { synchronizingTreeControls = false; }
+    }
+
     private static final Logger log = LoggerFactory.getLogger(PathwayBrowserController.class);
 
     final PathwayFamilyMainFace main;
@@ -94,6 +127,11 @@ public class PathwayBrowserController {
 
     public PathwayFamilyMainFace getMain() {
         return main;
+    }
+
+    public void reCalculateTreeLayoutPreservingZoom() {
+        PhylogeneticTreePanel panel = getSelectedPhylogeneticTreePanel();
+        if (panel != null) panel.recalculatePreservingZoom();
     }
 
     public void reCalculateTreeLayoutAndRefreshViewPort() {
@@ -332,23 +370,12 @@ public class PathwayBrowserController {
     }
 
     public void showLeaveLabel(boolean selected) {
-        if (treeLayoutProperties == null) return;
-
-        ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
-        List<GraphicsNode> leaves = treeLayoutProperties.getLeaves();
-        for (GraphicsNode graphicsNode : leaves) {
-            graphicsNode.getDrawUnit().setDrawName(selected);
-        }
-
-        if (selected) {
-            showLeafPropertiesInfo.setNeedChange4showLabel(true);
-            showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-        } else {
-            showLeafPropertiesInfo.setNeedChange4showLabel(false);
-            showLeafPropertiesInfo.setNeedChange4hideLabel(true);
-        }
-        showLeafPropertiesInfo.setShowLeafLabel(selected);
+        PhylogeneticTreePanel panel = getSelectedPhylogeneticTreePanel();
+        if (panel == null) return;
+        panel.setLeafLabelsVisible(selected);
+        panel.recalculatePreservingZoom();
     }
+
 
     public void setBranchLengthType(BranchLengthType branchLengthType) {
         // Implementation can be added if needed for pathway browser
@@ -499,6 +526,7 @@ public class PathwayBrowserController {
     }
 
     public void fireLayoutChanged() {
+        syncTreeControlsFromModel();
         // Hook for layout change events
         log.debug("fireLayoutChanged called");
     }

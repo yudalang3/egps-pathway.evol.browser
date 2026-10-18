@@ -44,6 +44,9 @@ public class TreePropertiesAssigner {
 		// Category %3: Inner Node
 		ShowInnerNodePropertiesInfo showInnerNodePropertiesInfo = treeLayoutProperties.getShowInnerNodePropertiesInfo();
 		showInnerNodePropertiesInfo.setShowInternalNodeLabel(object.isShowInnerNodeLabel());
+		EvolNodeUtil.recursiveIterateTreeIF(treeLayoutProperties.getOriginalRootNode(), node -> {
+			if (node.getChildCount() > 0) node.getDrawUnit().setDrawName(object.isShowInnerNodeLabel());
+		});
 		showInnerNodePropertiesInfo.setShowInternalNodeBootstrap(object.isShowBootstrap());
 		treeLayoutProperties.setShowNodeBranchLength(object.isShowBranchLength());
 

@@ -6,12 +6,18 @@ import module.evolview.gfamily.work.gui.browser.BaseCtrlPanel;
 import module.evolview.gfamily.work.gui.tree.control.Turn2ThisLayoutPanel;
 import module.evolview.model.enums.TreeLayoutEnum;
 
+import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import java.beans.PropertyChangeListener;
+
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 
 @SuppressWarnings("serial")
 public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements Turn2ThisLayoutPanel {
+	private PhylogeneticTreePanel observedTree;
+	private boolean synchronizing;
+	private final PropertyChangeListener dimensionListener = e -> reInitializeGUIAccording2treeLayoutProperties();
 	private JSpinner spinnerVerticalOrWholeZoom;
 	private JSpinner spinnerHorizontalChange;
 
@@ -23,7 +29,6 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 
 	private final int defaultInitializeValue = 100;
 
-	TreeLayoutEnum lastTreeLayoutControlPanel;
 	private JCheckBox chckbxLockAspectRatio;
 	private ToggleButton height1ScaleTogbtn;
 	private ToggleButton width1ScaleTogbtn;
@@ -82,7 +87,7 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 		height1ScaleTogbtn.addEventToggleSelected(new ToggleAdapter() {
 			@Override
 			public void onSelected(boolean selected) {
-				controller.getTreeLayoutProperties().setWhetherHeightScaleOnMouseWheel(selected);;
+				if (controller != null && !synchronizing) controller.getActiveTreeLayoutProperties().setWhetherHeightScaleOnMouseWheel(selected);;
 			}
 			
 		});
@@ -93,7 +98,7 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 		gbc_btnNewButton.gridy = 2;
 		add(height1ScaleTogbtn, gbc_btnNewButton);
 
-		lblHorizontalZoom = new JLabel("Width  scale");
+		lblHorizontalZoom = new JLabel("Width scale");
 		lblHorizontalZoom.setToolTipText("Zoom in or zoom out!");
 		lblHorizontalZoom.setFont(globalFont);
 		GridBagConstraints gbc_lblHorizontalZoom = new GridBagConstraints();
@@ -135,7 +140,7 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 		width1ScaleTogbtn.addEventToggleSelected(new ToggleAdapter() {
 			@Override
 			public void onSelected(boolean selected) {
-				controller.getTreeLayoutProperties().setWhetherWidthScaleOnMouseWheel(selected);
+				if (controller != null && !synchronizing) controller.getActiveTreeLayoutProperties().setWhetherWidthScaleOnMouseWheel(selected);
 			}
 			
 		});
@@ -162,188 +167,83 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 		gbc_separator_1.gridy = 5;
 		add(separator_1, gbc_separator_1);
 
-		changeListenerSpinnerHorizontal = e -> {
-			JSpinner source = (JSpinner) e.getSource();
-			int value = (int) source.getValue();
-
-//			Dimension heightAndWidthChangeDimension = getHeightAndWidthChangeDimension(value);
-//			if (chckbxLockAspectRatio.isSelected()) {
-//				controller.discreteZoomInOrOut(heightAndWidthChangeDimension.height,
-//						heightAndWidthChangeDimension.width);
-//
-//				spinnerVerticalOrWholeZoom.removeChangeListener(ChangeListenerSpinnerVerticalZoom);
-//				spinnerVerticalOrWholeZoom.setValue(value);
-//				spinnerVerticalOrWholeZoom.addChangeListener(ChangeListenerSpinnerVerticalZoom);
-//			} else {
-//				controller.discreteZoomInOrOut(0, heightAndWidthChangeDimension.width);
-//			}
-		};
-
-		changeListenerSpinnerVerticalZoom = e -> {
-			Object source = e.getSource();
-			JSpinner slider = (JSpinner) source;
-			int value = (int) slider.getValue();
-
-			Dimension heightAndWidthChangeDimension = getHeightAndWidthChangeDimension(value);
-//			if (chckbxLockAspectRatio.isSelected()) {
-//				controller.discreteZoomInOrOut(heightAndWidthChangeDimension.height,
-//						heightAndWidthChangeDimension.width);
-//
-//				spinnerHorizontalChange.removeChangeListener(ChangeListenerSpinnerHorizontal);
-//				spinnerHorizontalChange.setValue(value);
-//				spinnerHorizontalChange.addChangeListener(ChangeListenerSpinnerHorizontal);
-//			} else {
-//				controller.discreteZoomInOrOut(heightAndWidthChangeDimension.height, 0);
-//			}
-		};
-
-		// 初始化状态与监听
+		changeListenerSpinnerHorizontal = e -> applyScale(false);
+		changeListenerSpinnerVerticalZoom = e -> applyScale(true);
 		actionsTurn2ThisLayout(TreeLayoutEnum.RECTANGULAR_LAYOUT);
-
 	}
 
-	protected boolean shouldAddShowOutgroupCheckBox() {
-		return true;
-	}
-
-	public Dimension getHeightAndWidthChangeDimension(int value) {
-		return null;
-//		Dimension treePanelDimensize = controller.getGlobalPhylogeneticTreePanel().getTreePanelDimensize();
-//
-//		double increaseFactor = 0.01 * (value - defaultInitializeValue);
-//		int heightChange = (int) (increaseFactor * treePanelDimensize.getHeight());
-//		int widthChange = (int) (increaseFactor * treePanelDimensize.getWidth());
-//
-//		return new Dimension(widthChange, heightChange);
+	private void applyScale(boolean heightChanged) {
+		if (synchronizing || controller == null) return;
+		PhylogeneticTreePanel tree = controller.getSelectedPhylogeneticTreePanel();
+		if (tree == null) return;
+		Dimension old = tree.getTreePanelScale();
+		int height = (int) spinnerVerticalOrWholeZoom.getValue();
+		int width = (int) spinnerHorizontalChange.getValue();
+		if (tree.isUniformScaleLayout()) {
+			if (heightChanged) width = height; else height = width;
+		} else if (chckbxLockAspectRatio.isSelected()) {
+			double factor = heightChanged ? height / (double) old.height : width / (double) old.width;
+			factor = Math.max(factor, Math.max(100.0 / old.width, 100.0 / old.height));
+			factor = Math.min(factor, Math.min(100000.0 / old.width, 100000.0 / old.height));
+			height = (int) Math.round(old.height * factor);
+			width = (int) Math.round(old.width * factor);
+		}
+		tree.setTreePanelScale(height, width);
+		reInitializeGUIAccording2treeLayoutProperties();
 	}
 
 	@Override
-	public void actionsTurn2ThisLayout(TreeLayoutEnum conPanl) {
-		removeAllListeners();
-		switch (conPanl) {
-		case SLOPE_LAYOUT:
-			switchBetweenLayout(conPanl);
-			addAllListeners(conPanl);
-			break;
-		case RECTANGULAR_LAYOUT:
-			switchBetweenLayout(conPanl);
-			addAllListeners(conPanl);
-			break;
-		case CIRCULAR_LAYOUT:
-			switchBetweenLayout(conPanl);
-			addAllListeners(conPanl);
-			break;
-		case RADICAL_LAYOUT:
-			switchBetweenLayout(conPanl);
-			addAllListeners(conPanl);
-
-			break;
-		case SPRIAL_LAYOUT:
-			switchBetweenLayout(conPanl);
-			addAllListeners(conPanl);
-			break;
-		default:
-			break;
-		}
-
-		lastTreeLayoutControlPanel = conPanl;
-		
-		if (controller != null) {
-			controller.fireLayoutChanged();
-		}
-
-	}
-
-	private boolean isWholeZoomLayout(TreeLayoutEnum controlPanel) {
-		if (controlPanel == TreeLayoutEnum.SLOPE_LAYOUT || controlPanel == TreeLayoutEnum.RECTANGULAR_LAYOUT) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private void switchBetweenLayout(TreeLayoutEnum conPanl) {
-
-		// Vertical就是whole
-		int verticalValue = (int) spinnerVerticalOrWholeZoom.getValue();
-		if (isWholeZoomLayout(conPanl)) {
-			if (!isWholeZoomLayout(lastTreeLayoutControlPanel)) {
-				// 从rectangular或者 slope 变成whole
-				int horizontalValue = (int) spinnerHorizontalChange.getValue();
-
-				if (verticalValue > horizontalValue) {
-					spinnerHorizontalChange.setValue(verticalValue);
-				} else if (verticalValue < horizontalValue) {
-					spinnerVerticalOrWholeZoom.setValue(horizontalValue);
-				}
-			}
-
-		} else {
-			if (isWholeZoomLayout(lastTreeLayoutControlPanel)) {
-				// 从whole变成分开的的slope 或者 rectangular layout
-				spinnerHorizontalChange.setValue(verticalValue);
-			}
-		}
-
-	}
-
-	private void removeAllListeners() {
-
+	public void actionsTurn2ThisLayout(TreeLayoutEnum layout) {
+		boolean whole = layout != TreeLayoutEnum.RECTANGULAR_LAYOUT && layout != TreeLayoutEnum.SLOPE_LAYOUT;
+		chckbxLockAspectRatio.setEnabled(!whole);
+		chckbxLockAspectRatio.setSelected(whole);
 		spinnerVerticalOrWholeZoom.removeChangeListener(changeListenerSpinnerVerticalZoom);
 		spinnerHorizontalChange.removeChangeListener(changeListenerSpinnerHorizontal);
-
-	}
-
-	private void addAllListeners(TreeLayoutEnum conPanl) {
 		spinnerVerticalOrWholeZoom.addChangeListener(changeListenerSpinnerVerticalZoom);
 		spinnerHorizontalChange.addChangeListener(changeListenerSpinnerHorizontal);
-
-		if (isWholeZoomLayout(conPanl)) {
-			chckbxLockAspectRatio.setSelected(true);
-			chckbxLockAspectRatio.setEnabled(false);
-		} else {
-			chckbxLockAspectRatio.setSelected(false);
-			chckbxLockAspectRatio.setEnabled(true);
-		}
-
+		reInitializeGUIAccording2treeLayoutProperties();
+		if (controller != null) controller.fireLayoutChanged();
 	}
 
 	public void resetZoomInAndOut2zero() {
-		removeAllListeners();
-
-		spinnerVerticalOrWholeZoom.setValue(defaultInitializeValue);
-		spinnerHorizontalChange.setValue(defaultInitializeValue);
-
-		spinnerVerticalOrWholeZoom.addChangeListener(changeListenerSpinnerVerticalZoom);
-		spinnerHorizontalChange.addChangeListener(changeListenerSpinnerHorizontal);
+		if (controller != null && controller.getSelectedPhylogeneticTreePanel() != null)
+			controller.getSelectedPhylogeneticTreePanel().setTreePanelScale(100, 100);
+		reInitializeGUIAccording2treeLayoutProperties();
 	}
 
+	/** Synchronize display only; dimensions are owned by the tree panel. */
 	public void resetZoomLayoutPanel(int newHeight, int newWidth) {
-//		PhylogeneticTreePanel globalPhylogeneticTreePanel = controller.getGlobalPhylogeneticTreePanel();
-//		int oriWidth = globalPhylogeneticTreePanel.getWidth();
-//		int oriHeight = globalPhylogeneticTreePanel.getHeight();
-//		removeAllListeners();
-//
-//		double d1 = newHeight / (double) oriHeight;
-//		double d2 = newWidth / (double) oriWidth;
-//		spinnerVerticalOrWholeZoom.setValue((int) (d1 * 100));
-//		spinnerHorizontalChange.setValue((int) (d2 * 100));
-//
-//		spinnerVerticalOrWholeZoom.addChangeListener(ChangeListenerSpinnerVerticalZoom);
-//		spinnerHorizontalChange.addChangeListener(ChangeListenerSpinnerHorizontal);
+		reInitializeGUIAccording2treeLayoutProperties();
 	}
 
 	@Override
 	public void reInitializeGUIAccording2treeLayoutProperties() {
-		if (controller == null || controller.getTreeLayoutProperties() == null) {
-			return;
+		if (controller == null) return;
+		var properties = controller.getActiveTreeLayoutProperties();
+		PhylogeneticTreePanel tree = properties == null ? null : controller.getSelectedPhylogeneticTreePanel();
+		if (tree != observedTree) {
+			if (observedTree != null) observedTree.removePropertyChangeListener("treePanelDimension", dimensionListener);
+			observedTree = tree;
+			if (tree != null) tree.addPropertyChangeListener("treePanelDimension", dimensionListener);
 		}
-
-		// Sync height scale toggle button
-		height1ScaleTogbtn.setSelected(controller.getTreeLayoutProperties().isWhetherHeightScaleOnMouseWheel());
-
-		// Sync width scale toggle button
-		width1ScaleTogbtn.setSelected(controller.getTreeLayoutProperties().isWhetherWidthScaleOnMouseWheel());
+		synchronizing = true;
+		try {
+			Dimension scale = tree == null ? new Dimension(100, 100) : tree.getTreePanelScale();
+			spinnerVerticalOrWholeZoom.setValue(Math.min(100000, scale.height));
+			spinnerHorizontalChange.setValue(Math.min(100000, scale.width));
+			spinnerVerticalOrWholeZoom.setEnabled(tree != null);
+			spinnerHorizontalChange.setEnabled(tree != null);
+			boolean whole = tree != null && tree.isUniformScaleLayout();
+			chckbxLockAspectRatio.setEnabled(!whole && tree != null);
+			if (whole) chckbxLockAspectRatio.setSelected(true);
+			height1ScaleTogbtn.setEnabled(tree != null);
+			width1ScaleTogbtn.setEnabled(tree != null);
+			if (properties != null) {
+				height1ScaleTogbtn.setSelected(properties.isWhetherHeightScaleOnMouseWheel());
+				width1ScaleTogbtn.setSelected(properties.isWhetherWidthScaleOnMouseWheel());
+			}
+		} finally {
+			synchronizing = false;
+		}
 	}
-
 }

@@ -30,6 +30,10 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 
 	private int currentHeight;
 	private int currentWidth;
+	private Dimension fitCanvasSize = new Dimension();
+	private Boolean spiralLeafLabels;
+	private Boolean otherLeafLabels;
+	private boolean spiralFamily;
 
 	protected BaseLayout layout;
 	private final EnumMap<TreeLayout, BaseLayout> unrootedLayouts = new EnumMap<>(TreeLayout.class);
@@ -185,6 +189,7 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	}
 
 	public void updatePhylogeneticTreePanel4fitFrame() {
+		fitCanvasSize = new Dimension();
 
 		Container parent = this.getParent();
 		if (parent instanceof JViewport viewPort) {
@@ -211,17 +216,24 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			SwingUtilities.invokeLater(this::updatePhylogeneticTreePanel);
 			return;
 		}
+		boolean wasPending = isLayoutCalculationPending();
 		long revision = ++layoutRevision;
 		layoutStatus = "Calculating tree layout...";
 		if (layoutWorker != null) {
 			layoutWorker.cancel(true);
 			layoutWorker = null;
 		}
-		if (layout == null) return;
+		if (layout == null) {
+			firePropertyChange("layoutCalculationPending", wasPending, false);
+			return;
+		}
+		layout.prepareLabelSpace();
 		Dimension canvas = layout.getRequiredCanvasSize(currentWidth, currentHeight);
+		if (fitCanvasSize.width <= 0 || fitCanvasSize.height <= 0) fitCanvasSize = new Dimension(canvas);
 		currentWidth = canvas.width;
 		currentHeight = canvas.height;
 		setPreferredSize(canvas);
+		firePropertyChange("treePanelDimension", null, new Dimension(canvas));
 		if (layout instanceof RadialPhyloLayout radial && SwingUtilities.isEventDispatchThread()) {
 			RadialPhyloLayout.Calculation request;
 			try {
@@ -229,12 +241,16 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			} catch (IllegalArgumentException ex) {
 				layoutReady = false;
 				layoutStatus = "Unable to calculate the tree layout.";
+				firePropertyChange("layoutCalculationPending", wasPending, false);
+				notifyTreeViewStateChanged();
 				SwingDialog.showWarningMSGDialog("Tree layout", ex.getMessage());
 				return;
 			}
 			if (request.cached() != null) {
 				radial.applyCalculation(request, request.cached(), canvas.width, canvas.height);
 				layoutReady = true;
+				firePropertyChange("layoutCalculationPending", wasPending, false);
+				notifyTreeViewStateChanged();
 				refreshViewPort();
 				return;
 			}
@@ -256,18 +272,23 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 						SwingDialog.showWarningMSGDialog("Tree layout", "Unable to calculate the tree layout. See the log for details.");
 					} finally {
 						layoutWorker = null;
+						firePropertyChange("layoutCalculationPending", true, false);
 					}
+					notifyTreeViewStateChanged();
 					refreshViewPort();
 				}
 			};
 			layoutWorker.execute();
+			firePropertyChange("layoutCalculationPending", wasPending, true);
 			repaint();
 		} else {
 			// These are linear coordinate mappings. Publish them together on the EDT.
 			layout.calculateForPainting(currentWidth, currentHeight);
 			layoutReady = true;
+			firePropertyChange("layoutCalculationPending", wasPending, false);
 			refreshViewPort();
 		}
+		notifyTreeViewStateChanged();
 	}
 
 	/** Explicit cancellation leaves the last completed coordinates available for the next request. */
@@ -276,6 +297,8 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		++layoutRevision;
 		if (layoutWorker != null) layoutWorker.cancel(true);
 		layoutWorker = null;
+		firePropertyChange("layoutCalculationPending", true, false);
+		notifyTreeViewStateChanged();
 		layoutStatus = "Layout calculation cancelled. Choose a layout to recalculate.";
 		repaint();
 	}
@@ -297,14 +320,39 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			initialLayout = TreeLayout.RECT_PHYLO_LEFT;
 			layoutProp.setMyLayout(initialLayout);
 		}
+		spiralFamily = initialLayout.name().startsWith("SPRIAL_");
+		otherLeafLabels = layoutProp.getShowLeafPropertiesInfo().isShowLeafLabel();
+		if (spiralFamily) spiralLeafLabels = otherLeafLabels;
 		layout = obtainRightLayout(initialLayout);
 
 		updatePhylogeneticTreePanel4fitFrame();
 	}
 
 	public void updateViewAccording2TreeLayout(TreeLayout tt) {
+		boolean enteringSpiral = tt.name().startsWith("SPRIAL_");
+		if (enteringSpiral != spiralFamily) {
+			boolean current = layoutProp.getShowLeafPropertiesInfo().isShowLeafLabel();
+			if (spiralFamily) spiralLeafLabels = current; else otherLeafLabels = current;
+			spiralFamily = enteringSpiral;
+			setLeafLabelsVisible(enteringSpiral ? Boolean.TRUE.equals(spiralLeafLabels)
+					: otherLeafLabels == null ? current : otherLeafLabels);
+		}
 		layoutProp.setMyLayout(tt);
 		layout = obtainRightLayout(tt);
+		recalculatePreservingZoom();
+	}
+
+	public void recalculatePreservingZoom() {
+		if (layout == null) return;
+		Dimension scale = getTreePanelScale();
+		Container parent = getParent();
+		if (parent instanceof JViewport viewport) {
+			layout.prepareLabelSpace();
+			fitCanvasSize = layout.getRequiredCanvasSize(viewport.getWidth(), viewport.getHeight());
+			if (isUniformScaleLayout()) scale.width = scale.height = Math.max(scale.width, scale.height);
+			currentWidth = (int) Math.round(fitCanvasSize.width * scale.width / 100.0);
+			currentHeight = (int) Math.round(fitCanvasSize.height * scale.height / 100.0);
+		}
 		updatePhylogeneticTreePanel();
 	}
 
@@ -410,10 +458,14 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	 */
 	public void continuouslyZoomInOrOut(int heightChange, int widthChange, Point p) {
 
-		int tempHeight = currentHeight + heightChange;
-		int tempWidth = currentWidth + widthChange;
-		if (tempHeight < 0.5 * getHeight() || tempWidth < 0.5 * getWidth()) {
-			return;
+		if (currentHeight <= 0 || currentWidth <= 0) return;
+		int tempHeight = Math.max(fitCanvasSize.height, currentHeight + heightChange);
+		int tempWidth = Math.max(fitCanvasSize.width, currentWidth + widthChange);
+		if (isUniformScaleLayout()) {
+			double factor = heightChange != 0 ? tempHeight / (double) currentHeight : tempWidth / (double) currentWidth;
+			factor = Math.max(factor, Math.max(fitCanvasSize.height / (double) currentHeight, fitCanvasSize.width / (double) currentWidth));
+			tempHeight = (int) Math.round(currentHeight * factor);
+			tempWidth = (int) Math.round(currentWidth * factor);
 		}
 		double d1 = tempHeight / (double) (currentHeight);
 		double d2 = tempWidth / (double) (currentWidth);
@@ -435,7 +487,7 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		logger.trace("The new location is {} {}", location.x - offX, location.y - offY);
 
 		Container parent = getParent();
-		parent.doLayout();
+		if (parent != null) parent.doLayout();
 		/*
 		 * 终于解决这个问题了。
 		 * https://stackoverflow.com/questions/115103/how-do-you-implement-position-
@@ -565,6 +617,61 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 
 	public Dimension getTreePanelDimension() {
 		return new Dimension(currentWidth, currentHeight);
+	}
+
+	public void setLeafLabelsVisible(boolean visible) {
+		var state = layoutProp.getShowLeafPropertiesInfo();
+		boolean previous = state.isShowLeafLabel();
+		state.setShowLeafLabel(visible);
+		state.setNeedChange4showLabel(!previous && visible);
+		state.setNeedChange4hideLabel(previous && !visible);
+		module.evolview.phylotree.visualization.util.TreeOperationUtil.recursiveIterateTreeIF(rootNode, node -> {
+			if (node.getChildCount() == 0) node.getDrawUnit().setDrawName(visible);
+		});
+		if (spiralFamily) spiralLeafLabels = visible; else otherLeafLabels = visible;
+	}
+
+	public void notifyTreeViewStateChanged() {
+		firePropertyChange("treeViewState", null, this);
+	}
+
+	public boolean supportsScaleBar() {
+		return layout != null && layoutReady && !isLayoutCalculationPending() && layout.supportsScaleBar();
+	}
+
+	public boolean supportsAxisBar() { return layout != null && layoutReady && layout.supportsAxisBar(); }
+
+	public boolean hasBootstrapValues() {
+		final boolean[] present = {false};
+		module.evolview.phylotree.visualization.util.TreeOperationUtil.recursiveIterateTreeIF(rootNode, node -> {
+			if (node.getChildCount() > 0 && node.hasBootstrapValue()) present[0] = true;
+		});
+		return present[0];
+	}
+
+	public boolean isUniformScaleLayout() {
+		String name = layoutProp.getMyLayout().name();
+		return name.startsWith("RADIAL_") || name.startsWith("SPRIAL_") || name.contains("CIR_");
+	}
+
+	/** Percentages relative to the last fitted, readable canvas. */
+	public Dimension getTreePanelScale() {
+		if (fitCanvasSize.width <= 0 || fitCanvasSize.height <= 0) return new Dimension(100, 100);
+		return new Dimension(Math.max(100, (int) Math.round(100.0 * currentWidth / fitCanvasSize.width)),
+				Math.max(100, (int) Math.round(100.0 * currentHeight / fitCanvasSize.height)));
+	}
+
+	/** Manual scaling is centered on the visible viewport and requires no selected node. */
+	public void setTreePanelScale(int heightPercent, int widthPercent) {
+		if (layout == null || fitCanvasSize.width <= 0 || fitCanvasSize.height <= 0) return;
+		heightPercent = Math.max(100, Math.min(100000, heightPercent));
+		widthPercent = Math.max(100, Math.min(100000, widthPercent));
+		if (isUniformScaleLayout()) heightPercent = widthPercent = Math.max(heightPercent, widthPercent);
+		Rectangle visible = getVisibleRect();
+		Point anchor = new Point((int) visible.getCenterX(), (int) visible.getCenterY());
+		int targetHeight = (int) Math.round(fitCanvasSize.height * heightPercent / 100.0);
+		int targetWidth = (int) Math.round(fitCanvasSize.width * widthPercent / 100.0);
+		continuouslyZoomInOrOut(targetHeight - currentHeight, targetWidth - currentWidth, anchor);
 	}
 
 	public BaseLayout getCurrLayout() {

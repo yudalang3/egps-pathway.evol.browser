@@ -11,6 +11,14 @@ public final class TreeConversionUtil {
 	private TreeConversionUtil() {}
 
 	public static GraphicsNode node4eGPSToGraphicsNode(NodeEGPSv1 node) {
+		return convert(node, null);
+	}
+
+	public static GraphicsNode node4eGPSToGraphicsNode(NodeEGPSv1 node, boolean bootstrapCalculated) {
+		return convert(node, bootstrapCalculated);
+	}
+
+	private static GraphicsNode convert(NodeEGPSv1 node, Boolean bootstrapCalculated) {
 		GraphicsNode ret = new GraphicsNode();
 
 		int childCount = node.getChildCount();
@@ -22,15 +30,15 @@ public final class TreeConversionUtil {
 
 		ret.setRealBranchLength(node.getBranch().getLength());
 
-		if (node.getBs() < 1) {
-			ret.setBootstrap((int) (node.getBs() * 100));
-		} else {
-			ret.setBootstrap((int) (node.getBs()));
+		if (childCount > 0 && node.getParentCount() > 0) {
+			if (Boolean.TRUE.equals(bootstrapCalculated)) ret.setBootstrapValue(node.getBs() * 100);
+			else if (bootstrapCalculated == null && node.getBs() != 0)
+				ret.setBootstrapValue(node.getBs() < 1 ? node.getBs() * 100 : node.getBs());
 		}
 
 		for (int i = 0; i < childCount; i++) {
 			NodeEGPSv1 child = node.getChildAt(i);
-			GraphicsNode child4graphics = node4eGPSToGraphicsNode(child);
+			GraphicsNode child4graphics = convert(child, bootstrapCalculated);
 			ret.addChild(child4graphics);
 		}
 

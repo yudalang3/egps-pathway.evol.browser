@@ -11,10 +11,13 @@ import java.awt.event.MouseEvent;
 
 @SuppressWarnings("serial")
 public class SubSlopeLayout extends BaseCtrlPanel {
+	private boolean synchronizing;
+
 	private JSpinner spinnerOfLeafLocation;
 	private JSlider sliderOfLeafLocation;
 	private JLabel lblRotation;
 	private JSeparator separator;
+	private JSlider sliderOfMargin;
 	private JSpinner spinnerOfMargin;
 
 	private JToggleButton btnRotate0;
@@ -79,7 +82,7 @@ public class SubSlopeLayout extends BaseCtrlPanel {
 		gbc_lblNewLabel.gridwidth = 2;
 		add(lblNewLabel, gbc_lblNewLabel);
 
-		JSlider sliderOfMargin = new JSlider();
+		sliderOfMargin = new JSlider();
 		sliderOfMargin.setFont(globalFont);
 		sliderOfMargin.setFocusable(false);
 		sliderOfMargin.setValue(20);
@@ -155,21 +158,23 @@ public class SubSlopeLayout extends BaseCtrlPanel {
 		add(rotationPanel, gbc_rotationPanel);
 
 		spinnerOfLeafLocation.addChangeListener(e -> {
+			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
 			int value = (int) source.getValue();
 			sliderOfLeafLocation.setValue(value);
-			SlopeLayoutProperty slopeLayoutProperety = controller.getTreeLayoutProperties().getSlopeLayoutProperety();
+			SlopeLayoutProperty slopeLayoutProperety = controller.getActiveTreeLayoutProperties().getSlopeLayoutProperety();
 			slopeLayoutProperety.setLeafLocationRightMostRatio(0.01 * value);
-			controller.reCalculateTreeLayoutAndRefreshViewPort();
+			controller.reCalculateTreeLayoutPreservingZoom();
 		});
 		spinnerOfMargin.addChangeListener(e -> {
+			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
 			int value = (int) source.getValue();
 			sliderOfMargin.setValue(value);
 
-			SlopeLayoutProperty slopeLayoutProperety = controller.getTreeLayoutProperties().getSlopeLayoutProperety();
+			SlopeLayoutProperty slopeLayoutProperety = controller.getActiveTreeLayoutProperties().getSlopeLayoutProperety();
 			slopeLayoutProperety.setBlankMarginRatio(0.01 * value);
-			controller.reCalculateTreeLayoutAndRefreshViewPort();
+			controller.reCalculateTreeLayoutPreservingZoom();
 		});
 
 	}
@@ -179,12 +184,36 @@ public class SubSlopeLayout extends BaseCtrlPanel {
 		btn.setFont(globalFont);
 		btn.setFocusable(false);
 		btn.addActionListener(e -> {
-			if (btn.isSelected()) {
-				controller.getTreeLayoutProperties().getSlopeLayoutProperety().setSlopeLayoutRotationDeg(degrees);
-				controller.reCalculateTreeLayoutAndRefreshViewPort();
+			if (!synchronizing && controller != null && btn.isSelected()) {
+				controller.getActiveTreeLayoutProperties().getSlopeLayoutProperety().setSlopeLayoutRotationDeg(degrees);
+				controller.reCalculateTreeLayoutPreservingZoom();
 			}
 		});
 		return btn;
 	}
 
+
+    @Override
+    public void setController(module.evolview.pathwaybrowser.PathwayBrowserController controller) {
+        super.setController(controller);
+        reInitializeGUIAccording2treeLayoutProperties();
+    }
+
+    @Override
+    public void reInitializeGUIAccording2treeLayoutProperties() {
+        if (controller == null || controller.getActiveTreeLayoutProperties() == null) return;
+        var properties = controller.getActiveTreeLayoutProperties();
+        synchronizing = true;
+        try {
+            var slope = properties.getSlopeLayoutProperety();
+            spinnerOfLeafLocation.setValue((int) Math.round(slope.getLeafLocationRightMostRatio() * 100));
+            sliderOfLeafLocation.setValue((int) spinnerOfLeafLocation.getValue());
+            spinnerOfMargin.setValue((int) Math.round(slope.getBlankMarginRatio() * 100));
+            sliderOfMargin.setValue((int) spinnerOfMargin.getValue());
+            int rotation = slope.getSlopeLayoutRotationDeg();
+            btnRotate0.setSelected(rotation == 0); btnRotate90.setSelected(rotation == 90);
+            btnRotate180.setSelected(rotation == 180); btnRotate270.setSelected(rotation == 270);
+
+        } finally { synchronizing = false; }
+    }
 }

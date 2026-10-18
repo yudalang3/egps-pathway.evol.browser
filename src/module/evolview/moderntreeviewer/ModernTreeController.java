@@ -45,4 +45,18 @@ public class ModernTreeController extends GeneFamilyController {
 		super.fireLayoutChanged();
 		mainFace.invokeTheFeatureMethod(3);
 	}
+
+	@Override
+	public void syncTreeControlsFromModel() {
+		if (!javax.swing.SwingUtilities.isEventDispatchThread()) {
+			javax.swing.SwingUtilities.invokeLater(this::syncTreeControlsFromModel);
+			return;
+		}
+		if (synchronizingTreeControls || mainFace == null) return;
+		synchronizingTreeControls = true;
+		try {
+			bindSelectedTreeControls();
+			mainFace.reInitializeGUIAccording2Properties();
+		} finally { synchronizingTreeControls = false; }
+	}
 }

@@ -101,6 +101,7 @@ public class TreeLayoutProperties {
     private boolean highlightBackMuts = false;
 
     protected BlankArea blankArea = new BlankArea(20, 10, 80, 10);
+    private transient int columnLabelReserve;
 
     private boolean shouldLeafNameRightAlign = false;
 
@@ -501,6 +502,14 @@ public class TreeLayoutProperties {
 
     public void setBlankArea(BlankArea blankArea) {
         this.blankArea = blankArea;
+        columnLabelReserve = 0;
+    }
+
+    public void synchronizeColumnLabelReserve(int required) {
+        blankArea.setRight(blankArea.getRight() + required - columnLabelReserve);
+        columnLabelReserve = required;
+        showLeafPropertiesInfo.setNeedChange4showLabel(false);
+        showLeafPropertiesInfo.setNeedChange4hideLabel(false);
     }
 
     public void setShouldLeafNameRightAlign(boolean shouldLeafNameRightAlign) {

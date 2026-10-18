@@ -220,6 +220,10 @@ public class GeneFamilyMainFace extends ModuleFace {
 
 		tabbedPhylogeneticTreePane.setShowCloseButtonOnTab(true);
 		tabbedPhylogeneticTreePane.setBoldActiveTab(true);
+        tabbedPhylogeneticTreePane.addChangeListener(e -> {
+            if (controller.getTreeLayoutProperties() != null && controller.getTreeLayoutPanel() != null)
+                controller.syncTreeControlsFromModel();
+        });
 
 //		tabbedPhylogeneticTreePane.setTabTrailingComponent(tabTrailingJPanel);
 

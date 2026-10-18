@@ -125,7 +125,7 @@ public class PLWeb2ObtainPhyloTree extends PipelineWebToAlignment{
 	}
 
 	private GraphicsNode transferTheTree(NodeEGPSv1 tempTree) {
-		GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(tempTree);
+		GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(tempTree, ifBootStrap);
 		return ret;
 	}
 

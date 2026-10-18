@@ -11,13 +11,13 @@ import module.evolview.model.tree.*;
 import module.evolview.phylotree.visualization.annotation.*;
 import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.phylotree.visualization.graphics.struct.ShowInnerNodePropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.util.DrawUtil;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D.Double;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
@@ -82,6 +82,7 @@ public abstract class BaseLayout implements ITreeLayout {
         this.phylogeneticTreePanel = phylogeneticTreePanel;
         setRootNode(rootNode);
 
+        scaleBarProperty.setIfDrawScaleBar(false);
         annotationFont = treeLayoutProperties.getAxisFont();
 
         axisTickCalculator.setWorkSpaceRatio(1f);
@@ -114,6 +115,8 @@ public abstract class BaseLayout implements ITreeLayout {
      * 所有layout计算之前的公共部分！现在只是赋值height与width
      */
     protected void beforeCalculate(int width, int height) {
+        prepareLabelSpace();
+        scaleBarProperty.setIfDrawScaleBar(false);
         annotationFont = treeLayoutProperties.getAxisFont();
         currentHeight = height;
         currentWidth = width;
@@ -318,6 +321,13 @@ public abstract class BaseLayout implements ITreeLayout {
 
     }
 
+    public boolean supportsScaleBar() {
+        return isLayoutSupportDrawScaleBar() && scaleBarProperty.isIfDrawScaleBar()
+                && buttomScaleBarDrawProperty.getDisplayedStrings().size() >= 2;
+    }
+
+    public boolean supportsAxisBar() { return false; }
+
     protected boolean isLayoutSupportDrawScaleBar() {
         return true;
     }
@@ -388,6 +398,10 @@ public abstract class BaseLayout implements ITreeLayout {
 
     protected boolean usesTipLabels() { return false; }
 
+    public void prepareLabelSpace() {
+        treeLayoutProperties.synchronizeColumnLabelReserve(0);
+    }
+
     protected double minimumTreeRadius() { return 50; }
 
     protected double getTipLabelReserve() {
@@ -408,6 +422,7 @@ public abstract class BaseLayout implements ITreeLayout {
 
     /** Preserve readable fonts on small viewports by giving the scroll pane a larger canvas. */
     public Dimension getRequiredCanvasSize(int width, int height) {
+        prepareLabelSpace();
         if (!usesTipLabels()) return new Dimension(width, height);
         int diameter = (int) Math.ceil(2 * (minimumTreeRadius() + getTipLabelReserve()));
         return new Dimension(Math.max(width, diameter + blankArea.getLeft() + blankArea.getRight()),
@@ -472,9 +487,10 @@ public abstract class BaseLayout implements ITreeLayout {
             double angleIfNeeded = node.getAngleIfNeeded();
             if (angleIfNeeded != 0) {
                 double radians = Math.toRadians(angleIfNeeded);
+                AffineTransform originalTransform = g2d.getTransform();
                 g2d.rotate(-radians, x2, y2);
                 g2d.fill(generalPath);
-                g2d.rotate(radians, x2, y2);
+                g2d.setTransform(originalTransform);
             } else {
                 g2d.fill(generalPath);
             }
@@ -498,9 +514,10 @@ public abstract class BaseLayout implements ITreeLayout {
 
             if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
                 double radians = Math.toRadians(angleIfNeeded);
+                AffineTransform originalTransform = g2d.getTransform();
                 g2d.rotate(-radians, x2, y2);
                 g2d.drawString(drawString, xx, yy);
-                g2d.rotate(radians, x2, y2);
+                g2d.setTransform(originalTransform);
             } else {
                 g2d.drawString(drawString, xx, yy);
             }
@@ -539,8 +556,7 @@ public abstract class BaseLayout implements ITreeLayout {
 
         DrawUtil.drawRoundClassifiedColor(g2d, (int) x2, (int) y2, circleRadius);
 
-        ShowInnerNodePropertiesInfo showInnerNodePropertiesInfo = treeLayoutProperties.getShowInnerNodePropertiesInfo();
-        if (drawUnit.isDrawName()) {
+        if (drawUnit.isDrawName() && !node.isNameBootstrap()) {
             g2d.setColor(Color.black);
             g2d.setFont(treeLayoutProperties.getGlobalFont());
 
@@ -555,18 +571,14 @@ public abstract class BaseLayout implements ITreeLayout {
             if (!Strings.isNullOrEmpty(drawString)) {
                 if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
                     double radians = Math.toRadians(angleIfNeeded);
+                    AffineTransform originalTransform = g2d.getTransform();
                     g2d.rotate(-radians, x2, y2);
                     g2d.drawString(drawString, xx, yy);
-                    g2d.rotate(radians, x2, y2);
+                    g2d.setTransform(originalTransform);
                 } else {
                     g2d.drawString(drawString, xx, yy);
                 }
             }
-        }
-
-
-        if (showInnerNodePropertiesInfo.isShowInternalNodeBootstrap()) {
-            // boot strap属性还没加， 需要去做。
         }
 
     }
@@ -670,6 +682,7 @@ public abstract class BaseLayout implements ITreeLayout {
             }
         } else if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
             double radians = Math.toRadians(angleIfNeeded);
+            AffineTransform originalTransform = g2d.getTransform();
             g2d.rotate(-radians, x2, y2);
             g2d.drawString(drawString, xx, yy);
             Color color = leafNameRenderMap.get(node.getID());
@@ -686,7 +699,7 @@ public abstract class BaseLayout implements ITreeLayout {
                 }
             }
 
-            g2d.rotate(radians, x2, y2);
+            g2d.setTransform(originalTransform);
         } else {
             g2d.drawString(drawString, xx, yy);
 
@@ -773,6 +786,7 @@ public abstract class BaseLayout implements ITreeLayout {
         // yjn:选中节点的绘制得放在第三次遍历中得进行，否则会被点绘制覆盖一些
         recursiveDrawSelectedNode(g2d, rootNode);
         commonTailInDrawingProcess(g2d);
+        drawBootstrapLabels(g2d, rootNode);
     }
 
     /**
@@ -1009,6 +1023,52 @@ public abstract class BaseLayout implements ITreeLayout {
             }
         }
 
+    }
+
+    protected Rectangle bootstrapLabelBounds(Graphics2D graphics, GraphicsNode node, String label) {
+        FontMetrics metrics = graphics.getFontMetrics(treeLayoutProperties.getGlobalFont());
+        int radius = node.getDrawUnit().getCircleRadius();
+        int gap = radius + 5;
+        double dx = node.getXSelf() - node.getXParent();
+        double dy = node.getYSelf() - node.getYParent();
+        double length = Math.hypot(dx, dy);
+        double nx = length == 0 ? 0 : -dy / length;
+        double ny = length == 0 ? -1 : dx / length;
+        if (ny > 0) { nx = -nx; ny = -ny; }
+        boolean named = node.getDrawUnit().isDrawName() && !node.isNameBootstrap()
+                && node.getName() != null && !node.getName().isEmpty();
+        int rows = (named ? 1 : 0) + (treeLayoutProperties.isShowNodeBranchLength() ? 1 : 0);
+        double offset = gap + (rows + .5) * metrics.getHeight();
+        int width = metrics.stringWidth(label);
+        int x = (int) Math.round(node.getXSelf() + nx * offset - width / 2.0);
+        int y = (int) Math.round(node.getYSelf() + ny * offset - metrics.getHeight() / 2.0);
+        x = Math.max(1, Math.min(x, (int) currentWidth - width - 1));
+        y = Math.max(1, Math.min(y, (int) currentHeight - metrics.getHeight() - 1));
+        return new Rectangle(x, y, width, metrics.getHeight());
+    }
+
+    private void drawBootstrapLabels(Graphics2D graphics, GraphicsNode node) {
+        if (node.getChildCount() == 0) return;
+        if (treeLayoutProperties.getShowInnerNodePropertiesInfo().isShowInternalNodeBootstrap()
+                && node.hasBootstrapValue() && !node.hideNode()) {
+            String label = java.math.BigDecimal.valueOf(node.getBootstrapValue()).stripTrailingZeros().toPlainString();
+            Graphics2D text = (Graphics2D) graphics.create();
+            try {
+                text.setFont(treeLayoutProperties.getGlobalFont());
+                Rectangle box = bootstrapLabelBounds(text, node, label);
+                int baseline = box.y + text.getFontMetrics().getAscent();
+                Shape outline = new java.awt.font.TextLayout(label, text.getFont(), text.getFontRenderContext())
+                        .getOutline(AffineTransform.getTranslateInstance(box.x, baseline));
+                text.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                text.setColor(Color.white);
+                text.draw(outline);
+                text.setColor(Color.black);
+                text.drawString(label, box.x, baseline);
+            } finally { text.dispose(); }
+        }
+        if (!node.getCollapse()) {
+            for (int i = 0; i < node.getChildCount(); i++) drawBootstrapLabels(graphics, (GraphicsNode) node.getChildAt(i));
+        }
     }
 
     private void lastRecursiveDraw(Graphics2D g2d, GraphicsNode node) {

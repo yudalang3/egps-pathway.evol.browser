@@ -261,8 +261,8 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 	 * 让左边的控制面板刷新
 	 */
 	public void reInitializeGUIAccording2Properties() {
-		treeLayoutPanel.reInitializeGUIAccording2treeLayoutProperties();
-		treeOperationPanel.reInitializeGUIAccording2treeLayoutProperties();
+		if (treeLayoutPanel != null) treeLayoutPanel.reInitializeGUIAccording2treeLayoutProperties();
+		if (treeOperationPanel != null) treeOperationPanel.reInitializeGUIAccording2treeLayoutProperties();
 	}
 
 	@Override
@@ -372,7 +372,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			}
 
 			this.phylogeneticTreePanel.initializeLeftPanel();
-			this.reInitializeGUIAccording2Properties();
+			controller.syncTreeControlsFromModel();
 		}
 
 	}

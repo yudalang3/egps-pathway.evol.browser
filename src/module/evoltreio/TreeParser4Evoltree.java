@@ -60,7 +60,14 @@ public class TreeParser4Evoltree {
 			throw new IllegalArgumentException("Path is not a file: " + treePath);
 		}
 		List<String> input3 = FileUtils.readLines(treeFile, StandardCharsets.UTF_8);
-		DefaultPhyNode rootNode = (DefaultPhyNode) NodeUtils.parseTableTree(input3);
+		DefaultPhyNode rootNode = evoltree.struct.util.EvolNodeUtil.convertNode(NodeUtils.parseTableTree(input3), node -> {
+			DefaultPhyNode converted = new DefaultPhyNode();
+			converted.setID(node.getID());
+			converted.setName(node.getName());
+			converted.setLength(node.getLength());
+			converted.setSize(node.getSize());
+			return converted;
+		});
 		return Optional.of(rootNode);
 	}
 

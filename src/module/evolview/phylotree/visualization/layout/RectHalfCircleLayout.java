@@ -2,7 +2,6 @@ package module.evolview.phylotree.visualization.layout;
 
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
@@ -81,17 +80,6 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 
 	@Override
 	public void calculateForPainting(int width, int height) {
-		ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
-		if (showLeafPropertiesInfo.isNeedChange4hideLabel()) {
-			int stringWidth = getMaxLengthLeafNameWidthAccording2CurrentFont();
-			blankArea.setRight(blankArea.getRight() - stringWidth);
-			showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-		} else if (showLeafPropertiesInfo.isNeedChange4showLabel()) {
-			int stringWidth = getMaxLengthLeafNameWidthAccording2CurrentFont();
-			blankArea.setRight(stringWidth + blankArea.getRight());
-			showLeafPropertiesInfo.setNeedChange4showLabel(false);
-		}
-
 		beforeCalculate(width, height);
 
 		GraphicsNode root = rootNode;

@@ -20,6 +20,8 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 	protected JSlider rootLengthSlider;
 	protected JSpinner rootLengthSpinner;
 	protected ChangeListener rootLengthSpinnerChangeListener;
+	private boolean synchronizing;
+
 	private JSlider curvatureSlider;
 	private JSpinner curvatureSpinner;
 	private ChangeListener curvatureSpinnerChangeListener;
@@ -72,7 +74,7 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 			}
 		});
 
-		chckbxAlignToTip = new JCheckBox("Align");
+		chckbxAlignToTip = new JCheckBox("Align tips");
 		chckbxAlignToTip.setFocusable(false);
 		chckbxAlignToTip.setFont(globalFont);
 		GridBagConstraints gbc_chckbxAlignToTip = new GridBagConstraints();
@@ -178,10 +180,11 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 		gbc_curvatureSpinner.gridy = 7;
 		add(curvatureSpinner, gbc_curvatureSpinner);
 		curvatureSpinnerChangeListener = e -> {
+			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
 			int value = (int) source.getValue();
 			curvatureSlider.setValue(value);
-			controller.getTreeLayoutProperties().getRectangularLayoutPropertiy().setCurvature(value);
+			controller.getActiveTreeLayoutProperties().getRectangularLayoutPropertiy().setCurvature(value);
 			controller.refreshPhylogeneticTree();
 		};
 		curvatureSpinner.addChangeListener(curvatureSpinnerChangeListener);
@@ -216,7 +219,8 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 		checkBoxShowRoot.addEventToggleSelected(new ToggleAdapter() {
 			@Override
 			public void onSelected(boolean selected) {
-				controller.getTreeLayoutProperties().setShowRoot(selected);
+				if (synchronizing || controller == null) return;
+				controller.getActiveTreeLayoutProperties().setShowRoot(selected);
 				controller.refreshPhylogeneticTree();
 
 				rootLengthSlider.setEnabled(selected);
@@ -255,11 +259,12 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 		add(rootLengthSpinner, gbc_rootLengthSpinner);
 
 		rootLengthSpinnerChangeListener = e -> {
+			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
 			int value = (int) source.getValue();
 			rootLengthSlider.setValue(value);
-			controller.getTreeLayoutProperties().setRootTipLength(value);
-			controller.reCalculateTreeLayoutAndRefreshViewPort();
+			controller.getActiveTreeLayoutProperties().setRootTipLength(value);
+			controller.reCalculateTreeLayoutPreservingZoom();
 		};
 
 		rootLengthSpinner.addChangeListener(rootLengthSpinnerChangeListener);
@@ -270,6 +275,7 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 
 	@Override
 	public void actionsTurn2ThisLayout(TreeLayoutEnum conPanl) {
+		if (synchronizing || controller == null || controller.getSelectedPhylogeneticTreePanel() == null) return;
 		PhylogeneticTreePanel selectedPhylogeneticTreePanel = controller.getSelectedPhylogeneticTreePanel();
 		
 		if (rdbtnPhylogram.isSelected()) {
@@ -294,7 +300,7 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 			chckbxAlignToTip.setEnabled(false);
 		}
 
-		boolean showRoot = controller.getTreeLayoutProperties().isShowRoot();
+		boolean showRoot = controller.getActiveTreeLayoutProperties().isShowRoot();
 		checkBoxShowRoot.setSelected(showRoot);
 	}
 
@@ -305,4 +311,37 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 		}
 	}
 
+
+    @Override
+    public void setController(module.evolview.pathwaybrowser.PathwayBrowserController controller) {
+        super.setController(controller);
+        reInitializeGUIAccording2treeLayoutProperties();
+    }
+
+    @Override
+    public void reInitializeGUIAccording2treeLayoutProperties() {
+        if (controller == null || controller.getActiveTreeLayoutProperties() == null) return;
+        var properties = controller.getActiveTreeLayoutProperties();
+        synchronizing = true;
+        try {
+            var layout = properties.getMyLayout();
+            if (layout.name().startsWith("RECT_")) {
+                rdbtnPhylogram.setSelected(layout == TreeLayout.RECT_PHYLO_LEFT || layout == TreeLayout.RECT_PHYLO_ALIGN2TIP);
+                rdbtnClado2tip.setSelected(layout == TreeLayout.RECT_CLADO_ALIGNED_LEFT);
+                rdbtnCladoWithEqual.setSelected(layout == TreeLayout.RECT_CLADO_EQUAL_LEFT);
+                rdbtnNewRadioButton.setSelected(layout == TreeLayout.RECT_INNER_YAXIS);
+                rdbtnRectHalfCircularLayout.setSelected(layout == TreeLayout.RECT_HALF_CIRCLE);
+                chckbxAlignToTip.setSelected(layout == TreeLayout.RECT_PHYLO_ALIGN2TIP);
+            }
+            chckbxAlignToTip.setEnabled(rdbtnPhylogram.isSelected());
+            int curvature = properties.getRectangularLayoutPropertiy().getCurvature();
+            curvatureSpinner.setValue(curvature); curvatureSlider.setValue(curvature);
+            checkBoxShowRoot.setSelected(properties.isShowRoot());
+            rootLengthSpinner.setValue((int) Math.round(properties.getRootTipLength()));
+            rootLengthSlider.setValue((int) rootLengthSpinner.getValue());
+            rootLengthSpinner.setEnabled(properties.isShowRoot());
+            rootLengthSlider.setEnabled(properties.isShowRoot());
+
+        } finally { synchronizing = false; }
+    }
 }

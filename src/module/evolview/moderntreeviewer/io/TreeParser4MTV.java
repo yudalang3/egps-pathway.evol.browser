@@ -17,7 +17,11 @@ public class TreeParser4MTV extends TreeParser4Evoltree {
 		Objects.requireNonNull(blank_space, "Please provide the blinkArea instance.");
 		Optional<DefaultPhyNode> tree = super.getTree(object);
 		
-		GraphicsNode theGraphicsTree = NodeUtils.convertBasicNode2graphicsNode(tree.get());
+		boolean newick = !com.google.common.base.Strings.isNullOrEmpty(object.getInput_nwk_string())
+				|| !com.google.common.base.Strings.isNullOrEmpty(object.getInput_nwk_path());
+		int format = object.getNwkFormat();
+		if (format < 0 || format > 9) format = module.evoltreio.NewickFormatConfig.DEFAULT_FORMAT;
+		GraphicsNode theGraphicsTree = NodeUtils.convertBasicNode2graphicsNode(tree.get(), newick && (format == 0 || format == 2));
 		return Optional.of(theGraphicsTree);
 	}
 

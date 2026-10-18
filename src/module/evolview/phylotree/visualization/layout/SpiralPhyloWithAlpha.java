@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.function.Function;
 
 public class SpiralPhyloWithAlpha extends SprialLayout {
+	@Override
+	public boolean supportsAxisBar() { return true; }
+
 
 	/** Global beta */
 	private double beta = 4;

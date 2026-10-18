@@ -8,6 +8,9 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 
 public class CircularPhyloAlign2Tip extends CircularPhylo {
+	@Override
+	public boolean supportsAxisBar() { return true; }
+
 
 	private Line2D.Double lineDrawUtil = new Line2D.Double();
 	final BasicStroke basicStroke;

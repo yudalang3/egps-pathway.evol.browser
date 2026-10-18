@@ -15,11 +15,24 @@ import java.util.function.Function;
 
 public class NodeUtils {
 	public static GraphicsNode convertBasicNode2graphicsNode(EvolNode node) {
+		return convertBasicNode2graphicsNode(node, false);
+	}
+
+	public static GraphicsNode convertBasicNode2graphicsNode(EvolNode node, boolean namesAreSupport) {
 		Function<EvolNode, GraphicsNode> generateNewRoot = inputNode -> {
 			GraphicsNode newroot = new GraphicsNode();
 			newroot.setID(inputNode.getID());
 
 			newroot.setName(inputNode.getName());
+			if (inputNode instanceof DefaultGraphicsPhyloNode graphics) {
+				newroot.copyBootstrapFrom(graphics);
+			} else if (inputNode instanceof evoltree.phylogeny.DefaultPhyNode phylo && phylo.getBootstrapValue() != 0) {
+				newroot.setBootstrapValue(phylo.getBootstrapValue());
+			}
+			if (namesAreSupport && inputNode.getChildCount() > 0 && inputNode.getName() != null && !inputNode.getName().isEmpty()) {
+				newroot.setBootstrapValue(Double.parseDouble(inputNode.getName()));
+				newroot.setNameBootstrap(true);
+			}
 			newroot.setLength(inputNode.getLength());
 			newroot.setRealBranchLength(inputNode.getLength());
 

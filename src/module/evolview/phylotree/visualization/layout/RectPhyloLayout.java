@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.annotation.*;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.phylotree.visualization.graphics.struct.ShowLeafPropertiesInfo;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
@@ -19,6 +18,9 @@ import java.util.List;
 import java.util.function.Function;
 
 public class RectPhyloLayout extends RectangularLayout {
+	@Override
+	public boolean supportsAxisBar() { return true; }
+
 
 	public RectPhyloLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
 			TreeLayoutHost phylogeneticTreePanel) {
@@ -45,17 +47,6 @@ public class RectPhyloLayout extends RectangularLayout {
 
 	@Override
 	public void calculateForPainting(int width, int height) {
-		ShowLeafPropertiesInfo showLeafPropertiesInfo = treeLayoutProperties.getShowLeafPropertiesInfo();
-		if (showLeafPropertiesInfo.isNeedChange4hideLabel()) {
-			int stringWidth = getMaxLengthLeafNameWidthAccording2CurrentFont();
-			blankArea.setRight(blankArea.getRight() - stringWidth);
-			showLeafPropertiesInfo.setNeedChange4hideLabel(false);
-		} else if (showLeafPropertiesInfo.isNeedChange4showLabel()) {
-			int stringWidth = getMaxLengthLeafNameWidthAccording2CurrentFont();
-			blankArea.setRight(stringWidth + blankArea.getRight());
-			showLeafPropertiesInfo.setNeedChange4showLabel(false);
-		}
-
 		beforeCalculate(width, height);
 
 		GraphicsNode root = rootNode;
@@ -66,6 +57,12 @@ public class RectPhyloLayout extends RectangularLayout {
 		this.scaleBarProperty.setIfDrawScaleBar(true);
 
 		afterCalculation();
+	}
+
+	@Override
+	public void prepareLabelSpace() {
+		treeLayoutProperties.synchronizeColumnLabelReserve(treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()
+				? getMaxLengthLeafNameWidthAccording2CurrentFont() : 0);
 	}
 
 	@Override

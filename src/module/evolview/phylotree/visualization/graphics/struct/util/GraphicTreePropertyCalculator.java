@@ -113,6 +113,7 @@ public class GraphicTreePropertyCalculator {
 		newroot.setDisplayedBranchLength(root.getDisplayedBranchLength());
 		newroot.setDrawUnit(root.getDrawUnit());
 		newroot.setName(root.getName());
+		newroot.copyBootstrapFrom(root);
 
 
 		newroot.setSize(root.getSize());

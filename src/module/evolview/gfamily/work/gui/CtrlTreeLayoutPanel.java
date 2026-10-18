@@ -45,6 +45,7 @@ public class CtrlTreeLayoutPanel extends BaseCtrlPanel {
 		subRadicalLayout.setController(controller);
 		subSlopeLayout.setController(controller);
 		subSprialLayout.setController(controller);
+		reInitializeGUIAccording2treeLayoutProperties();
 	}
 
 	/**
@@ -100,10 +101,12 @@ public class CtrlTreeLayoutPanel extends BaseCtrlPanel {
 
 		switch (treeLayoutType) {
 		case RECTANGULAR_LAYOUT:
+			subRectLayout.reInitializeGUIAccording2treeLayoutProperties();
 			subRectLayout.actionsTurn2ThisLayout(treeLayoutType);
 			guiZoomAndRotateContainner.actionsTurn2ThisLayout(treeLayoutType);
 			break;
 		case CIRCULAR_LAYOUT:
+			subCirLayout.reInitializeGUIAccording2treeLayoutProperties();
 			subCirLayout.actionsTurn2ThisLayout(treeLayoutType);
 			guiZoomAndRotateContainner.actionsTurn2ThisLayout(treeLayoutType);
 			break;
@@ -117,6 +120,7 @@ public class CtrlTreeLayoutPanel extends BaseCtrlPanel {
 			break;
 		default:
 			// SLOPE_LAYOUT_NAME
+			subSlopeLayout.reInitializeGUIAccording2treeLayoutProperties();
 			controller.getSelectedPhylogeneticTreePanel()
 					.updateViewAccording2TreeLayout(TreeLayout.SLOPE_CLADO_ALIGNED_LEFT);
 			guiZoomAndRotateContainner.actionsTurn2ThisLayout(treeLayoutType);
@@ -135,13 +139,20 @@ public class CtrlTreeLayoutPanel extends BaseCtrlPanel {
 
 	@Override
 	public void reInitializeGUIAccording2treeLayoutProperties() {
-		// Sync zoom container toggle buttons (height/width scale on mouse wheel)
+		if (controller == null) return;
 		guiZoomAndRotateContainner.reInitializeGUIAccording2treeLayoutProperties();
 		subRadicalLayout.reInitializeGUIAccording2treeLayoutProperties();
-		if (controller.getTreeLayoutProperties().getMyLayout().name().startsWith("RADIAL_")) {
-			cardLayout.show(centerPanelContainner, TreeLayoutEnum.RADICAL_LAYOUT.getName());
-			toplayoutSwither.selectRadialLayout();
-		}
+		if (controller.getActiveTreeLayoutProperties() == null) return;
+		subRectLayout.reInitializeGUIAccording2treeLayoutProperties();
+		subCirLayout.reInitializeGUIAccording2treeLayoutProperties();
+		subSlopeLayout.reInitializeGUIAccording2treeLayoutProperties();
+		subSprialLayout.reInitializeGUIAccording2treeLayoutProperties();
+		String name = controller.getActiveTreeLayoutProperties().getMyLayout().name();
+		TreeLayoutEnum type = name.startsWith("RADIAL_") ? TreeLayoutEnum.RADICAL_LAYOUT
+				: name.startsWith("SPRIAL_") ? TreeLayoutEnum.SPRIAL_LAYOUT
+				: name.startsWith("SLOPE_") ? TreeLayoutEnum.SLOPE_LAYOUT
+				: name.contains("CIR_") ? TreeLayoutEnum.CIRCULAR_LAYOUT : TreeLayoutEnum.RECTANGULAR_LAYOUT;
+		cardLayout.show(centerPanelContainner, type.getName());
+		toplayoutSwither.selectLayout(type);
 	}
-
 }

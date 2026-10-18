@@ -69,18 +69,21 @@ public class CircularPhylo extends CicularLayout {
 
 		GraphicsNode node = rootNode;
 		recursiveCalculate(node, recursiveCalculateStartLength);
-		// set root properties!
-		node.setXParent(centerX);
-		node.setYParent(centerY);
-		Double tt = GuiCalculator.calculateCircularLocation(node.getAngleIfNeeded(),
-				node.getRadicusIfNeeded(), centerX, centerY);
-		node.setXSelf(tt.x);
-		node.setYSelf(tt.y);
-
+		configureRootBranch();
 
 		this.scaleBarProperty.setIfDrawScaleBar(true);
 
 		afterCalculation();
+	}
+
+	protected void configureRootBranch() {
+		rootNode.setXParent(centerX);
+		rootNode.setYParent(centerY);
+		Double tt = GuiCalculator.calculateCircularLocation(rootNode.getAngleIfNeeded(),
+				rootNode.getRadicusIfNeeded(), centerX, centerY);
+		rootNode.setXSelf(tt.x);
+		rootNode.setYSelf(tt.y);
+
 	}
 
 	@Override

@@ -660,6 +660,7 @@ public class CGBNodeUtil {
 			newroot.setID(root.getID());
 
 			newroot.setName(root.getName());
+			newroot.copyBootstrapFrom(root);
 
 			newroot.setLength(root.getLength());
 

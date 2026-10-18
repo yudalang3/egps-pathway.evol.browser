@@ -88,7 +88,7 @@ public class PLMSA2PhyloTree extends AbstractDistanceBasedTreePipeline {
 			SwingDialog.showErrorMSGDialog("Error", "The tree is null! Please check the input file!");
 			return;
 		}
-		final GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(finalTree);
+		final GraphicsNode ret = TreeConversionUtil.node4eGPSToGraphicsNode(finalTree, ifBootStrap);
 
 		IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
 		independentModuleLoader.setHowModuleLaunchedWithData("Module launched by pipline multiple sequence alignment to construct the phylogenetic tree.", 

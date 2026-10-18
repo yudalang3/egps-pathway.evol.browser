@@ -43,7 +43,6 @@ public class GraphicsNode extends NodeWithCGBID {
 	 * 对于CGB2.0抽样树的可视化size，即抽样树中的实际抽出的size
 	 */
 	private int visualizeSize = 1;
-	private int bootstrap;
 
 	/**
 	 * Default constructor
@@ -171,11 +170,11 @@ public class GraphicsNode extends NodeWithCGBID {
 	}
 
 	public int getBootstrap() {
-		return bootstrap;
+		return (int) getBootstrapValue();
 	}
 
 	public void setBootstrap(int bootstrap) {
-		this.bootstrap = bootstrap;
+		setBootstrapValue(bootstrap);
 	}
 	
 
