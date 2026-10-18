@@ -164,8 +164,8 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
 
             mTreeViewMainFace.phylogeneticTreePanel.initializeLeftPanel();
             log.trace("mTreeViewMainFace.phylogeneticTreePanel.initializeLeftPanel();");
-            mTreeViewMainFace.reInitializeGUIAccording2Properties();
-            log.trace("mTreeViewMainFace.reInitializeGUIAccording2Properties;");
+            mTreeViewMainFace.controller.syncTreeControlsFromModel();
+            log.trace("mTreeViewMainFace.controller.syncTreeControlsFromModel;");
         });
 		/**
 		 * 教训：这里有个巨大的坑要注意：

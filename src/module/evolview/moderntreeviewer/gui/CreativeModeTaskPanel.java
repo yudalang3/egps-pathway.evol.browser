@@ -9,6 +9,7 @@ import evoltree.struct.util.EvolNodeUtil;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.MTreeViewMainFace;
+import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
@@ -62,12 +63,17 @@ public class CreativeModeTaskPanel extends JPanel {
         toggleButtonCreative.addEventToggleSelected(new ToggleAdapter() {
             @Override
             public void onSelected(boolean selected) {
-                if (treeLayoutProperties == null) {
+                if (!isEnabled() || treeLayoutProperties == null) {
+                    toggleButtonCreative.setSelected(false);
                     return;
                 }
                 treeLayoutProperties.setCreativeMode(selected);
-                if (selected) {
-                    main.invokeTheFeatureMethod(4);
+                refreshState();
+                if (main != null) {
+                    main.reInitializeGUIAccording2Properties();
+                    main.getSelectedPhylogenticTreePanel().setToolTipText(null);
+                    main.getSelectedPhylogenticTreePanel().refreshViewPort();
+                    if (selected) main.invokeTheFeatureMethod(4);
                 }
             }
         });
@@ -130,6 +136,7 @@ public class CreativeModeTaskPanel extends JPanel {
         gbc_buttonLoad.gridy = 7;
         gbc_buttonLoad.insets = new Insets(0, 0, 5, 0);
         add(btn_load, gbc_buttonLoad);
+        refreshState();
     }
 
     private void loadImageFrom() {
@@ -137,7 +144,7 @@ public class CreativeModeTaskPanel extends JPanel {
             EGPSSwingUtil.promote(5, "Missing Tree", "Please load the phylogenetic tree first.", main);
             return;
         }
-        if (!treeLayoutProperties.isCreativeMode()) {
+        if (!isEnabled() || !treeLayoutProperties.isCreativeMode()) {
             SwingDialog.showWarningMSGDialog("Warning", "You are not in creative mode, you can't load image from clipboard.");
             return;
         }
@@ -161,14 +168,19 @@ public class CreativeModeTaskPanel extends JPanel {
     }
 
     private static ToggleButton getToggleButtonCreative(Font defaultFont) {
-        ToggleButton toggleButtonCreative = new ToggleButton();
+        ToggleButton toggleButtonCreative = new ToggleButton() {
+            @Override
+            public void setSelected(boolean selected, boolean animated) {
+                super.setSelected(selected && isEnabled(), animated);
+            }
+        };
         toggleButtonCreative.setForeground(new Color(40, 139, 236));
         toggleButtonCreative.setText("Toggle creative mode");
         toggleButtonCreative.setFocusable(false);
         toggleButtonCreative.setFont(defaultFont);
         toggleButtonCreative.setMinimumSize(new Dimension(80, 35));
         toggleButtonCreative.setToolTipText(
-                "Click to toggle free-create mode, enable users to free drag, create and manipulate the tree nodes.");
+                "Enable horizontal dragging to adjust branch lengths and right-click editing of nodes.");
         return toggleButtonCreative;
     }
 
@@ -177,7 +189,7 @@ public class CreativeModeTaskPanel extends JPanel {
         buttonSetAllBranches.setHorizontalAlignment(SwingConstants.LEFT);
         buttonSetAllBranches.setFont(defaultFont);
         buttonSetAllBranches.addActionListener(e -> {
-            if (main == null) {
+            if (main == null || !isEnabled()) {
                 return;
             }
 
@@ -212,7 +224,7 @@ public class CreativeModeTaskPanel extends JPanel {
         buttonAlign2right.setHorizontalAlignment(SwingConstants.LEFT);
         buttonAlign2right.setFont(defaultFont);
         buttonAlign2right.addActionListener(e -> {
-            if (main == null) {
+            if (main == null || !isEnabled()) {
                 return;
             }
 
@@ -249,11 +261,38 @@ public class CreativeModeTaskPanel extends JPanel {
     }
 
     public void setTreeLayoutProperties(TreeLayoutProperties treeLayoutProperties) {
-        this.treeLayoutProperties = treeLayoutProperties;
-        // 数据导入后重置按钮状态为未选中
-        if (toggleButtonCreative != null) {
-            toggleButtonCreative.setSelected(false);
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> setTreeLayoutProperties(treeLayoutProperties));
+            return;
         }
+        if (this.treeLayoutProperties != treeLayoutProperties && treeLayoutProperties != null) {
+            treeLayoutProperties.setCreativeMode(false);
+        }
+        this.treeLayoutProperties = treeLayoutProperties;
+        refreshState();
+    }
+
+    private void refreshState() {
+        boolean available = treeLayoutProperties != null
+                && (treeLayoutProperties.getMyLayout() == TreeLayout.RECT_PHYLO_LEFT
+                || treeLayoutProperties.getMyLayout() == TreeLayout.RECT_PHYLO_ALIGN2TIP);
+        if (!available && treeLayoutProperties != null) treeLayoutProperties.setCreativeMode(false);
+        setEnabled(available);
+        for (Component component : getComponents()) component.setEnabled(available);
+        boolean selected = available && treeLayoutProperties.isCreativeMode();
+        toggleButtonCreative.setSelected(selected);
+        String tooltip;
+        if (treeLayoutProperties == null) {
+            tooltip = "Load a tree to use creative mode.";
+        } else if (!available) {
+            tooltip = "Requires a rectangular phylogram. Select Rectangular > Phylogram in Tree layout.";
+        } else if (selected) {
+            tooltip = "Creative mode is on. Drag nodes horizontally to change branch lengths. Right-click to edit nodes.";
+        } else {
+            tooltip = "Enable horizontal dragging to adjust branch lengths and right-click editing of nodes.";
+        }
+        setToolTipText(tooltip);
+        toggleButtonCreative.setToolTipText(tooltip);
     }
 
     public void setMain(MTreeViewMainFace mainFace) {

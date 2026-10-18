@@ -46,6 +46,8 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 
 	protected PhylogeneticTreePanel phylogeneticTreePanel;
 	CreativeModeTaskPanel creativeModeTaskPanel;
+	private JXTaskPane creativeModePane;
+	private TreeLayoutProperties creativeModeProperties;
 	private CtrlTreeLayoutPanel treeLayoutPanel;
 
 	ModernTreeController controller = new ModernTreeController(null, this);
@@ -221,16 +223,23 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 		}
 
 		{
-			JXTaskPane operationPane = new JXTaskPane();
-			// operationPane.setCollapsed(true);
+			JXTaskPane operationPane = new JXTaskPane() {
+				@Override
+				public void setCollapsed(boolean collapsed) {
+					if (collapsed || isEnabled()) super.setCollapsed(collapsed);
+				}
+			};
+			creativeModePane = operationPane;
 			operationPane.setFont(titleFont);
 
 			String title = "Creative mode";
 			operationPane.setTitle(title);
 			creativeModeTaskPanel = new CreativeModeTaskPanel();
 			operationPane.add(creativeModeTaskPanel);
-			boolean b = getValueOfStr4storage(title);
-			operationPane.setCollapsed(b);
+			operationPane.setEnabled(false);
+			operationPane.setCollapsed(true);
+			operationPane.setTitle("Creative mode (unavailable)");
+			operationPane.setToolTipText(creativeModeTaskPanel.getToolTipText());
 
 			taskPaneContainer2.add(operationPane);
 
@@ -247,7 +256,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			if (component instanceof JXTaskPane) {
 				JXTaskPane jxTaskPane = (JXTaskPane) component;
 				Integer saveNumber = jxTaskPane.isCollapsed() ? 1 : 0;
-				str2numberMap.put(jxTaskPane.getTitle(), saveNumber);
+				str2numberMap.put(jxTaskPane == creativeModePane ? "Creative mode" : jxTaskPane.getTitle(), saveNumber);
 			}
 		}
 
@@ -261,8 +270,28 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 	 * 让左边的控制面板刷新
 	 */
 	public void reInitializeGUIAccording2Properties() {
+		if (!SwingUtilities.isEventDispatchThread()) {
+			SwingUtilities.invokeLater(this::reInitializeGUIAccording2Properties);
+			return;
+		}
 		if (treeLayoutPanel != null) treeLayoutPanel.reInitializeGUIAccording2treeLayoutProperties();
 		if (treeOperationPanel != null) treeOperationPanel.reInitializeGUIAccording2treeLayoutProperties();
+		if (creativeModePane != null) {
+			TreeLayoutProperties properties = controller.getActiveTreeLayoutProperties();
+			boolean newTree = properties != creativeModeProperties;
+			boolean wasAvailable = creativeModePane.isEnabled();
+			creativeModeProperties = properties;
+			creativeModeTaskPanel.setTreeLayoutProperties(properties);
+			boolean available = creativeModeTaskPanel.isEnabled();
+			creativeModePane.setEnabled(available);
+			creativeModePane.setTitle(available ? "Creative mode" : "Creative mode (unavailable)");
+			creativeModePane.setToolTipText(creativeModeTaskPanel.getToolTipText());
+			if (!available) {
+				creativeModePane.setCollapsed(true);
+				if (phylogeneticTreePanel != null) phylogeneticTreePanel.setToolTipText(null);
+			}
+			else if (newTree || !wasAvailable) creativeModePane.setCollapsed(false);
+		}
 	}
 
 	@Override

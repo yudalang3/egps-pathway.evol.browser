@@ -208,7 +208,9 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		Optional<GraphicsNode> optRet = judgeSelectedNode(point);
 		// Need to complete
 		if (optRet.isPresent()) {
-			phylogeneticTreePanel.setToolTipText(gestureActionHint);
+			phylogeneticTreePanel.setToolTipText(treeLayoutProperties.isCreativeMode()
+					? "Creative mode is on. Drag nodes horizontally to change branch lengths. Right-click to edit nodes."
+					: gestureActionHint);
 		} else {
 			component.setCursor(Cursor.getDefaultCursor());
 			phylogeneticTreePanel.setToolTipText(null);
@@ -657,6 +659,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;
@@ -695,6 +698,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;
@@ -718,6 +722,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;
@@ -749,6 +754,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;
@@ -777,6 +783,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;
@@ -796,6 +803,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;
@@ -812,6 +820,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;
@@ -827,6 +836,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				jPopupMenu4creativeMode.add(jMenuItem);
 				jMenuItem.setFont(defaultFont);
 				jMenuItem.addActionListener(e -> {
+					if (!treeLayoutProperties.isCreativeMode()) return;
 					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
 					if (selectedNodes.isEmpty()) {
 						return;

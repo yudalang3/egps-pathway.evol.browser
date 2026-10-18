@@ -271,6 +271,7 @@ public class TreeLayoutProperties {
 
     public void setMyLayout(TreeLayout myLayout) {
         this.myLayout = myLayout;
+        if (!supportsCreativeMode()) isCreativeMode = false;
     }
 
     public List<GraphicsNode> getLeaves() {
@@ -464,11 +465,15 @@ public class TreeLayoutProperties {
     }
 
     public boolean isCreativeMode() {
-        return isCreativeMode;
+        return isCreativeMode && supportsCreativeMode();
     }
 
     public void setCreativeMode(boolean isCreativeMode) {
-        this.isCreativeMode = isCreativeMode;
+        this.isCreativeMode = isCreativeMode && supportsCreativeMode();
+    }
+
+    private boolean supportsCreativeMode() {
+        return myLayout == TreeLayout.RECT_PHYLO_LEFT || myLayout == TreeLayout.RECT_PHYLO_ALIGN2TIP;
     }
 
     public void setShowWidthAndHeightString(boolean b) {
