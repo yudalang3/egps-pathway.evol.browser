@@ -11,6 +11,16 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D.Double;
 
 public abstract class SprialLayout extends BaseLayout {
+	@Override
+	protected boolean usesTipLabels() { return true; }
+
+	@Override
+	protected double minimumTreeRadius() {
+		double theta = Math.toRadians(Math.max(1, treeLayoutProperties.getSprialLayoutPropertiy().getGlobalStartDegree()
+				+ treeLayoutProperties.getSprialLayoutPropertiy().getGlobalExtendingDegree()));
+		double gap = treeLayoutProperties.getSprialLayoutPropertiy().getGapSize();
+		return Math.max(50, treeLayoutProperties.getRootTipLength() + gap + (gap + 1) * (2 * Math.PI + theta) / (2 * Math.PI));
+	}
 
 	protected int leafLoop = 0;
 	protected double increseDeg;
@@ -35,13 +45,10 @@ public abstract class SprialLayout extends BaseLayout {
 
 		SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
 		globalStartDegree = circularLayoutPropertiy.getGlobalStartDegree();
-		double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree() - globalStartDegree;
+		double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
 		increseDeg = totolDeg / GraphicTreePropertyCalculator.getLeafNumber(rootNode);
 
-		// Note: Spiral layout uses biggestCircleRadicus differently than Circular.
-		// The leaf label space reservation is handled in subclasses (Alpha/Beta variants)
-		// via maxAlpha/maxBeta calculations.
-		biggestCircleRadicus = 0.5 * Math.min(workWidth, workHeight);
+		biggestCircleRadicus = Math.max(minimumTreeRadius(), 0.5 * Math.min(workWidth, workHeight) - getTipLabelReserve());
 	}
 
 	public SprialLayout(TreeLayoutProperties controller, GraphicsNode rootNode,

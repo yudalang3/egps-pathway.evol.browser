@@ -107,5 +107,10 @@ public class TreeLayoutSwitcher extends BaseCtrlPanel{
 		standardPhylogram.setEnabled(enable);
 	}
 
+	public void selectRadialLayout() {
+		radialCladogram.setSelected(true);
+		prevButton = radialCladogram;
+	}
+
 
 }

@@ -4,8 +4,23 @@ import module.evolview.model.tree.GraphicsNode;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.awt.geom.GeneralPath;
 
 public abstract class RadicalLayout extends CicularLayout {
+	@Override
+	protected TracingPaintingProperty configurateTracingShape(GraphicsNode node, Color color) {
+		TracingPaintingProperty tracing = new TracingPaintingProperty();
+		tracing.path = new GeneralPath();
+		tracing.path.moveTo(node.getXSelf(), node.getYSelf());
+		tracing.pointOfNode = new Point2D.Double(node.getXSelf(), node.getYSelf());
+		tracing.fillColor = color;
+		node.getDrawUnit().setNodeSelected(true);
+		while (node != rootNode && node.getParentCount() > 0) {
+			node = (GraphicsNode) node.getParent();
+			tracing.path.lineTo(node.getXSelf(), node.getYSelf());
+		}
+		return tracing;
+	}
 
 
 	public RadicalLayout(TreeLayoutProperties controller, GraphicsNode rootNode,

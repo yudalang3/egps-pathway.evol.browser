@@ -9,6 +9,9 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
 public abstract class CicularLayout extends BaseLayout {
+	@Override
+	protected boolean usesTipLabels() { return true; }
+
 	public CicularLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
 			TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode, phylogeneticTreePanel);

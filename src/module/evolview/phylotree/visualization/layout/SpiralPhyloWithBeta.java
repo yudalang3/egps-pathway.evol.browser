@@ -44,23 +44,25 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 		SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
 
 		final int GAP_SIZE = circularLayoutPropertiy.getGapSize();
+		globalStartDegree = circularLayoutPropertiy.getGlobalStartDegree();
 		betaFactor = circularLayoutPropertiy.getBetaFactor();
 		alpha = treeLayoutProperties.getRootTipLength();
-		maxBeta = (biggestCircleRadicus - alpha) / Math.toRadians(circularLayoutPropertiy.getGlobalExtendingDegree());
-		minBeta = (2 * maxBeta * Math.PI + GAP_SIZE) / (4 * Math.PI);
+		maxBeta = (biggestCircleRadicus - alpha) / (betaFactor * Math.toRadians(Math.max(1,
+				globalStartDegree + circularLayoutPropertiy.getGlobalExtendingDegree())));
+		minBeta = Math.min(maxBeta, (2 * maxBeta * Math.PI + GAP_SIZE / betaFactor) / (4 * Math.PI));
 
 		LongestRoot2leafBean maxLengthOfRoot2LeafNoOutgroup = GraphicTreePropertyCalculator
 				.getMaxLengthOfRoot2Leaf(rootNode);
 
 		double maxLengthOfRoot2Leaf = maxLengthOfRoot2LeafNoOutgroup.getLength();
-		canvas2logicRatio = (maxBeta - minBeta) / maxLengthOfRoot2Leaf;
+		canvas2logicRatio = maxLengthOfRoot2Leaf > 0 ? (maxBeta - minBeta) / maxLengthOfRoot2Leaf : 0;
 
 		// Beta layout: workWidth is the actual screen distance at maximum theta
 		// r = alpha + beta × theta, so distance = (maxBeta - minBeta) × thetaMax
 		// Currently globalStartDegree is always 0, but keep full formula for robustness
 		double thetaMax = Math.toRadians(circularLayoutPropertiy.getGlobalStartDegree()
 				+ circularLayoutPropertiy.getGlobalExtendingDegree());
-		int workWidth = (int) ((maxBeta - minBeta) * thetaMax);
+		int workWidth = (int) ((maxBeta - minBeta) * betaFactor * thetaMax);
 		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
 				maxLengthOfRoot2LeafNoOutgroup.getLeaf(),workWidth);
 	}
@@ -96,7 +98,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double lastDeg = lastLeaf.getAngleIfNeeded();
 				GeneralPath clone = produceSpiralRing(startDeg, lastDeg - startDeg, alpha,
-						betaFactor * currentGraphicsNode.getRadicusIfNeeded(), alpha, maxBeta);
+						betaFactor * currentGraphicsNode.getRadicusIfNeeded(), alpha, betaFactor * maxBeta);
 
 				tt.setDrawShape(clone);
 			}
@@ -117,9 +119,9 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double lastDeg = lastLeaf.getAngleIfNeeded();
 
-				GeneralPath clone = produceSpiral(startDeg, lastDeg - startDeg, alpha + 2, maxBeta);
+				GeneralPath clone = produceSpiral(startDeg, lastDeg - startDeg, alpha + 2, betaFactor * maxBeta);
 
-				Double point = GuiCalculator.calculateSpiralLocation(alpha, maxBeta, 0.5 * (startDeg + lastDeg),
+				Double point = GuiCalculator.calculateSpiralLocation(alpha, betaFactor * maxBeta, 0.5 * (startDeg + lastDeg),
 						centerX, centerY);
 				tt.setTextLocationAndShape(point.getX(), point.getY(), clone);
 			}
@@ -151,9 +153,9 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 					extentDeg = 1;
 				}
 
-				GeneralPath clone = produceSpiral(startDeg, extentDeg, alpha + 2, maxBeta);
+				GeneralPath clone = produceSpiral(startDeg, extentDeg, alpha + 2, betaFactor * maxBeta);
 
-				Double point = GuiCalculator.calculateSpiralLocation(alpha, maxBeta, 0.5 * (startDeg + endDeg), centerX,
+				Double point = GuiCalculator.calculateSpiralLocation(alpha, betaFactor * maxBeta, 0.5 * (startDeg + endDeg), centerX,
 						centerY);
 
 				OutterSidewardLocation ret = new OutterSidewardLocation();
@@ -181,9 +183,9 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 				}
 
 				GeneralPath clone = produceSpiralRing(startDeg, extendDeg, alpha,
-						betaFactor * mrca.getRadicusIfNeeded(), alpha, maxBeta);
+						betaFactor * mrca.getRadicusIfNeeded(), alpha, betaFactor * maxBeta);
 
-				Double point = GuiCalculator.calculateSpiralLocation(alpha, maxBeta, 0.5 * (startDeg + lastDeg),
+				Double point = GuiCalculator.calculateSpiralLocation(alpha, betaFactor * maxBeta, 0.5 * (startDeg + lastDeg),
 						centerX, centerY);
 
 				OutterSidewardLocation ret = new OutterSidewardLocation();
@@ -204,7 +206,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 		NodeType nodeType = TreeDecideUtil.decideNodeType(node, rootNode);
 		switch (nodeType) {
 		case LEAF:
-			node.setAngleIfNeeded(leafLoop * increseDeg);
+			node.setAngleIfNeeded(leafLoop * increseDeg + globalStartDegree);
 			node.setRadicusIfNeeded(realBranchLenAlsoBeta);
 			assignLocation(node);
 			leafLoop++;
@@ -324,6 +326,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 			List<java.lang.Double> displayeDoubles = buttomScaleBarDrawProperty.getDisplayeDoubles();
 			List<String> displayedStrings = buttomScaleBarDrawProperty.getDisplayedStrings();
 			int count = displayedStrings.size();
+			if (count < 2) return;
 
 			SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
 			double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
@@ -334,7 +337,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 			double range = last - first;
 			for (int i = 0; i < count; i++){
 				java.lang.Double double1 = displayeDoubles.get(i);
-				double currentBeta = (double1 - minBeta) / range * totalAvailableBeta + minBeta;
+				double currentBeta = ((double1 - first) / range * totalAvailableBeta + minBeta) * betaFactor;
 				GeneralPath generalPath = produceSpiral(globalStartDegree, totolDeg, rootTipLength, currentBeta);
 				g2d.draw(generalPath);
 

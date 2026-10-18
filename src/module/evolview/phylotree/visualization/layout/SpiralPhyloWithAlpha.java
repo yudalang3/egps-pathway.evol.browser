@@ -42,13 +42,14 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 		double twoPi = 2 * Math.PI;
 		int globalExtendingDegree = circularLayoutPropertiy.getGlobalExtendingDegree();
 		beta = (biggestCircleRadicus - treeLayoutProperties.getRootTipLength() - GAP_SIZE)
-				/ (twoPi + Math.toRadians(globalExtendingDegree));
+				/ (twoPi + Math.toRadians(globalStartDegree + globalExtendingDegree));
 		double betaTimesTwoPi = beta * twoPi;
 
 		maxAlpha = treeLayoutProperties.getRootTipLength() + betaTimesTwoPi - GAP_SIZE;
 		LongestRoot2leafBean maxLengthOfRoot2LeafNoOutgroup = GraphicTreePropertyCalculator
 				.getMaxLengthOfRoot2Leaf(rootNode);
-		canvas2logicRatio = (betaTimesTwoPi - GAP_SIZE) / maxLengthOfRoot2LeafNoOutgroup.getLength();
+		canvas2logicRatio = maxLengthOfRoot2LeafNoOutgroup.getLength() > 0
+				? (betaTimesTwoPi - GAP_SIZE) / maxLengthOfRoot2LeafNoOutgroup.getLength() : 0;
 
 		int workWidth = (int) (maxAlpha - treeLayoutProperties.getRootTipLength());
 		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
@@ -313,6 +314,7 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 			List<java.lang.Double> displayeDoubles = buttomScaleBarDrawProperty.getDisplayeDoubles();
 			List<String> displayedStrings = buttomScaleBarDrawProperty.getDisplayedStrings();
 			int count = displayedStrings.size();
+			if (count < 2) return;
 
 			SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
 			double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();

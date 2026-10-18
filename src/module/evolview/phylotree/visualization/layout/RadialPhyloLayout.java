@@ -1,25 +1,106 @@
 package module.evolview.phylotree.visualization.layout;
 
-import evoltree.struct.util.EvolNodeUtil;
 import graphic.engine.guicalculator.GuiCalculator;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.annotation.*;
-import module.evolview.phylotree.visualization.graphics.struct.NodeType;
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import module.evolview.phylotree.visualization.util.DrawUtil;
 
 import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D.Double;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class RadialPhyloLayout extends RadicalLayout {
 
 	/* the circleCenter of the circle */
 	protected Point circleCenter = new Point(0, 0);
+	private Calculation cachedCalculation;
+	private UnrootedLayoutCalculator.Result cachedCoordinates;
+
+	public record Calculation(GraphicsNode[] nodes, UnrootedLayoutCalculator.Input input,
+			UnrootedLayoutCalculator.Result cached) { }
+
+	protected UnrootedLayoutCalculator.Algorithm algorithm() {
+		return UnrootedLayoutCalculator.Algorithm.EQUAL_ANGLE;
+	}
+
+	protected boolean isCladogram() { return false; }
+
+	/** Capture on the EDT; numerical workers only read the resulting arrays. */
+	public Calculation prepareCalculation() {
+		record Pending(GraphicsNode node, int parent) { }
+		List<GraphicsNode> nodes = new ArrayList<>();
+		List<Integer> parents = new ArrayList<>();
+		List<java.lang.Double> lengths = new ArrayList<>();
+		ArrayDeque<Pending> pending = new ArrayDeque<>();
+		pending.push(new Pending(rootNode, -1));
+		while (!pending.isEmpty()) {
+			Pending next = pending.pop();
+			int index = nodes.size();
+			nodes.add(next.node());
+			parents.add(next.parent());
+			lengths.add(next.parent() < 0 ? 0 : isCladogram() ? 1 : next.node().getDisplayedBranchLength());
+			if (!next.node().getCollapse()) {
+				for (int i = next.node().getChildCount() - 1; i >= 0; i--) {
+					pending.push(new Pending((GraphicsNode) next.node().getChildAt(i), index));
+				}
+			}
+		}
+		var input = new UnrootedLayoutCalculator.Input(parents.stream().mapToInt(Integer::intValue).toArray(),
+				lengths.stream().mapToDouble(java.lang.Double::doubleValue).toArray());
+		GraphicsNode[] capturedNodes = nodes.toArray(GraphicsNode[]::new);
+		boolean cached = cachedCalculation != null && input.sameTree(cachedCalculation.input())
+				&& Arrays.equals(capturedNodes, cachedCalculation.nodes());
+		return new Calculation(capturedNodes, input, cached ? cachedCoordinates : null);
+	}
+
+	public UnrootedLayoutCalculator.Result compute(Calculation calculation) {
+		return calculation.cached() != null ? calculation.cached()
+				: UnrootedLayoutCalculator.calculate(calculation.input(), algorithm());
+	}
+
+	/** Publish complete coordinates before rebuilding dependent annotations. */
+	public void applyCalculation(Calculation calculation, UnrootedLayoutCalculator.Result result, int width, int height) {
+		cachedCalculation = calculation;
+		cachedCoordinates = result;
+		beforeCalculate(width, height);
+		double rotation = Math.toRadians(treeLayoutProperties.getRadicalLayoutRotationDeg());
+		double cos = Math.cos(rotation), sin = Math.sin(rotation);
+		double[] x = new double[result.x().length], y = new double[x.length];
+		double minX = java.lang.Double.POSITIVE_INFINITY, minY = minX;
+		double maxX = java.lang.Double.NEGATIVE_INFINITY, maxY = maxX;
+		for (int i = 0; i < x.length; i++) {
+			x[i] = cos * result.x()[i] - sin * result.y()[i];
+			y[i] = sin * result.x()[i] + cos * result.y()[i];
+			minX = Math.min(minX, x[i]); maxX = Math.max(maxX, x[i]);
+			minY = Math.min(minY, y[i]); maxY = Math.max(maxY, y[i]);
+		}
+		double reserve = getTipLabelReserve();
+		double rangeX = Math.max(1e-12, maxX - minX), rangeY = Math.max(1e-12, maxY - minY);
+		double scale = Math.min(Math.max(1, blankArea.getWorkWidth(width) - 2 * reserve) / rangeX,
+				Math.max(1, blankArea.getWorkHeight(height) - 2 * reserve) / rangeY);
+		int[] parents = calculation.input().parents();
+		double midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
+		for (int i = 0; i < x.length; i++) {
+			GraphicsNode node = calculation.nodes()[i];
+			int parent = Math.max(0, parents[i]);
+			node.setXSelf(circleCenter.x + (x[i] - midX) * scale);
+			node.setYSelf(circleCenter.y + (y[i] - midY) * scale);
+			node.setXParent(circleCenter.x + (x[parent] - midX) * scale);
+			node.setYParent(circleCenter.y + (y[parent] - midY) * scale);
+			node.setAngleIfNeeded(-Math.toDegrees(result.angles()[i] + rotation));
+		}
+		double longest = Arrays.stream(calculation.input().lengths()).max().orElse(0);
+		canvas2logicRatio = longest > 0 ? scale / longest : 1;
+		scaleBarProperty.setIfDrawScaleBar(!isCladogram() && longest > 0);
+		if (!isCladogram() && longest > 0) configureBottomScaleBarDrawProperty(100 / canvas2logicRatio, rootNode, 100);
+		afterCalculation();
+	}
 
 	public RadialPhyloLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
 			TreeLayoutHost phylogeneticTreePanel) {
@@ -136,30 +217,15 @@ public class RadialPhyloLayout extends RadicalLayout {
 //		if (treeLayoutProperties.isShowOutgroup()) {
 //			rightHorizontalBlank = rightHorizontalBlank + 80;
 //		}
-		int workHeight = blankArea.getWorkHeight(height);
-		int workWidth = blankArea.getWorkWidth(width);
-		canvas2logicRatio = Math.min(workHeight, workWidth)
-				/ (2 * GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode).getLength());
-
-		circleCenter.setLocation(currentWidth / 2, currentHeight / 2);
+		circleCenter.setLocation(blankArea.getLeft() + blankArea.getWorkWidth(width) / 2.0,
+				blankArea.getTop() + blankArea.getWorkHeight(height) / 2.0);
 	}
 
 	@Override
 	public void calculateForPainting(int width, int height) {
 
-		if (rootNode.getSize() < 4) {
-			EvolNodeUtil.initializeSize(rootNode);
-		}
-
-		beforeCalculate(width, height);
-		recursizeCalculate(rootNode, 0, 2 * Math.PI);
-
-		int radicalLayoutRotationDeg = treeLayoutProperties.getRadicalLayoutRotationDeg();
-		if (radicalLayoutRotationDeg != 0) {
-			DrawUtil.rotationTransform(rootNode, radicalLayoutRotationDeg, currentWidth, currentHeight);
-		}
-
-		afterCalculation();
+		Calculation calculation = prepareCalculation();
+		applyCalculation(calculation, compute(calculation), width, height);
 	}
 
 	@Override
@@ -269,61 +335,6 @@ public class RadialPhyloLayout extends RadicalLayout {
 			}
 		}
 
-	}
-
-	/**
-	 * 
-	 * @param node
-	 * @param lowAngleRadians  : 初始是 0
-	 * @param highAngleRadians : 初始是 2* pi
-	 */
-	protected void recursizeCalculate(GraphicsNode node, double lowAngleRadians, double highAngleRadians) {
-		NodeType nodeType = TreeDecideUtil.decideNodeType(node, rootNode);
-		switch (nodeType) {
-		case LEAF:
-			break;
-		default:
-			double curX = 0;
-			double curY = 0;
-			if (nodeType == NodeType.ROOT) {
-				double x1 = circleCenter.getX();
-				double y1 = circleCenter.getY();
-				node.setXParent(x1);
-				node.setYParent(y1);
-				node.setXSelf(x1);
-				node.setYSelf(y1);
-				curX = x1;
-				curY = y1;
-			} else {
-				curX = node.getXSelf();
-				curY = node.getYSelf();
-			}
-			double currentNodeLeafNumber = node.getSize();
-			double curAngle = lowAngleRadians;
-			for (int i = 0; i < node.getChildCount(); i++) {
-				GraphicsNode child = (GraphicsNode) node.getChildAt(i);
-				double innerChildLeafNumber = child.getSize();
-				double ratios = innerChildLeafNumber / currentNodeLeafNumber;
-				double arcSize = ratios * (highAngleRadians - lowAngleRadians);
-
-				double length = child.getDisplayedBranchLength() * canvas2logicRatio;
-				double midAngle = curAngle + arcSize / 2;
-
-				double newX = curX + Math.cos(midAngle) * length;
-				double newY = curY + Math.sin(midAngle) * length;
-
-				child.setXParent(curX);
-				child.setYParent(curY);
-				child.setXSelf(newX);
-				child.setYSelf(newY);
-
-				child.setAngleIfNeeded(-Math.toDegrees(midAngle));
-				recursizeCalculate(child, curAngle, curAngle + arcSize);
-				curAngle += arcSize;
-			}
-
-			break;
-		}
 	}
 
 	@Override

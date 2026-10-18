@@ -137,6 +137,11 @@ public class CtrlTreeLayoutPanel extends BaseCtrlPanel {
 	public void reInitializeGUIAccording2treeLayoutProperties() {
 		// Sync zoom container toggle buttons (height/width scale on mouse wheel)
 		guiZoomAndRotateContainner.reInitializeGUIAccording2treeLayoutProperties();
+		subRadicalLayout.reInitializeGUIAccording2treeLayoutProperties();
+		if (controller.getTreeLayoutProperties().getMyLayout().name().startsWith("RADIAL_")) {
+			cardLayout.show(centerPanelContainner, TreeLayoutEnum.RADICAL_LAYOUT.getName());
+			toplayoutSwither.selectRadialLayout();
+		}
 	}
 
 }

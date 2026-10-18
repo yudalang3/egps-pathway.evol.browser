@@ -46,10 +46,7 @@ public class CircularPhylo extends CicularLayout {
 
 		// Calculate available radius, reserving space for leaf labels if shown
 		double availableRadius = 0.5 * Math.min(workWidth, workHeight);
-		if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
-			int maxLeafLabelWidth = getMaxLengthLeafNameWidthAccording2CurrentFont();
-			availableRadius -= maxLeafLabelWidth;
-		}
+		availableRadius -= getTipLabelReserve();
 		biggestCircleRadicus = Math.max(availableRadius, 50); // Ensure minimum radius
 
 		calculateRatioAndChooseStartLength();

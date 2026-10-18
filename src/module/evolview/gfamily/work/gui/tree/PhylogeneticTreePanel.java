@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.EnumMap;
+import java.util.concurrent.CancellationException;
 
 /**
  * This class is the "Phylogenetic Tree" tab.
@@ -30,6 +32,11 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	private int currentWidth;
 
 	protected BaseLayout layout;
+	private final EnumMap<TreeLayout, BaseLayout> unrootedLayouts = new EnumMap<>(TreeLayout.class);
+	private SwingWorker<UnrootedLayoutCalculator.Result, Void> layoutWorker;
+	private long layoutRevision;
+	private boolean layoutReady;
+	private String layoutStatus = "Calculating tree layout...";
 
 	/**
 	 * 在 PhylogeneticTreePanel有一个是否显示scaleBar的属性。那个是控制全局是否显示scale bar的。
@@ -93,8 +100,12 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			EGPSMainGuiUtil.drawLetUserImportDataString((Graphics2D) g);
 			return;
 		}
+		if (!layoutReady) {
+			g.drawString(layoutStatus, 20, 30);
+			return;
+		}
 
-		Graphics2D g2d = (Graphics2D) g;
+		Graphics2D g2d = (Graphics2D) g.create();
 		try {
 			EGPSMainGuiUtil.setupHighQualityRendering(g2d);
 			drawProcess(g2d);
@@ -196,34 +207,81 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	 * 
 	 */
 	public void updatePhylogeneticTreePanel() {
-		SwingWorker<Void, Void> swingWorker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                recalculatedInstructions(currentWidth, currentHeight);
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    // 调用get()来捕获doInBackground()中抛出的异常
-                    get();
-                    // 如果没有异常，继续执行正常逻辑
-                    refreshViewPort();
-                } catch (Exception e) {
-                    // 处理异常
-                    e.printStackTrace();
-                }
-            }
-        };
-
-		// 有可能这个过程不是在GUI下面
-		if (UnifiedAccessPoint.isGULaunched()) {
-			swingWorker.execute();
-		} else {
-			recalculatedInstructions(currentWidth, currentHeight);
+		if (UnifiedAccessPoint.isGULaunched() && !SwingUtilities.isEventDispatchThread()) {
+			SwingUtilities.invokeLater(this::updatePhylogeneticTreePanel);
+			return;
 		}
+		long revision = ++layoutRevision;
+		layoutStatus = "Calculating tree layout...";
+		if (layoutWorker != null) {
+			layoutWorker.cancel(true);
+			layoutWorker = null;
+		}
+		if (layout == null) return;
+		Dimension canvas = layout.getRequiredCanvasSize(currentWidth, currentHeight);
+		currentWidth = canvas.width;
+		currentHeight = canvas.height;
+		setPreferredSize(canvas);
+		if (layout instanceof RadialPhyloLayout radial && SwingUtilities.isEventDispatchThread()) {
+			RadialPhyloLayout.Calculation request;
+			try {
+				request = radial.prepareCalculation();
+			} catch (IllegalArgumentException ex) {
+				layoutReady = false;
+				layoutStatus = "Unable to calculate the tree layout.";
+				SwingDialog.showWarningMSGDialog("Tree layout", ex.getMessage());
+				return;
+			}
+			if (request.cached() != null) {
+				radial.applyCalculation(request, request.cached(), canvas.width, canvas.height);
+				layoutReady = true;
+				refreshViewPort();
+				return;
+			}
+			layoutReady = false;
+			layoutWorker = new SwingWorker<>() {
+				@Override protected UnrootedLayoutCalculator.Result doInBackground() {
+					return radial.compute(request);
+				}
+				@Override protected void done() {
+					if (revision != layoutRevision || radial != layout || isCancelled()) return;
+					try {
+						radial.applyCalculation(request, get(), currentWidth, currentHeight);
+						layoutReady = true;
+					} catch (CancellationException ignored) {
+						return;
+					} catch (Exception ex) {
+						layoutStatus = "Unable to calculate the tree layout.";
+						logger.error("Unable to calculate unrooted tree layout", ex);
+						SwingDialog.showWarningMSGDialog("Tree layout", "Unable to calculate the tree layout. See the log for details.");
+					} finally {
+						layoutWorker = null;
+					}
+					refreshViewPort();
+				}
+			};
+			layoutWorker.execute();
+			repaint();
+		} else {
+			// These are linear coordinate mappings. Publish them together on the EDT.
+			layout.calculateForPainting(currentWidth, currentHeight);
+			layoutReady = true;
+			refreshViewPort();
+		}
+	}
 
+	/** Explicit cancellation leaves the last completed coordinates available for the next request. */
+	public void cancelLayoutCalculation() {
+		if (!isLayoutCalculationPending()) return;
+		++layoutRevision;
+		if (layoutWorker != null) layoutWorker.cancel(true);
+		layoutWorker = null;
+		layoutStatus = "Layout calculation cancelled. Choose a layout to recalculate.";
+		repaint();
+	}
+
+	public boolean isLayoutCalculationPending() {
+		return layoutWorker != null;
 	}
 
 	/**
@@ -256,6 +314,11 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	 * @param currLayout
 	 */
 	private BaseLayout obtainRightLayout(TreeLayout currLayout) {
+		BaseLayout cached = unrootedLayouts.get(currLayout);
+		if (cached != null) {
+			cached.setRootNode(rootNode);
+			return cached;
+		}
 		TreeLayoutProperties treeLayoutProperties = layoutProp;
 		BaseLayout ret;
 		switch (currLayout) {
@@ -304,6 +367,12 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		case RADIAL_EQUAL_DAYLIGHT_CLADO:
 			ret = new RadicalEqualDaylightCladoLayout(treeLayoutProperties, rootNode, this);
 			break;
+		case RADIAL_NBODY_PHYLO:
+			ret = new RadialNBodyLayout(treeLayoutProperties, rootNode, this, false);
+			break;
+		case RADIAL_NBODY_CLADO:
+			ret = new RadialNBodyLayout(treeLayoutProperties, rootNode, this, true);
+			break;
 		case SPRIAL_ALPHA_PHYLO:
 			ret = new SpiralPhyloWithAlpha(treeLayoutProperties, rootNode, this);
 			break;
@@ -321,17 +390,14 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			ret = new RadialPhyloLayout(treeLayoutProperties, rootNode, this);
 			break;
 		}
+		if (ret instanceof RadialPhyloLayout) unrootedLayouts.put(currLayout, ret);
 		return ret;
 	}
 
 	private void recalculatedInstructions(int w, int h) {
-		// 这个设置之前是为了防止JscollerPanel不出现滚动条
-		// 现在还是只能这样否则它不出现滚动条
-		setPreferredSize(new Dimension(w - 4, h - 4));
-		if (layout == null) {
-			return;
-		}
-		layout.calculateForPainting(w, h);
+		currentWidth = w;
+		currentHeight = h;
+		updatePhylogeneticTreePanel();
 
 	}
 
@@ -428,6 +494,7 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	}
 
 	public void resetNewRoot(GraphicsNode newRoot) {
+		cancelLayoutCalculation();
 		this.rootNode = newRoot;
 		layout.setRootNode(newRoot);
 		treeListener.setRootNode(newRoot);

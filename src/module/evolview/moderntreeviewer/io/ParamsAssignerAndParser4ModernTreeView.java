@@ -40,7 +40,7 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 		// Category %2: Leaf Node
 		addKeyValueEntryBean("%2", "Leaf Node", "");
 		addKeyValueEntryBean("leaf.show.label", "T", "Whether display the leaf label on the tree.");
-		addKeyValueEntryBean("leaf.label.right.align", "T", "Whether right align the leaf labels.");
+		addKeyValueEntryBean("leaf.label.right.align", "T", "Right align label columns in rectangular/slant layouts. Tip-oriented layouts keep labels next to their tips.");
 
 		// Category %3: Inner Node
 		addKeyValueEntryBean("%3", "Inner Node", "");
@@ -67,7 +67,7 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
 		// Category %7: Layout Settings
 		addKeyValueEntryBean("%7", "Layout Settings", "");
 		addKeyValueEntryBean("layout.initial", "RECT_PHYLO_LEFT",
-				"Initial tree layout. Values: RECT_PHYLO_LEFT, RECT_CLADO_ALIGNED_LEFT, OUTER_CIR_PHYLO, SLOPE_CLADO_ALIGNED_LEFT, RADIAL_PHYLO, etc. " +
+				"Initial tree layout. Values include RADIAL_PHYLO, RADIAL_CLADO, RADIAL_EQUAL_DAYLIGHT_PHYLO, RADIAL_EQUAL_DAYLIGHT_CLADO, RADIAL_NBODY_PHYLO, RADIAL_NBODY_CLADO, RECT_PHYLO_LEFT, OUTER_CIR_PHYLO, etc. " +
 				"Or use friendly names: RECTANGULAR, CIRCULAR, SPIRAL, SLANT, RADIAL.");
 		addKeyValueEntryBean("layout.blank.space", "20,40,80,40", "The blank area of top,left,bottom,right (pixels).");
 

@@ -114,6 +114,7 @@ public abstract class BaseLayout implements ITreeLayout {
      * 所有layout计算之前的公共部分！现在只是赋值height与width
      */
     protected void beforeCalculate(int width, int height) {
+        annotationFont = treeLayoutProperties.getAxisFont();
         currentHeight = height;
         currentWidth = width;
 
@@ -270,6 +271,8 @@ public abstract class BaseLayout implements ITreeLayout {
     protected void configureBottomScaleBarDrawProperty(double maxLengthOfRoot2Leaf, GraphicsNode maxLengthLeaf, int drawWorkingWidth) {
         buttomScaleBarDrawProperty.clear();
 
+        if (!(maxLengthOfRoot2Leaf > 0) || !java.lang.Double.isFinite(maxLengthOfRoot2Leaf) || drawWorkingWidth <= 0) return;
+
         Pair<java.lang.Double, java.lang.Double> minMax = Pair.of(0.0, maxLengthOfRoot2Leaf);
 
         axisTickCalculator.setMinAndMaxPair(minMax);
@@ -325,7 +328,8 @@ public abstract class BaseLayout implements ITreeLayout {
      * @param g2d
      */
     private void drawScaleBar(Graphics2D g2d) {
-        if (treeLayoutProperties.isShowScaleBar()) {
+        if (treeLayoutProperties.isShowScaleBar() && scaleBarProperty.isIfDrawScaleBar()
+                && buttomScaleBarDrawProperty.getDisplayedStrings().size() >= 2) {
             drawScaleBar(g2d, scaleBarProperty);
         }
     }
@@ -373,8 +377,41 @@ public abstract class BaseLayout implements ITreeLayout {
     protected int getMaxLengthLeafNameWidthAccording2CurrentFont() {
         FontMetrics fontMetrics = phylogeneticTreePanel.getHostComponent()
                 .getFontMetrics(treeLayoutProperties.getGlobalFont());
-        int stringWidth = fontMetrics.stringWidth(maxLengthLeafName);
-        return stringWidth;
+        int width = 0;
+        for (GraphicsNode leaf : GraphicTreePropertyCalculator.getLeaves(rootNode)) {
+            if ((!usesTipLabels() || leaf.getDrawUnit().isDrawName()) && leaf.getName() != null) {
+                width = Math.max(width, fontMetrics.stringWidth(leaf.getName()));
+            }
+        }
+        return width;
+    }
+
+    protected boolean usesTipLabels() { return false; }
+
+    protected double minimumTreeRadius() { return 50; }
+
+    protected double getTipLabelReserve() {
+        FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+        int radius = 0;
+        Deque<GraphicsNode> pending = new ArrayDeque<>();
+        pending.push(rootNode);
+        while (!pending.isEmpty()) {
+            GraphicsNode node = pending.pop();
+            radius = Math.max(radius, node.getDrawUnit().getCircleRadius());
+            if (!node.getCollapse()) {
+                for (int i = 0; i < node.getChildCount(); i++) pending.push((GraphicsNode) node.getChildAt(i));
+            }
+        }
+        return radius + 4 + (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()
+                ? getMaxLengthLeafNameWidthAccording2CurrentFont() + metrics.getHeight() : 0);
+    }
+
+    /** Preserve readable fonts on small viewports by giving the scroll pane a larger canvas. */
+    public Dimension getRequiredCanvasSize(int width, int height) {
+        if (!usesTipLabels()) return new Dimension(width, height);
+        int diameter = (int) Math.ceil(2 * (minimumTreeRadius() + getTipLabelReserve()));
+        return new Dimension(Math.max(width, diameter + blankArea.getLeft() + blankArea.getRight()),
+                Math.max(height, diameter + blankArea.getTop() + blankArea.getBottom()));
     }
 
     /**
@@ -579,6 +616,27 @@ public abstract class BaseLayout implements ITreeLayout {
         g2d.setColor(Color.black);
 
         g2d.setFont(treeLayoutProperties.getGlobalFont());
+
+        if (usesTipLabels()) {
+            TipLabelGeometry placement = TipLabelGeometry.at(node.getAngleIfNeeded(), circleRadius,
+                    drawString, g2d.getFontMetrics());
+            Graphics2D labelGraphics = (Graphics2D) g2d.create();
+            try {
+                labelGraphics.translate(x2, y2);
+                labelGraphics.rotate(placement.rotation());
+                Color background = leafNameRenderMap.get(node.getID());
+                if (background == null) background = leafNameRenderMap2.get(node.getID());
+                if (background != null) {
+                    labelGraphics.setColor(background);
+                    labelGraphics.fill(placement.box());
+                }
+                labelGraphics.setColor(Color.black);
+                labelGraphics.drawString(drawString, (float) placement.x(), (float) placement.baseline());
+            } finally {
+                labelGraphics.dispose();
+            }
+            return;
+        }
 
         boolean shouldLeafNameRightAlign = treeLayoutProperties.isShouldLeafNameRightAlign();
 
