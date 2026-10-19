@@ -18,7 +18,7 @@ public class SubSprialLayout extends BaseCtrlPanel implements Turn2ThisLayoutPan
     private final JRadioButton cladogram = new JRadioButton("Cladogram");
     private final JCheckBox showRoot = new JCheckBox("Show root");
     private final JSlider rootLength = new JSlider(0, 200, 15);
-    private final JSpinner rootValue = new JSpinner(new SpinnerNumberModel(15, 0, 200, 1));
+    private final JSpinner rootValue = new JSpinner(new SpinnerNumberModel(15.0, 0.0, 200.0, 0.5));
     private final JSlider extent = new JSlider(0, 10000, 630);
     private final JSpinner extentValue = new JSpinner(new SpinnerNumberModel(630, 0, 10000, 1));
     private final JSlider gap = new JSlider(0, 50, 10);
@@ -56,13 +56,17 @@ public class SubSprialLayout extends BaseCtrlPanel implements Turn2ThisLayoutPan
             controller.getActiveTreeLayoutProperties().setShowRoot(showRoot.isSelected());
             controller.reCalculateTreeLayoutPreservingZoom();
         });
-        rootLength.addChangeListener(e -> { if (!rootLength.getValueIsAdjusting()) rootValue.setValue(rootLength.getValue()); });
+        rootLength.addChangeListener(e -> {
+            if (!synchronizing && !rootLength.getValueIsAdjusting()
+                    && rootLength.getValue() != Math.round(((Number) rootValue.getValue()).doubleValue()))
+                rootValue.setValue((double) rootLength.getValue());
+        });
         extent.addChangeListener(e -> { if (!extent.getValueIsAdjusting()) extentValue.setValue(extent.getValue()); });
         gap.addChangeListener(e -> { if (!gap.getValueIsAdjusting()) gapValue.setValue(gap.getValue()); });
         rootValue.addChangeListener(e -> {
             if (synchronizing || controller == null) return;
-            rootLength.setValue((int) rootValue.getValue());
-            controller.getActiveTreeLayoutProperties().setRootTipLength((int) rootValue.getValue());
+            rootLength.setValue((int) Math.round(((Number) rootValue.getValue()).doubleValue()));
+            controller.getActiveTreeLayoutProperties().setRootTipLength(((Number) rootValue.getValue()).doubleValue());
             controller.reCalculateTreeLayoutPreservingZoom();
         });
         extentValue.addChangeListener(e -> {
@@ -82,6 +86,12 @@ public class SubSprialLayout extends BaseCtrlPanel implements Turn2ThisLayoutPan
             controller.getActiveTreeLayoutProperties().getSprialLayoutPropertiy().setBetaFactor((int) betaFactor.getValue() * .01);
             controller.reCalculateTreeLayoutPreservingZoom();
         });
+        for (JComponent component : new JComponent[]{alpha, beta, phylogram, cladogram}) parameter(component, "Layout/Type");
+        parameter(betaFactor, "Spiral layout/Beta factor");
+        parameter(showRoot, "Root/Show root branch");
+        parameter(rootLength, "Root/Root branch length"); parameter(rootValue, "Root/Root branch length");
+        parameter(extent, "Spiral layout/Total angle"); parameter(extentValue, "Spiral layout/Total angle");
+        parameter(gap, "Spiral layout/Arm spacing"); parameter(gapValue, "Spiral layout/Arm spacing");
         updateEnabledState();
     }
 
@@ -123,8 +133,8 @@ public class SubSprialLayout extends BaseCtrlPanel implements Turn2ThisLayoutPan
             var spiral = properties.getSprialLayoutPropertiy();
             betaFactor.setValue((int) Math.round(spiral.getBetaFactor() * 100));
             showRoot.setSelected(properties.isShowRoot());
-            rootValue.setValue((int) Math.round(properties.getRootTipLength()));
-            rootLength.setValue((int) rootValue.getValue());
+            rootValue.setValue(properties.getRootTipLength());
+            rootLength.setValue((int) Math.round(properties.getRootTipLength()));
             extentValue.setValue(spiral.getGlobalExtendingDegree());
             extent.setValue(spiral.getGlobalExtendingDegree());
             gapValue.setValue(spiral.getGapSize()); gap.setValue(spiral.getGapSize());

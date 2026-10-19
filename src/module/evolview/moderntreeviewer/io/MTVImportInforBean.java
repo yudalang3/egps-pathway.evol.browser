@@ -8,6 +8,11 @@ import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import java.awt.*;
 
 public class MTVImportInforBean extends EvolTreeImportInfoBean {
+    // Registry values supplement legacy integer fields without changing the public Bean API or serialization.
+    private transient java.util.Map<String, Object> explicitSettings = java.util.Map.of();
+
+    void setExplicitSettings(java.util.Map<String, Object> values) { explicitSettings = java.util.Map.copyOf(values); }
+    java.util.Map<String, Object> explicitSettings() { return explicitSettings; }
 
 	// Layout settings
 	protected BlankArea blank_space = new BlankArea(20, 40, 80, 40);  // default: top,left,bottom,right

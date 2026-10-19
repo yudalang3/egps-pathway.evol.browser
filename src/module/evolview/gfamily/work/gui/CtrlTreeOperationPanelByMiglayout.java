@@ -310,7 +310,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 		gbc_separator_2.gridy = 5;
 		add(separator_2, gbc_separator_2);
 
-		JLabel lblTreeInfromation = new JLabel("Tree infromation");
+		JLabel lblTreeInfromation = new JLabel("Tree information");
 		lblTreeInfromation.setFont(titleFont);
 		GridBagConstraints gbc_lblTreeInfromation = new GridBagConstraints();
 		gbc_lblTreeInfromation.fill = GridBagConstraints.HORIZONTAL;
@@ -369,7 +369,8 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 		add(axisButton, gbc_axisButton);
 		axisButton.addActionListener(displayListener);
 
-		toggleButtonWH = new JToggleButton("W&H");
+		toggleButtonWH = new JToggleButton("Size");
+		toggleButtonWH.setMargin(new Insets(2, 4, 2, 4));
 //		toggleButtonWH = new JToggleButton("");
 		toggleButtonWH.setFocusable(false);
 //		toggleButtonWH.setIcon(IconObtainer.get("showInnerNodeLabelToggleButton.png"));
@@ -462,6 +463,20 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 //		});
 
 		Border emptyBorder = BorderFactory.createEmptyBorder(5, 7, 5, 7);
+		parameter(scaleBar, "Display/Show scale bar"); parameter(axisButton, "Display/Show axis");
+		parameter(showleaveLabelToggleButton, "Labels/Show leaf names"); parameter(displayTitleToggleButton, "Display/Show title");
+		parameter(toggleButtonWH, "Display/Show canvas size"); parameter(showInnerNodeLabelToggleButton, "Labels/Show internal node names");
+		parameter(showBranchLengthToggleButton, "Labels/Show branch lengths"); parameter(showBootstrapToggleButton, "Labels/Show bootstrap values");
+		parameter(btnChangeColor, "Node style/Color");
+		parameter(lineIncreaseButton, "Node style/Branch line width"); parameter(lineDecreaseButton, "Node style/Branch line width");
+		parameter(nodeIncreaseButton, "Node style/Node radius"); parameter(nodeDecreaseButton, "Node style/Node radius");
+		autoSize4fitFrameButton.setToolTipText("Fit the tree to the viewport and reset both zoom scales to 100%. Keep tree edits and styles.");
+		parameter(globalFontButton, "Fonts/Labels/Family"); parameter(titleFontButton, "Fonts/Title/Family"); parameter(axisFontButton, "Fonts/Axis and scale bar/Family");
+		globalFontButton.setToolTipText("Choose the font used for leaf names, internal names and branch labels.");
+		titleFontButton.setToolTipText("Choose the title font.");
+		axisFontButton.setToolTipText("Choose an independent font for the axis and scale bar.");
+		buttonLadderize4up.setToolTipText("Order clades by descendant count and branch length in ascending ladder order. Keep topology and branch lengths.");
+		buttonLaddrize4down.setToolTipText("Order clades by descendant count and branch length in descending ladder order. Keep topology and branch lengths.");
 		Component[] components = getComponents();
 		for (Component component : components) {
 			if (component instanceof JButton) {
@@ -486,6 +501,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
         synchronizing = true;
         for (JToggleButton button : buttons) button.removeActionListener(displayListener);
         try {
+            for (Component component : getComponents()) if (component instanceof AbstractButton) component.setEnabled(properties != null);
             for (JToggleButton button : buttons) button.setEnabled(properties != null);
             if (properties == null) return;
             var inner = properties.getShowInnerNodePropertiesInfo();
@@ -518,6 +534,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		if (controller == null || controller.getActiveTreeLayoutProperties() == null || !e.getComponent().isEnabled()) return;
 		boolean isRightClicked = SwingUtilities.isRightMouseButton(e);
 
 		Object source = e.getSource();
@@ -540,6 +557,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if (controller == null || controller.getActiveTreeLayoutProperties() == null) return;
 		Object source = e.getSource();
 		if (searchButton == source) {
 			seachDialog = getSearchDialog();
@@ -557,9 +575,13 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 			EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(rootNode, false);
 			panel.updatePhylogeneticTreePanel4fitFrame();
 		} else if (source == autoSize4fitFrameButton) {
-			controller.reCalculateTreeLayoutAndRefreshViewPort();
+			fitTreeToFrame();
 		}
 
+	}
+
+	protected void fitTreeToFrame() {
+		controller.reCalculateTreeLayoutAndRefreshViewPort();
 	}
 
 	private SeachDialog getSearchDialog() {

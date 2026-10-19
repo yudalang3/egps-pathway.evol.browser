@@ -283,7 +283,11 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 					selectedNodes.add(node);
 				}
 			});
-			treeLayoutProperties.getSelectedNodes().addAll(selectedNodes);
+			for (GraphicsNode node : selectedNodes) {
+				treeLayoutProperties.getSelectedNodes().remove(node);
+				treeLayoutProperties.getSelectedNodes().add(node);
+			}
+			phylogeneticTreePanel.notifyTreeViewStateChanged();
 
 			for (GraphicsNode node : selectedNodes) {
 				node.getDrawUnit().setBranchSelected(true);
@@ -292,7 +296,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		}
 
 		// Clear selection only if: no drag happened AND click was on empty area (no node)
-		if (!isDragging && !SwingUtilities.isRightMouseButton(arg0)) {
+		if (!isDragging && rect4selectArea.isEmpty() && !SwingUtilities.isRightMouseButton(arg0)) {
 			Optional<GraphicsNode> optRet = judgeSelectedNode(releasePoint);
 			if (optRet.isEmpty()) {
 				// Clicked on empty area without dragging - clear selection
@@ -468,9 +472,9 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		TreeDrawUnit bioLine = selectedNode.getDrawUnit();
 		bioLine.setBranchSelected(true);
 		List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-		if (!selectedNodes.contains(selectedNode)) {
-			selectedNodes.add(selectedNode);
-		}
+		selectedNodes.remove(selectedNode);
+		selectedNodes.add(selectedNode);
+		phylogeneticTreePanel.notifyTreeViewStateChanged();
 		phylogeneticTreePanel.refreshViewPort();
 	}
 
@@ -481,6 +485,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 			node.getDrawUnit().setBranchSelected(false);
 		}
 		selectedNodes.clear();
+		phylogeneticTreePanel.notifyTreeViewStateChanged();
 
 		if (selectedNode == null) {
 			UnifiedAccessPoint.getInstanceFrame().showTipsOnBottomStatusBar(null);
@@ -490,6 +495,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		TreeDrawUnit bioLine = selectedNode.getDrawUnit();
 		bioLine.setBranchSelected(true);
 		selectedNodes.add(selectedNode);
+		phylogeneticTreePanel.notifyTreeViewStateChanged();
 
 		sBuilder.setLength(0);
 		sBuilder.append("The node \"");
@@ -879,6 +885,19 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 		}
 
+		for (Component component : jPopupMenu4creativeMode.getComponents()) if (component instanceof JMenuItem item) {
+			item.setToolTipText(switch (item.getText()) {
+				case "Add child" -> "Add a child to the selected node. A selected leaf becomes an internal node with two new leaves. Changes tree topology.";
+				case "Add sibling" -> "Add a new node under the selected node's parent. Changes tree topology; the root has no sibling.";
+				case "Add sibling and merge" -> "Group the selected node and a new sibling under a new parent. Changes tree topology.";
+				case "Rename" -> "Edit the selected node's stored name. Updates labels and exported tree data.";
+				case "Swap with sibling" -> "Exchange the displayed order of the selected node and a sibling. Keep branch lengths.";
+				case "Ladderize up" -> "Order descendants of the selected clade in ascending ladder order. Keep topology and branch lengths.";
+				case "Ladderize down" -> "Order descendants of the selected clade in descending ladder order. Keep topology and branch lengths.";
+				case "Delete clade" -> "Delete the selected node and all descendants from the tree. The root cannot be deleted.";
+				default -> item.getText();
+			});
+		}
 		return jPopupMenu4creativeMode;
 	}
 

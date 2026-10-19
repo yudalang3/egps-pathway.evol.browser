@@ -29,6 +29,8 @@ public final class TreeSettingsDialog extends JDialog {
         JButton apply = new JButton("Apply");
         JButton save = new JButton("Save as user defaults…");
         JButton close = new JButton("Close");
+        save.setToolTipText("Validate and save reusable settings for future trees. Apply changes the current tree separately. Selection scope, Mixed values and creative-mode activation are not saved.");
+        close.setToolTipText("Close this window. Keep changes already applied; discard unapplied edits.");
         JButton repair = state.warning() == null ? null : new JButton("Repair user defaults…");
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         for (JButton button : new JButton[]{apply, save, close}) {
@@ -38,6 +40,7 @@ public final class TreeSettingsDialog extends JDialog {
         }
         if (repair != null) {
             repair.setFont(fonts.getDialogButtonFont());
+            repair.setToolTipText("Open the original saved JSONC text, repair it, then validate and save user defaults.");
             repair.setMargin(new Insets(6, 18, 6, 18));
             buttons.add(repair, 2);
             save.setEnabled(false);
@@ -45,7 +48,7 @@ public final class TreeSettingsDialog extends JDialog {
             repair.addActionListener(event -> showRepairDialog(preferences, state.text(), repairedState -> {
                 repair.setVisible(false);
                 save.setEnabled(true);
-                save.setToolTipText(null);
+                save.setToolTipText("Save reusable settings for future trees. Apply changes the current tree separately.");
                 if (tree == null) {
                     session.refreshDefaults(repairedState.values());
                     editor.setText(session.text());
@@ -121,6 +124,8 @@ public final class TreeSettingsDialog extends JDialog {
         error.setForeground(new Color(165, 45, 45));
         JButton save = new JButton("Save repaired defaults");
         JButton cancel = new JButton("Cancel");
+        save.setToolTipText("Validate this JSONC text and save the repaired defaults file. Existing trees remain unchanged.");
+        cancel.setToolTipText("Close without saving repairs.");
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         for (JButton button : new JButton[]{save, cancel}) {
             button.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());

@@ -23,7 +23,32 @@ import java.util.function.Function;
 public final class TreeSettings {
     private record Setting(String path, Object initial, String voice, String description,
                            Function<Object, Object> validate, Function<TreeLayoutProperties, Object> read,
-                           BiConsumer<TreeLayoutProperties, Object> write) { }
+                           BiConsumer<TreeLayoutProperties, Object> write, List<String> aliases) { }
+
+    public record Definition(String path, String voice, Object initial, String description, List<String> aliases) { }
+    public record InputSetting(String key, String value, String description, List<String> aliases) { }
+
+    public static List<InputSetting> inputSettings() {
+        return List.of(
+                new InputSetting("input.newick.text", "", "Newick text. Takes priority over file inputs.", List.of("input.nwk.string")),
+                new InputSetting("input.newick.file", "", "Newick file path. Used when no Newick text is provided.", List.of("input.nwk.path")),
+                new InputSetting("input.table.file", "", "Table-format tree file path. Used when neither Newick source is provided.", List.of("input.tableLike.path")),
+                new InputSetting("input.newick.format", Integer.toString(module.evoltreio.NewickFormatConfig.DEFAULT_FORMAT), "Newick format (0-9). 0 reads internal support; 1 reads internal names.", List.of("nwk.format")),
+                new InputSetting("input.newick.remove.whitespace", "false", "Remove whitespace before parsing. Leave false to preserve spaces in names.", List.of("nwk.remove.whitespace")),
+                new InputSetting("input.node.styles.file", "", "Node-style TSV file. Required column: name. Optional columns: fillColor, circleRadius, lineThickness, displayName. Overrides uniform imported styles.", List.of("advanced.node.visual.config", "node.visual.config.path")));
+    }
+
+    /** A missing key differs from an explicitly empty value (notably font.axis). */
+    private static boolean supplied(OrganizedParameterGetter input, String key) {
+        return input.getComplicatedValues(key).isPresent();
+    }
+
+    public static String inputValue(OrganizedParameterGetter input, String canonical) {
+        InputSetting setting = inputSettings().stream().filter(s -> s.key.equals(canonical)).findFirst().orElseThrow();
+        if (supplied(input, canonical)) return input.getSimplifiedStringWithDefault(canonical);
+        for (String alias : setting.aliases) if (supplied(input, alias)) return input.getSimplifiedStringWithDefault(alias);
+        return setting.value;
+    }
 
     private static final Map<TreeLayout, String> LAYOUTS = new LinkedHashMap<>();
     private static final List<Setting> SETTINGS = new ArrayList<>();
@@ -80,8 +105,8 @@ public final class TreeSettings {
         font("Axis and scale bar", "font.axis", UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(14f), TreeLayoutProperties::getAxisFont, TreeLayoutProperties::setAxisFont);
         add(LAYOUT, LAYOUTS.get(TreeLayout.RECT_PHYLO_LEFT), "layout.initial",
                 "Tree layout. Choices: " + String.join("; ", LAYOUTS.values()) + ".", value -> {
-                    if (!(value instanceof String) || !LAYOUTS.containsValue(value)) throw new IllegalArgumentException("Choose a layout listed in Default settings");
-                    return value;
+                    if (!(value instanceof String name)) throw new IllegalArgumentException("Expected a layout name");
+                    return LAYOUTS.get(layout(name));
                 }, p -> LAYOUTS.get(p.getMyLayout()), (p, value) -> p.setMyLayout(layout((String) value)));
         String[] sides = {"Top", "Left", "Bottom", "Right"};
         int[] margins = {20, 40, 80, 40};
@@ -199,7 +224,108 @@ public final class TreeSettings {
 
     private static void add(String path, Object initial, String voice, String description, Function<Object, Object> validator,
                             Function<TreeLayoutProperties, Object> read, BiConsumer<TreeLayoutProperties, Object> write) {
-        SETTINGS.add(new Setting(path, initial, voice, description, validator, read, write));
+        String key = canonical(path, voice);
+        SETTINGS.add(new Setting(path, initial, key, description, validator, read, write, aliases(voice).stream().filter(alias -> !alias.equals(key)).toList()));
+    }
+
+    private static List<String> aliases(String legacy) {
+        if (legacy == null) return List.of();
+        String older = switch (legacy) {
+            case "font.global" -> "tree.global.font";
+            case "font.title" -> "bottom.title.font";
+            case "layout.blank.space" -> "blank.space";
+            case "wheel.height.scale.on" -> "height.scale.on";
+            case "wheel.width.scale.on" -> "width.scale.on";
+            case "leaf.show.label" -> "show.leaf.label";
+            case "tree.need.reverse.axis" -> "need.reverse.axis.bar";
+            case "tree.title.string" -> "bottom.title.string";
+            case "tree.branch.length.unit" -> "branch.length.unit";
+            default -> null;
+        };
+        return older == null ? List.of(legacy) : List.of(legacy, older);
+    }
+
+    private static String canonical(String path, String legacy) {
+        if (path.equals("Node style/Scope")) return "node.style.scope";
+        if (path.endsWith("Inherit label font")) return "font.axis.inherit.label.font";
+        if (path.startsWith("Fonts/")) {
+            String group = legacy.equals("font.global") ? "font.labels" : legacy;
+            return group + (path.endsWith("/Family") ? ".family" : path.endsWith("/Size") ? ".size.pt" : ".style");
+        }
+        if (path.startsWith("Layout/Margins/")) return "layout.margins." + path.substring(path.lastIndexOf('/') + 1).toLowerCase(Locale.ROOT) + ".px";
+        return switch (legacy) {
+            case "tree.show.scale.bar" -> "display.show.scale.bar";
+            case "tree.show.axis.bar" -> "display.show.axis";
+            case "tree.show.title" -> "display.show.title";
+            case "tree.show.width.height" -> "display.show.canvas.size";
+            case "tree.title.string" -> "display.title.text";
+            case "tree.branch.length.unit" -> "display.branch.length.unit";
+            case "tree.need.reverse.axis" -> "display.reverse.axis";
+            case "leaf.show.label" -> "labels.show.leaf.names";
+            case "leaf.label.right.align" -> "labels.right.align.leaf.labels";
+            case "inner.show.label" -> "labels.show.internal.node.names";
+            case "inner.show.bootstrap" -> "labels.show.bootstrap.values";
+            case "inner.show.branch.length" -> "labels.show.branch.lengths";
+            case "root.show" -> "root.show.branch";
+            case "root.tip.length" -> "root.branch.length.px";
+            case "layout.initial" -> "layout.type";
+            case "layout.rectangular.curvature" -> "layout.rectangular.branch.curvature.percent";
+            case "layout.circular.start.degree" -> "layout.circular.start.angle.degrees";
+            case "layout.circular.extent.degree" -> "layout.circular.arc.extent.degrees";
+            case "layout.circular.inner.radius" -> "layout.circular.inner.radius.px";
+            case "layout.spiral.start.degree" -> "layout.spiral.start.angle.degrees";
+            case "layout.spiral.extent.degree" -> "layout.spiral.total.angle.degrees";
+            case "layout.spiral.gap.factor" -> "layout.spiral.arm.spacing.factor";
+            case "layout.spiral.beta.factor" -> "layout.spiral.beta";
+            case "layout.slant.tree.width" -> "layout.slant.tree.width.percent";
+            case "layout.slant.left.margin" -> "layout.slant.left.margin.percent";
+            case "layout.slant.rotation" -> "layout.slant.rotation.degrees";
+            case "layout.radial.rotation" -> "layout.radial.rotation.degrees";
+            case "wheel.height.scale.on" -> "mouse.wheel.zoom.height";
+            case "wheel.width.scale.on" -> "mouse.wheel.zoom.width";
+            case "view.height.scale" -> "view.height.scale.percent";
+            case "view.width.scale" -> "view.width.scale.percent";
+            case "node.color" -> "node.style.color";
+            case "node.radius" -> "node.style.radius.px";
+            case "node.line.width" -> "node.style.branch.line.width.px";
+            case "creative.mode" -> "creative.mode.enabled";
+            default -> legacy;
+        };
+    }
+
+    public static List<Definition> definitions() {
+        return SETTINGS.stream().map(s -> new Definition(s.path, s.voice, s.initial, s.description, s.aliases)).toList();
+    }
+
+    public static String tooltip(String path) {
+        Setting setting = SETTINGS.stream().filter(s -> s.path.equals(path)).findFirst().orElseThrow();
+        return setting.description + " VOICE: " + setting.voice;
+    }
+
+    public static String referenceMarkdown(boolean chinese) {
+        StringBuilder text = new StringBuilder(chinese ? "# Modern Tree View 参数对照\n\n" : "# Modern Tree View parameter reference\n\n");
+        text.append(chinese
+                ? "由参数定义表生成。高级参数路径和 JSONC 文件保持不变；新模板只使用规范 VOICE key，旧脚本无需重写。\n\n优先级：程序默认 → 用户默认 → VOICE 显式参数 → 当前树修改。单个字段中：规范 key → 当前旧名 → 更早历史旧名。\n\n"
+                : "Generated from the settings registry. Advanced parameters paths and existing JSONC files remain unchanged. New templates use canonical VOICE keys; existing scripts do not need rewriting.\n\nPrecedence: program defaults → user defaults → explicit VOICE → current tree edits. Per field: canonical key → current legacy key → older alias.\n\n");
+        text.append("| Advanced parameters path | Canonical VOICE key | Legacy aliases | Program default | Meaning and constraints |\n|---|---|---|---|---|\n");
+        for (Setting setting : SETTINGS) {
+            text.append("| ").append(setting.path).append(" | `").append(setting.voice).append("` | ")
+                    .append(String.join(", ", setting.aliases)).append(" | `").append(JSON.toJSONString(setting.initial))
+                    .append("` | ").append(setting.description.replace("|", "\\|")).append(" |\n");
+        }
+        text.append("\n## Import-only parameters\n\n| Canonical VOICE key | Legacy aliases | Default | Meaning |\n|---|---|---|---|\n");
+        for (InputSetting setting : inputSettings()) text.append("| `").append(setting.key).append("` | ")
+                .append(String.join(", ", setting.aliases)).append(" | `").append(setting.value).append("` | ").append(setting.description).append(" |\n");
+        text.append("\n## Compatibility details\n\n")
+                .append("- `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.\n")
+                .append("- Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.\n")
+                .append("- Legacy packed font keys are expanded before canonical family/size/style values. Explicit `font.axis.inherit.label.font` has final precedence. Empty legacy `font.axis` inherits labels; explicit axis attributes disable implicit inheritance.\n")
+                .append("- Layout accepts the listed English names, existing enum names, and RECTANGULAR/CIRCULAR/SPIRAL/SLANT/RADIAL. Unknown names are errors.\n")
+                .append("- Boolean examples use true/false; legacy T/F remain accepted. Fonts use Regular, Bold, Italic, or Bold Italic.\n")
+                .append("- Selected clades includes selected nodes and descendants; without selection it means the whole tree. Leaves only limits that scope to leaves. Import has no selection.\n")
+                .append("- Apply changes the current tree only. Save as user defaults stores reusable preferences separately. Scope, Mixed values and creative-mode activation are not saved.\n")
+                .append("- Data sources, Newick options, and node-style files belong to import, not the current tree's display snapshot. Per-node annotations override imported uniform styles.\n");
+        return text.toString();
     }
 
     private static void flag(String path, boolean initial, String voice, String description, Function<TreeLayoutProperties, Boolean> read, BiConsumer<TreeLayoutProperties, Boolean> write) {
@@ -212,6 +338,7 @@ public final class TreeSettings {
     private static void text(String path, String initial, String voice, String description, Function<TreeLayoutProperties, String> read, BiConsumer<TreeLayoutProperties, String> write) {
         add(path, initial, voice, description, value -> {
             if (!(value instanceof String)) throw new IllegalArgumentException("Expected a double-quoted string");
+            if (path.equals("Display/Title text")) new java.text.MessageFormat((String) value);
             return value;
         }, read::apply, (p, value) -> write.accept(p, (String) value));
     }
@@ -251,7 +378,17 @@ public final class TreeSettings {
     }
 
     private static TreeLayout layout(String name) {
-        return LAYOUTS.entrySet().stream().filter(e -> e.getValue().equals(name)).findFirst().orElseThrow().getKey();
+        for (var entry : LAYOUTS.entrySet()) if (entry.getValue().equalsIgnoreCase(name.trim())) return entry.getKey();
+        String enumName = switch (name.trim().toUpperCase(Locale.ROOT)) {
+            case "RECTANGULAR" -> "RECT_PHYLO_LEFT";
+            case "CIRCULAR" -> "OUTER_CIR_PHYLO";
+            case "SPIRAL" -> "SPRIAL_ALPHA_PHYLO";
+            case "SLANT" -> "SLOPE_CLADO_ALIGNED_LEFT";
+            case "RADIAL" -> "RADIAL_PHYLO";
+            default -> name.trim().toUpperCase(Locale.ROOT);
+        };
+        try { return TreeLayout.valueOf(enumName); }
+        catch (IllegalArgumentException error) { throw new IllegalArgumentException("Unknown layout: " + name + ". Choose a layout listed in Default settings."); }
     }
 
     public static Map<String, Object> defaults() {
@@ -285,29 +422,40 @@ public final class TreeSettings {
         Map<String, Object> result = new LinkedHashMap<>();
         for (Setting setting : SETTINGS) {
             if (input == null) { result.put(setting.path, setting.read.apply(parsed)); continue; }
-            if (setting.voice == null || input.getComplicatedValues(setting.voice).isEmpty()) continue;
-            String raw = input.getSimplifiedStringWithDefault(setting.voice);
+            String key = supplied(input, setting.voice) ? setting.voice : setting.aliases.stream().filter(k -> supplied(input, k)).findFirst().orElse(null);
+            if (key == null) continue;
+            String raw = input.getSimplifiedStringWithDefault(key);
             Object value;
             try {
-                if (setting.voice.startsWith("font.")) {
+                if (List.of("font.global", "tree.global.font", "font.title", "bottom.title.font", "font.axis").contains(key)) {
                     if (setting.path.endsWith("Inherit label font")) value = raw.isEmpty();
                     else if (raw.isEmpty()) continue;
                     else {
                         Font font = egps2.utils.common.util.EGPSFonts.parseFont(raw);
                         value = setting.path.endsWith("/Family") ? font.getFamily() : setting.path.endsWith("/Size") ? (double) font.getSize2D() : List.of("Regular", "Bold", "Italic", "Bold Italic").get(font.getStyle());
                     }
-                } else if (setting.voice.equals("layout.initial") || setting.voice.equals("layout.blank.space")) value = setting.read.apply(parsed);
+                } else if (key.equals("layout.blank.space") || key.equals("blank.space")) {
+                    String[] parts = raw.split(",", -1);
+                    if (parts.length != 4) throw new IllegalArgumentException("Expected top,left,bottom,right in pixels");
+                    int side = List.of("Top", "Left", "Bottom", "Right").indexOf(setting.path.substring(setting.path.lastIndexOf('/') + 1));
+                    for (String part : parts) numeric(Double.valueOf(part.trim()), 0, 10000, true);
+                    value = Double.valueOf(parts[side].trim());
+                }
                 else if (setting.initial instanceof Boolean) {
                     Boolean bool = org.apache.commons.lang3.BooleanUtils.toBooleanObject(raw);
                     if (bool == null) throw new IllegalArgumentException("Use T, F, true or false");
                     value = bool;
                 } else if (setting.initial instanceof Number) {
                     value = Double.valueOf(raw);
-                    if (setting.voice.equals("layout.spiral.beta.factor")) value = ((Number) value).doubleValue() / 100;
+                    if (key.equals("layout.spiral.beta.factor")) value = ((Number) value).doubleValue() / 100;
                 } else value = raw;
+                if (setting.path.startsWith("Node style/") && "Mixed".equals(value)) throw new IllegalArgumentException("Mixed is a snapshot value, not a VOICE setting");
                 result.put(setting.path, setting.validate.apply(value));
-            } catch (IllegalArgumentException error) { throw new IllegalArgumentException(setting.voice + " (" + setting.path + "): " + error.getMessage(), error); }
+            } catch (IllegalArgumentException error) { throw new IllegalArgumentException(key + " (" + setting.path + "): " + error.getMessage(), error); }
         }
+        if (input != null && !supplied(input, "font.axis.inherit.label.font")
+                && result.keySet().stream().anyMatch(p -> p.startsWith("Fonts/Axis and scale bar/") && !p.endsWith("Inherit label font")))
+            result.put("Fonts/Axis and scale bar/Inherit label font", false);
         return result;
     }
 
@@ -316,20 +464,9 @@ public final class TreeSettings {
     public static List<VoiceSetting> voiceSettings() {
         Map<String, VoiceSetting> result = new LinkedHashMap<>();
         for (Setting setting : SETTINGS) {
-            if (setting.voice == null || result.containsKey(setting.voice)) continue;
             String value = setting.initial.toString();
             if (setting.initial instanceof Number n && n.doubleValue() == Math.rint(n.doubleValue())) value = Integer.toString(n.intValue());
-            if (setting.initial instanceof Boolean b) value = b ? "T" : "F";
-            if (setting.voice.equals("layout.initial")) value = "RECT_PHYLO_LEFT";
-            if (setting.voice.equals("layout.blank.space")) value = "20,40,80,40";
-            if (setting.voice.equals("layout.spiral.beta.factor")) value = "100";
-            if (setting.voice.startsWith("font.")) {
-                String group = setting.path.substring(0, setting.path.lastIndexOf('/')) + "/";
-                var values = defaults();
-                Font font = new Font((String) values.get(group + "Family"), List.of("Regular", "Bold", "Italic", "Bold Italic").indexOf(values.get(group + "Style")), 1).deriveFont(((Number) values.get(group + "Size")).floatValue());
-                value = setting.voice.equals("font.axis") ? "" : egps2.utils.common.util.EGPSFonts.codeFont(font);
-            }
-            result.put(setting.voice, new VoiceSetting(setting.voice, value, setting.path + ": " + setting.description + (setting.voice.equals("layout.spiral.beta.factor") ? " VOICE uses 100-500 (units of 0.01)." : "")));
+            result.put(setting.voice, new VoiceSetting(setting.voice, value, setting.path + ": " + setting.description));
         }
         return new ArrayList<>(result.values());
     }
@@ -338,7 +475,16 @@ public final class TreeSettings {
         TreeLayout target = values.containsKey(LAYOUT) ? layout((String) values.get(LAYOUT)) : properties.getMyLayout();
         if (Boolean.TRUE.equals(values.get("Creative mode/Enabled")) && target != TreeLayout.RECT_PHYLO_LEFT && target != TreeLayout.RECT_PHYLO_ALIGN2TIP)
             throw new IllegalArgumentException("Creative mode requires a rectangular phylogram.");
-        for (Setting setting : SETTINGS) if (values.containsKey(setting.path)) setting.write.accept(properties, values.get(setting.path));
+        Map<String, Object> checked = new LinkedHashMap<>();
+        for (Setting setting : SETTINGS) if (values.containsKey(setting.path)) {
+            try { checked.put(setting.path, setting.validate.apply(values.get(setting.path))); }
+            catch (IllegalArgumentException error) { throw new IllegalArgumentException(setting.path + ": " + error.getMessage(), error); }
+        }
+        if (checked.keySet().stream().anyMatch(p -> p.startsWith("Layout/Margins/"))) properties.synchronizeColumnLabelReserve(0);
+        for (Setting setting : SETTINGS) if (checked.containsKey(setting.path) && !setting.path.startsWith("Node style/")) setting.write.accept(properties, checked.get(setting.path));
+        String scope = (String) checked.getOrDefault("Node style/Scope", "All nodes");
+        for (String name : List.of("Color", "Branch line width", "Node radius"))
+            if (checked.containsKey("Node style/" + name)) applyStyle(properties, name, checked.get("Node style/" + name), scope);
     }
 
     public static void applyToTree(PhylogeneticTreePanel tree, Map<String, Object> changes) {
@@ -361,9 +507,19 @@ public final class TreeSettings {
             if (changes.containsKey("Node style/" + name)) applyStyle(properties, name, changes.get("Node style/" + name), scope);
         if (changes.containsKey("Creative mode/Enabled")) properties.setCreativeMode((Boolean) changes.get("Creative mode/Enabled"));
         tree.recalculatePreservingZoom();
-        if (changes.containsKey("View/Height scale") || changes.containsKey("View/Width scale")) tree.setTreePanelScale(
-                ((Number) changes.getOrDefault("View/Height scale", scale.height)).intValue(),
-                ((Number) changes.getOrDefault("View/Width scale", scale.width)).intValue());
+        if (changes.containsKey("View/Height scale") || changes.containsKey("View/Width scale")) {
+            int height = ((Number) changes.getOrDefault("View/Height scale", scale.height)).intValue();
+            int width = ((Number) changes.getOrDefault("View/Width scale", scale.width)).intValue();
+            if (properties.isLockAspectRatio() && !tree.isUniformScaleLayout()
+                    && changes.containsKey("View/Height scale") != changes.containsKey("View/Width scale")) {
+                double factor = changes.containsKey("View/Height scale") ? height / (double) scale.height : width / (double) scale.width;
+                factor = Math.max(factor, Math.max(100.0 / scale.height, 100.0 / scale.width));
+                factor = Math.min(factor, Math.min(100000.0 / scale.height, 100000.0 / scale.width));
+                height = (int) Math.round(scale.height * factor);
+                width = (int) Math.round(scale.width * factor);
+            }
+            tree.setTreePanelScale(height, width);
+        }
         tree.notifyTreeViewStateChanged();
     }
 
@@ -397,7 +553,7 @@ public final class TreeSettings {
                 group = next;
             }
             group.put(parts[parts.length - 1], new Setting(setting.path, values.getOrDefault(setting.path, setting.initial), setting.voice,
-                    setting.description + (setting.voice == null ? "" : " VOICE: " + setting.voice + "."), setting.validate, setting.read, setting.write));
+                    setting.description + " VOICE: " + setting.voice + ".", setting.validate, setting.read, setting.write, setting.aliases));
         }
         StringBuilder result = new StringBuilder(header);
         document(tree, result, 0);

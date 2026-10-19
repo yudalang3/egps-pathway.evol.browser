@@ -179,6 +179,8 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 		gbc_curvatureSpinner.gridx = 2;
 		gbc_curvatureSpinner.gridy = 7;
 		add(curvatureSpinner, gbc_curvatureSpinner);
+		for (JComponent component : new JComponent[]{rdbtnPhylogram, chckbxAlignToTip, rdbtnClado2tip, rdbtnCladoWithEqual, rdbtnNewRadioButton, rdbtnRectHalfCircularLayout}) parameter(component, "Layout/Type");
+		parameter(curvatureSlider, "Rectangular layout/Branch curvature"); parameter(curvatureSpinner, "Rectangular layout/Branch curvature");
 		curvatureSpinnerChangeListener = e -> {
 			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
@@ -250,8 +252,10 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 		add(rootLengthSlider, gbc_rootLengthSlider);
 
 		rootLengthSpinner = new JSpinner();
+		parameter(checkBoxShowRoot, "Root/Show root branch");
+		parameter(rootLengthSlider, "Root/Root branch length"); parameter(rootLengthSpinner, "Root/Root branch length");
 		rootLengthSpinner.setFont(globalFont);
-		rootLengthSpinner.setModel(new SpinnerNumberModel(20, 0, theMaxValueOfRootLength, 1));
+		rootLengthSpinner.setModel(new SpinnerNumberModel(20.0, 0.0, (double) theMaxValueOfRootLength, 0.5));
 		GridBagConstraints gbc_rootLengthSpinner = new GridBagConstraints();
 		gbc_rootLengthSpinner.gridx = 2;
 		gbc_rootLengthSpinner.gridy = 9;
@@ -261,8 +265,8 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
 		rootLengthSpinnerChangeListener = e -> {
 			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
-			int value = (int) source.getValue();
-			rootLengthSlider.setValue(value);
+			double value = ((Number) source.getValue()).doubleValue();
+			rootLengthSlider.setValue((int) Math.round(value));
 			controller.getActiveTreeLayoutProperties().setRootTipLength(value);
 			controller.reCalculateTreeLayoutPreservingZoom();
 		};
@@ -337,8 +341,8 @@ public class SubRectangularLayout extends BaseCtrlPanel implements Turn2ThisLayo
             int curvature = properties.getRectangularLayoutPropertiy().getCurvature();
             curvatureSpinner.setValue(curvature); curvatureSlider.setValue(curvature);
             checkBoxShowRoot.setSelected(properties.isShowRoot());
-            rootLengthSpinner.setValue((int) Math.round(properties.getRootTipLength()));
-            rootLengthSlider.setValue((int) rootLengthSpinner.getValue());
+            rootLengthSpinner.setValue(properties.getRootTipLength());
+            rootLengthSlider.setValue((int) Math.round(properties.getRootTipLength()));
             rootLengthSpinner.setEnabled(properties.isShowRoot());
             rootLengthSlider.setEnabled(properties.isShowRoot());
 

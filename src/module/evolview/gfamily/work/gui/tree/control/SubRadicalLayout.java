@@ -99,6 +99,9 @@ public class SubRadicalLayout extends BaseCtrlPanel implements Turn2ThisLayoutPa
         rotation.addChangeListener(e -> {
             if (!rotation.getValueIsAdjusting()) rotationValue.setValue(rotation.getValue());
         });
+        for (JComponent component : new JComponent[]{equalAngle, equalDaylight, nBody, phylogram, cladogram}) parameter(component, "Layout/Type");
+        parameter(rotation, "Radial layout/Rotation"); parameter(rotationValue, "Radial layout/Rotation");
+        cancel.setToolTipText("Cancel the current N-body layout calculation. Select a layout to calculate again.");
         rotationValue.addChangeListener(e -> {
             if (synchronizing || controller == null) return;
             int value = (int) rotationValue.getValue();

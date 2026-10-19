@@ -13,6 +13,12 @@ public abstract class BaseCtrlPanel extends JPanel {
 
 	
 	protected GeneFamilyController controller;
+
+	/** Semantic tags allow a module to attach its own parameter help without coupling shared controls. */
+	protected static void parameter(JComponent component, String path) {
+		component.putClientProperty("tree.parameter", path);
+		component.setName(path);
+	}
 	/**
 	 * 在这个过程中，你可以将所有的控制类的 setter都加进去
 	 * @param controller

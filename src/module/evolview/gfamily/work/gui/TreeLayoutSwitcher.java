@@ -94,6 +94,7 @@ public class TreeLayoutSwitcher extends BaseCtrlPanel{
 		Component[] components = getComponents();
 		for (Component component : components) {
 			JToggleButton bb = (JToggleButton) component;
+			parameter(bb, "Layout/Type");
 			bb.setBorder(emptyBorder);
 		}
 

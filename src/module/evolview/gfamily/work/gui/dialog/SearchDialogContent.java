@@ -30,6 +30,8 @@ public class SearchDialogContent extends JPanel implements ActionListener {
     private JButton clearHighlightsButton;
 
     private GeneFamilyController controller;
+    private module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel observedTree;
+    private final java.beans.PropertyChangeListener clearListener = event -> resetResults();
 
 	private FindSearchRecord findSearchRecord = new FindSearchRecord();
 
@@ -41,7 +43,7 @@ public class SearchDialogContent extends JPanel implements ActionListener {
     public SearchDialogContent(GeneFamilyController controller) {
         this.controller = controller;
 
-        Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
+        Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDialogContentFont();
         setBorder(new EmptyBorder(6, 12, 6, 6));
         GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0};
@@ -142,7 +144,37 @@ public class SearchDialogContent extends JPanel implements ActionListener {
         gbc_consoleTextField.gridy = 3;
         add(consoleTextField, gbc_consoleTextField);
         consoleTextField.setColumns(10);
+        consoleTextField.setEditable(false);
+        inputTextField.setToolTipText("Find nodes whose names contain this text. Matching is case-sensitive.");
+        findNextButton.setToolTipText("Find the next matching node; wrap to the first result at the end.");
+        findPrevButton.setToolTipText("Find the previous matching node; wrap to the last result at the beginning.");
+        highlightAllButton.setToolTipText("Highlight all matching nodes, then close this window. Node colors remain unchanged.");
+        clearHighlightsButton.setToolTipText("Clear search highlights and results. Keep manually selected branches and node colors.");
+        closeButton.setToolTipText("Close the search window. Keep current highlights.");
+        consoleTextField.setToolTipText("Search result count or input feedback.");
+        for (JButton button : new JButton[]{findNextButton, findPrevButton, highlightAllButton, clearHighlightsButton, closeButton})
+            button.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());
+        resetResults();
 
+    }
+
+    @Override public void addNotify() {
+        super.addNotify();
+        observedTree = controller.getActiveTreeLayoutProperties() == null ? null : controller.getSelectedPhylogeneticTreePanel();
+        if (observedTree != null) observedTree.addPropertyChangeListener("treeSelectionCleared", clearListener);
+    }
+
+    @Override public void removeNotify() {
+        if (observedTree != null) observedTree.removePropertyChangeListener("treeSelectionCleared", clearListener);
+        observedTree = null;
+        resetResults();
+        super.removeNotify();
+    }
+
+    public void resetResults() {
+        findRets.clear();
+        findSearchRecord = new FindSearchRecord();
+        if (findPrevButton != null) findPrevButton.setEnabled(false);
     }
 
     @Override
@@ -193,6 +225,7 @@ public class SearchDialogContent extends JPanel implements ActionListener {
             EvolNodeUtil.recursiveIterateTreeIF(rootNode, node -> {
                 node.getDrawUnit().setNodeSelected(false);
             });
+            resetResults();
             controller.refreshPhylogeneticTree();
 
         } else if (findPrevButton == e.getSource()) {
@@ -247,7 +280,9 @@ public class SearchDialogContent extends JPanel implements ActionListener {
 
         });
 
-        return false;
+        findPrevButton.setEnabled(!findRets.isEmpty());
+        if (findRets.isEmpty()) consoleTextField.setText("No matching nodes found.");
+        return findRets.isEmpty();
     }
 
     private void disposeThis() {

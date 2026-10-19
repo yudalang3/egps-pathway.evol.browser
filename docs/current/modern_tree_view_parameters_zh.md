@@ -1,209 +1,81 @@
-# Modern Tree View 参数参考
+# Modern Tree View 参数对照
 
-## 概览
+由参数定义表生成。高级参数路径和 JSONC 文件保持不变；新模板只使用规范 VOICE key，旧脚本无需重写。
 
-本文档列出 Modern Tree View 目前通过 VOICE 参数系统暴露的参数面。参数按照 `ParamsAssignerAndParser4ModernTreeView` 使用的 `%N` 分类约定组织。
+优先级：程序默认 → 用户默认 → VOICE 显式参数 → 当前树修改。单个字段中：规范 key → 当前旧名 → 更早历史旧名。
 
-**实现覆盖率：** 文档中列出的 40 个参数当前都已经实现。
+| Advanced parameters path | Canonical VOICE key | Legacy aliases | Program default | Meaning and constraints |
+|---|---|---|---|---|
+| Display/Show scale bar | `display.show.scale.bar` | tree.show.scale.bar | `false` | Display the branch-length scale. Phylogram layouts only. Use true or false. |
+| Display/Show axis | `display.show.axis` | tree.show.axis.bar | `true` | Display the coordinate axis where the layout supports it. Use true or false. |
+| Display/Show title | `display.show.title` | tree.show.title | `true` | Display the statement below the tree. Use true or false. |
+| Display/Show canvas size | `display.show.canvas.size` | tree.show.width.height | `false` | Display canvas width and height in pixels. Use true or false. |
+| Display/Title text | `display.title.text` | tree.title.string, bottom.title.string | `"The phylogenetic tree with {0} high-quality sequenced samples."` | Bottom statement. {0} is replaced by the number of leaves. |
+| Display/Branch length unit | `display.branch.length.unit` | tree.branch.length.unit, branch.length.unit | `""` | Axis unit, for example MYA. An empty string omits the unit. |
+| Display/Reverse axis | `display.reverse.axis` | tree.need.reverse.axis, need.reverse.axis.bar | `false` | Reverse the axis direction, for example for time before present. Use true or false. |
+| Labels/Show leaf names | `labels.show.leaf.names` | leaf.show.label, show.leaf.label | `true` | Display names next to leaf nodes. Use true or false. |
+| Labels/Right align leaf labels | `labels.right.align.leaf.labels` | leaf.label.right.align | `true` | Right align label columns in rectangular and slant layouts. Use true or false. |
+| Labels/Show internal node names | `labels.show.internal.node.names` | inner.show.label | `false` | Display names on internal nodes. Use true or false. |
+| Labels/Show bootstrap values | `labels.show.bootstrap.values` | inner.show.bootstrap | `false` | Display bootstrap support values when present in the tree. Use true or false. |
+| Labels/Show branch lengths | `labels.show.branch.lengths` | inner.show.branch.length | `false` | Display numeric branch lengths. Use true or false. |
+| Root/Show root branch | `root.show.branch` | root.show | `false` | Display the branch leading to the root. Use true or false. |
+| Root/Root branch length | `root.branch.length.px` | root.tip.length | `10.0` | Root branch length in pixels (0-200). |
+| Fonts/Labels/Family | `font.labels.family` | font.global, tree.global.font | `"Microsoft YaHei UI"` | Installed font family or Java logical font, for example Monospaced. |
+| Fonts/Labels/Size | `font.labels.size.pt` | font.global, tree.global.font | `14.0` | Font size in points (1-200). |
+| Fonts/Labels/Style | `font.labels.style` | font.global, tree.global.font | `"Regular"` | Font style: Regular, Bold, Italic or Bold Italic. |
+| Fonts/Title/Family | `font.title.family` | font.title, bottom.title.font | `"Microsoft YaHei UI"` | Installed font family or Java logical font, for example Monospaced. |
+| Fonts/Title/Size | `font.title.size.pt` | font.title, bottom.title.font | `13.0` | Font size in points (1-200). |
+| Fonts/Title/Style | `font.title.style` | font.title, bottom.title.font | `"Bold"` | Font style: Regular, Bold, Italic or Bold Italic. |
+| Fonts/Axis and scale bar/Family | `font.axis.family` | font.axis | `"Microsoft YaHei UI"` | Installed font family or Java logical font, for example Monospaced. |
+| Fonts/Axis and scale bar/Size | `font.axis.size.pt` | font.axis | `14.0` | Font size in points (1-200). |
+| Fonts/Axis and scale bar/Style | `font.axis.style` | font.axis | `"Regular"` | Font style: Regular, Bold, Italic or Bold Italic. |
+| Layout/Type | `layout.type` | layout.initial | `"Rectangular phylogram"` | Tree layout. Choices: Slant cladogram; Rectangular cladogram (aligned tips); Rectangular cladogram (equal branches); Rectangular (internal nodes on axis); Rectangular phylogram; Rectangular phylogram (aligned tips); Rectangular half circle; Circular cladogram (inward); Circular cladogram (aligned tips); Circular phylogram; Circular phylogram (aligned tips); Circular cladogram (equal branches); Spiral alpha phylogram; Spiral alpha cladogram; Spiral beta phylogram; Spiral beta cladogram; Radial cladogram; Radial phylogram; Radial equal daylight phylogram; Radial equal daylight cladogram; Radial N-body phylogram; Radial N-body cladogram. |
+| Layout/Margins/Top | `layout.margins.top.px` | layout.blank.space, blank.space | `20` | Blank space in pixels (0-10000), excluding automatic label space. |
+| Layout/Margins/Left | `layout.margins.left.px` | layout.blank.space, blank.space | `40` | Blank space in pixels (0-10000), excluding automatic label space. |
+| Layout/Margins/Bottom | `layout.margins.bottom.px` | layout.blank.space, blank.space | `80` | Blank space in pixels (0-10000), excluding automatic label space. |
+| Layout/Margins/Right | `layout.margins.right.px` | layout.blank.space, blank.space | `40` | Blank space in pixels (0-10000), excluding automatic label space. |
+| Rectangular layout/Branch curvature | `layout.rectangular.branch.curvature.percent` | layout.rectangular.curvature | `0` | Branch curvature (0-100), rectangular layouts only. |
+| Circular layout/Start angle | `layout.circular.start.angle.degrees` | layout.circular.start.degree | `285` | Start angle in degrees (0-360), circular layouts only. |
+| Circular layout/Arc extent | `layout.circular.arc.extent.degrees` | layout.circular.extent.degree | `360` | Arc extent in degrees (0-360), circular layouts only. |
+| Circular layout/Inner radius | `layout.circular.inner.radius.px` | layout.circular.inner.radius | `50` | Inner radius in pixels (0-200), inward circular cladogram only. |
+| Spiral layout/Start angle | `layout.spiral.start.angle.degrees` | layout.spiral.start.degree | `0` | Start angle in degrees (0-360), spiral layouts only. |
+| Spiral layout/Total angle | `layout.spiral.total.angle.degrees` | layout.spiral.extent.degree | `720` | Total spiral angle in degrees (0-10000). |
+| Spiral layout/Arm spacing | `layout.spiral.arm.spacing.factor` | layout.spiral.gap.factor | `10` | Spacing factor between spiral arms (0-50); this is not a pixel distance. |
+| Spiral layout/Beta factor | `layout.spiral.beta` | layout.spiral.beta.factor | `1.0` | Beta spiral factor (1.0-5.0). Use the actual value, not a percentage. |
+| Slant layout/Tree width | `layout.slant.tree.width.percent` | layout.slant.tree.width | `100.0` | Tree width as a percentage (0-100), slant layout only. |
+| Slant layout/Left margin | `layout.slant.left.margin.percent` | layout.slant.left.margin | `20.0` | Left margin as a percentage (0-100), slant layout only. |
+| Slant layout/Rotation | `layout.slant.rotation.degrees` | layout.slant.rotation | `0` | Slant rotation in degrees: 0, 90, 180 or 270. |
+| Radial layout/Rotation | `layout.radial.rotation.degrees` | layout.radial.rotation | `0` | Rotation in degrees (0-360), radial layouts only. |
+| Mouse wheel/Zoom height | `mouse.wheel.zoom.height` | wheel.height.scale.on, height.scale.on | `true` | Allow the mouse wheel to change tree height. Use true or false. |
+| Mouse wheel/Zoom width | `mouse.wheel.zoom.width` | wheel.width.scale.on, width.scale.on | `true` | Allow the mouse wheel to change tree width. Use true or false. |
+| View/Height scale | `view.height.scale.percent` | view.height.scale | `100` | Height as a percentage of fitted size (100-100000). |
+| View/Width scale | `view.width.scale.percent` | view.width.scale | `100` | Width as a percentage of fitted size (100-100000). Circular, spiral and radial layouts scale uniformly. |
+| View/Lock aspect ratio | `view.lock.aspect.ratio` |  | `false` | Keep the aspect ratio during manual zoom. Circular, spiral and radial layouts always scale uniformly. Use true or false. |
+| Fonts/Axis and scale bar/Inherit label font | `font.axis.inherit.label.font` | font.axis | `true` | Use the label font for the axis and scale bar. Empty VOICE font.axis inherits the label font. Use true or false. |
+| Node style/Scope | `node.style.scope` |  | `"Selected clades"` | Selected clades includes selected nodes and descendants; without selection, the whole tree. Other choices: All nodes, Leaves only. Scope is not saved. |
+| Node style/Color | `node.style.color` | node.color | `"#000000"` | Node and branch color as #RRGGBB, or Mixed. Leave Mixed unchanged to preserve different values. |
+| Node style/Branch line width | `node.style.branch.line.width.px` | node.line.width | `1.6` | Branch line width in pixels (0-200), or Mixed. |
+| Node style/Node radius | `node.style.radius.px` | node.radius | `0` | Node radius in pixels (0-200), or Mixed. |
+| Creative mode/Enabled | `creative.mode.enabled` | creative.mode | `false` | Drag horizontally to change branch lengths; right-click to edit nodes. Requires a rectangular phylogram. Never saved as enabled in user defaults. Use true or false. |
 
----
+## Import-only parameters
 
-## 必需输入参数
+| Canonical VOICE key | Legacy aliases | Default | Meaning |
+|---|---|---|---|
+| `input.newick.text` | input.nwk.string | `` | Newick text. Takes priority over file inputs. |
+| `input.newick.file` | input.nwk.path | `` | Newick file path. Used when no Newick text is provided. |
+| `input.table.file` | input.tableLike.path | `` | Table-format tree file path. Used when neither Newick source is provided. |
+| `input.newick.format` | nwk.format | `1` | Newick format (0-9). 0 reads internal support; 1 reads internal names. |
+| `input.newick.remove.whitespace` | nwk.remove.whitespace | `false` | Remove whitespace before parsing. Leave false to preserve spaces in names. |
+| `input.node.styles.file` | advanced.node.visual.config, node.visual.config.path | `` | Node-style TSV file. Required column: name. Optional columns: fillColor, circleRadius, lineThickness, displayName. Overrides uniform imported styles. |
 
-这些参数位于顶层，因为它们定义了树输入来源。
+## Compatibility details
 
-| 参数键 | 默认值 | 说明 |
-|--------|--------|------|
-| `input.nwk.string` | `""` | 最高优先级输入，直接提供 Newick 字符串内容。 |
-| `input.nwk.path` | `<example path>` | 中等优先级输入，提供 Newick 文件路径。 |
-| `nwk.format` | `0` | Newick 解释模式，支持 `0-9`。 |
-| `nwk.remove.whitespace` | `F` | 在解析前去掉 Newick 内容中的空白字符。 |
-| `input.tableLike.path` | `""` | 使用 table-like tree 格式作为替代输入。 |
-
----
-
-## 分类 `%1`：Tree Information
-
-控制整棵树的全局信息显示。
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `tree.show.scale.bar` | `F` | 显示 phylogram 比例尺。 | 新式键名 |
-| `tree.show.axis.bar` | `T` | 显示坐标轴。 | 新式键名 |
-| `tree.show.title` | `T` | 显示底部标题。 | 新式键名 |
-| `tree.show.width.height` | `F` | 在绘图区显示宽高信息，圆形布局时尤其有用。 | 新式键名 |
-| `tree.title.string` | `The phylogenetic tree with {0} high-quality sequenced samples.` | 底部标题模板，`{0}` 会替换为叶节点数量。 | 重命名 |
-| `tree.branch.length.unit` | `""` | 分支长度显示单位，例如 `mya`。 | 重命名 |
-| `tree.need.reverse.axis` | `F` | 反转坐标轴方向，适合“多少年前”这种时间尺度。 | 重命名 |
-
----
-
-## 分类 `%2`：Leaf Node
-
-控制叶标签显示。
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `leaf.show.label` | `T` | 显示叶标签。 | 重命名 |
-| `leaf.label.right.align` | `T` | 叶标签右对齐。 | 既有键名 |
-
----
-
-## 分类 `%3`：Inner Node
-
-控制内部节点显示。
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `inner.show.label` | `F` | 显示内部节点标签。 | 新式键名 |
-| `inner.show.bootstrap` | `F` | 显示 bootstrap / support 值。 | 新式键名 |
-| `inner.show.branch.length` | `F` | 显示内部节点对应的分支长度。 | 新式键名 |
-
----
-
-## 分类 `%4`：Root Settings
-
-控制根节点显示行为。
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `root.show` | `F` | 显式显示根节点。 | 新式键名 |
-| `root.tip.length` | `10` | 根部 tip 线段长度，单位为像素。 | 新式键名 |
-
----
-
-## 分类 `%5`：Mouse Wheel
-
-控制鼠标滚轮在两个方向上的缩放行为。
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `wheel.height.scale.on` | `T` | 启用高度方向滚轮缩放。 | 重命名 |
-| `wheel.width.scale.on` | `T` | 启用宽度方向滚轮缩放。 | 重命名 |
-
----
-
-## 分类 `%6`：Font Settings
-
-控制查看器主要字体。
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `font.global` | `<system font, 14>` | 全局字体，用于叶标签和一般文本。 | 重命名 |
-| `font.title` | `<title font>` | 底部标题字体。 | 重命名 |
-| `font.axis` | `<global font>` | 坐标轴和比例尺字体。留空时复用全局字体。 | 新式键名 |
-
----
-
-## 分类 `%7`：Layout Settings
-
-控制初始布局选择以及各布局专有参数。
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `layout.initial` | `RECT_PHYLO_LEFT` | 初始布局。支持 `RECTANGULAR`、`CIRCULAR`、`SPIRAL`、`SLANT`、`RADIAL` 等名称。 | 新式键名 |
-| `layout.blank.space` | `20,40,80,40` | 空白边距，格式为 `top,left,bottom,right` 像素。 | 新式键名 |
-
-### 分类 `%7.1`：Rectangular Layout
-
-| 参数键 | 默认值 | 范围 | 说明 |
-|--------|--------|------|------|
-| `layout.rectangular.curvature` | `0` | `0-100` | 分支曲率。`0` 表示直线，`100` 表示最大曲率。 |
-
-### 分类 `%7.2`：Circular Layout
-
-| 参数键 | 默认值 | 范围 | 说明 |
-|--------|--------|------|------|
-| `layout.circular.start.degree` | `285` | `0-360` | 起始角度。 |
-| `layout.circular.extent.degree` | `360` | `0-360` | 弧度展开范围。 |
-| `layout.circular.inner.radius` | `50` | `0-200` | Inner cladogram 风格使用的内圈半径。 |
-
-### 分类 `%7.3`：Spiral Layout
-
-| 参数键 | 默认值 | 范围 | 说明 |
-|--------|--------|------|------|
-| `layout.spiral.extent.degree` | `720` | `0-10000` | 螺旋总展开角度。 |
-| `layout.spiral.gap.factor` | `10` | `0-50` | 螺旋臂间距。 |
-| `layout.spiral.beta.factor` | `100` | `100-500` | Beta 模式系数，内部以 `0.01` 单位存储。 |
-
-### 分类 `%7.4`：Slant Layout
-
-| 参数键 | 默认值 | 范围 | 说明 |
-|--------|--------|------|------|
-| `layout.slant.tree.width` | `100` | `0-100` | 树宽百分比。数值越小，右侧保留越多空白。 |
-| `layout.slant.left.margin` | `20` | `0-100` | 左边距百分比。 |
-| `layout.slant.rotation` | `0` | `0/90/180/270` | 旋转角度。 |
-
-### 分类 `%7.5`：Radial Layout
-
-| 参数键 | 默认值 | 范围 | 说明 |
-|--------|--------|------|------|
-| `layout.radial.rotation` | `0` | `0-360` | 旋转角度。 |
-
----
-
-## 分类 `%8`：Advanced
-
-| 参数键 | 默认值 | 说明 | 状态 |
-|--------|--------|------|------|
-| `advanced.node.visual.config` | `""` | 用于节点级视觉标注的 TSV 或等价配置文件。 | 重命名 |
-
----
-
-## 旧键名到新键名映射
-
-| 旧键名 | 新键名 | 分类 |
-|--------|--------|------|
-| `tree.global.font` | `font.global` | `%6` Font Settings |
-| `bottom.title.font` | `font.title` | `%6` Font Settings |
-| `blank.space` | `layout.blank.space` | `%7` Layout Settings |
-| `height.scale.on` | `wheel.height.scale.on` | `%5` Mouse Wheel |
-| `width.scale.on` | `wheel.width.scale.on` | `%5` Mouse Wheel |
-| `show.leaf.label` | `leaf.show.label` | `%2` Leaf Node |
-| `leaf.label.right.align` | `leaf.label.right.align` | `%2` Leaf Node |
-| `need.reverse.axis.bar` | `tree.need.reverse.axis` | `%1` Tree Information |
-| `bottom.title.string` | `tree.title.string` | `%1` Tree Information |
-| `branch.length.unit` | `tree.branch.length.unit` | `%1` Tree Information |
-| `node.visual.config.path` | `advanced.node.visual.config` | `%8` Advanced |
-
----
-
-## 参数汇总
-
-| 分类 | 参数数量 | 用途 |
-|------|----------|------|
-| 必需输入 | 5 | 树输入来源与解析模式 |
-| `%1` Tree Information | 7 | 树级信息显示 |
-| `%2` Leaf Node | 2 | 叶标签显示 |
-| `%3` Inner Node | 3 | 内部节点显示 |
-| `%4` Root Settings | 2 | 根节点显示 |
-| `%5` Mouse Wheel | 2 | 滚轮缩放 |
-| `%6` Font Settings | 3 | 字体 |
-| `%7` Layout Settings | 15 | 布局选择与布局调节 |
-| `%8` Advanced | 1 | 节点级视觉配置 |
-| **总计** | **40** | 当前全部参数面 |
-
----
-
-## GUI 控件与参数映射
-
-| GUI 控件 | 参数键 |
-|----------|--------|
-| Scale bar toggle | `tree.show.scale.bar` |
-| Axis toggle | `tree.show.axis.bar` |
-| Bottom title toggle | `tree.show.title` |
-| Width-and-height toggle | `tree.show.width.height` |
-| Leaf-label toggle | `leaf.show.label` |
-| Inner-node label toggle | `inner.show.label` |
-| Internal branch-length toggle | `inner.show.branch.length` |
-| Bootstrap toggle | `inner.show.bootstrap` |
-| Height wheel toggle | `wheel.height.scale.on` |
-| Width wheel toggle | `wheel.width.scale.on` |
-
----
-
-## 当前状态
-
-- `ParamsAssignerAndParser4ModernTreeView.java` 定义了文档中的全部 40 个参数。
-- 当前源码中，这 40 个参数都已经实现。
-- 这些参数与 `modern_tree_view_initial_mechanism.md` 中说明的初始化规则保持一致。
+- `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.
+- Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.
+- Legacy packed font keys are expanded before canonical family/size/style values. Explicit `font.axis.inherit.label.font` has final precedence. Empty legacy `font.axis` inherits labels; explicit axis attributes disable implicit inheritance.
+- Layout accepts the listed English names, existing enum names, and RECTANGULAR/CIRCULAR/SPIRAL/SLANT/RADIAL. Unknown names are errors.
+- Boolean examples use true/false; legacy T/F remain accepted. Fonts use Regular, Bold, Italic, or Bold Italic.
+- Selected clades includes selected nodes and descendants; without selection it means the whole tree. Leaves only limits that scope to leaves. Import has no selection.
+- Apply changes the current tree only. Save as user defaults stores reusable preferences separately. Scope, Mixed values and creative-mode activation are not saved.
+- Data sources, Newick options, and node-style files belong to import, not the current tree's display snapshot. Per-node annotations override imported uniform styles.

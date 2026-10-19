@@ -310,7 +310,8 @@ public class TreeSettingsRegressionTest {
         for (var setting : TreeSettings.voiceSettings()) require(parser.getRequiredParams().containsKey(setting.key()), "VOICE schema key: " + setting.key());
         var voice = allocate(VOICE4MTV.class);
         String template = voice.getExampleText();
-        require(template.contains("# $view.height.scale=") && template.contains("# $creative.mode=") && template.contains("\n$input.nwk.string="), "Fresh templates comment optional parameters only");
+        require(template.contains("# $view.height.scale.percent=") && template.contains("# $creative.mode.enabled=") && template.contains("\n$input.newick.text=")
+                && template.contains("# $input.newick.format=") && template.contains("# $input.node.styles.file="), "Fresh templates use canonical names and comment optional parameters only");
         p.setAxisFont(new Font("Monospaced", Font.BOLD, 12));
         require(TreeSettings.explicitImport(input(Map.of()), p).isEmpty(), "Absent VOICE keys create no overrides");
         TreeSettings.apply(p, TreeSettings.explicitImport(input(Map.of("font.axis", "")), p));

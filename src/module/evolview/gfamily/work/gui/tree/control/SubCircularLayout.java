@@ -163,8 +163,11 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		});
 		
 		spinnerRootLength = new JSpinner();
+		for (JComponent component : new JComponent[]{rdbtnPhylogram, chckbxAlignToTip, rdbtnCladogramWithEqualLength, rdbtnCladogramAlign2tip, rdbtnInnerCladogram}) parameter(component, "Layout/Type");
+		parameter(checkBoxShowOutgroup, "Root/Show root branch");
+		parameter(sliderRootLength, "Root/Root branch length"); parameter(spinnerRootLength, "Root/Root branch length");
 		spinnerRootLength.setFont(globalFont);
-		spinnerRootLength.setModel(new SpinnerNumberModel(15, 0, theMaxValueOfRootLength, 1));
+		spinnerRootLength.setModel(new SpinnerNumberModel(15.0, 0.0, (double) theMaxValueOfRootLength, 0.5));
 		GridBagConstraints gbc_spinnerRootLength = new GridBagConstraints();
 		gbc_spinnerRootLength.anchor = GridBagConstraints.WEST;
 		gbc_spinnerRootLength.insets = new Insets(0, 0, 5, 0);
@@ -174,8 +177,8 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		spinnerRootLengthChangeListener = e -> {
 			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
-			int value = (int) source.getValue();
-			sliderRootLength.setValue(value);
+			double value = ((Number) source.getValue()).doubleValue();
+			sliderRootLength.setValue((int) Math.round(value));
 			controller.getActiveTreeLayoutProperties().setRootTipLength(value);
 			controller.reCalculateTreeLayoutPreservingZoom();
 		};
@@ -211,6 +214,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		});
 
 		spinnerStartDegree = new JSpinner();
+		parameter(sliderStartDegree, "Circular layout/Start angle"); parameter(spinnerStartDegree, "Circular layout/Start angle");
 		spinnerStartDegree.setFont(globalFont);
 		spinnerStartDegree.setModel(new SpinnerNumberModel(285, 0, 360, 1));
 		GridBagConstraints gbc_spinnerStartDegree = new GridBagConstraints();
@@ -259,6 +263,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		});
 
 		spinnerExtentDegree = new JSpinner();
+		parameter(sliderExtentDegree, "Circular layout/Arc extent"); parameter(spinnerExtentDegree, "Circular layout/Arc extent");
 		spinnerExtentDegree.setFont(globalFont);
 		spinnerExtentDegree.setModel(new SpinnerNumberModel(360, 0, 360, 1));
 		GridBagConstraints gbc_spinnerExtentDegree = new GridBagConstraints();
@@ -344,8 +349,8 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
             }
             chckbxAlignToTip.setEnabled(rdbtnPhylogram.isSelected());
             checkBoxShowOutgroup.setSelected(properties.isShowRoot());
-            spinnerRootLength.setValue((int) Math.round(properties.getRootTipLength()));
-            sliderRootLength.setValue((int) spinnerRootLength.getValue());
+            spinnerRootLength.setValue(properties.getRootTipLength());
+            sliderRootLength.setValue((int) Math.round(properties.getRootTipLength()));
             spinnerRootLength.setEnabled(properties.isShowRoot());
             sliderRootLength.setEnabled(properties.isShowRoot());
             var circular = properties.getCircularLayoutPropertiy();

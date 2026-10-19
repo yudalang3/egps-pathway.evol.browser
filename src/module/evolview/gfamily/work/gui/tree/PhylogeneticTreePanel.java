@@ -635,6 +635,17 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		firePropertyChange("treeViewState", null, this);
 	}
 
+	public void clearNodeSelection() {
+		layoutProp.getSelectedNodes().clear();
+		evoltree.struct.util.EvolNodeUtil.recursiveIterateTreeIF(layoutProp.getOriginalRootNode(), node -> {
+			node.getDrawUnit().setBranchSelected(false);
+			node.getDrawUnit().setNodeSelected(false);
+		});
+		firePropertyChange("treeSelectionCleared", null, this);
+		notifyTreeViewStateChanged();
+		refreshViewPort();
+	}
+
 	public boolean supportsScaleBar() {
 		return layout != null && layoutReady && !isLayoutCalculationPending() && layout.supportsScaleBar();
 	}

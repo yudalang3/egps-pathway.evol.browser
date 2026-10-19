@@ -179,6 +179,11 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 		gbc_separator_1.gridy = 5;
 		add(separator_1, gbc_separator_1);
 
+		parameter(spinnerVerticalOrWholeZoom, "View/Height scale");
+		parameter(spinnerHorizontalChange, "View/Width scale");
+		parameter(height1ScaleTogbtn, "Mouse wheel/Zoom height");
+		parameter(width1ScaleTogbtn, "Mouse wheel/Zoom width");
+		parameter(chckbxLockAspectRatio, "View/Lock aspect ratio");
 		changeListenerSpinnerHorizontal = e -> applyScale(false);
 		changeListenerSpinnerVerticalZoom = e -> applyScale(true);
 		actionsTurn2ThisLayout(TreeLayoutEnum.RECTANGULAR_LAYOUT);

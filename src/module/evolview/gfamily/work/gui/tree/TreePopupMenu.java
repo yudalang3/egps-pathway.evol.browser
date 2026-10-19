@@ -327,12 +327,14 @@ public class TreePopupMenu {
 		});
 
 		JMenuItem selectAllDescendant = new JMenuItem("Select all descendant nodes");
+		selectAllDescendant.setToolTipText("Select this clade and its descendants for subsequent node and branch styling.");
 		selectAllDescendant.setIcon(IconObtainer.get("selectall.png"));
 		selectAllDescendant.addActionListener(e -> {
 			selectedAllDescendants4SingleInternalNode(currNode);
 		});
 
 		JMenuItem clearSelect = new JMenuItem("Set all descendant nodes unselected");
+		clearSelect.setToolTipText("Clear selection marks from this clade and its descendants. Preserve colors and annotations.");
 		clearSelect.setIcon(IconObtainer.get("clearselect.png"));
 		clearSelect.addActionListener(e -> {
 			clearSelectionAllDescendants4SingleInternalNode(currNode);
@@ -990,6 +992,7 @@ public class TreePopupMenu {
 
 		JMenuItem displayNodeInformation = new JMenuItem("Display more information");
 		displayNodeInformation.setIcon(IconObtainer.get("information.png"));
+		displayNodeInformation.setToolTipText("Show the node name, stored branch length and available metadata.");
 		displayNodeInformation.addActionListener(e -> {
 			displayMoreInformation4leaf(currNode);
 		});
@@ -1014,6 +1017,7 @@ public class TreePopupMenu {
 
 		if (currNode.getCollapse()) {
 			JMenuItem modifyCollapseProperty = new JMenuItem("modify collapse property");
+			modifyCollapseProperty.setToolTipText("Change the color and triangle size used to display this collapsed clade.");
 			modifyCollapseProperty.addActionListener(e -> {
 
 				Map<Integer, CollapseProperty> collapseProportyMaps = getTreeLayoutProperties()

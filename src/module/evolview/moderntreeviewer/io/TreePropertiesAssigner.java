@@ -93,6 +93,7 @@ public class TreePropertiesAssigner {
 
 		// Category %7.5: Radial Layout
 		treeLayoutProperties.setRadicalLayoutRotationDeg(object.getRadialRotation());
+		module.evolview.moderntreeviewer.para.TreeSettings.apply(treeLayoutProperties, object.explicitSettings());
 	}
 
 	public void assignGraphicsNodeEffects(GraphicsNode rootNode, MTVImportInforBean evolTreeImportInfoBean)

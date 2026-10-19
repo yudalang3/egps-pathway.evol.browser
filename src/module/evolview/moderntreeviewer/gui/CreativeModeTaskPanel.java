@@ -107,7 +107,7 @@ public class CreativeModeTaskPanel extends JPanel {
 
         JButton btn_load = new JButton("Load image from clipboard");
         btn_load.setFont(defaultFont);
-        btn_load.setToolTipText("Load image from clipboard, remove is already existed.");
+        btn_load.setToolTipText("Creative mode must be on. Load a background image from the clipboard; click again to remove the existing background. The image is hidden when creative mode is off.");
         btn_load.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 SwingUtilities.invokeLater(() -> {
@@ -187,6 +187,7 @@ public class CreativeModeTaskPanel extends JPanel {
 
     private JButton getButtonSetAllBranches(Font defaultFont) {
         JButton buttonSetAllBranches = new JButton("Set all branches to equal length");
+        buttonSetAllBranches.setToolTipText("Set every stored branch length to the same value. This changes the tree and works with creative mode off. Requires a rectangular phylogram.");
         buttonSetAllBranches.setHorizontalAlignment(SwingConstants.LEFT);
         buttonSetAllBranches.setFont(defaultFont);
         buttonSetAllBranches.addActionListener(e -> {
@@ -222,6 +223,7 @@ public class CreativeModeTaskPanel extends JPanel {
 
     private JButton getButtonAlign2right(Font defaultFont) {
         JButton buttonAlign2right = new JButton("Align all leaves to right side");
+        buttonAlign2right.setToolTipText("Change terminal branch lengths so all leaf tips align. This changes the tree and works with creative mode off. Requires a rectangular phylogram.");
         buttonAlign2right.setHorizontalAlignment(SwingConstants.LEFT);
         buttonAlign2right.setFont(defaultFont);
         buttonAlign2right.addActionListener(e -> {
@@ -271,6 +273,7 @@ public class CreativeModeTaskPanel extends JPanel {
     }
 
     private void refreshState() {
+        toggleButtonCreative.putClientProperty("tree.parameter", "Creative mode/Enabled");
         boolean available = treeLayoutProperties != null
                 && (treeLayoutProperties.getMyLayout() == TreeLayout.RECT_PHYLO_LEFT
                 || treeLayoutProperties.getMyLayout() == TreeLayout.RECT_PHYLO_ALIGN2TIP);
@@ -290,6 +293,7 @@ public class CreativeModeTaskPanel extends JPanel {
             tooltip = "Enable horizontal dragging to adjust branch lengths and right-click editing of nodes.";
         }
         setToolTipText(tooltip);
+        toggleButtonCreative.putClientProperty("tree.action.help", tooltip);
         toggleButtonCreative.setToolTipText(tooltip);
     }
 

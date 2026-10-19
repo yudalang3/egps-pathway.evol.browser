@@ -63,7 +63,7 @@ public class SubSlopeLayout extends BaseCtrlPanel {
 
 		spinnerOfLeafLocation = new JSpinner();
 		spinnerOfLeafLocation.setFont(globalFont);
-		spinnerOfLeafLocation.setModel(new SpinnerNumberModel(100, 0, 100, 1));
+		spinnerOfLeafLocation.setModel(new SpinnerNumberModel(100.0, 0.0, 100.0, 0.5));
 		GridBagConstraints gbc_spinnerOfLeafLocation = new GridBagConstraints();
 		gbc_spinnerOfLeafLocation.insets = new Insets(0, 0, 5, 0);
 		gbc_spinnerOfLeafLocation.gridx = 1;
@@ -103,7 +103,7 @@ public class SubSlopeLayout extends BaseCtrlPanel {
 
 		spinnerOfMargin = new JSpinner();
 		spinnerOfMargin.setFont(globalFont);
-		spinnerOfMargin.setModel(new SpinnerNumberModel(20, 0, 100, 1));
+		spinnerOfMargin.setModel(new SpinnerNumberModel(20.0, 0.0, 100.0, 0.5));
 		GridBagConstraints gbc_spinnerOfMargin = new GridBagConstraints();
 		gbc_spinnerOfMargin.insets = new Insets(0, 0, 5, 0);
 		gbc_spinnerOfMargin.gridx = 1;
@@ -157,11 +157,14 @@ public class SubSlopeLayout extends BaseCtrlPanel {
 		gbc_rotationPanel.gridy = 6;
 		add(rotationPanel, gbc_rotationPanel);
 
+		parameter(sliderOfLeafLocation, "Slant layout/Tree width"); parameter(spinnerOfLeafLocation, "Slant layout/Tree width");
+		parameter(sliderOfMargin, "Slant layout/Left margin"); parameter(spinnerOfMargin, "Slant layout/Left margin");
+		for (JComponent component : new JComponent[]{btnRotate0, btnRotate90, btnRotate180, btnRotate270}) parameter(component, "Slant layout/Rotation");
 		spinnerOfLeafLocation.addChangeListener(e -> {
 			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
-			int value = (int) source.getValue();
-			sliderOfLeafLocation.setValue(value);
+			double value = ((Number) source.getValue()).doubleValue();
+			sliderOfLeafLocation.setValue((int) Math.round(value));
 			SlopeLayoutProperty slopeLayoutProperety = controller.getActiveTreeLayoutProperties().getSlopeLayoutProperety();
 			slopeLayoutProperety.setLeafLocationRightMostRatio(0.01 * value);
 			controller.reCalculateTreeLayoutPreservingZoom();
@@ -169,8 +172,8 @@ public class SubSlopeLayout extends BaseCtrlPanel {
 		spinnerOfMargin.addChangeListener(e -> {
 			if (synchronizing || controller == null) return;
 			JSpinner source = (JSpinner) e.getSource();
-			int value = (int) source.getValue();
-			sliderOfMargin.setValue(value);
+			double value = ((Number) source.getValue()).doubleValue();
+			sliderOfMargin.setValue((int) Math.round(value));
 
 			SlopeLayoutProperty slopeLayoutProperety = controller.getActiveTreeLayoutProperties().getSlopeLayoutProperety();
 			slopeLayoutProperety.setBlankMarginRatio(0.01 * value);
@@ -206,10 +209,10 @@ public class SubSlopeLayout extends BaseCtrlPanel {
         synchronizing = true;
         try {
             var slope = properties.getSlopeLayoutProperety();
-            spinnerOfLeafLocation.setValue((int) Math.round(slope.getLeafLocationRightMostRatio() * 100));
-            sliderOfLeafLocation.setValue((int) spinnerOfLeafLocation.getValue());
-            spinnerOfMargin.setValue((int) Math.round(slope.getBlankMarginRatio() * 100));
-            sliderOfMargin.setValue((int) spinnerOfMargin.getValue());
+            spinnerOfLeafLocation.setValue(slope.getLeafLocationRightMostRatio() * 100);
+            sliderOfLeafLocation.setValue((int) Math.round(slope.getLeafLocationRightMostRatio() * 100));
+            spinnerOfMargin.setValue(slope.getBlankMarginRatio() * 100);
+            sliderOfMargin.setValue((int) Math.round(slope.getBlankMarginRatio() * 100));
             int rotation = slope.getSlopeLayoutRotationDeg();
             btnRotate0.setSelected(rotation == 0); btnRotate90.setSelected(rotation == 90);
             btnRotate180.setSelected(rotation == 180); btnRotate270.setSelected(rotation == 270);

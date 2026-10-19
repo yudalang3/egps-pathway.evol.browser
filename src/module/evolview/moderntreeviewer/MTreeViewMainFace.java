@@ -213,7 +213,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			taskPane.setFont(titleFont);
 			String title = "Tree operation";
 			taskPane.setTitle(title);
-			treeOperationPanel = new CtrlTreeOperationPanelByMiglayout();
+			treeOperationPanel = new module.evolview.moderntreeviewer.gui.ModernTreeOperationPanel();
 			boolean b = getValueOfStr4storage(title);
 			taskPane.setCollapsed(b);
 
@@ -302,6 +302,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			SwingUtilities.invokeLater(this::reInitializeGUIAccording2Properties);
 			return;
 		}
+		module.evolview.moderntreeviewer.gui.TreeParameterTooltips.setAvailable(treeLayoutPanel, controller.getActiveTreeLayoutProperties() != null);
 		if (treeLayoutPanel != null) treeLayoutPanel.reInitializeGUIAccording2treeLayoutProperties();
 		if (treeOperationPanel != null) treeOperationPanel.reInitializeGUIAccording2treeLayoutProperties();
 		if (creativeModePane != null) {
@@ -320,6 +321,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			}
 			else if (newTree || !wasAvailable) creativeModePane.setCollapsed(false);
 		}
+		module.evolview.moderntreeviewer.gui.TreeParameterTooltips.install(taskPaneContainer, controller.getActiveTreeLayoutProperties() != null);
 	}
 
 	@Override

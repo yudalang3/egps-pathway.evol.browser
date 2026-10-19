@@ -52,7 +52,10 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 		alpha = treeLayoutProperties.getRootTipLength();
 		maxBeta = (biggestCircleRadicus - alpha) / (betaFactor * Math.toRadians(Math.max(1,
 				globalStartDegree + circularLayoutPropertiy.getGlobalExtendingDegree())));
-		minBeta = Math.min(maxBeta, (2 * maxBeta * Math.PI + GAP_SIZE / betaFactor) / (4 * Math.PI));
+		// Normalizing maxBeta by the factor used to cancel it completely in screen coordinates.
+		// Vary the inner slope fraction instead, preserving the outer bound and linear branch mapping.
+		minBeta = Math.min(maxBeta, betaFactor * maxBeta / (1 + betaFactor)
+				+ GAP_SIZE / (4 * Math.PI * betaFactor));
 
 		LongestRoot2leafBean maxLengthOfRoot2LeafNoOutgroup = GraphicTreePropertyCalculator
 				.getMaxLengthOfRoot2Leaf(rootNode);

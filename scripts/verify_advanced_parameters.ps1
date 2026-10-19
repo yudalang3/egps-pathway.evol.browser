@@ -1,3 +1,4 @@
+param([switch]$UpdateReference)
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 Set-Location -LiteralPath $projectRoot
@@ -17,15 +18,23 @@ Get-ChildItem src/module -Recurse -File | Where-Object { $_.Extension -in $resou
 }
 $tests = @(
     'module.evolview.moderntreeviewer.TreeSettingsRegressionTest',
+    'module.evolview.moderntreeviewer.TreeParameterAuditTest',
     'module.evolview.moderntreeviewer.CreativeModeRegressionTest',
     'test.module.evolview.phylotree.visualization.layout.TreeViewStateRegressionTest',
     'test.module.evolview.phylotree.visualization.layout.TreeLayoutControlsRegressionTest',
     'test.module.evolview.phylotree.visualization.layout.TreeTipLayoutRegressionTest'
+    'test.module.evolview.phylotree.visualization.layout.LeafLabelStateInitializerTest'
+    'test.module.evolview.phylotree.visualization.layout.UnrootedLayoutCalculatorTest'
+    'test.module.evolview.phylotree.visualization.layout.UnrootedLayoutWorkerTest'
 )
 foreach ($test in $tests) {
     $testName = $test.Split('.')[-1]
-    $headless = if ($testName -eq 'TreeSettingsRegressionTest') { 'false' } else { 'true' }
+    $headless = if ($testName -in @('TreeSettingsRegressionTest', 'TreeParameterAuditTest')) { 'false' } else { 'true' }
     & java "-Djava.awt.headless=$headless" -cp "$buildTarget;dependency-egps/*" $test *> "logs/advanced-$testName.log"
     if ($LASTEXITCODE -ne 0) { Get-Content "logs/advanced-$testName.log" -Tail 25; throw "$testName failed." }
     Write-Output "$testName passed"
+}
+if ($UpdateReference) {
+    & java '-Djava.awt.headless=true' -cp "$buildTarget;dependency-egps/*" module.evolview.moderntreeviewer.TreeParameterAuditTest --write-docs
+    if ($LASTEXITCODE -ne 0) { throw 'Parameter reference generation failed.' }
 }

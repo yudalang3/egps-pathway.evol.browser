@@ -82,14 +82,14 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
             // Great Apes phylogenetic tree with divergence times in MYA (Million Years Ago)
             // Human-Chimp: ~6.5 MYA, Chimp-Bonobo: ~1.5 MYA, Human/Chimp-Gorilla: ~8.5 MYA, Homininae-Orangutan: ~12.5 MYA
             String nwkStr = "(((Human:6.5,(Chimpanzee:1.5,Bonobo:1.5):5):2,Gorilla:8.5):4,Orangutan:12.5);";
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.nwk.string", nwkStr,
+            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.newick.text", nwkStr,
                     "Great Apes phylogeny with divergence times (MYA). Direct input the nwk string content.");
         } else if (exampleIndex == 1) {
             String speciesTree = EGPSProperties.PROPERTIES_DIR + "/bioData/example/treeBarplot/01.speci.nwk";
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.nwk.path", speciesTree, "Input the nwk file path.");
+            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.newick.file", speciesTree, "Input the nwk file path.");
         } else if (exampleIndex == 2) {
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.nwk.path", "", "Input the nwk file path.");
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.tableLike.path",
+            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.newick.file", "", "Input the nwk file path.");
+            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.table.file",
                     EGPSProperties.PROPERTIES_DIR + "/bioData/example/myTree.tpv",
                     "Input the table-like tree file path.");
             exampleIndex = -1;
@@ -98,7 +98,8 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
 
         return evolTreeParserMap4VOICM.getExampleString().lines().map(line -> {
             String key = line.stripLeading();
-            return !key.startsWith("#") && !key.startsWith("$input.") && key.contains("=") ? "# " + line : line;
+            boolean source = key.startsWith("$input.newick.text=") || key.startsWith("$input.newick.file=") || key.startsWith("$input.table.file=");
+            return !key.startsWith("#") && !source && key.contains("=") ? "# " + line : line;
         }).collect(java.util.stream.Collectors.joining("\n"));
     }
 

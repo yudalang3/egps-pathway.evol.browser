@@ -82,6 +82,8 @@ public final class TreeSettingsEditor extends JPanel {
         editor.setMargin(new Insets(8, 10, 8, 10));
         editor.setText(text);
         editor.setEditable(editable);
+        editor.setToolTipText(editable ? "Edit JSONC parameters. Comments and trailing commas are allowed. Apply validates the text before changing the current tree."
+                : "Program defaults and parameter documentation. Read only; select and copy text. Each parameter lists its VOICE key.");
         editor.setFocusTraversalKeysEnabled(!editable);
         editor.setCaretPosition(0);
         editor.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "four-spaces");

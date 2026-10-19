@@ -527,7 +527,11 @@ public class TreeLayoutProperties {
     }
 
     public void setBlankArea(BlankArea blankArea) {
-        this.blankArea = blankArea;
+        // Layout instances retain this object, including cached radial layouts.
+        this.blankArea.setTop(blankArea.getTop());
+        this.blankArea.setLeft(blankArea.getLeft());
+        this.blankArea.setBottom(blankArea.getBottom());
+        this.blankArea.setRight(blankArea.getRight());
         columnLabelReserve = 0;
     }
 
