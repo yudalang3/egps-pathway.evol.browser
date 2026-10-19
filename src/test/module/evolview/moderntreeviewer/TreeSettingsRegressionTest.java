@@ -353,10 +353,56 @@ public class TreeSettingsRegressionTest {
                     Graphics2D graphics = image.createGraphics(); pane.printAll(graphics); graphics.dispose();
                     ImageIO.write(image, "png", OUTPUT.resolve("advanced-dialog-fonts.png").toFile());
                 } finally { dialog.dispose(); }
+                var damaged = new module.evolview.moderntreeviewer.para.TreeSettingsDialog(new JPanel(), preferences,
+                        new TreeSettingsPreferences.State("{/* broken", Map.of(), "Unterminated comment"), null, () -> null);
+                try {
+                    require(buttons(damaged.getContentPane()).stream().anyMatch(b -> "Repair user defaults…".equals(b.getText()) && b.isEnabled()),
+                            "Damaged user defaults expose the repair editor");
+                    require(buttons(damaged.getContentPane()).stream().anyMatch(b -> "Save as user defaults…".equals(b.getText()) && !b.isEnabled()),
+                            "Damaged user defaults cannot be overwritten by a snapshot");
+                } finally { damaged.dispose(); }
             }
         } finally {
             launch.setDialogTitleFont(oldTitle); launch.setDialogContentFont(oldContent); launch.setDialogButtonFont(oldButton);
         }
+    }
+
+    private static void testRepairDialog() throws Exception {
+        if (GraphicsEnvironment.isHeadless()) return;
+        Path path = Files.createTempDirectory(OUTPUT, "repair-dialog-").resolve("user.jsonc");
+        Files.writeString(path, "{/* broken");
+        TreeSettingsPreferences preferences = new TreeSettingsPreferences(path);
+        TreeSettingsPreferences.State damaged = preferences.loadAsync().get(5, TimeUnit.SECONDS);
+        require(damaged.warning() != null, "Damaged defaults are detected before repair");
+        SwingUtilities.invokeAndWait(() -> {
+            var dialog = new module.evolview.moderntreeviewer.para.TreeSettingsDialog(new JPanel(), preferences, damaged, null, () -> null);
+            try {
+                JButton repair = buttons(dialog.getContentPane()).stream()
+                        .filter(b -> "Repair user defaults…".equals(b.getText())).findFirst().orElseThrow();
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        JDialog child = Arrays.stream(Window.getWindows()).filter(w -> w instanceof JDialog d
+                                && d.isVisible() && "Repair user defaults".equals(d.getTitle())).map(w -> (JDialog) w).findFirst().orElseThrow();
+                        TreeSettingsEditor editor = (TreeSettingsEditor) ((BorderLayout) child.getContentPane().getLayout())
+                                .getLayoutComponent(BorderLayout.CENTER);
+                        require(editor.text().equals("{/* broken"), "Repair editor shows the original damaged text");
+                        JTextPane input = (JTextPane) field(TreeSettingsEditor.class, "user").get(editor);
+                        input.setText("{\"Labels\":{\"Show leaf names\":false}}\n");
+                        buttons(child.getContentPane()).stream().filter(b -> "Save repaired defaults".equals(b.getText()))
+                                .findFirst().orElseThrow().doClick();
+                    } catch (Exception error) { throw new RuntimeException(error); }
+                });
+                repair.doClick();
+                require(buttons(dialog.getContentPane()).stream().anyMatch(b -> "Save as user defaults…".equals(b.getText()) && b.isEnabled()),
+                        "Successful repair enables saving reusable defaults");
+                TreeSettingsEditor current = (TreeSettingsEditor) ((BorderLayout) dialog.getContentPane().getLayout())
+                        .getLayoutComponent(BorderLayout.CENTER);
+                require(Boolean.FALSE.equals(TreeSettings.parse(current.text()).get("Labels/Show leaf names")),
+                        "No-tree parameter snapshot refreshes after repairing user defaults");
+            } finally { dialog.dispose(); }
+        });
+        require(Files.readString(path).equals("{\"Labels\":{\"Show leaf names\":false}}\n"),
+                "Repair writes the corrected JSONC to the original path");
     }
 
     private static void verifyEditorFonts(Container parent, Font title, Font content) {
@@ -435,6 +481,21 @@ public class TreeSettingsRegressionTest {
                     JPanel left = (JPanel) controls.invoke(face);
                     require(buttons(left).stream().anyMatch(b -> "Advanced parameters".equals(b.getText()) && b.isEnabled()),
                             "Tree settings is available before a tree is loaded");
+                    JButton advanced = buttons(left).stream().filter(b -> "Advanced parameters".equals(b.getText())).findFirst().orElseThrow();
+                    Color normal = advanced.getBackground();
+                    advanced.getModel().setRollover(true);
+                    require(!advanced.getBackground().equals(normal), "Advanced entry responds to hover");
+                    advanced.getModel().setRollover(false);
+                    require(advanced.getBackground().equals(normal), "Advanced entry returns to its normal color");
+                    if (!suppliedProperties) {
+                        left.setSize(420, 500);
+                        layout(left);
+                        BufferedImage image = new BufferedImage(420, 500, BufferedImage.TYPE_INT_RGB);
+                        Graphics2D graphics = image.createGraphics();
+                        left.printAll(graphics);
+                        graphics.dispose();
+                        ImageIO.write(image, "png", OUTPUT.resolve("advanced-entry.png").toFile());
+                    }
                     face.scrollPane = new JScrollPane();
                     face.scrollPane.getViewport().setSize(1000, 700);
                     TreeLayoutProperties explicit = properties();
@@ -470,6 +531,7 @@ public class TreeSettingsRegressionTest {
         TreeSettingsPreferences preferences = testStorage();
         testReusableDefaults();
         testVoiceSchema();
+        testRepairDialog();
         SwingUtilities.invokeAndWait(() -> {
             try { testEditor(); testLiveApply(); testSnapshotSession(); testDialogFonts(preferences); }
             catch (Exception error) { throw new RuntimeException(error); }

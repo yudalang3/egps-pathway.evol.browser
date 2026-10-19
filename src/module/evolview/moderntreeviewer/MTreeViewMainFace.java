@@ -142,9 +142,34 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 		jPanel4leftPanel.add(new JScrollPane(taskPaneContainer), BorderLayout.CENTER);
 
 		JButton jButton = new JButton("Advanced parameters");
-		jButton.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());
+		Color linkBlue = new Color(35, 84, 174);
+		Color normalBackground = new Color(236, 242, 253);
+		Color hoverBackground = new Color(222, 233, 251);
+		jButton.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont().deriveFont(Font.BOLD));
+		jButton.setForeground(linkBlue);
+		jButton.setBackground(normalBackground);
+		jButton.setContentAreaFilled(false);
+		jButton.setOpaque(true);
+		jButton.setFocusPainted(false);
+		jButton.setHorizontalAlignment(SwingConstants.LEFT);
+		jButton.setIcon(new ParametersIcon(linkBlue));
+		jButton.setIconTextGap(10);
+		jButton.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createMatteBorder(0, 3, 0, 0, linkBlue),
+				BorderFactory.createEmptyBorder(8, 11, 8, 11)));
+		jButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		jButton.setRolloverEnabled(true);
+		jButton.getModel().addChangeListener(event -> jButton.setBackground(
+				jButton.getModel().isRollover() || jButton.isFocusOwner() ? hoverBackground : normalBackground));
+		jButton.addFocusListener(new java.awt.event.FocusAdapter() {
+			@Override public void focusGained(java.awt.event.FocusEvent event) { jButton.setBackground(hoverBackground); }
+			@Override public void focusLost(java.awt.event.FocusEvent event) {
+				jButton.setBackground(jButton.getModel().isRollover() ? hoverBackground : normalBackground);
+			}
+		});
 		jButton.setToolTipText("Configure all tree parameters");
 		JPanel advancedParametersHeader = new JPanel(new BorderLayout());
+		advancedParametersHeader.setBackground(Color.WHITE);
 		advancedParametersHeader.setBorder(BorderFactory.createEmptyBorder(8, 8, 10, 8));
 		advancedParametersHeader.add(jButton, BorderLayout.CENTER);
 		jPanel4leftPanel.add(advancedParametersHeader, BorderLayout.NORTH);
@@ -161,6 +186,23 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 
 
 		return jPanel4leftPanel;
+	}
+
+	private record ParametersIcon(Color color) implements Icon {
+		@Override public int getIconWidth() { return 16; }
+		@Override public int getIconHeight() { return 16; }
+		@Override public void paintIcon(Component component, Graphics graphics, int x, int y) {
+			Graphics2D g = (Graphics2D) graphics.create();
+			try {
+				g.setColor(color);
+				g.setStroke(new BasicStroke(1.4f));
+				for (int row = 0; row < 3; row++) {
+					int lineY = y + 3 + row * 5;
+					g.drawLine(x, lineY, x + 15, lineY);
+					g.fillOval(x + new int[]{4, 10, 6}[row], lineY - 2, 5, 5);
+				}
+			} finally { g.dispose(); }
+		}
 	}
 
 	private void addJXTaskPanels(JXTaskPaneContainer taskPaneContainer2) {

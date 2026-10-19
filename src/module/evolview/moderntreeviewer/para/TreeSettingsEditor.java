@@ -22,10 +22,15 @@ public final class TreeSettingsEditor extends JPanel {
     private boolean modified;
 
     public TreeSettingsEditor(String userText) {
+        this(userText, "Current parameters — Editable");
+    }
+
+    TreeSettingsEditor(String userText, String rightTitle) {
         super(new BorderLayout(0, 10));
         original = userText;
+        boolean repairing = rightTitle.endsWith("— Repair");
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        JLabel guidance = new JLabel("Configure all tree parameters");
+        JLabel guidance = new JLabel(repairing ? "Edit the saved JSONC text to repair user defaults." : "Configure all tree parameters");
         guidance.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogContentFont());
         add(guidance, BorderLayout.NORTH);
         configure(defaults, TreeSettings.defaultText(), false);
@@ -36,12 +41,13 @@ public final class TreeSettingsEditor extends JPanel {
             public void changedUpdate(DocumentEvent event) { }
         });
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                pane("Default settings — Read only", defaults), pane("Current parameters — Editable", user));
+                pane("Default settings — Read only", defaults), pane(rightTitle, user));
         split.setResizeWeight(0.5);
         split.setDividerLocation(0.5);
         split.setBorder(null);
         add(split, BorderLayout.CENTER);
-        JLabel priority = new JLabel("Program defaults → User defaults → Explicit VOICE parameters → Current tree edits");
+        JLabel priority = new JLabel(repairing ? "Saving the repaired file updates user defaults for future trees."
+                : "Program defaults → User defaults → Explicit VOICE parameters → Current tree edits");
         priority.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogContentFont());
         add(priority, BorderLayout.SOUTH);
         setPreferredSize(new Dimension(1100, 680));

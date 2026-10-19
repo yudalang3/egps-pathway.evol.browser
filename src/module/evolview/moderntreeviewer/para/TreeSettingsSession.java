@@ -17,6 +17,12 @@ public final class TreeSettingsSession {
         if (tree == null) baseline.putAll(defaults);
     }
     public boolean canApply() { return tree != null && current.get() == tree; }
+    public void refreshDefaults(Map<String, Object> defaults) {
+        if (tree == null) {
+            baseline = new LinkedHashMap<>(TreeSettings.defaults());
+            baseline.putAll(defaults);
+        }
+    }
     public String unavailableReason() {
         if (tree == null) return "Load a tree to apply parameters. You can still save user defaults.";
         return canApply() ? null : "This tree has been replaced. Close and reopen Advanced parameters.";
