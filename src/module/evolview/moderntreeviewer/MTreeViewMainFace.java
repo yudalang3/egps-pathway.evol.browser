@@ -1,6 +1,5 @@
 package module.evolview.moderntreeviewer;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jidesoft.swing.JideSplitPane;
 import egps2.EGPSProperties;
 import egps2.UnifiedAccessPoint;
@@ -17,9 +16,10 @@ import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.gui.CreativeModeTaskPanel;
-import module.evolview.moderntreeviewer.para.TextInputDialogWithOKCancel;
+import module.evolview.moderntreeviewer.para.TreeSettings;
+import module.evolview.moderntreeviewer.para.TreeSettingsDialog;
+import module.evolview.moderntreeviewer.para.TreeSettingsPreferences;
 import module.evolview.phylotree.visualization.graphics.phylogeny.PhyloGraphicsTreeEncoderDecoder;
-import module.evolview.phylotree.visualization.graphics.struct.AdvancedParametersBean;
 import module.evolview.phylotree.visualization.layout.LeafLabelStateInitializer;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,6 +48,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 	CreativeModeTaskPanel creativeModeTaskPanel;
 	private JXTaskPane creativeModePane;
 	private TreeLayoutProperties creativeModeProperties;
+	TreeSettingsPreferences treeSettingsPreferences;
 	private CtrlTreeLayoutPanel treeLayoutPanel;
 
 	ModernTreeController controller = new ModernTreeController(null, this);
@@ -140,37 +141,22 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 		jPanel4leftPanel.setMinimumSize(new Dimension(290, 200));
 		jPanel4leftPanel.add(new JScrollPane(taskPaneContainer), BorderLayout.CENTER);
 
-		// add a Button to the taskPaneContainer for the scripted parameters adjustment
-
-		Font titleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 		JButton jButton = new JButton("Advanced parameters");
-		jButton.setFont(titleFont);
-		taskPaneContainer.add(jButton);
+		jButton.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());
+		jButton.setToolTipText("Configure all tree parameters");
+		JPanel advancedParametersHeader = new JPanel(new BorderLayout());
+		advancedParametersHeader.setBorder(BorderFactory.createEmptyBorder(8, 8, 10, 8));
+		advancedParametersHeader.add(jButton, BorderLayout.CENTER);
+		jPanel4leftPanel.add(advancedParametersHeader, BorderLayout.NORTH);
 
 		jButton.addActionListener(e -> {
-			if (phylogeneticTreePanel == null) {
-				SwingDialog.showInfoMSGDialog("Input Tree First",
-						"You don not import the phylogenetic tree, input first.");
-				return;
-			}
-
-			TreeLayoutProperties layoutProperties = phylogeneticTreePanel.getLayoutProperties();
-			AdvancedParametersBean advancedPara = layoutProperties.getAdvancedPara();
-			String jsonString = JSONObject.toJSONString(advancedPara, true);
-
-			Consumer<String> callBackConsumer = str -> {
-				AdvancedParametersBean object = JSONObject.parseObject(jsonString, AdvancedParametersBean.class);
-				phylogeneticTreePanel.getLayoutProperties().setAdvancedPara(object);
-				this.fitFrameRefresh();
-			};
-			TextInputDialogWithOKCancel textInputDialogWithOKCancel = new TextInputDialogWithOKCancel(jsonString,
-					callBackConsumer);
-			EGPSMainGuiUtil.addEscapeListener(textInputDialogWithOKCancel);
-
-			textInputDialogWithOKCancel.setSize(800, 600);
-			textInputDialogWithOKCancel.setLocationRelativeTo(this);
-			textInputDialogWithOKCancel.setVisible(true);
-
+			jButton.setEnabled(false);
+			settingsPreferences().loadAsync().thenAccept(state -> SwingUtilities.invokeLater(() -> {
+				jButton.setEnabled(true);
+				showSettingsWarning(state);
+				new TreeSettingsDialog(this, settingsPreferences(), state,
+						phylogeneticTreePanel, () -> phylogeneticTreePanel).setVisible(true);
+			}));
 		});
 
 
@@ -338,6 +324,22 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 
 	@Override
 	public void initializeGraphics() {
+		settingsPreferences().loadAsync().thenAccept(state -> SwingUtilities.invokeLater(() -> {
+			showSettingsWarning(state);
+			initializeGraphicsWithSettings(state);
+		}));
+	}
+
+	TreeSettingsPreferences settingsPreferences() {
+		if (treeSettingsPreferences == null) treeSettingsPreferences = TreeSettingsPreferences.application();
+		return treeSettingsPreferences;
+	}
+
+	void showSettingsWarning(TreeSettingsPreferences.State state) {
+		if (settingsPreferences().claimWarning()) SwingDialog.showWarningMSGDialog("Advanced parameters", state.warning());
+	}
+
+	private void initializeGraphicsWithSettings(TreeSettingsPreferences.State settings) {
 		// 这两个设置勿忘
 		treeLayoutPanel.setController(controller);
 		treeOperationPanel.setController(controller);
@@ -372,6 +374,10 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			// 和MTreeViewMainFace的initializeGraphics()
 			TreeLayoutProperties treeLayoutProperties = LeafLabelStateInitializer
 					.resolveDirectLaunchProperties(rootNode, moduleLoader2.treeLayoutProperties);
+			if (moduleLoader2.treeLayoutProperties == null) {
+				TreeSettings.apply(treeLayoutProperties, TreeSettings.defaults());
+				TreeSettings.apply(treeLayoutProperties, settings.values());
+			}
 
 			creativeModeTaskPanel.setTreeLayoutProperties(treeLayoutProperties);
 			// 导入之后及时清除数据，避免对下次载入模块产生影响。
@@ -401,6 +407,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 			}
 
 			this.phylogeneticTreePanel.initializeLeftPanel();
+            TreeSettings.initializeView(this.phylogeneticTreePanel);
 			controller.syncTreeControlsFromModel();
 		}
 

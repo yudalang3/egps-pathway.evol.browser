@@ -14,6 +14,8 @@ import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 import module.evolview.moderntreeviewer.io.TreeParser4MTV;
 import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
+import module.evolview.moderntreeviewer.para.TreeSettings;
+import module.evolview.moderntreeviewer.para.TreeSettingsPreferences;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import javax.swing.*;
 import java.io.File;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map;
 
 /**
  * 这个类的移植还是有点麻烦，需要花时间让其更加通用
@@ -93,7 +96,10 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
         }
         exampleIndex++;
 
-        return evolTreeParserMap4VOICM.getExampleString();
+        return evolTreeParserMap4VOICM.getExampleString().lines().map(line -> {
+            String key = line.stripLeading();
+            return !key.startsWith("#") && !key.startsWith("$input.") && key.contains("=") ? "# " + line : line;
+        }).collect(java.util.stream.Collectors.joining("\n"));
     }
 
     @Override
@@ -104,6 +110,18 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
 
     @Override
     public void execute(OrganizedParameterGetter o) throws Exception {
+        var loading = mTreeViewMainFace.settingsPreferences().loadAsync();
+        if (!loading.isDone()) {
+            loading.thenRunAsync(() -> {
+                try { execute(o); }
+                catch (Exception error) {
+                    log.error("Unable to load the tree", error);
+                    SwingUtilities.invokeLater(() -> SwingDialog.showErrorMSGDialog("Tree import", error.getMessage()));
+                }
+            });
+            return;
+        }
+        TreeSettingsPreferences.State settings = loading.join();
         if (evolTreeParserMap4VOICM == null) {
             getExampleText();
         }
@@ -129,6 +147,10 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
 
             TreePropertiesAssigner treePropertiesAssigner = new TreePropertiesAssigner();
             treePropertiesAssigner.assign(treeLayoutProperties, object);
+            Map<String, Object> explicit = TreeSettings.explicitImport(o, treeLayoutProperties);
+            TreeSettings.apply(treeLayoutProperties, TreeSettings.defaults());
+            TreeSettings.apply(treeLayoutProperties, settings.values());
+            TreeSettings.apply(treeLayoutProperties, explicit);
             treePropertiesAssigner.assignGraphicsNodeEffects(convertNode, object);
 
             String dataSource = null;
@@ -141,38 +163,36 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
                 dataSource = "Data is loading from eGPS-defined table like string ";
             }
 
-            mTreeViewMainFace.whatDataInvoked = dataSource;
-
-            mTreeViewMainFace.phylogeneticTreePanel = new PhylogeneticTreePanel(treeLayoutProperties, convertNode, null,
-                    null);
-            mTreeViewMainFace.creativeModeTaskPanel.setTreeLayoutProperties(treeLayoutProperties);
-            mTreeViewMainFace.controller.setTreeLayoutProperties(treeLayoutProperties);
+            String loadedDataSource = dataSource;
+            SwingUtilities.invokeLater(() -> displayTree(convertNode, treeLayoutProperties, loadedDataSource, settings));
         } catch (Exception e2) {
-            SwingDialog.showErrorMSGDialog("Running error", e2.getMessage());
-            e2.printStackTrace();
+            log.error("Unable to import the tree", e2);
+            SwingUtilities.invokeLater(() -> SwingDialog.showErrorMSGDialog("Running error", e2.getMessage()));
             return;
         }
         log.trace("Finish loading tree.");
-        SwingUtilities.invokeLater(() -> {
-            // 要把原来的viewport移除，再新增
-            JViewport viewport = mTreeViewMainFace.scrollPane.getViewport();
-            viewport.removeAll();
-            log.trace("Count is: {}", viewport.getComponentCount());
-            viewport.add(mTreeViewMainFace.phylogeneticTreePanel);
-            log.trace("Count is: {}, parent is {}", viewport.getComponentCount(), mTreeViewMainFace.phylogeneticTreePanel.getParent());
-            log.trace("phylogeneticTreePanel, parent is {}", mTreeViewMainFace.phylogeneticTreePanel.getParent());
+    }
 
-            mTreeViewMainFace.phylogeneticTreePanel.initializeLeftPanel();
-            log.trace("mTreeViewMainFace.phylogeneticTreePanel.initializeLeftPanel();");
-            mTreeViewMainFace.controller.syncTreeControlsFromModel();
-            log.trace("mTreeViewMainFace.controller.syncTreeControlsFromModel;");
-        });
-		/**
-		 * 教训：这里有个巨大的坑要注意：
-		 *
-		 * MainFace有个功能是 initialize，它也会放入EDT里面，所以很多时候GUI的线程如果不是一个代码块的话，不可预测啊
-		 */
+    private void displayTree(GraphicsNode root, TreeLayoutProperties properties, String source,
+                             TreeSettingsPreferences.State settings) {
+        mTreeViewMainFace.showSettingsWarning(settings);
+        mTreeViewMainFace.whatDataInvoked = source;
+        mTreeViewMainFace.phylogeneticTreePanel = new PhylogeneticTreePanel(properties, root, null, null);
+        mTreeViewMainFace.creativeModeTaskPanel.setTreeLayoutProperties(properties);
+        mTreeViewMainFace.controller.setTreeLayoutProperties(properties);
+        // 要把原来的viewport移除，再新增
+        JViewport viewport = mTreeViewMainFace.scrollPane.getViewport();
+        viewport.removeAll();
+        log.trace("Count is: {}", viewport.getComponentCount());
+        viewport.add(mTreeViewMainFace.phylogeneticTreePanel);
+        log.trace("Count is: {}, parent is {}", viewport.getComponentCount(), mTreeViewMainFace.phylogeneticTreePanel.getParent());
+        log.trace("phylogeneticTreePanel, parent is {}", mTreeViewMainFace.phylogeneticTreePanel.getParent());
 
+        mTreeViewMainFace.phylogeneticTreePanel.initializeLeftPanel();
+        TreeSettings.initializeView(mTreeViewMainFace.phylogeneticTreePanel);
+        log.trace("Tree panel initialized.");
+        mTreeViewMainFace.controller.syncTreeControlsFromModel();
+        log.trace("mTreeViewMainFace.controller.syncTreeControlsFromModel;");
     }
 
 }

@@ -72,6 +72,7 @@ public class CreativeModeTaskPanel extends JPanel {
                 if (main != null) {
                     main.reInitializeGUIAccording2Properties();
                     main.getSelectedPhylogenticTreePanel().setToolTipText(null);
+                    main.getSelectedPhylogenticTreePanel().notifyTreeViewStateChanged();
                     main.getSelectedPhylogenticTreePanel().refreshViewPort();
                     if (selected) main.invokeTheFeatureMethod(4);
                 }
@@ -264,9 +265,6 @@ public class CreativeModeTaskPanel extends JPanel {
         if (!SwingUtilities.isEventDispatchThread()) {
             SwingUtilities.invokeLater(() -> setTreeLayoutProperties(treeLayoutProperties));
             return;
-        }
-        if (this.treeLayoutProperties != treeLayoutProperties && treeLayoutProperties != null) {
-            treeLayoutProperties.setCreativeMode(false);
         }
         this.treeLayoutProperties = treeLayoutProperties;
         refreshState();

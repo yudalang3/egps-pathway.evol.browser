@@ -672,6 +672,7 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		int targetHeight = (int) Math.round(fitCanvasSize.height * heightPercent / 100.0);
 		int targetWidth = (int) Math.round(fitCanvasSize.width * widthPercent / 100.0);
 		continuouslyZoomInOrOut(targetHeight - currentHeight, targetWidth - currentWidth, anchor);
+		notifyTreeViewStateChanged();
 	}
 
 	public BaseLayout getCurrLayout() {

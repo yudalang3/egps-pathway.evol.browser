@@ -237,9 +237,9 @@ public class GeneFamilyController {
             return;
         }
 
-        TreeOperationUtil.recursiveIterateTreeIF(selectedNode, node -> {
-            node.getDrawUnit().setLineColor(color);
-        });
+        for (GraphicsNode root : selectedNodes.isEmpty() ? List.of(selectedNode) : selectedNodes) {
+            TreeOperationUtil.recursiveIterateTreeIF(root, node -> { node.getDrawUnit().setLineColor(color); });
+        }
 
         refreshPhylogeneticTree();
 

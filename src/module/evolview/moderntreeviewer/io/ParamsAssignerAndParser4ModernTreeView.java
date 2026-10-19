@@ -1,7 +1,7 @@
 package module.evolview.moderntreeviewer.io;
 
 import com.google.common.base.Strings;
-import egps2.UnifiedAccessPoint;
+import java.awt.Font;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import egps2.utils.common.util.EGPSFonts;
 import graphic.engine.guicalculator.BlankArea;
@@ -10,92 +10,16 @@ import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import org.apache.commons.lang3.BooleanUtils;
 import utils.string.EGPSStringUtil;
 
-import java.awt.*;
 
 public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndParser4PhyloTree {
 
 	public ParamsAssignerAndParser4ModernTreeView() {
 		super();
 
-		Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont().deriveFont(14f);
-		Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
-		String codeFont = EGPSFonts.codeFont(defaultFont);
-		String codeTitleFont = EGPSFonts.codeFont(defaultTitleFont);
-
-		// Category %1: Tree Information
-		addKeyValueEntryBean("%1", "Tree Information", "");
-		addKeyValueEntryBean("tree.show.scale.bar", "F", "Show the plotting scale for the phylogram.");
-		addKeyValueEntryBean("tree.show.axis.bar", "T", "Show the x-axis.");
-		addKeyValueEntryBean("tree.show.title", "T", "Show the statement at the bottom of the tree.");
-		addKeyValueEntryBean("tree.show.width.height", "F",
-				"Show width and height in the drawing panel. Useful for circular layout.");
-		addKeyValueEntryBean("tree.title.string",
-				"The phylogenetic tree with {0} high-quality sequenced samples.",
-				"Statement displayed at the bottom. {0} will be replaced with number of leaves.");
-		addKeyValueEntryBean("tree.branch.length.unit", "",
-				"The unit of branch, for example mya(million years ago) or evolutionary rate.");
-		addKeyValueEntryBean("tree.need.reverse.axis", "F",
-				"Whether reverse the axis bar. In some cases, the time is years ago.");
-
-		// Category %2: Leaf Node
-		addKeyValueEntryBean("%2", "Leaf Node", "");
-		addKeyValueEntryBean("leaf.show.label", "T", "Whether display the leaf label on the tree.");
-		addKeyValueEntryBean("leaf.label.right.align", "T", "Right align label columns in rectangular/slant layouts. Tip-oriented layouts keep labels next to their tips.");
-
-		// Category %3: Inner Node
-		addKeyValueEntryBean("%3", "Inner Node", "");
-		addKeyValueEntryBean("inner.show.label", "F", "Show internal node label.");
-		addKeyValueEntryBean("inner.show.bootstrap", "F", "Show internal node bootstrap value.");
-		addKeyValueEntryBean("inner.show.branch.length", "F", "Show node branch length.");
-
-		// Category %4: Root Settings
-		addKeyValueEntryBean("%4", "Root Settings", "");
-		addKeyValueEntryBean("root.show", "F", "Whether to display the root node.");
-		addKeyValueEntryBean("root.tip.length", "10", "The length of the root tip line in pixels.");
-
-		// Category %5: Mouse Wheel
-		addKeyValueEntryBean("%5", "Mouse Wheel", "");
-		addKeyValueEntryBean("wheel.height.scale.on", "T", "Whether mouse wheel scale on for height.");
-		addKeyValueEntryBean("wheel.width.scale.on", "T", "Whether mouse wheel scale on for width.");
-
-		// Category %6: Font Settings
-		addKeyValueEntryBean("%6", "Font Settings", "");
-		addKeyValueEntryBean("font.global", codeFont, "The font for global, leaf label names employ it.");
-		addKeyValueEntryBean("font.title", codeTitleFont, "The font for bottom title.");
-		addKeyValueEntryBean("font.axis", "", "The font for x-axis and plotting scale. Leave empty to use global font.");
-
-		// Category %7: Layout Settings
-		addKeyValueEntryBean("%7", "Layout Settings", "");
-		addKeyValueEntryBean("layout.initial", "RECT_PHYLO_LEFT",
-				"Initial tree layout. Values include RADIAL_PHYLO, RADIAL_CLADO, RADIAL_EQUAL_DAYLIGHT_PHYLO, RADIAL_EQUAL_DAYLIGHT_CLADO, RADIAL_NBODY_PHYLO, RADIAL_NBODY_CLADO, RECT_PHYLO_LEFT, OUTER_CIR_PHYLO, etc. " +
-				"Or use friendly names: RECTANGULAR, CIRCULAR, SPIRAL, SLANT, RADIAL.");
-		addKeyValueEntryBean("layout.blank.space", "20,40,80,40", "The blank area of top,left,bottom,right (pixels).");
-
-		// Category %7.1: Rectangular Layout
-		addKeyValueEntryBean("%7.1", "Rectangular Layout", "");
-		addKeyValueEntryBean("layout.rectangular.curvature", "0", "Branch curvature (0-100). 0 = straight lines, 100 = curved.");
-
-		// Category %7.2: Circular Layout
-		addKeyValueEntryBean("%7.2", "Circular Layout", "");
-		addKeyValueEntryBean("layout.circular.start.degree", "285", "Start angle in degrees (0-360).");
-		addKeyValueEntryBean("layout.circular.extent.degree", "360", "Arc extent in degrees (0-360).");
-		addKeyValueEntryBean("layout.circular.inner.radius", "50", "Inner circle radius for Inner Cladogram layout (0-200 pixels).");
-
-		// Category %7.3: Spiral Layout
-		addKeyValueEntryBean("%7.3", "Spiral Layout", "");
-		addKeyValueEntryBean("layout.spiral.extent.degree", "720", "Total spiral angle (0-10000 degrees).");
-		addKeyValueEntryBean("layout.spiral.gap.factor", "10", "Gap between spiral arms (0-50).");
-		addKeyValueEntryBean("layout.spiral.beta.factor", "100", "Beta mode factor (100-500, unit is 0.01).");
-
-		// Category %7.4: Slant Layout
-		addKeyValueEntryBean("%7.4", "Slant Layout", "");
-		addKeyValueEntryBean("layout.slant.tree.width", "100", "Tree width percentage (0-100). Smaller values add right margin.");
-		addKeyValueEntryBean("layout.slant.left.margin", "20", "Left margin percentage (0-100).");
-		addKeyValueEntryBean("layout.slant.rotation", "0", "Rotation angle: 0, 90, 180, or 270 degrees.");
-
-		// Category %7.5: Radial Layout
-		addKeyValueEntryBean("%7.5", "Radial Layout", "");
-		addKeyValueEntryBean("layout.radial.rotation", "0", "Rotation angle (0-360 degrees).");
+        addKeyValueEntryBean("%1", "Tree display parameters", "");
+        for (var setting : module.evolview.moderntreeviewer.para.TreeSettings.voiceSettings()) {
+            addKeyValueEntryBean(setting.key(), setting.value(), setting.comment());
+        }
 
 		// Category %8: Advanced
 		addKeyValueEntryBean("%8", "Advanced", "");

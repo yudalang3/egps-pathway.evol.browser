@@ -87,7 +87,10 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 		height1ScaleTogbtn.addEventToggleSelected(new ToggleAdapter() {
 			@Override
 			public void onSelected(boolean selected) {
-				if (controller != null && !synchronizing) controller.getActiveTreeLayoutProperties().setWhetherHeightScaleOnMouseWheel(selected);;
+				if (controller != null && !synchronizing && controller.getActiveTreeLayoutProperties() != null) {
+					controller.getActiveTreeLayoutProperties().setWhetherHeightScaleOnMouseWheel(selected);
+					controller.getSelectedPhylogeneticTreePanel().notifyTreeViewStateChanged();
+				}
 			}
 			
 		});
@@ -140,13 +143,22 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 		width1ScaleTogbtn.addEventToggleSelected(new ToggleAdapter() {
 			@Override
 			public void onSelected(boolean selected) {
-				if (controller != null && !synchronizing) controller.getActiveTreeLayoutProperties().setWhetherWidthScaleOnMouseWheel(selected);
+				if (controller != null && !synchronizing && controller.getActiveTreeLayoutProperties() != null) {
+					controller.getActiveTreeLayoutProperties().setWhetherWidthScaleOnMouseWheel(selected);
+					controller.getSelectedPhylogeneticTreePanel().notifyTreeViewStateChanged();
+				}
 			}
 			
 		});
 
 		chckbxLockAspectRatio = new JCheckBox("Lock aspect ratio");
 		chckbxLockAspectRatio.setFocusable(false);
+		chckbxLockAspectRatio.addItemListener(event -> {
+			if (!synchronizing && controller != null && controller.getSelectedPhylogeneticTreePanel() != null) {
+				controller.getActiveTreeLayoutProperties().setLockAspectRatio(chckbxLockAspectRatio.isSelected());
+				controller.getSelectedPhylogeneticTreePanel().notifyTreeViewStateChanged();
+			}
+		});
 		chckbxLockAspectRatio.setFont(globalFont);
 		chckbxLockAspectRatio.setToolTipText("<html>This only influence the manually height and width scale in spinner.<br>The mouse wheel zoom in and out will not be affected.");;
 		GridBagConstraints gbc_chckbxLockAspectRatio = new GridBagConstraints();
@@ -194,9 +206,6 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 
 	@Override
 	public void actionsTurn2ThisLayout(TreeLayoutEnum layout) {
-		boolean whole = layout != TreeLayoutEnum.RECTANGULAR_LAYOUT && layout != TreeLayoutEnum.SLOPE_LAYOUT;
-		chckbxLockAspectRatio.setEnabled(!whole);
-		chckbxLockAspectRatio.setSelected(whole);
 		spinnerVerticalOrWholeZoom.removeChangeListener(changeListenerSpinnerVerticalZoom);
 		spinnerHorizontalChange.removeChangeListener(changeListenerSpinnerHorizontal);
 		spinnerVerticalOrWholeZoom.addChangeListener(changeListenerSpinnerVerticalZoom);
@@ -235,7 +244,7 @@ public class GUITreeZoomContainerInTopFixPanel extends BaseCtrlPanel implements 
 			spinnerHorizontalChange.setEnabled(tree != null);
 			boolean whole = tree != null && tree.isUniformScaleLayout();
 			chckbxLockAspectRatio.setEnabled(!whole && tree != null);
-			if (whole) chckbxLockAspectRatio.setSelected(true);
+			chckbxLockAspectRatio.setSelected(whole || properties != null && properties.isLockAspectRatio());
 			height1ScaleTogbtn.setEnabled(tree != null);
 			width1ScaleTogbtn.setEnabled(tree != null);
 			if (properties != null) {

@@ -20,12 +20,22 @@ public class ModernTreeController extends GeneFamilyController {
 
 	@Override
 	public void refreshPhylogeneticTree() {
+		mainFace.phylogeneticTreePanel.notifyTreeViewStateChanged();
 		mainFace.phylogeneticTreePanel.refreshViewPort();
+	}
+
+	@Override
+	public void weakRefreshPhylogeneticTree() {
+		if (getSelectedPhylogeneticTreePanel() != null) {
+			getSelectedPhylogeneticTreePanel().recalculatePreservingZoom();
+			getSelectedPhylogeneticTreePanel().notifyTreeViewStateChanged();
+		}
 	}
 	
 	@Override
 	public void reCalculateTreeLayoutAndRefreshViewPort() {
-		mainFace.fitFrameRefresh();
+		if (getSelectedPhylogeneticTreePanel() != null) getSelectedPhylogeneticTreePanel().notifyTreeViewStateChanged();
+		mainFace.phylogeneticTreePanel.recalculatePreservingZoom();
 		mainFace.invokeTheFeatureMethod(0);
 	}
 	

@@ -7,6 +7,7 @@ import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.listener.TreeListener;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.moderntreeviewer.gui.CreativeModeTaskPanel;
+import module.evolview.moderntreeviewer.para.TreeSettingsPreferences;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 /** Real task panes and controller notifications, without starting the desktop JFrame. */
 public class CreativeModeRegressionTest {
+    private static TreeSettingsPreferences preferences;
     private static final String ON = "Creative mode is on. Drag nodes horizontally to change branch lengths. Right-click to edit nodes.";
 
     private static class MainFace extends MTreeViewMainFace {
@@ -118,6 +120,7 @@ public class CreativeModeRegressionTest {
 
     private static MainFace createFace() throws Exception {
         MainFace face = allocate(MainFace.class);
+        face.treeSettingsPreferences = preferences;
         ModernTreeController controller = allocate(ModernTreeController.class);
         field(ModernTreeController.class, "mainFace").set(controller, face);
         field(GeneFamilyController.class, "treeControlsListener").set(controller,
@@ -194,7 +197,7 @@ public class CreativeModeRegressionTest {
         face.phylogeneticTreePanel = new PhylogeneticTreePanel(imported);
         controller.setTreeLayoutProperties(imported);
         controller.syncTreeControlsFromModel();
-        require(!pane.isCollapsed() && !imported.isCreativeMode(), "New tree expands and resets editing");
+        require(!pane.isCollapsed() && imported.isCreativeMode(), "New tree expands and honors explicitly supplied creator state");
     }
 
     private static void testEditing() throws Exception {
@@ -314,6 +317,8 @@ public class CreativeModeRegressionTest {
     }
 
     public static void main(String[] args) throws Exception {
+        preferences = new TreeSettingsPreferences(java.nio.file.Files.createTempDirectory(java.nio.file.Path.of("temp"), "creative-preferences-").resolve("user.jsonc"));
+        preferences.loadAsync().get(5, TimeUnit.SECONDS);
         SwingUtilities.invokeAndWait(() -> {
             try { testControls(); testEditing(); }
             catch (Exception error) { throw new RuntimeException(error); }

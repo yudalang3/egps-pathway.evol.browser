@@ -93,6 +93,24 @@ public class TreeLayoutProperties {
     private Font globalFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
     private Font titleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
     private Font axisFont = globalFont;
+    private boolean axisFontInherited = true;
+    private boolean lockAspectRatio;
+    private int initialHeightScale = 100, initialWidthScale = 100;
+
+    public boolean isLockAspectRatio() { return lockAspectRatio; }
+    public void setLockAspectRatio(boolean value) { lockAspectRatio = value; }
+    public int getInitialHeightScale() { return initialHeightScale; }
+    public void setInitialHeightScale(int value) { initialHeightScale = value; }
+    public int getInitialWidthScale() { return initialWidthScale; }
+    public void setInitialWidthScale(int value) { initialWidthScale = value; }
+    public boolean isAxisFontInherited() { return axisFontInherited; }
+    public void setAxisFontInherited(boolean value) {
+        axisFontInherited = value;
+        if (value) axisFont = globalFont;
+    }
+    public BlankArea getConfiguredBlankArea() {
+        return new BlankArea(blankArea.getTop(), blankArea.getLeft(), blankArea.getBottom(), blankArea.getRight() - columnLabelReserve);
+    }
 
     private boolean isCreativeMode = false;
     private Image backgroundImage4CreativeMode;
@@ -360,6 +378,7 @@ public class TreeLayoutProperties {
 
     public void setGlobalFont(Font font) {
         this.globalFont = font;
+        if (axisFontInherited) axisFont = font;
     }
 
     public Font getGlobalFont() {
@@ -376,6 +395,7 @@ public class TreeLayoutProperties {
 
     public void setAxisFont(Font font) {
         axisFont = font;
+        axisFontInherited = false;
     }
 
     public Font getAxisFont() {
@@ -462,6 +482,7 @@ public class TreeLayoutProperties {
         globalFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
         titleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
         axisFont = globalFont.deriveFont(10f);
+        axisFontInherited = false;
     }
 
     public boolean isCreativeMode() {
