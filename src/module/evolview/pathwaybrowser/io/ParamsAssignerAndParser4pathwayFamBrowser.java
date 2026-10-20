@@ -1,6 +1,7 @@
 package module.evolview.pathwaybrowser.io;
 
 import egps2.UnifiedAccessPoint;
+import egps2.EGPSProperties;
 import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
 import module.evoltreio.NewickFormatConfig;
@@ -25,6 +26,9 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 
 		requiredParams.clear();
 		String propertiesDir = UnifiedAccessPoint.getLaunchProperty().getTestDataDir();
+		if (propertiesDir == null || propertiesDir.isBlank()) {
+			propertiesDir = EGPSProperties.PROPERTIES_DIR;
+		}
 		addKeyValueEntryBean("@", "The Pathway Family Browser", "");
 
 		addKeyValueEntryBean("input.nwk.path",
