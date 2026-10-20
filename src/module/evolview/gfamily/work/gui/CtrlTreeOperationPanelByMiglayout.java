@@ -57,7 +57,8 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
             });
         }
         tree.notifyTreeViewStateChanged();
-        tree.refreshViewPort();
+        if (source == scaleBar) tree.refreshViewPort();
+        else tree.recalculatePreservingZoom();
     }
 
 
@@ -512,9 +513,13 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
             PhylogeneticTreePanel tree = controller.getSelectedPhylogeneticTreePanel();
             scaleBar.setEnabled(tree.supportsScaleBar());
             axisButton.setEnabled(tree.supportsAxisBar());
+            scaleBar.setSelected(properties.isShowScaleBar() && tree.supportsScaleBar());
+            axisButton.setSelected(properties.isShowAxisBar() && tree.supportsAxisBar());
+            scaleBar.putClientProperty("tree.unavailable.reason", tree.scaleUnavailableReason(false));
+            axisButton.putClientProperty("tree.unavailable.reason", tree.scaleUnavailableReason(true));
             showBootstrapToggleButton.setEnabled(tree.hasBootstrapValues());
-            scaleBar.setToolTipText(scaleBar.isEnabled() ? "Show the plotting scale for the phylogram." : "A plotting scale is unavailable in this layout.");
-            axisButton.setToolTipText(axisButton.isEnabled() ? "Show the axis." : "An axis is unavailable in this layout.");
+            scaleBar.setToolTipText(module.evolview.moderntreeviewer.gui.TreeParameterTooltips.scaleHelp(false, true, scaleBar.isEnabled(), tree.scaleUnavailableReason(false)));
+            axisButton.setToolTipText(module.evolview.moderntreeviewer.gui.TreeParameterTooltips.scaleHelp(true, true, axisButton.isEnabled(), tree.scaleUnavailableReason(true)));
             showBootstrapToggleButton.setToolTipText(showBootstrapToggleButton.isEnabled() ? "Show internal node bootstrap values." : "This tree has no bootstrap values.");
         } finally {
             for (JToggleButton button : buttons) button.addActionListener(displayListener);

@@ -20,25 +20,7 @@ public class ImporterBean4PathwayFamilyBrowser extends MTVImportInforBean {
 
 
     public ImporterBean4PathwayFamilyBrowser(MTVImportInforBean object) {
-
-        this.setInput_nwk_path(object.getInput_nwk_path());
-        this.setNwkFormat(object.getNwkFormat());
-        this.setShowLeafLabel(object.isShowLeafLabel());
-        this.setShouldLeafNameRightAlign(object.isShouldLeafNameRightAlign());
-        this.setNeedReverseAxisBar(object.isNeedReverseAxisBar());
-        this.setWhetherHeightScaleOnMouseWheel(object.isWhetherHeightScaleOnMouseWheel());
-        this.setWhetherWidthScaleOnMouseWheel(object.isWhetherWidthScaleOnMouseWheel());
-
-        this.blank_space = object.getBlank_space();
-        this.titleString = object.getTitleString();
-        this.setRemoveWhitespace(object.isRemoveWhitespace());
-
-        branchLengthUnit = object.getBranchLengthUnit();
-
-        this.defaultFont = object.getDefaultFont();
-        this.defaultTitleFont = object.getDefaultTitleFont();
-
-
+        super(object);
     }
 
 

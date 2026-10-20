@@ -8,6 +8,9 @@ import java.util.List;
 
 public class RectCladoAlign2tip extends RectPhyloLayout {
 
+    @Override
+    protected boolean usesBranchLengths() { return false; }
+
 	public RectCladoAlign2tip(TreeLayoutProperties controller, GraphicsNode rootNode,TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode,phylogeneticTreePanel);
 	}

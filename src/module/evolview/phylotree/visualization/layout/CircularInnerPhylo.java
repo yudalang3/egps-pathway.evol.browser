@@ -15,7 +15,8 @@ public class CircularInnerPhylo extends CircularPhylo{
 		CircularLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getCircularLayoutPropertiy();
 		
 		double avaliableLength = biggestCircleRadicus -circularLayoutPropertiy.getInnerCircleRadicus();
-		canvas2logicRatio = avaliableLength / GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode).getLength();
+		double distance = GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode).getLength();
+        canvas2logicRatio = distance > 0 ? avaliableLength / distance : 0;
 		
 		recursiveCalculateStartLength = (int) biggestCircleRadicus;
 		

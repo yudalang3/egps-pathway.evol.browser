@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 /** Real task panes and controller notifications, without starting the desktop JFrame. */
 public class CreativeModeRegressionTest {
     private static TreeSettingsPreferences preferences;
-    private static final String ON = "Creative mode is on. Drag nodes horizontally to change branch lengths. Right-click to edit nodes.";
+    private static final String ON = "Creative mode is on. Ctrl-click to toggle selection; Ctrl-drag to add nodes. Drag selected nodes horizontally together; the root stays fixed. Right-click to edit nodes.";
 
     private static class MainFace extends MTreeViewMainFace {
         MainFace() { super(null); }
@@ -218,9 +218,12 @@ public class CreativeModeRegressionTest {
             properties.setCreativeMode(true);
             listener.mouseMoved(new MouseEvent(tree, MouseEvent.MOUSE_MOVED, 0, 0, (int) leaf.getXSelf(), (int) leaf.getYSelf(), 0, false));
             require(ON.equals(tree.getToolTipText()), "Node tooltip in " + layout);
-            listener.mousePressed(new MouseEvent(tree, MouseEvent.MOUSE_PRESSED, 0, 0, 100, 100, 1, false, MouseEvent.BUTTON1));
-            listener.mouseDragged(new MouseEvent(tree, MouseEvent.MOUSE_DRAGGED, 0, 0, 250, 100, 0, false));
-            require(leaf.getXSelf() == 250, "Horizontal editing in " + layout);
+            double originalX = leaf.getXSelf();
+            int pressX = (int) Math.round(originalX), pressY = (int) Math.round(leaf.getYSelf());
+            listener.mousePressed(new MouseEvent(tree, MouseEvent.MOUSE_PRESSED, 0, 0, pressX, pressY, 1, false, MouseEvent.BUTTON1));
+            listener.mouseDragged(new MouseEvent(tree, MouseEvent.MOUSE_DRAGGED, 0, 0, pressX + 40, pressY, 0, false));
+            listener.mouseReleased(new MouseEvent(tree, MouseEvent.MOUSE_RELEASED, 0, 0, pressX + 40, pressY, 1, false, MouseEvent.BUTTON1));
+            require(leaf.getXSelf() == originalX + 40, "Horizontal editing in " + layout);
             Method popupMethod = TreeListener.class.getDeclaredMethod("getPopupMenu4creativeMode");
             popupMethod.setAccessible(true);
             JPopupMenu popup = (JPopupMenu) popupMethod.invoke(listener);
@@ -228,8 +231,11 @@ public class CreativeModeRegressionTest {
             require(leaf.getChildCount() == 2, "Creative menu edits in " + layout);
             properties.setMyLayout(TreeLayout.OUTER_CIR_PHYLO);
             double x = leaf.getXSelf();
+            listener.mousePressed(new MouseEvent(tree, MouseEvent.MOUSE_PRESSED, 0,
+                    java.awt.event.InputEvent.CTRL_DOWN_MASK, 300, 100, 1, false, MouseEvent.BUTTON1));
             listener.mouseDragged(new MouseEvent(tree, MouseEvent.MOUSE_DRAGGED, 0,
                     java.awt.event.InputEvent.CTRL_DOWN_MASK, 350, 100, 0, false));
+            listener.mouseReleased(new MouseEvent(tree, MouseEvent.MOUSE_RELEASED, 0, 0, 350, 100, 1, false, MouseEvent.BUTTON1));
             require(leaf.getXSelf() == x, "Unsupported layout selects without editing nodes");
             for (Component item : popup.getComponents()) ((JMenuItem) item).doClick();
             require(leaf.getChildCount() == 2, "Previously opened creative menu cannot edit after leaving");

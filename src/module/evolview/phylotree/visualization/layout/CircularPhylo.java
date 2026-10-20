@@ -65,7 +65,7 @@ public class CircularPhylo extends CicularLayout {
 			leafNumber4computation --;
 		}
 		
-		increseDeg = totolDeg / (double) leafNumber4computation;
+		increseDeg = totolDeg / (double) Math.max(1, leafNumber4computation);
 
 		GraphicsNode node = rootNode;
 		recursiveCalculate(node, recursiveCalculateStartLength);
@@ -239,7 +239,7 @@ public class CircularPhylo extends CicularLayout {
 		double avaliableLength = biggestCircleRadicus - treeLayoutProperties.getRootTipLength();
 		LongestRoot2leafBean maxLengthOfRoot2LeafNoOutgroup = GraphicTreePropertyCalculator
 				.getMaxLengthOfRoot2Leaf(rootNode);
-		canvas2logicRatio = avaliableLength / maxLengthOfRoot2LeafNoOutgroup.getLength();
+		canvas2logicRatio = maxLengthOfRoot2LeafNoOutgroup.getLength() > 0 ? avaliableLength / maxLengthOfRoot2LeafNoOutgroup.getLength() : 0;
 
 		recursiveCalculateStartLength = (int) treeLayoutProperties.getRootTipLength();
 
@@ -299,6 +299,10 @@ public class CircularPhylo extends CicularLayout {
 		// System.out.print(tt[0]+"\t"+tt[1]+"\t");
 
 		GraphicsNode parent = (GraphicsNode) node.getParent();
+		if (node == rootNode || parent == null) {
+			node.setXParent(node.getXSelf()); node.setYParent(node.getYSelf());
+			return;
+		}
 		tt = GuiCalculator.calculateCircularLocation(currentNodeAngle, parent.getRadicusIfNeeded(), centerX, centerY);
 
 		node.setXParent(tt.x);
@@ -335,7 +339,7 @@ public class CircularPhylo extends CicularLayout {
 	 * @param g2d
 	 */
 	protected void drawBranchLengthReferenceAxis(Graphics2D g2d) {
-		if (!is4AnnotationDialog && treeLayoutProperties.isShowAxisBar()) {
+		if (!is4AnnotationDialog && treeLayoutProperties.isShowAxisBar() && supportsAxisBar()) {
 			
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -345,18 +349,17 @@ public class CircularPhylo extends CicularLayout {
 			g2d.setFont(treeLayoutProperties.getAxisFont());
 			g2d.setStroke(new BasicStroke(1f));
 
-			double width = biggestCircleRadicus - recursiveCalculateStartLength;
 			FontMetrics fontMetrics = g2d.getFontMetrics();
 //		int fontHeight = fontMetrics.getHeight();
 
-			List<java.lang.Double> displayeDoubles = buttomScaleBarDrawProperty.getDisplayeDoubles();
+			List<java.lang.Double> tickValues = buttomScaleBarDrawProperty.getTickValues();
 			List<String> displayedStrings = buttomScaleBarDrawProperty.getDisplayedStrings();
 			int count = displayedStrings.size();
 
 			for (int i = 0; i < count; i++) {
-				java.lang.Double double1 = displayeDoubles.get(i);
+				double value = axisDistance(tickValues.get(i));
 
-				int radicus = (int) (leftBlankLength + double1 * width);
+                int radicus = (int) Math.round(leftBlankLength + value * canvas2logicRatio);
 				int diameter = 2 * radicus;
 				g2d.drawOval(centerX - radicus, centerY - radicus, diameter, diameter);
 				String str = displayedStrings.get(i);
@@ -364,6 +367,7 @@ public class CircularPhylo extends CicularLayout {
 				float xStr = (float) (centerX - 0.5 * fontMetrics.stringWidth(str));
 				g2d.drawString(str, xStr, yStr);
 			}
+			drawAxisUnit(g2d);
 		}
 	}
 

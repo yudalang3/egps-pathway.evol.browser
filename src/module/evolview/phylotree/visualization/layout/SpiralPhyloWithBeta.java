@@ -22,8 +22,10 @@ import java.util.function.Function;
  *
  */
 public class SpiralPhyloWithBeta extends SprialLayout {
+    @Override
+    protected boolean isLayoutSupportDrawScaleBar() { return false; }
 	@Override
-	public boolean supportsAxisBar() { return true; }
+	protected boolean hasCoordinateAxis() { return true; }
 
 
 	protected double maxBeta;
@@ -251,6 +253,10 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 		// System.out.println("Current node angle: "+currentNodeAngle+"\tNode radicus:
 		// "+node.getRadicusIfNeeded()+" Point: "+tt.x+" "+tt.y);
 		GraphicsNode parent = (GraphicsNode) node.getParent();
+		if (node == rootNode || parent == null) {
+			node.setXParent(node.getXSelf()); node.setYParent(node.getYSelf());
+			return;
+		}
 		tt = GuiCalculator.calculateSpiralLocation(alpha, betaFactor * parent.getRadicusIfNeeded(), currentNodeAngle,
 				centerX, centerY);
 
@@ -320,7 +326,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 	 * @param g2d
 	 */
 	protected void drawBottomAxis(Graphics2D g2d) {
-		if (!is4AnnotationDialog && treeLayoutProperties.isShowAxisBar()) {
+		if (!is4AnnotationDialog && treeLayoutProperties.isShowAxisBar() && supportsAxisBar()) {
 			g2d.setFont(treeLayoutProperties.getAxisFont());
 
 			double totalAvailableBeta = maxBeta - minBeta;
@@ -329,7 +335,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 			g2d.setColor(Color.decode("#E9E4E6"));
 			g2d.setStroke(new BasicStroke(1f));
 
-			List<java.lang.Double> displayeDoubles = buttomScaleBarDrawProperty.getDisplayeDoubles();
+			List<java.lang.Double> tickValues = buttomScaleBarDrawProperty.getTickValues();
 			List<String> displayedStrings = buttomScaleBarDrawProperty.getDisplayedStrings();
 			int count = displayedStrings.size();
 			if (count < 2) return;
@@ -337,13 +343,9 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 			SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
 			double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
 			double rootTipLength = treeLayoutProperties.getRootTipLength();
-
-			java.lang.Double first = displayeDoubles.getFirst();
-			java.lang.Double last = displayeDoubles.getLast();
-			double range = last - first;
 			for (int i = 0; i < count; i++){
-				java.lang.Double double1 = displayeDoubles.get(i);
-				double currentBeta = ((double1 - first) / range * totalAvailableBeta + minBeta) * betaFactor;
+				double fraction = axisDistance(tickValues.get(i)) / maximumScaleDistance;
+				double currentBeta = (fraction * totalAvailableBeta + minBeta) * betaFactor;
 				GeneralPath generalPath = produceSpiral(globalStartDegree, totolDeg, rootTipLength, currentBeta);
 				g2d.draw(generalPath);
 
@@ -358,6 +360,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 				g2d.drawString(str, xStr, yStr);
 
 			}
+			drawAxisUnit(g2d);
 
 		}
 	}

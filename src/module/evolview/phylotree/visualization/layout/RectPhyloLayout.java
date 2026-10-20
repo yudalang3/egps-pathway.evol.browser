@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public class RectPhyloLayout extends RectangularLayout {
 	@Override
-	public boolean supportsAxisBar() { return true; }
+	protected boolean hasCoordinateAxis() { return true; }
 
 
 	public RectPhyloLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
@@ -36,10 +36,10 @@ public class RectPhyloLayout extends RectangularLayout {
 		LongestRoot2leafBean maxLengthOfRoot2LeafBean = GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode);
 		double maxLengthOfRoot2Leaf = maxLengthOfRoot2LeafBean.getLength();
 
-		canvas2logicRatio = blankArea.getWorkWidth((int) currentWidth) / maxLengthOfRoot2Leaf;
+		canvas2logicRatio = maxLengthOfRoot2Leaf > 0 ? blankArea.getWorkWidth((int) currentWidth) / maxLengthOfRoot2Leaf : 0;
 		// y axis
 		eachYGapLength = blankArea.getWorkHeight((int) currentHeight)
-				/ (GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
+				/ Math.max(1.0, GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
 
 		int workWidth = blankArea.getWorkWidth((int) currentWidth);
 		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafBean.getLength(), maxLengthOfRoot2LeafBean.getLeaf(),workWidth);
@@ -239,7 +239,7 @@ public class RectPhyloLayout extends RectangularLayout {
 			return;
 		}
 
-		if (!treeLayoutProperties.isShowAxisBar()) {
+		if (!treeLayoutProperties.isShowAxisBar() || !supportsAxisBar()) {
 			return;
 		}
 

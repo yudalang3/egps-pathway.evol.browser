@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.geom.*;
 
 public class RectHalfCircleLayout extends RectPhyloLayout {
+    @Override
+    protected boolean hasCoordinateAxis() { return false; }
 
 	private int halfWorkWidth;
 	private int halfWorkRadius;
@@ -71,9 +73,9 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 		LongestRoot2leafBean maxLengthOfRoot2LeafBean = GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode);
 		double maxLengthOfRoot2Leaf = maxLengthOfRoot2LeafBean.getLength();
 
-		canvas2logicRatio = halfWorkRadius / maxLengthOfRoot2Leaf;
+		canvas2logicRatio = maxLengthOfRoot2Leaf > 0 ? halfWorkRadius / maxLengthOfRoot2Leaf : 0;
 		// y axis
-		eachYGapLength = totalAvaliableLength / (GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
+		eachYGapLength = totalAvaliableLength / Math.max(1.0, GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
 
 		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafBean.getLength(), maxLengthOfRoot2LeafBean.getLeaf(),workWidth);
 	}
@@ -174,12 +176,15 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 
 	@Override
 	public void paintGraphics(Graphics2D g2d) {
+		g2d.setColor(rootNode.getDrawUnit().getLineColor());
+		g2d.setFont(treeLayoutProperties.getGlobalFont());
 
 		// for debug
 //		backGround(g2d);
 
 
 		recursiveDraw(rootNode, g2d);
+        drawScaleBar(g2d);
 	}
 
 	private void recursiveDraw(GraphicsNode node, Graphics2D g2d) {

@@ -22,6 +22,7 @@ public class TreeParser4MTV extends TreeParser4Evoltree {
 		int format = object.getNwkFormat();
 		if (format < 0 || format > 9) format = module.evoltreio.NewickFormatConfig.DEFAULT_FORMAT;
 		GraphicsNode theGraphicsTree = NodeUtils.convertBasicNode2graphicsNode(tree.get(), newick && (format == 0 || format == 2));
+		module.evolview.phylotree.visualization.layout.BranchLengthDomain.maximum(theGraphicsTree, false);
 		return Optional.of(theGraphicsTree);
 	}
 

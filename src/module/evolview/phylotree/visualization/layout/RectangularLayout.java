@@ -20,6 +20,7 @@ public abstract class RectangularLayout extends BaseLayout {
 	}
 
 	protected void drawEachLines(Graphics2D g2d, GraphicsNode node) {
+		if (node == rootNode) return; // A singleton or collapsed root has no incoming tree edge.
 		double x1 = node.getXParent();
 		double x2 = node.getXSelf();
 		double y1 = node.getYParent();

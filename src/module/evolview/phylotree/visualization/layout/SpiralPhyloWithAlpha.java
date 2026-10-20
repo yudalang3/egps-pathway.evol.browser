@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public class SpiralPhyloWithAlpha extends SprialLayout {
 	@Override
-	public boolean supportsAxisBar() { return true; }
+	protected boolean hasCoordinateAxis() { return true; }
 
 
 	/** Global beta */
@@ -240,6 +240,10 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 		// System.out.println("Current node angle: "+currentNodeAngle+"\tNode radicus:
 		// "+node.getRadicusIfNeeded()+" Point: "+tt.x+" "+tt.y);
 		GraphicsNode parent = (GraphicsNode) node.getParent();
+		if (node == rootNode || parent == null) {
+			node.setXParent(node.getXSelf()); node.setYParent(node.getYSelf());
+			return;
+		}
 		tt = GuiCalculator.calculateSpiralLocation(parent.getRadicusIfNeeded(), beta, currentNodeAngle, centerX,
 				centerY);
 
@@ -305,7 +309,7 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 	 * @param g2d
 	 */
 	protected void drawBottomAxis(Graphics2D g2d) {
-		if (!is4AnnotationDialog && treeLayoutProperties.isShowAxisBar()) {
+		if (!is4AnnotationDialog && treeLayoutProperties.isShowAxisBar() && supportsAxisBar()) {
 			g2d.setFont(treeLayoutProperties.getAxisFont());
 
 			double rootTipLength = treeLayoutProperties.getRootTipLength();
@@ -314,7 +318,7 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 			g2d.setColor(Color.decode("#E9E4E6"));
 			g2d.setStroke(new BasicStroke(1f));
 
-			List<java.lang.Double> displayeDoubles = buttomScaleBarDrawProperty.getDisplayeDoubles();
+			List<java.lang.Double> tickValues = buttomScaleBarDrawProperty.getTickValues();
 			List<String> displayedStrings = buttomScaleBarDrawProperty.getDisplayedStrings();
 			int count = displayedStrings.size();
 			if (count < 2) return;
@@ -322,15 +326,11 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 			SprialLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getSprialLayoutPropertiy();
 			double totolDeg = circularLayoutPropertiy.getGlobalExtendingDegree();
 
-			java.lang.Double first = displayeDoubles.getFirst();
-			java.lang.Double last = displayeDoubles.getLast();
-			double range = last - first;
-
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			for (int i = 0; i < count; i++) {
-				java.lang.Double double1 = displayeDoubles.get(i);
+				double fraction = axisDistance(tickValues.get(i)) / maximumScaleDistance;
 				// Alpha layout: alpha (starting radius) varies, beta (growth rate) is fixed
-				double currentAlpha = (double1 - first) / range * totalAvailableAlpha + rootTipLength;
+				double currentAlpha = fraction * totalAvailableAlpha + rootTipLength;
 
 				GeneralPath clone = produceSpiral(globalStartDegree, totolDeg, currentAlpha, beta);
 				g2d.draw(clone);
@@ -345,6 +345,7 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 				float yStr = (float) (tt.y + 6);
 				g2d.drawString(str, xStr, yStr);
 			}
+			drawAxisUnit(g2d);
 		}
 	}
 	

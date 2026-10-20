@@ -5,6 +5,9 @@ import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
 public class CircularCladoAlign2Tip extends CircularPhylo {
 
+    @Override
+    protected boolean usesBranchLengths() { return false; }
+
 	public CircularCladoAlign2Tip(TreeLayoutProperties controller, GraphicsNode rootNode,TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode,phylogeneticTreePanel);
 	}

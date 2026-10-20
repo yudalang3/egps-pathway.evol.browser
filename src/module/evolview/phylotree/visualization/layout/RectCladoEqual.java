@@ -5,6 +5,9 @@ import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
 public class RectCladoEqual extends RectPhyloLayout {
 
+    @Override
+    protected boolean usesBranchLengths() { return false; }
+
 	public RectCladoEqual(TreeLayoutProperties controller, GraphicsNode rootNode,TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode,phylogeneticTreePanel);
 	}

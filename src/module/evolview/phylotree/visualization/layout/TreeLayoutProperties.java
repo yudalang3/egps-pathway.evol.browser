@@ -52,7 +52,7 @@ public class TreeLayoutProperties {
 
 
     // Painting proporties!
-    private boolean showScaleBar = false;
+    private boolean showScaleBar = true;
     private boolean showRoot = false;
     private double rootTipLength = 10;
 
@@ -73,7 +73,7 @@ public class TreeLayoutProperties {
 
     private boolean showNodeBranchLength = false;
 
-    private TreeLayout myLayout = TreeLayout.RECT_CLADO_ALIGNED_LEFT;
+    private TreeLayout myLayout = TreeLayout.RECT_PHYLO_LEFT;
     private boolean whetherWidthScaleOnMouseWheel = true;
     private boolean whetherHeightScaleOnMouseWheel = true;
 
@@ -109,7 +109,8 @@ public class TreeLayoutProperties {
         if (value) axisFont = globalFont;
     }
     public BlankArea getConfiguredBlankArea() {
-        return new BlankArea(blankArea.getTop(), blankArea.getLeft(), blankArea.getBottom(), blankArea.getRight() - columnLabelReserve);
+        return new BlankArea(blankArea.getTop() - scaleTopReserve, blankArea.getLeft() - scaleLeftReserve,
+                blankArea.getBottom() - scaleBottomReserve, blankArea.getRight() - columnLabelReserve - scaleRightReserve);
     }
 
     private boolean isCreativeMode = false;
@@ -120,6 +121,7 @@ public class TreeLayoutProperties {
 
     protected BlankArea blankArea = new BlankArea(20, 10, 80, 10);
     private transient int columnLabelReserve;
+    private transient int scaleTopReserve, scaleLeftReserve, scaleBottomReserve, scaleRightReserve;
 
     private boolean shouldLeafNameRightAlign = false;
 
@@ -533,6 +535,19 @@ public class TreeLayoutProperties {
         this.blankArea.setBottom(blankArea.getBottom());
         this.blankArea.setRight(blankArea.getRight());
         columnLabelReserve = 0;
+        scaleTopReserve = scaleLeftReserve = scaleBottomReserve = scaleRightReserve = 0;
+    }
+
+    public void synchronizeScaleMargins(int top, int left, int bottom, int right) {
+        int t = Math.max(0, top);
+        int l = Math.max(0, left);
+        int b = Math.max(0, bottom);
+        int r = Math.max(0, right - columnLabelReserve);
+        blankArea.setTop(blankArea.getTop() + t - scaleTopReserve);
+        blankArea.setLeft(blankArea.getLeft() + l - scaleLeftReserve);
+        blankArea.setBottom(blankArea.getBottom() + b - scaleBottomReserve);
+        blankArea.setRight(blankArea.getRight() + r - scaleRightReserve);
+        scaleTopReserve = t; scaleLeftReserve = l; scaleBottomReserve = b; scaleRightReserve = r;
     }
 
     public void synchronizeColumnLabelReserve(int required) {

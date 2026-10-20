@@ -25,6 +25,9 @@ import java.util.function.Function;
  */
 public class SlopeCladoAlignedLeft extends RectangularLayout {
 
+    @Override
+    protected boolean usesBranchLengths() { return false; }
+
 	private double realHeight;
 	private double realWidth;
 	private double reciprocalOfLeafNumbers;

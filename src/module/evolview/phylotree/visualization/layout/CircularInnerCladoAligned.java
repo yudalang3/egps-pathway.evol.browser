@@ -5,6 +5,9 @@ import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
 public class CircularInnerCladoAligned extends CircularInnerPhylo{
 
+    @Override
+    protected boolean usesBranchLengths() { return false; }
+
 	public CircularInnerCladoAligned(TreeLayoutProperties controller, GraphicsNode rootNode,TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode,phylogeneticTreePanel);
 	}
@@ -29,7 +32,7 @@ public class CircularInnerCladoAligned extends CircularInnerPhylo{
 	}
 	
 	protected boolean isLayoutSupportDrawScaleBar() {
-		return true;
+		return false;
 	}
 
 }

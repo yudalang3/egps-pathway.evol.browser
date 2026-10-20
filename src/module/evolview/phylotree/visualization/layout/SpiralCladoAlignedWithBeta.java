@@ -5,6 +5,9 @@ import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
 public class SpiralCladoAlignedWithBeta extends SpiralPhyloWithBeta {
 
+    @Override
+    protected boolean usesBranchLengths() { return false; }
+
 	public SpiralCladoAlignedWithBeta(TreeLayoutProperties controller, GraphicsNode rootNode,TreeLayoutHost phylogeneticTreePanel) {
 		super(controller, rootNode,phylogeneticTreePanel);
 	}

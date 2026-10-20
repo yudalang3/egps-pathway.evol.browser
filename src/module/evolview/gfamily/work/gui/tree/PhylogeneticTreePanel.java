@@ -68,6 +68,7 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 
 		this.rootNode = node;
 		this.layoutProp = treePro;
+		BranchLengthDomain.maximum(node, false);
 
 		setAutoscrolls(true);
 		initializeTreeListener();
@@ -227,6 +228,21 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			firePropertyChange("layoutCalculationPending", wasPending, false);
 			return;
 		}
+		try {
+			TreeLayout resolved = resolveDistanceLayout(layoutProp.getMyLayout());
+			if (resolved != layoutProp.getMyLayout()) {
+				layoutProp.setMyLayout(resolved);
+				layout = obtainRightLayout(resolved);
+				spiralFamily = false;
+			}
+		} catch (IllegalArgumentException error) {
+			layoutReady = false;
+			layoutStatus = error.getMessage();
+			logger.warn("Unable to establish a distance layout: {}", error.getMessage());
+			notifyTreeViewStateChanged();
+			if (UnifiedAccessPoint.isGULaunched()) SwingDialog.showWarningMSGDialog("Tree layout", error.getMessage());
+			return;
+		}
 		layout.prepareLabelSpace();
 		Dimension canvas = layout.getRequiredCanvasSize(currentWidth, currentHeight);
 		if (fitCanvasSize.width <= 0 || fitCanvasSize.height <= 0) fitCanvasSize = new Dimension(canvas);
@@ -320,6 +336,8 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 			initialLayout = TreeLayout.RECT_PHYLO_LEFT;
 			layoutProp.setMyLayout(initialLayout);
 		}
+		initialLayout = resolveDistanceLayout(initialLayout);
+		layoutProp.setMyLayout(initialLayout);
 		spiralFamily = initialLayout.name().startsWith("SPRIAL_");
 		otherLeafLabels = layoutProp.getShowLeafPropertiesInfo().isShowLeafLabel();
 		if (spiralFamily) spiralLeafLabels = otherLeafLabels;
@@ -329,6 +347,7 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 	}
 
 	public void updateViewAccording2TreeLayout(TreeLayout tt) {
+		tt = resolveDistanceLayout(tt);
 		boolean enteringSpiral = tt.name().startsWith("SPRIAL_");
 		if (enteringSpiral != spiralFamily) {
 			boolean current = layoutProp.getShowLeafPropertiesInfo().isShowLeafLabel();
@@ -339,7 +358,17 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		}
 		layoutProp.setMyLayout(tt);
 		layout = obtainRightLayout(tt);
+		layoutReady = false;
 		recalculatePreservingZoom();
+	}
+
+	private TreeLayout resolveDistanceLayout(TreeLayout requested) {
+		if (requested.isCladogram()) return requested;
+		if (BranchLengthDomain.maximum(rootNode, true) > 0) return requested;
+		String message = "No positive branch-length range is available. Showing a rectangular cladogram; stored branch lengths are unchanged.";
+		logger.info(message);
+		if (UnifiedAccessPoint.isGULaunched()) SwingDialog.showWarningMSGDialog("Tree layout", message);
+		return TreeLayout.RECT_CLADO_ALIGNED_LEFT;
 	}
 
 	public void recalculatePreservingZoom() {
@@ -650,7 +679,14 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		return layout != null && layoutReady && !isLayoutCalculationPending() && layout.supportsScaleBar();
 	}
 
-	public boolean supportsAxisBar() { return layout != null && layoutReady && layout.supportsAxisBar(); }
+	public boolean supportsAxisBar() { return layout != null && layoutReady && !isLayoutCalculationPending() && layout.supportsAxisBar(); }
+
+	public String scaleUnavailableReason(boolean axis) {
+		if (layout == null) return "Load a tree to use this control.";
+		if (layoutProp.getMyLayout().isCladogram()) return layout.scaleUnavailableReason(axis);
+		if (!layoutReady || isLayoutCalculationPending()) return "The tree layout is not ready. The scale will be available after a successful calculation.";
+		return layout.scaleUnavailableReason(axis);
+	}
 
 	public boolean hasBootstrapValues() {
 		final boolean[] present = {false};

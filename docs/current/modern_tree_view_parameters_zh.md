@@ -6,7 +6,7 @@
 
 | Advanced parameters path | Canonical VOICE key | Legacy aliases | Program default | Meaning and constraints |
 |---|---|---|---|---|
-| Display/Show scale bar | `display.show.scale.bar` | tree.show.scale.bar | `false` | Display the branch-length scale. Phylogram layouts only. Use true or false. |
+| Display/Show scale bar | `display.show.scale.bar` | tree.show.scale.bar | `true` | Display the branch-length scale where a uniform pixel scale is available. Unavailable in cladograms and Beta spirals. Use true or false. |
 | Display/Show axis | `display.show.axis` | tree.show.axis.bar | `true` | Display the coordinate axis where the layout supports it. Use true or false. |
 | Display/Show title | `display.show.title` | tree.show.title | `true` | Display the statement below the tree. Use true or false. |
 | Display/Show canvas size | `display.show.canvas.size` | tree.show.width.height | `false` | Display canvas width and height in pixels. Use true or false. |

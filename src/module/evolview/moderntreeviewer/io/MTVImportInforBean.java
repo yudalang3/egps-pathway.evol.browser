@@ -8,6 +8,51 @@ import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import java.awt.*;
 
 public class MTVImportInforBean extends EvolTreeImportInfoBean {
+
+    public MTVImportInforBean() { }
+
+    protected MTVImportInforBean(MTVImportInforBean source) {
+        this.explicitSettings = source.explicitSettings;
+        this.initialLayout = source.initialLayout;
+        this.slantTreeWidth = source.slantTreeWidth;
+        this.slantLeftMargin = source.slantLeftMargin;
+        this.slantRotation = source.slantRotation;
+        this.radialRotation = source.radialRotation;
+        this.rectangularCurvature = source.rectangularCurvature;
+        this.circularStartDegree = source.circularStartDegree;
+        this.circularExtentDegree = source.circularExtentDegree;
+        this.circularInnerRadius = source.circularInnerRadius;
+        this.spiralExtentDegree = source.spiralExtentDegree;
+        this.spiralGapFactor = source.spiralGapFactor;
+        this.spiralBetaFactor = source.spiralBetaFactor;
+        this.showScaleBar = source.showScaleBar;
+        this.showAxisBar = source.showAxisBar;
+        this.showTitle = source.showTitle;
+        this.showWidthAndHeightString = source.showWidthAndHeightString;
+        this.titleString = source.titleString;
+        this.branchLengthUnit = source.branchLengthUnit;
+        this.needReverseAxisBar = source.needReverseAxisBar;
+        this.showLeafLabel = source.showLeafLabel;
+        this.shouldLeafNameRightAlign = source.shouldLeafNameRightAlign;
+        this.showInnerNodeLabel = source.showInnerNodeLabel;
+        this.showBootstrap = source.showBootstrap;
+        this.showBranchLength = source.showBranchLength;
+        this.showRoot = source.showRoot;
+        this.rootTipLength = source.rootTipLength;
+        this.whetherWidthScaleOnMouseWheel = source.whetherWidthScaleOnMouseWheel;
+        this.whetherHeightScaleOnMouseWheel = source.whetherHeightScaleOnMouseWheel;
+        this.defaultFont = source.defaultFont;
+        this.defaultTitleFont = source.defaultTitleFont;
+        this.axisFont = source.axisFont;
+        this.nodeVisualAnnotationConfigFilePath = source.nodeVisualAnnotationConfigFilePath;
+        setInput_nwk_string(source.getInput_nwk_string());
+        setInput_nwk_path(source.getInput_nwk_path());
+        setInput_tableLike_path(source.getInput_tableLike_path());
+        setRemoveWhitespace(source.isRemoveWhitespace());
+        setNwkFormat(source.getNwkFormat());
+        blank_space = new BlankArea(source.blank_space.getTop(), source.blank_space.getLeft(), source.blank_space.getBottom(), source.blank_space.getRight());
+    }
+
     // Registry values supplement legacy integer fields without changing the public Bean API or serialization.
     private transient java.util.Map<String, Object> explicitSettings = java.util.Map.of();
 
@@ -40,7 +85,7 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
 	protected int spiralBetaFactor = 100;      // 100-500, unit is 0.01
 
 	// Tree Information (%1)
-	protected boolean showScaleBar = false;
+	protected boolean showScaleBar = true;
 	protected boolean showAxisBar = true;
 	protected boolean showTitle = true;
 	protected boolean showWidthAndHeightString = false;

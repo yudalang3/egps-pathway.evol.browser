@@ -1,7 +1,6 @@
 package module.evolview.gfamily.work.listener;
 
 import egps2.UnifiedAccessPoint;
-import egps2.frame.MyFrame;
 import egps2.panels.dialog.SwingDialog;
 import evoltree.struct.EvolNode;
 import evoltree.struct.util.EvolNodeUtil;
@@ -12,12 +11,10 @@ import module.evolview.gfamily.work.gui.tree.RectObj;
 import module.evolview.gfamily.work.gui.tree.TreePopupMenu;
 import module.evolview.common.SwingDebouncer;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.ScaleBarProperty;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +22,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Line2D;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,6 +54,10 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 	private Point origin;
 	private boolean isDragging = false;
+	private enum Gesture { NONE, SELECT, PAN, EDIT, SCALE }
+	private Gesture gesture = Gesture.NONE;
+	private MouseEvent pressedEvent;
+	private GroupDragSession groupDrag;
 
 	private final StringBuilder sBuilder = new StringBuilder(1024);
 	private final String templateHeader = "<html><body font size='5'>";
@@ -65,7 +69,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 	private final Rectangle rect4selectArea = new Rectangle();
 	private final String gestureActionHint = new String(
-			"<html><body font size='5'> Press<br> Shift + left click to collapse <br> Alt + left click to see info.<br> Right click to operate.</body></html>");
+			"<html><body font size='5'> Ctrl + left click to toggle selection.<br> Ctrl + drag to add nodes.<br> Shift + left click to collapse.<br> Alt + left click to see info.<br> Right click to operate.</body></html>");
 
 	public TreeListener(TreeLayoutProperties properties, GraphicsNode rootNode,
 			PhylogeneticTreePanel phylogeneticTreePanel) {
@@ -79,6 +83,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 	}
 
 	public void setRootNode(GraphicsNode rootNode) {
+		resetGesture();
 		this.rootNode = rootNode;
 	}
 
@@ -96,62 +101,85 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 	@Override
 	public void mouseDragged(MouseEvent arg0) {
-
-		Component component = arg0.getComponent();
-		boolean controlDown = arg0.isControlDown();
-		if (!controlDown) {
-			component.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-		}
-
-		if (getTreeLayoutProperties().isShowScaleBar() && whetherScaleBarSelectedInDrag) {
-			Point point = arg0.getPoint();
-			getScaleBarListenerObj().adjustPaintings(point.getX(), point.getY());
-			phylogeneticTreePanel.repaint();
-		}
-
-		boolean isCreativeMode = treeLayoutProperties.isCreativeMode();
-
-		if (isCreativeMode) {
-			// 创造者模式
-			List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-			if (selectedNodes.isEmpty()) {
-				moveTheDrawingArea(arg0);
-				return;
+		if (origin == null || gesture == Gesture.NONE) return;
+		if (!isDragging && origin.distanceSq(arg0.getPoint()) < 16) return;
+		if (!isDragging && gesture == Gesture.EDIT && treeLayoutProperties.isCreativeMode()
+				&& !phylogeneticTreePanel.isLayoutCalculationPending()
+				&& phylogeneticTreePanel.getCurrLayout() != null) {
+			double ratio = phylogeneticTreePanel.getCurrLayout().getCanvas2logicRatio();
+			if (Double.isFinite(ratio) && ratio > 0) {
+				groupDrag = new GroupDragSession(treeLayoutProperties.getSelectedNodes(), rootNode, ratio);
 			}
-			GraphicsNode graphicsNode = selectedNodes.get(0);
-
-			double canves2logicRatio = phylogeneticTreePanel.getCurrLayout().getCanvas2logicRatio();
-
-			double abs = FastMath.abs(graphicsNode.getXParent() - graphicsNode.getXSelf());
-			graphicsNode.setRealBranchLength(abs / canves2logicRatio);
-
-			// 这里除了要改变 self的 (x,y)坐标之外还要更改 Parent的坐标
-
-			graphicsNode.setXSelf(arg0.getX());
-			int childCount = graphicsNode.getChildCount();
-			for (int i = 0; i < childCount; i++) {
-				GraphicsNode child = (GraphicsNode) graphicsNode.getChildAt(i);
-				child.setXParent(arg0.getX());
-
-				abs = FastMath.abs(child.getXParent() - child.getXSelf());
-				child.setRealBranchLength(abs / canves2logicRatio);
-			}
-
-			phylogeneticTreePanel.repaint();
-		} else {
-			// 非创造者模式
-
-			if (controlDown) {
-				// 用户拖拽时，动态更新矩形的宽度和高度
-				Point endPoint = arg0.getPoint();
-				rect4selectArea.setFrame(Math.min(origin.x, endPoint.x), Math.min(origin.y, endPoint.y),
-						Math.abs(endPoint.x - origin.x), Math.abs(endPoint.y - origin.y));
+		}
+		isDragging = true;
+		switch (gesture) {
+			case SELECT -> {
+				Point end = arg0.getPoint();
+				rect4selectArea.setFrame(Math.min(origin.x, end.x), Math.min(origin.y, end.y),
+						Math.abs(end.x - origin.x), Math.abs(end.y - origin.y));
 				phylogeneticTreePanel.repaint();
-			} else {
-				isDragging = true;
+			}
+			case SCALE -> {
+				getScaleBarListenerObj().adjustPaintings(arg0.getX(), arg0.getY());
+				phylogeneticTreePanel.repaint();
+			}
+			case EDIT -> {
+				if (groupDrag != null && treeLayoutProperties.isCreativeMode()
+						&& !phylogeneticTreePanel.isLayoutCalculationPending()) {
+					groupDrag.move(arg0.getX() - origin.x);
+					phylogeneticTreePanel.repaint();
+				}
+			}
+			case PAN -> {
+				arg0.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 				moveTheDrawingArea(arg0);
 			}
+			default -> { }
+		}
+	}
 
+	/** Snapshot once, then apply a single bounded displacement to the whole selection. */
+	private static final class GroupDragSession {
+		private final Map<GraphicsNode, Double> positions = new LinkedHashMap<>();
+		private final Map<GraphicsNode, Double> lengths = new LinkedHashMap<>();
+		private final double ratio;
+		private double minimum = Double.NEGATIVE_INFINITY;
+		private double maximum = Double.POSITIVE_INFINITY;
+
+		GroupDragSession(List<GraphicsNode> selected, GraphicsNode root, double ratio) {
+			this.ratio = ratio;
+			for (GraphicsNode node : selected) {
+				if (node != root && node.getParentCount() > 0 && !node.hideNode()) {
+					positions.put(node, node.getXSelf());
+				}
+			}
+			for (GraphicsNode node : positions.keySet()) {
+				lengths.put(node, node.getRealBranchLength());
+				for (int i = 0; i < node.getChildCount(); i++) {
+					GraphicsNode child = (GraphicsNode) node.getChildAt(i);
+					lengths.put(child, child.getRealBranchLength());
+				}
+			}
+			for (var edge : lengths.entrySet()) {
+				int direction = direction(edge.getKey());
+				if (direction > 0) minimum = Math.max(minimum, -edge.getValue() * ratio);
+				if (direction < 0) maximum = Math.min(maximum, edge.getValue() * ratio);
+			}
+		}
+
+		private int direction(GraphicsNode child) {
+			return (positions.containsKey(child) ? 1 : 0)
+					- (positions.containsKey((GraphicsNode) child.getParent()) ? 1 : 0);
+		}
+
+		void move(double requested) {
+			double delta = Math.max(minimum, Math.min(maximum, requested));
+			positions.forEach((node, x) -> node.setXSelf(x + delta));
+			lengths.forEach((child, length) -> {
+				child.setXParent(((GraphicsNode) child.getParent()).getXSelf());
+				int direction = direction(child);
+				if (direction != 0) child.setRealBranchLength(Math.max(0, length + direction * delta / ratio));
+			});
 		}
 	}
 
@@ -172,7 +200,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 		phylogeneticTreePanel.scrollRectToVisible(viewArea);
 
-		UnifiedAccessPoint.getInstanceFrame()
+		if (UnifiedAccessPoint.isGULaunched()) UnifiedAccessPoint.getInstanceFrame()
 				.showTipsOnBottomStatusBar("Press Ctrl key with drag to select nodes.");
 
 	}
@@ -192,10 +220,9 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 		Point point = e.getPoint();
 
-		ScaleBarProperty scaleBarProperty = phylogeneticTreePanel.getScaleBarProperty();
 		Component component = e.getComponent();
 
-		if (scaleBarProperty.isIfDrawScaleBar() && getTreeLayoutProperties().isShowScaleBar()) {
+		if (phylogeneticTreePanel.supportsScaleBar() && getTreeLayoutProperties().isShowScaleBar()) {
 			boolean contains = getScaleBarListenerObj().contains(point.getX(), point.getY());
 			if (contains) {
 				component.setCursor(Cursor.getPredefinedCursor(getScaleBarListenerObj().getCursorType()));
@@ -209,7 +236,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		// Need to complete
 		if (optRet.isPresent()) {
 			phylogeneticTreePanel.setToolTipText(treeLayoutProperties.isCreativeMode()
-					? "Creative mode is on. Drag nodes horizontally to change branch lengths. Right-click to edit nodes."
+					? "Creative mode is on. Ctrl-click to toggle selection; Ctrl-drag to add nodes. Drag selected nodes horizontally together; the root stays fixed. Right-click to edit nodes."
 					: gestureActionHint);
 		} else {
 			component.setCursor(Cursor.getDefaultCursor());
@@ -267,60 +294,56 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		arg0.getComponent().setCursor(Cursor.getDefaultCursor());
-
-		// 鼠标释放后，可以决定是否保留这个矩形，或者执行其他逻辑
-		Point releasePoint = arg0.getPoint();
-
-		if (rect4selectArea.getWidth() > 0) {
-			List<GraphicsNode> selectedNodes = new LinkedList<>();
-
-			EvolNodeUtil.recursiveIterateTreeIF(rootNode, node -> {
-				double xSelf = node.getXSelf();
-				double ySelf = node.getYSelf();
-				//
-				boolean contains = rect4selectArea.contains(xSelf, ySelf);
-				if (contains) {
-					selectedNodes.add(node);
-				}
-			});
-			for (GraphicsNode node : selectedNodes) {
-				treeLayoutProperties.getSelectedNodes().remove(node);
-				treeLayoutProperties.getSelectedNodes().add(node);
+		if (pressedEvent == null || !SwingUtilities.isLeftMouseButton(arg0)) return;
+		if (isDragging) {
+			if (gesture != Gesture.PAN) mouseDragged(arg0);
+			if (gesture == Gesture.SELECT) {
+				Set<GraphicsNode> selection = new LinkedHashSet<>(treeLayoutProperties.getSelectedNodes());
+				EvolNodeUtil.recursiveIterateTreeIFWithStop(rootNode, (GraphicsNode node) -> {
+					if (!node.hideNode() && rect4selectArea.contains(node.getXSelf(), node.getYSelf())) {
+						selection.add(node);
+						node.getDrawUnit().setBranchSelected(true);
+					}
+					return node.getCollapse();
+				});
+				List<GraphicsNode> selected = treeLayoutProperties.getSelectedNodes();
+				selected.clear();
+				selected.addAll(selection);
 			}
 			phylogeneticTreePanel.notifyTreeViewStateChanged();
-
-			for (GraphicsNode node : selectedNodes) {
-				node.getDrawUnit().setBranchSelected(true);
-			}
-
+			refreshPropertiesPanel();
+		} else if (gesture != Gesture.NONE && gesture != Gesture.SCALE) {
+			actionForMouseClick(pressedEvent);
 		}
+		resetGesture();
+		phylogeneticTreePanel.weakRefreshViewPort();
+	}
 
-		// Clear selection only if: no drag happened AND click was on empty area (no node)
-		if (!isDragging && rect4selectArea.isEmpty() && !SwingUtilities.isRightMouseButton(arg0)) {
-			Optional<GraphicsNode> optRet = judgeSelectedNode(releasePoint);
-			if (optRet.isEmpty()) {
-				// Clicked on empty area without dragging - clear selection
-				dealWithSelectedNodes(null);
-				phylogeneticTreePanel.refreshViewPort();
-			}
-		}
-
+	private void resetGesture() {
 		rect4selectArea.setSize(0, 0);
 		origin = null;
+		pressedEvent = null;
+		groupDrag = null;
+		gesture = Gesture.NONE;
 		isDragging = false;
-
-		// ref
-		phylogeneticTreePanel.weakRefreshViewPort();
-
+		whetherScaleBarSelectedInDrag = false;
 	}
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-
+		resetGesture();
 		origin = new Point(arg0.getPoint());
-
-		ScaleBarProperty scaleBarProperty = phylogeneticTreePanel.getScaleBarProperty();
-		if (scaleBarProperty.isIfDrawScaleBar()) {
+		if (!SwingUtilities.isLeftMouseButton(arg0) || (!arg0.isControlDown()
+				&& (arg0.isAltDown() || arg0.isShiftDown()))) {
+			actionForMouseClick(arg0);
+			return;
+		}
+		pressedEvent = arg0;
+		if (arg0.isControlDown()) {
+			gesture = Gesture.SELECT;
+			return;
+		}
+		if (treeLayoutProperties.isShowScaleBar() && phylogeneticTreePanel.supportsScaleBar()) {
 			Point point = arg0.getPoint();
 			boolean contains = getScaleBarListenerObj().contains(point.getX(), point.getY());
 			if (contains) {
@@ -328,8 +351,19 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 			}
 			this.whetherScaleBarSelectedInDrag = contains;
 		}
-
-		actionForMouseClick(arg0);
+		if (whetherScaleBarSelectedInDrag) {
+			gesture = Gesture.SCALE;
+			return;
+		}
+		if (treeLayoutProperties.isCreativeMode()) {
+			Optional<GraphicsNode> hit = judgeSelectedNode(arg0.getPoint());
+			if (hit.isPresent() && !treeLayoutProperties.getSelectedNodes().contains(hit.get())) {
+				dealWithSelectedNodes(hit.get());
+			}
+			gesture = treeLayoutProperties.getSelectedNodes().isEmpty() ? Gesture.PAN : Gesture.EDIT;
+		} else {
+			gesture = Gesture.PAN;
+		}
 	}
 
 	@Override
@@ -354,13 +388,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				if (optRet.isPresent()) {
 					GraphicsNode selectedNode = optRet.get();
 					controlPressSelect(selectedNode);
-					TreeDrawUnit bioLine = selectedNode.getDrawUnit();
-					bioLine.setBranchSelected(true);
-					List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-					if (!selectedNodes.contains(selectedNode)) {
-						selectedNodes.add(selectedNode);
-					}
-					phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
 				}
 			} else if (altDown) {
 				if (optRet.isPresent()) {
@@ -405,18 +432,23 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 					for (Consumer<GraphicsNode> consumer : tree2AnalyzingPanelInteractions) {
 						consumer.accept(selectedNode);
 					}
+				} else {
+					dealWithSelectedNodes(null);
 				}
-				// Note: Don't clear selection here on empty area click.
-				// Selection clearing for empty area is handled in mouseReleased()
-				// to allow drag without losing selection.
+				// Ordinary clicks are dispatched on release so a drag retains the selection.
 
 			}
 		}
 
-		MyFrame instanceFrame = UnifiedAccessPoint.getInstanceFrame();
-		instanceFrame.refreshRightGraphicPropertiesPanel();
+		refreshPropertiesPanel();
 		phylogeneticTreePanel.refreshViewPort();
 
+	}
+
+	private void refreshPropertiesPanel() {
+		if (UnifiedAccessPoint.isGULaunched()) {
+			UnifiedAccessPoint.getInstanceFrame().refreshRightGraphicPropertiesPanel();
+		}
 	}
 
 	private void mouseRightClickAction(MouseEvent e, Optional<GraphicsNode> optRet, Component component) {
@@ -469,11 +501,10 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 	 */
 	protected void controlPressSelect(GraphicsNode selectedNode) {
 
-		TreeDrawUnit bioLine = selectedNode.getDrawUnit();
-		bioLine.setBranchSelected(true);
 		List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-		selectedNodes.remove(selectedNode);
-		selectedNodes.add(selectedNode);
+		boolean removed = selectedNodes.removeIf(node -> node.equals(selectedNode));
+		if (!removed) selectedNodes.add(selectedNode);
+		selectedNode.getDrawUnit().setBranchSelected(!removed);
 		phylogeneticTreePanel.notifyTreeViewStateChanged();
 		phylogeneticTreePanel.refreshViewPort();
 	}
@@ -485,10 +516,10 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 			node.getDrawUnit().setBranchSelected(false);
 		}
 		selectedNodes.clear();
-		phylogeneticTreePanel.notifyTreeViewStateChanged();
 
 		if (selectedNode == null) {
-			UnifiedAccessPoint.getInstanceFrame().showTipsOnBottomStatusBar(null);
+			phylogeneticTreePanel.notifyTreeViewStateChanged();
+			if (UnifiedAccessPoint.isGULaunched()) UnifiedAccessPoint.getInstanceFrame().showTipsOnBottomStatusBar(null);
 			return;
 		}
 
@@ -506,7 +537,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		sBuilder.append(", branch length is: ");
 		sBuilder.append(selectedNode.getLength());
 
-		UnifiedAccessPoint.getInstanceFrame().showTipsOnBottomStatusBar(sBuilder.toString());
+		if (UnifiedAccessPoint.isGULaunched()) UnifiedAccessPoint.getInstanceFrame().showTipsOnBottomStatusBar(sBuilder.toString());
 	}
 
 	private boolean ifPointLocatedInNode(Point point, GraphicsNode node) {

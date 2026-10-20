@@ -13,6 +13,9 @@ public class BottomScaleBarDrawProperty {
 
 	private List<String> displayedStrings = Lists.newArrayList();
 	private List<Double> displayeDoubles = Lists.newArrayList();
+    private final List<Double> tickValues = Lists.newArrayList();
+
+    public List<Double> getTickValues() { return tickValues; }
 
 	/**
 	 * @return the displayedStrings
@@ -28,14 +31,20 @@ public class BottomScaleBarDrawProperty {
 		return displayeDoubles;
 	}
 	
+    public void addElement(String label, double logicalValue, double pixelOffset) {
+        displayedStrings.add(label);
+        tickValues.add(logicalValue);
+        displayeDoubles.add(pixelOffset);
+    }
+
 	public void clear() {
 		displayedStrings.clear();
 		displayeDoubles.clear();
+        tickValues.clear();
 	}
 	
 	public void addElement(String str, double value) {
-		displayedStrings.add(str);
-		displayeDoubles.add(value);
+		addElement(str, Double.NaN, value);
 	}
 	
 }

@@ -368,7 +368,9 @@ public final class TreeParameterAuditTest {
                 }
                 GraphicsNode first = tree[0].getLayoutProperties().getLeaves().getFirst(), last = tree[0].getLayoutProperties().getLeaves().getLast();
                 select(tree[0], first); select(tree[0], last); select(tree[0], first);
-                require(tree[0].getLayoutProperties().getSelectedNodes().size() == 2 && tree[0].getLayoutProperties().getSelectedNodes().getLast() == first, "Reselect updates active node without duplicates");
+                require(tree[0].getLayoutProperties().getSelectedNodes().equals(List.of(last)) && !first.getDrawUnit().isBranchSelected(), "Ctrl reselect removes only that node");
+                select(tree[0], first);
+                require(tree[0].getLayoutProperties().getSelectedNodes().size() == 2 && tree[0].getLayoutProperties().getSelectedNodes().getLast() == first, "Selecting again appends the active node without duplicates");
                 tree[0].setTreePanelScale(220, 220); render(tree[0]);
                 Dimension zoom = tree[0].getTreePanelScale();
                 button(c.operations, "Center selected node").doClick();

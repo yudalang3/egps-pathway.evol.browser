@@ -288,7 +288,7 @@ public class CreativeModeTaskPanel extends JPanel {
         } else if (!available) {
             tooltip = "Requires a rectangular phylogram. Select Rectangular > Phylogram in Tree layout.";
         } else if (selected) {
-            tooltip = "Creative mode is on. Drag nodes horizontally to change branch lengths. Right-click to edit nodes.";
+            tooltip = "Creative mode is on. Ctrl-click to toggle selection; Ctrl-drag to add nodes. Drag selected nodes horizontally together; the root stays fixed. Right-click to edit nodes.";
         } else {
             tooltip = "Enable horizontal dragging to adjust branch lengths and right-click editing of nodes.";
         }

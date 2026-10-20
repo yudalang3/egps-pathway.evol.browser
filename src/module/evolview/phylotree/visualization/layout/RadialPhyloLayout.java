@@ -31,6 +31,9 @@ public class RadialPhyloLayout extends RadicalLayout {
 
 	protected boolean isCladogram() { return false; }
 
+    @Override
+    protected boolean usesBranchLengths() { return !isCladogram(); }
+
 	/** Capture on the EDT; numerical workers only read the resulting arrays. */
 	public Calculation prepareCalculation() {
 		record Pending(GraphicsNode node, int parent) { }

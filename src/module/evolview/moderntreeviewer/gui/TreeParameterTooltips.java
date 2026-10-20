@@ -8,6 +8,27 @@ import java.awt.*;
 public final class TreeParameterTooltips {
     private TreeParameterTooltips() { }
 
+    public static String scaleHelp(boolean axis, boolean hasTree, boolean available, String reason) {
+        String title = axis ? "Branch-length coordinate axis" : "Branch-length scale";
+        String status = !hasTree ? "Load a tree first" : available ? "Click to show or hide" : "Unavailable in this view";
+        String explanation = !hasTree ? "Import a tree to use this control."
+                : available ? axis ? "Read branch-length values along the coordinate axis."
+                        : "The line represents the branch-length distance printed below it."
+                : reason;
+        String body = escape(explanation);
+        for (String action : new String[] {"Switch to a phylogram", "Use its numeric spiral", "Use the branch-length scale"})
+            body = body.replace(". " + action, ".<br><br><b>Next step:</b> " + action);
+        if (available && !axis) body += "<br><br><b>Move:</b> Drag the scale or its label to reposition it.";
+        return "<html><table width='400' cellpadding='3'><tr><td><b>" + title
+                + "</b><br><b>" + status + "</b><br><br>" + body
+                + "<br><br><font size='-1'>VOICE: " + (axis ? "display.show.axis.bar" : "display.show.scale.bar")
+                + "</font></td></tr></table></html>";
+    }
+
+    private static String escape(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
     public static void install(Container container, boolean hasTree) {
         if (container == null) return;
         for (Component component : container.getComponents()) {
@@ -53,9 +74,14 @@ public final class TreeParameterTooltips {
                             : path.equals("Root/Root branch length") ? "Enable Show root branch to adjust this value. "
                             : path.equals("Spiral layout/Beta factor") ? "Select a Beta spiral to use this factor. "
                             : path.equals("View/Lock aspect ratio") ? "This layout always uses uniform scaling. " : "";
+                    if (control.getClientProperty("tree.unavailable.reason") instanceof String detail
+                            && (path.equals("Display/Show scale bar") || path.equals("Display/Show axis"))) reason = detail + " ";
                     text = reason + text;
                 }
-                String help = wrap(text);
+                String help = path.equals("Display/Show scale bar") || path.equals("Display/Show axis")
+                        ? scaleHelp(path.equals("Display/Show axis"), hasTree, control.isEnabled(),
+                                java.util.Objects.toString(control.getClientProperty("tree.unavailable.reason"), text))
+                        : wrap(text);
                 control.setToolTipText(help);
                 if (control instanceof JSpinner spinner) {
                     childHelp(spinner, help);

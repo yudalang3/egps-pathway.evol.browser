@@ -68,7 +68,7 @@ public final class TreeSettings {
         TreeLayout[] layouts = TreeLayout.values();
         if (layouts.length != names.length) throw new IllegalStateException("Add a settings name for the new tree layout");
         for (int i = 0; i < layouts.length; i++) LAYOUTS.put(layouts[i], names[i]);
-        flag("Display/Show scale bar", false, "tree.show.scale.bar", "Display the branch-length scale. Phylogram layouts only.",
+        flag("Display/Show scale bar", true, "tree.show.scale.bar", "Display the branch-length scale where a uniform pixel scale is available. Unavailable in cladograms and Beta spirals.",
                 TreeLayoutProperties::isShowScaleBar, TreeLayoutProperties::setShowScaleBar);
         flag("Display/Show axis", true, "tree.show.axis.bar", "Display the coordinate axis where the layout supports it.",
                 TreeLayoutProperties::isShowAxisBar, TreeLayoutProperties::setShowAxisBar);
@@ -114,7 +114,8 @@ public final class TreeSettings {
             final int side = i;
             number("Layout/Margins/" + sides[i], margins[i], 0, 10000, "layout.blank.space", "Blank space in pixels (0-10000), excluding automatic label space.",
                     p -> margin(p.getConfiguredBlankArea(), side), (p, value) -> {
-                        int[] values = {p.getBlankArea().getTop(), p.getBlankArea().getLeft(), p.getBlankArea().getBottom(), p.getBlankArea().getRight()};
+                        BlankArea configured = p.getConfiguredBlankArea();
+                        int[] values = {configured.getTop(), configured.getLeft(), configured.getBottom(), configured.getRight()};
                         values[side] = value.intValue();
                         p.setBlankArea(new BlankArea(values[0], values[1], values[2], values[3]));
                     });
@@ -490,6 +491,12 @@ public final class TreeSettings {
     public static void applyToTree(PhylogeneticTreePanel tree, Map<String, Object> changes) {
         if (tree == null || changes.isEmpty()) return;
         TreeLayoutProperties properties = tree.getLayoutProperties();
+        if (changes.size() == 1 && changes.containsKey("Display/Show scale bar")) {
+            apply(properties, changes);
+            tree.notifyTreeViewStateChanged();
+            tree.refreshViewPort();
+            return;
+        }
         TreeLayout targetLayout = changes.containsKey(LAYOUT) ? layout((String) changes.get(LAYOUT)) : properties.getMyLayout();
         if (Boolean.TRUE.equals(changes.get("Creative mode/Enabled")) && targetLayout != TreeLayout.RECT_PHYLO_LEFT && targetLayout != TreeLayout.RECT_PHYLO_ALIGN2TIP)
             throw new IllegalArgumentException("Creative mode/Enabled: Requires a rectangular phylogram.");

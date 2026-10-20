@@ -3,8 +3,6 @@ package module.evolview.phylotree.visualization.layout;
 import com.google.common.base.Strings;
 import egps2.utils.common.model.datatransfer.TwoTuple;
 import evoltree.txtdisplay.TreeDrawUnit;
-import graphic.engine.AxisTickCalculator;
-import graphic.engine.AxisTickCalculatorHeavy;
 import graphic.engine.guicalculator.BlankArea;
 import module.evolview.model.enums.BranchLengthType;
 import module.evolview.model.tree.*;
@@ -14,7 +12,6 @@ import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
 import module.evolview.phylotree.visualization.util.DrawUtil;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -46,7 +43,7 @@ public abstract class BaseLayout implements ITreeLayout {
     protected double currentWidth;
 
     protected final BlankArea blankArea;
-    protected AxisTickCalculatorHeavy axisTickCalculator = new AxisTickCalculatorHeavy();
+    protected double maximumScaleDistance;
 
     protected boolean is4AnnotationDialog = false;
     protected boolean isShowAnnotation = true;
@@ -85,7 +82,6 @@ public abstract class BaseLayout implements ITreeLayout {
         scaleBarProperty.setIfDrawScaleBar(false);
         annotationFont = treeLayoutProperties.getAxisFont();
 
-        axisTickCalculator.setWorkSpaceRatio(1f);
     }
 
     public void setRootNode(GraphicsNode rootNode) {
@@ -116,6 +112,9 @@ public abstract class BaseLayout implements ITreeLayout {
      */
     protected void beforeCalculate(int width, int height) {
         prepareLabelSpace();
+        prepareScaleSpace();
+        buttomScaleBarDrawProperty.clear();
+        maximumScaleDistance = 0;
         scaleBarProperty.setIfDrawScaleBar(false);
         annotationFont = treeLayoutProperties.getAxisFont();
         currentHeight = height;
@@ -273,39 +272,26 @@ public abstract class BaseLayout implements ITreeLayout {
      */
     protected void configureBottomScaleBarDrawProperty(double maxLengthOfRoot2Leaf, GraphicsNode maxLengthLeaf, int drawWorkingWidth) {
         buttomScaleBarDrawProperty.clear();
-
-        if (!(maxLengthOfRoot2Leaf > 0) || !java.lang.Double.isFinite(maxLengthOfRoot2Leaf) || drawWorkingWidth <= 0) return;
-
-        Pair<java.lang.Double, java.lang.Double> minMax = Pair.of(0.0, maxLengthOfRoot2Leaf);
-
-        axisTickCalculator.setMinAndMaxPair(minMax);
-        axisTickCalculator.setWorkingSpace(drawWorkingWidth);
-        axisTickCalculator.setWorkSpaceRatio(1f);
-        axisTickCalculator.determineAxisTick();
-
-
-
-        List<String> tickLabels = axisTickCalculator.getTickLabels();
-        List<Integer> tickLocations = axisTickCalculator.getTickLocations();
-        // do not forget
-        axisTickCalculator.clear();
-
-        int size = tickLabels.size();
-        if (treeLayoutProperties.isNeedReverseAxisBar()) {
-            for (int i = size - 1; i >= 0; i--) {
-                String string = tickLabels.get(i);
-                Integer integer = tickLocations.get(i);
-                int plotValue = drawWorkingWidth - integer;
-                buttomScaleBarDrawProperty.addElement(string, plotValue);
-            }
-        } else {
-            for (int i = 0; i < size; i++) {
-                String string = tickLabels.get(i);
-                Integer integer = tickLocations.get(i);
-                buttomScaleBarDrawProperty.addElement(string, integer.intValue());
-            }
+        maximumScaleDistance = maxLengthOfRoot2Leaf;
+        FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getAxisFont());
+        int labelWidth = metrics.stringWidth(BranchLengthTicks.format(maxLengthOfRoot2Leaf));
+        for (BranchLengthTicks.Tick tick : BranchLengthTicks.calculate(maxLengthOfRoot2Leaf, drawWorkingWidth, labelWidth)) {
+            double offset = drawWorkingWidth * (axisDistance(tick.value()) / maxLengthOfRoot2Leaf);
+            buttomScaleBarDrawProperty.addElement(tick.label(), tick.value(), offset);
         }
+    }
 
+    protected double axisDistance(double value) {
+        return treeLayoutProperties.isNeedReverseAxisBar() ? maximumScaleDistance - value : value;
+    }
+
+    protected void drawAxisUnit(Graphics2D graphics) {
+        String unit = Objects.toString(treeLayoutProperties.getBranchLengthUnit(), "");
+        if (unit.isBlank()) return;
+        graphics.setFont(treeLayoutProperties.getAxisFont());
+        graphics.setColor(Color.black);
+        graphics.drawString(unit, blankArea.getLeft(), (float) (currentHeight - 8
+                - graphics.getFontMetrics().getDescent() - (treeLayoutProperties.isShowTitle() ? 30 : 0)));
     }
 
     public void setBranchLengthType(BranchLengthType branchLengthType) {
@@ -321,27 +307,32 @@ public abstract class BaseLayout implements ITreeLayout {
 
     }
 
+    protected boolean usesBranchLengths() { return true; }
+
+    protected boolean hasCoordinateAxis() { return false; }
+
     public boolean supportsScaleBar() {
-        return isLayoutSupportDrawScaleBar() && scaleBarProperty.isIfDrawScaleBar()
-                && buttomScaleBarDrawProperty.getDisplayedStrings().size() >= 2;
+        return usesBranchLengths() && isLayoutSupportDrawScaleBar() && scaleBarProperty.isIfDrawScaleBar()
+                && maximumScaleDistance > 0 && java.lang.Double.isFinite(canvas2logicRatio) && canvas2logicRatio > 0;
     }
 
-    public boolean supportsAxisBar() { return false; }
-
-    protected boolean isLayoutSupportDrawScaleBar() {
-        return true;
+    public boolean supportsAxisBar() {
+        return usesBranchLengths() && hasCoordinateAxis() && maximumScaleDistance > 0
+                && buttomScaleBarDrawProperty.getTickValues().size() >= 2;
     }
 
-    /**
-     * 画比例尺
-     *
-     * @param g2d
-     */
-    private void drawScaleBar(Graphics2D g2d) {
-        if (treeLayoutProperties.isShowScaleBar() && scaleBarProperty.isIfDrawScaleBar()
-                && buttomScaleBarDrawProperty.getDisplayedStrings().size() >= 2) {
+    protected boolean isLayoutSupportDrawScaleBar() { return usesBranchLengths(); }
+
+    public String scaleUnavailableReason(boolean axis) {
+        if (!usesBranchLengths()) return "Cladograms show topology; branch lengths are not drawn to scale. A branch-length scale or numeric axis is unavailable. Switch to a phylogram to use these controls.";
+        if (!axis && !isLayoutSupportDrawScaleBar()) return "Branch-length pixel scale varies with angle in the Beta spiral. A single scale bar cannot represent the whole tree. Use its numeric spiral reference axis instead.";
+        if (axis && !hasCoordinateAxis()) return "This layout has no global coordinate axis. Use the branch-length scale bar instead.";
+        return "No valid positive branch-length range is available in the current view.";
+    }
+
+    protected final void drawScaleBar(Graphics2D g2d) {
+        if (!is4AnnotationDialog && treeLayoutProperties.isShowScaleBar() && supportsScaleBar())
             drawScaleBar(g2d, scaleBarProperty);
-        }
     }
 
     public void setIs4AnnotationDialog(boolean is4AnnotationDialog) {
@@ -402,6 +393,16 @@ public abstract class BaseLayout implements ITreeLayout {
         treeLayoutProperties.synchronizeColumnLabelReserve(0);
     }
 
+    private void prepareScaleSpace() {
+        FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getAxisFont());
+        boolean axis = treeLayoutProperties.isShowAxisBar() && usesBranchLengths() && hasCoordinateAxis();
+        int bottom = axis ? 30 + metrics.getHeight() + metrics.getDescent() + (treeLayoutProperties.isShowTitle() ? 30 : 0) : 0;
+        int labelWidth = axis ? metrics.stringWidth(BranchLengthTicks.format(BranchLengthDomain.maximum(rootNode, true))) : 0;
+        int unitWidth = axis ? metrics.stringWidth(Objects.toString(treeLayoutProperties.getBranchLengthUnit(), "")) : 0;
+        treeLayoutProperties.synchronizeScaleMargins(0, axis ? labelWidth / 2 + 8 : 0, bottom,
+                axis ? labelWidth / 2 + unitWidth + 18 : 0);
+    }
+
     protected double minimumTreeRadius() { return 50; }
 
     protected double getTipLabelReserve() {
@@ -423,6 +424,9 @@ public abstract class BaseLayout implements ITreeLayout {
     /** Preserve readable fonts on small viewports by giving the scroll pane a larger canvas. */
     public Dimension getRequiredCanvasSize(int width, int height) {
         prepareLabelSpace();
+        prepareScaleSpace();
+        width = Math.max(width, blankArea.getLeft() + blankArea.getRight() + 100);
+        height = Math.max(height, blankArea.getTop() + blankArea.getBottom() + 100);
         if (!usesTipLabels()) return new Dimension(width, height);
         int diameter = (int) Math.ceil(2 * (minimumTreeRadius() + getTipLabelReserve()));
         return new Dimension(Math.max(width, diameter + blankArea.getLeft() + blankArea.getRight()),
@@ -728,37 +732,29 @@ public abstract class BaseLayout implements ITreeLayout {
      */
     private void drawScaleBar(Graphics2D g2d, ScaleBarProperty scaleBarProperty) {
 
-        g2d.setStroke(new BasicStroke(2.0f));
-        g2d.setColor(Color.black);
-
         g2d.setFont(treeLayoutProperties.getAxisFont());
-        FontMetrics fontMetrics = g2d.getFontMetrics();
-        int fontHeight = fontMetrics.getHeight();
-
-        List<String> displayedStrings = buttomScaleBarDrawProperty.getDisplayedStrings();
-        List<java.lang.Double> displayeDoubles = buttomScaleBarDrawProperty.getDisplayeDoubles();
-
-        int xAxis = (int) scaleBarProperty.getxLocation();
-        int yAxis = (int) scaleBarProperty.getyLocation();
-
-        // vertical bar
-        g2d.drawLine(xAxis, yAxis, xAxis, yAxis + 10);
-
-        java.lang.Double xValue = displayeDoubles.get(1);
-        int xx = (int) (xAxis + xValue);
-        double verticalTipLength = yAxis + 10;
-        // vertical bar
-        lineDrawUtil.setLine(xx, yAxis, xx, verticalTipLength);
-        g2d.draw(lineDrawUtil);
-
-        // horizontal bar
-        g2d.drawLine(xx, yAxis + 5, xAxis, yAxis + 5);
-
-        final String str = displayedStrings.get(1);
-
-        float xStr = (float) (0.5 * (xx + xAxis) - 0.5 * fontMetrics.stringWidth(str));
-        g2d.drawString(str, xStr, (float) (verticalTipLength + fontHeight));
-
+        FontMetrics metrics = g2d.getFontMetrics();
+        double target = Math.min(80, Math.max(1, blankArea.getWorkWidth((int) currentWidth)));
+        double value = BranchLengthTicks.niceFloor(Math.min(maximumScaleDistance, target / canvas2logicRatio));
+        if (!(value > 0)) return;
+        String unit = Objects.toString(treeLayoutProperties.getBranchLengthUnit(), "");
+        String label = BranchLengthTicks.format(value) + (unit.isBlank() ? "" : " " + unit);
+        scaleBarProperty.setDefaultLocation(Math.max(12, treeLayoutProperties.getConfiguredBlankArea().getLeft()),
+                treeLayoutProperties.isShowWidthAndHeightString() ? 57 : 12);
+        scaleBarProperty.configure(value, value * canvas2logicRatio, label, metrics, (int) currentWidth, (int) currentHeight);
+        java.awt.geom.Rectangle2D bounds = scaleBarProperty.getBounds();
+        g2d.setColor(phylogeneticTreePanel.getHostComponent().getBackground());
+        g2d.fill(bounds);
+        g2d.setColor(Color.black);
+        g2d.setStroke(new BasicStroke(2.0f));
+        double x = bounds.getX() + (bounds.getWidth() - scaleBarProperty.getPixelLength()) / 2;
+        double y = bounds.getY() + 2;
+        double endX = x + scaleBarProperty.getPixelLength();
+        g2d.draw(new Line2D.Double(x, y, x, y + 10));
+        g2d.draw(new Line2D.Double(endX, y, endX, y + 10));
+        g2d.draw(new Line2D.Double(x, y + 5, endX, y + 5));
+        g2d.drawString(label, (float) (bounds.getCenterX() - metrics.stringWidth(label) / 2.0),
+                (float) (y + 12 + metrics.getAscent()));
     }
 
     /**
@@ -776,8 +772,6 @@ public abstract class BaseLayout implements ITreeLayout {
      */
     @Override
     public void paintGraphics(Graphics2D g2d) {
-        drawScaleBar(g2d);
-
         specificTreeDrawingProcess(g2d);
         firstRecursiveDraw(g2d, rootNode);
 
@@ -787,6 +781,7 @@ public abstract class BaseLayout implements ITreeLayout {
         recursiveDrawSelectedNode(g2d, rootNode);
         commonTailInDrawingProcess(g2d);
         drawBootstrapLabels(g2d, rootNode);
+        drawScaleBar(g2d);
     }
 
     /**

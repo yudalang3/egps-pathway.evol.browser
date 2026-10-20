@@ -19,6 +19,15 @@ public class ScaleBarRectObject extends RectObj{
 	}
 
 	@Override
+	public boolean contains(double x, double y) {
+		this.x = scaleBarProperty.getxLocation();
+		this.y = scaleBarProperty.getyLocation();
+		this.w = scaleBarProperty.getWidth();
+		this.h = scaleBarProperty.getHeight();
+		return scaleBarProperty.getBounds().contains(x, y);
+	}
+
+	@Override
 	public int getCursorType() {
 		return Cursor.CROSSHAIR_CURSOR;
 	}
