@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class TreeSettingsRegressionTest {
@@ -216,6 +217,182 @@ public class TreeSettingsRegressionTest {
         require(!properties.isCreativeMode() && properties.getShowLeafPropertiesInfo().isShowLeafLabel(), "Layout changes obey creative restrictions and apply requested labels");
     }
 
+    private static JScrollPane scroll(JTextPane pane) {
+        return (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, pane);
+    }
+
+    private static void requireScrollProgress(JScrollBar source, JScrollBar target) {
+        int sourceRange = source.getMaximum() - source.getMinimum() - source.getVisibleAmount();
+        int targetRange = target.getMaximum() - target.getMinimum() - target.getVisibleAmount();
+        int expected = target.getMinimum() + (int) Math.round(
+                (source.getValue() - source.getMinimum()) * (double) targetRange / sourceRange);
+        require(Math.abs(target.getValue() - expected) <= 1, "Peer scrollbar follows proportional progress");
+    }
+
+    private static void requireLineNumbersFollow(JTextPane editor) {
+        JScrollPane scroll = scroll(editor);
+        JViewport header = scroll.getRowHeader();
+        require(header.getViewPosition().y == scroll.getViewport().getViewPosition().y,
+                "Line numbers scroll at the same vertical coordinate as the text");
+        require(header.getView().getPreferredSize().height == editor.getPreferredSize().height,
+                "Line-number height covers the complete document");
+        int y = scroll.getViewport().getViewPosition().y;
+        if (y > editor.getFontMetrics(editor.getFont()).getHeight() * 2) {
+            int first = editor.getDocument().getDefaultRootElement()
+                    .getElementIndex(editor.viewToModel2D(new Point(0, y)));
+            require(first > 0, "Scrolled line numbers use document rows beyond the first line");
+        }
+    }
+
+    private static void snapshot(JComponent component, String name) throws Exception {
+        BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        component.printAll(graphics);
+        graphics.dispose();
+        ImageIO.write(image, "png", OUTPUT.resolve(name + ".png").toFile());
+    }
+
+    private static void verifyTooltip(JComponent component, String name) throws Exception {
+        require(component.getToolTipText().startsWith("<html>"), "Tooltip uses formatted HTML: " + name);
+        JToolTip tooltip = component.createToolTip();
+        tooltip.setTipText(component.getToolTipText());
+        tooltip.setSize(tooltip.getPreferredSize());
+        require(tooltip.getWidth() >= 390 && tooltip.getWidth() <= 480, "Tooltip has a readable bounded width: " + name);
+        require(tooltip.getHeight() > 32, "Tooltip displays multiple lines: " + name);
+        require(tooltip.getFont().equals(UIManager.getFont("ToolTip.font")), "Tooltip uses the host font");
+        snapshot(tooltip, name);
+    }
+
+    private static void testEditorScroll() throws Exception {
+        TreeSettingsEditor editor = new TreeSettingsEditor(TreeSettings.documentText(TreeSettings.defaults())
+                + "\n// " + "Extra wide comment ".repeat(30) + "\n// Extra line\n");
+        JTextPane left = (JTextPane) field(TreeSettingsEditor.class, "defaults").get(editor);
+        JTextPane right = (JTextPane) field(TreeSettingsEditor.class, "user").get(editor);
+        editor.setSize(900, 600);
+        layout(editor);
+        layout(editor);
+        for (JScrollBar[] pair : new JScrollBar[][] {
+                {scroll(left).getVerticalScrollBar(), scroll(right).getVerticalScrollBar()},
+                {scroll(left).getHorizontalScrollBar(), scroll(right).getHorizontalScrollBar()}}) {
+            for (int direction = 0; direction < 2; direction++) {
+                JScrollBar source = pair[direction], target = pair[1 - direction];
+                int range = source.getMaximum() - source.getMinimum() - source.getVisibleAmount();
+                require(range > 0, "Fixture has scrollable content");
+                for (double progress : new double[] {0.37, 1, 0}) {
+                    source.setValue(source.getMinimum() + (int) Math.round(range * progress));
+                    requireScrollProgress(source, target);
+                    requireLineNumbersFollow(left);
+                    requireLineNumbersFollow(right);
+                    if (source == scroll(left).getVerticalScrollBar())
+                        snapshot(editor, "settings-lines-" + (progress == 0 ? "top" : progress == 1 ? "bottom" : "middle"));
+                }
+            }
+        }
+        right.setText("{}");
+        layout(editor);
+        layout(editor);
+        scroll(left).getVerticalScrollBar().setValue(100);
+        require(scroll(right).getVerticalScrollBar().getValue() == 0,
+                "A short document stays at its only valid scroll position");
+        int narrow = scroll(right).getRowHeader().getView().getPreferredSize().width;
+        right.setText("// Row\n".repeat(1001));
+        editor.setSize(1050, 700);
+        layout(editor);
+        layout(editor);
+        require(scroll(right).getRowHeader().getView().getPreferredSize().width > narrow,
+                "Line-number column grows for four-digit document rows");
+        scroll(right).getVerticalScrollBar().setValue(1000);
+        requireLineNumbersFollow(right);
+        right.setText("{}\n");
+        layout(editor);
+        layout(editor);
+        require(scroll(right).getRowHeader().getView().getPreferredSize().width == narrow,
+                "Deleting lines restores the narrower line-number column");
+        requireLineNumbersFollow(right);
+    }
+
+    private record EditorView(int dot, int mark, Point left, Point right) {
+        static EditorView capture(JTextPane left, JTextPane right) {
+            return new EditorView(right.getCaret().getDot(), right.getCaret().getMark(),
+                    scroll(left).getViewport().getViewPosition(), scroll(right).getViewport().getViewPosition());
+        }
+    }
+
+    private static void testApplyView(TreeSettingsPreferences preferences) throws Exception {
+        if (GraphicsEnvironment.isHeadless()) return;
+        var dialogs = new module.evolview.moderntreeviewer.para.TreeSettingsDialog[1];
+        TreeSettingsEditor[] editors = new TreeSettingsEditor[1];
+        JTextPane[] panes = new JTextPane[2];
+        PhylogeneticTreePanel[] trees = new PhylogeneticTreePanel[1];
+        EditorView[] before = new EditorView[1];
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    trees[0] = new PhylogeneticTreePanel(properties());
+                    JViewport viewport = new JViewport();
+                    viewport.setSize(1000, 700);
+                    viewport.setView(trees[0]);
+                    trees[0].initializeLeftPanel();
+                    dialogs[0] = new module.evolview.moderntreeviewer.para.TreeSettingsDialog(new JPanel(), preferences,
+                            new TreeSettingsPreferences.State("{}", Map.of(), null), trees[0], () -> trees[0]);
+                    editors[0] = (TreeSettingsEditor) ((BorderLayout) dialogs[0].getContentPane().getLayout())
+                            .getLayoutComponent(BorderLayout.CENTER);
+                    panes[0] = (JTextPane) field(TreeSettingsEditor.class, "defaults").get(editors[0]);
+                    panes[1] = (JTextPane) field(TreeSettingsEditor.class, "user").get(editors[0]);
+                    Map<String, Object> values = new LinkedHashMap<>(TreeSettings.snapshot(trees[0]));
+                    values.put("Labels/Show leaf names", false);
+                    editors[0].setText(TreeSettings.documentText(values) + "\n// Draft comment\n");
+                    layout(dialogs[0]);
+                    layout(dialogs[0]);
+                    int position = panes[1].getText().indexOf("\"Labels\"");
+                    panes[1].getCaret().setDot(position + 8);
+                    panes[1].getCaret().moveDot(position);
+                } catch (Exception error) { throw new RuntimeException(error); }
+            });
+            // First Apply refreshes canonical text; second Apply repeats unchanged text;
+            // invalid input must leave the editor alone.
+            for (int attempt = 0; attempt < 3; attempt++) {
+                if (attempt == 2) SwingUtilities.invokeAndWait(() -> panes[1].replaceSelection("invalid JSON"));
+                SwingUtilities.invokeAndWait(() -> {
+                    JScrollPane right = scroll(panes[1]);
+                    right.getVerticalScrollBar().setValue(700);
+                    right.getHorizontalScrollBar().setValue(20);
+                    before[0] = EditorView.capture(panes[0], panes[1]);
+                    require(before[0].right().y > 0 && before[0].right().x > 0,
+                            "Apply fixture is scrolled on both axes");
+                    buttons(dialogs[0].getContentPane()).stream().filter(b -> "Apply".equals(b.getText()))
+                            .findFirst().orElseThrow().doClick();
+                });
+                CountDownLatch highlighted = new CountDownLatch(1);
+                SwingUtilities.invokeAndWait(() -> {
+                    javax.swing.Timer timer = new javax.swing.Timer(180, event -> highlighted.countDown());
+                    timer.setRepeats(false);
+                    timer.start();
+                });
+                require(highlighted.await(5, TimeUnit.SECONDS), "Editor highlighting settles");
+                SwingUtilities.invokeAndWait(() -> {
+                    layout(dialogs[0]);
+                    require(EditorView.capture(panes[0], panes[1]).equals(before[0]),
+                            "Apply preserves caret direction, selection and both viewports after deferred layout");
+                    requireLineNumbersFollow(panes[0]);
+                    requireLineNumbersFollow(panes[1]);
+                    require(!trees[0].getLayoutProperties().getShowLeafPropertiesInfo().isShowLeafLabel(),
+                            "Apply updates the actual tree");
+                });
+            }
+            SwingUtilities.invokeAndWait(() -> editors[0].setTextPreservingView("{}"));
+            SwingUtilities.invokeAndWait(() -> {
+                layout(dialogs[0]);
+                require(panes[1].getCaret().getDot() <= 2 && panes[1].getCaret().getMark() <= 2,
+                        "Shorter refreshed text clamps selection to valid offsets");
+                require(scroll(panes[1]).getViewport().getViewPosition().equals(new Point()),
+                        "Shorter refreshed text clamps scrolling to its valid range");
+            });
+        } finally {
+            SwingUtilities.invokeAndWait(() -> { if (dialogs[0] != null) dialogs[0].dispose(); });
+        }
+    }
+
     private static OrganizedParameterGetter input(Map<String, String> values) throws Exception {
         Constructor<OrganizedParameterGetter> constructor = OrganizedParameterGetter.class.getDeclaredConstructor(Map.class);
         constructor.setAccessible(true);
@@ -336,12 +513,16 @@ public class TreeSettingsRegressionTest {
             JTextPane right = (JTextPane) field(TreeSettingsEditor.class, "user").get(editor);
             require(left.getFont().equals(content) && right.getFont().equals(content), "Editors use Dialog content font exactly");
             verifyEditorFonts(editor, title, content);
+            verifyTooltip(left, "tooltip-defaults");
+            verifyTooltip(right, "tooltip-editor");
             if (!GraphicsEnvironment.isHeadless()) {
                 var dialog = new module.evolview.moderntreeviewer.para.TreeSettingsDialog(new JPanel(), preferences,
                         new TreeSettingsPreferences.State("{}", Map.of(), null), null, () -> null);
                 try {
                     require(dialog.isModal() && dialog.getTitle().equals("Advanced parameters"), "Advanced parameters stays modal");
                     for (JButton b : buttons(dialog.getContentPane())) {
+                        if (b.getText() != null && !b.getText().isBlank())
+                            verifyTooltip(b, "tooltip-" + b.getText().replaceAll("[^a-zA-Z]+", "-"));
                         if (List.of("Apply", "Save as user defaults…", "Close").contains(b.getText())) require(b.getFont().equals(button), "Dialog button font: " + b.getText());
                         if (b.getText().equals("Apply")) {
                             require(!b.isEnabled() && b.getToolTipText().contains("Load a tree"), "Disabled Apply explains why a tree is required");
@@ -355,12 +536,20 @@ public class TreeSettingsRegressionTest {
                     ImageIO.write(image, "png", OUTPUT.resolve("advanced-dialog-fonts.png").toFile());
                 } finally { dialog.dispose(); }
                 var damaged = new module.evolview.moderntreeviewer.para.TreeSettingsDialog(new JPanel(), preferences,
-                        new TreeSettingsPreferences.State("{/* broken", Map.of(), "Unterminated comment"), null, () -> null);
+                        new TreeSettingsPreferences.State("{/* broken", Map.of(), "Invalid <node> & value"), null, () -> null);
                 try {
                     require(buttons(damaged.getContentPane()).stream().anyMatch(b -> "Repair user defaults…".equals(b.getText()) && b.isEnabled()),
                             "Damaged user defaults expose the repair editor");
                     require(buttons(damaged.getContentPane()).stream().anyMatch(b -> "Save as user defaults…".equals(b.getText()) && !b.isEnabled()),
                             "Damaged user defaults cannot be overwritten by a snapshot");
+                    for (JButton b : buttons(damaged.getContentPane()))
+                        if (b.getText() != null && !b.getText().isBlank())
+                            verifyTooltip(b, "tooltip-damaged-" + b.getText().replaceAll("[^a-zA-Z]+", "-"));
+                    JPanel bottom = (JPanel) ((BorderLayout) damaged.getContentPane().getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+                    JTextArea warning = (JTextArea) ((BorderLayout) bottom.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+                    require(warning.getToolTipText().contains("Invalid &lt;node&gt; &amp; value"),
+                            "Dynamic error text is escaped before HTML rendering");
+                    verifyTooltip(warning, "tooltip-error");
                 } finally { damaged.dispose(); }
             }
         } finally {
@@ -380,6 +569,7 @@ public class TreeSettingsRegressionTest {
             try {
                 JButton repair = buttons(dialog.getContentPane()).stream()
                         .filter(b -> "Repair user defaults…".equals(b.getText())).findFirst().orElseThrow();
+                Throwable[] repairFailure = new Throwable[1];
                 SwingUtilities.invokeLater(() -> {
                     try {
                         JDialog child = Arrays.stream(Window.getWindows()).filter(w -> w instanceof JDialog d
@@ -388,12 +578,20 @@ public class TreeSettingsRegressionTest {
                                 .getLayoutComponent(BorderLayout.CENTER);
                         require(editor.text().equals("{/* broken"), "Repair editor shows the original damaged text");
                         JTextPane input = (JTextPane) field(TreeSettingsEditor.class, "user").get(editor);
+                        verifyTooltip(input, "tooltip-repair-editor");
+                        for (JButton b : buttons(child.getContentPane()))
+                            if (b.getText() != null && !b.getText().isBlank())
+                                verifyTooltip(b, "tooltip-repair-" + b.getText().replaceAll("[^a-zA-Z]+", "-"));
                         input.setText("{\"Labels\":{\"Show leaf names\":false}}\n");
                         buttons(child.getContentPane()).stream().filter(b -> "Save repaired defaults".equals(b.getText()))
                                 .findFirst().orElseThrow().doClick();
-                    } catch (Exception error) { throw new RuntimeException(error); }
+                    } catch (Throwable error) {
+                        repairFailure[0] = error;
+                        for (Window child : dialog.getOwnedWindows()) child.dispose();
+                    }
                 });
                 repair.doClick();
+                if (repairFailure[0] != null) throw new AssertionError("Repair dialog interaction failed", repairFailure[0]);
                 require(buttons(dialog.getContentPane()).stream().anyMatch(b -> "Save as user defaults…".equals(b.getText()) && b.isEnabled()),
                         "Successful repair enables saving reusable defaults");
                 TreeSettingsEditor current = (TreeSettingsEditor) ((BorderLayout) dialog.getContentPane().getLayout())
@@ -534,9 +732,10 @@ public class TreeSettingsRegressionTest {
         testVoiceSchema();
         testRepairDialog();
         SwingUtilities.invokeAndWait(() -> {
-            try { testEditor(); testLiveApply(); testSnapshotSession(); testDialogFonts(preferences); }
+            try { testEditor(); testEditorScroll(); testLiveApply(); testSnapshotSession(); testDialogFonts(preferences); }
             catch (Exception error) { throw new RuntimeException(error); }
         });
+        testApplyView(preferences);
         testImport(preferences);
         testDirectLaunch(preferences);
         testDirectLaunch(new TreeSettingsPreferences(Files.createTempDirectory(OUTPUT, "defaults-").resolve("user.jsonc")));

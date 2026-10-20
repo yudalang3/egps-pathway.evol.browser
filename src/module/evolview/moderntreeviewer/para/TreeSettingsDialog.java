@@ -9,6 +9,8 @@ import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static module.evolview.moderntreeviewer.para.TreeSettingsHelp.tooltip;
+
 public final class TreeSettingsDialog extends JDialog {
     private boolean saving;
 
@@ -29,8 +31,11 @@ public final class TreeSettingsDialog extends JDialog {
         JButton apply = new JButton("Apply");
         JButton save = new JButton("Save as user defaults…");
         JButton close = new JButton("Close");
-        save.setToolTipText("Validate and save reusable settings for future trees. Apply changes the current tree separately. Selection scope, Mixed values and creative-mode activation are not saved.");
-        close.setToolTipText("Close this window. Keep changes already applied; discard unapplied edits.");
+        String saveHelp = tooltip("Save as user defaults", "Check and save reusable settings for future trees.",
+                "Use Apply separately to update the current tree.",
+                "Selection scope, Mixed values and creative-mode activation are not saved.");
+        save.setToolTipText(saveHelp);
+        close.setToolTipText(tooltip("Close", "Keep changes already applied to the tree.", "Discard unapplied edits."));
         JButton repair = state.warning() == null ? null : new JButton("Repair user defaults…");
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         for (JButton button : new JButton[]{apply, save, close}) {
@@ -40,15 +45,16 @@ public final class TreeSettingsDialog extends JDialog {
         }
         if (repair != null) {
             repair.setFont(fonts.getDialogButtonFont());
-            repair.setToolTipText("Open the original saved JSONC text, repair it, then validate and save user defaults.");
+            repair.setToolTipText(tooltip("Repair user defaults", "Open the original saved text and correct its errors.",
+                    "Check and save the repaired settings for future trees."));
             repair.setMargin(new Insets(6, 18, 6, 18));
             buttons.add(repair, 2);
             save.setEnabled(false);
-            save.setToolTipText("Repair the saved user defaults before saving new ones.");
+            save.setToolTipText(tooltip("Saving is unavailable", "Repair the saved user defaults before saving new ones."));
             repair.addActionListener(event -> showRepairDialog(preferences, state.text(), repairedState -> {
                 repair.setVisible(false);
                 save.setEnabled(true);
-                save.setToolTipText("Save reusable settings for future trees. Apply changes the current tree separately.");
+                save.setToolTipText(saveHelp);
                 if (tree == null) {
                     session.refreshDefaults(repairedState.values());
                     editor.setText(session.text());
@@ -59,39 +65,50 @@ public final class TreeSettingsDialog extends JDialog {
             }));
         }
         apply.setEnabled(session.canApply());
-        apply.setToolTipText(session.canApply() ? "Validate all parameters, then apply changes to the current tree." : session.unavailableReason());
+        apply.setToolTipText(session.canApply()
+                ? tooltip("Apply", "Check all parameters and update the current tree.", "User defaults are saved separately.")
+                : tooltip("Apply is unavailable", session.unavailableReason()));
         if (state.warning() != null) {
             message.setForeground(new Color(165, 45, 45));
             message.setText("Saved user defaults could not be loaded. Use Repair user defaults to edit the original file.");
-            message.setToolTipText(state.warning());
-        } else message.setText(session.unavailableReason());
+            message.setToolTipText(tooltip("Could not load user defaults", state.warning()));
+        } else {
+            message.setText(session.unavailableReason());
+            if (!session.canApply()) message.setToolTipText(tooltip("Apply is unavailable", session.unavailableReason()));
+        }
         apply.addActionListener(event -> {
             try {
-                session.apply(editor.text()); editor.setText(session.text());
+                session.apply(editor.text()); editor.setTextPreservingView(session.text());
                 message.setForeground(UIManager.getColor("Label.foreground"));
                 message.setText("Applied to the current tree.");
                 message.setToolTipText(null);
             } catch (IllegalArgumentException error) {
                 message.setForeground(new Color(165, 45, 45));
-                message.setText(error.getMessage()); message.setToolTipText(error.getMessage());
+                message.setText(error.getMessage()); message.setToolTipText(tooltip("Could not apply parameters", error.getMessage()));
             }
             apply.setEnabled(session.canApply());
-            if (!session.canApply()) apply.setToolTipText(session.unavailableReason());
+            if (!session.canApply()) apply.setToolTipText(tooltip("Apply is unavailable", session.unavailableReason()));
         });
         save.addActionListener(event -> {
             java.util.Map<String, Object> values;
             try { values = session.values(editor.text()); }
-            catch (IllegalArgumentException error) { message.setText(error.getMessage()); return; }
+            catch (IllegalArgumentException error) {
+                message.setText(error.getMessage());
+                message.setToolTipText(tooltip("Could not save user defaults", error.getMessage()));
+                return;
+            }
             saving = true;
             apply.setEnabled(false); save.setEnabled(false); close.setEnabled(false);
             editor.setEditingEnabled(false);
             message.setText("Saving user defaults…");
+            message.setToolTipText(null);
             preferences.saveDefaultsAsync(values).whenComplete((commit, failure) -> SwingUtilities.invokeLater(() -> {
                 saving = false;
                 apply.setEnabled(session.canApply()); save.setEnabled(true); close.setEnabled(true);
                 editor.setEditingEnabled(true);
                 Throwable cause = failure == null ? null : failure.getCause() == null ? failure : failure.getCause();
                 message.setText(cause == null ? "User defaults saved. Apply updates the current tree separately." : cause.getMessage());
+                message.setToolTipText(cause == null ? null : tooltip("Could not save user defaults", cause.getMessage()));
             }));
         });
         close.addActionListener(event -> dispose());
@@ -124,8 +141,9 @@ public final class TreeSettingsDialog extends JDialog {
         error.setForeground(new Color(165, 45, 45));
         JButton save = new JButton("Save repaired defaults");
         JButton cancel = new JButton("Cancel");
-        save.setToolTipText("Validate this JSONC text and save the repaired defaults file. Existing trees remain unchanged.");
-        cancel.setToolTipText("Close without saving repairs.");
+        save.setToolTipText(tooltip("Save repaired defaults", "Check the edited text and save it to the user defaults file.",
+                "These defaults are used for future trees. Existing trees remain unchanged."));
+        cancel.setToolTipText(tooltip("Cancel repair", "Close without saving repairs."));
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         for (JButton button : new JButton[]{save, cancel}) {
             button.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());
@@ -143,7 +161,7 @@ public final class TreeSettingsDialog extends JDialog {
             try { TreeSettings.parse(text); }
             catch (IllegalArgumentException invalid) {
                 error.setText(invalid.getMessage());
-                error.setToolTipText(invalid.getMessage());
+                error.setToolTipText(tooltip("Could not save repaired defaults", invalid.getMessage()));
                 return;
             }
             savingRepair[0] = true;
@@ -151,6 +169,7 @@ public final class TreeSettingsDialog extends JDialog {
             cancel.setEnabled(false);
             editor.setEditingEnabled(false);
             error.setText("Saving repaired defaults…");
+            error.setToolTipText(null);
             preferences.saveAsync(text).whenComplete((commit, failure) -> SwingUtilities.invokeLater(() -> {
                 savingRepair[0] = false;
                 if (failure == null) {
@@ -163,7 +182,7 @@ public final class TreeSettingsDialog extends JDialog {
                 editor.setEditingEnabled(true);
                 Throwable cause = failure.getCause() == null ? failure : failure.getCause();
                 error.setText(cause.getMessage());
-                error.setToolTipText(cause.getMessage());
+                error.setToolTipText(tooltip("Could not save repaired defaults", cause.getMessage()));
             }));
         });
         cancel.addActionListener(event -> dialog.dispose());

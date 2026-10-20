@@ -8,6 +8,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.regex.Matcher;
@@ -18,6 +20,10 @@ public final class TreeSettingsEditor extends JPanel {
     private static final Pattern TOKENS = Pattern.compile("//[^\\r\\n]*|/\\*.*?(?:\\*/|$)|\"(?:\\\\.|[^\"\\\\])*\"|-?\\d+(?:\\.\\d+)?|\\b(?:true|false|null)\\b", Pattern.DOTALL);
     private final JTextPane defaults = new CodePane();
     private final JTextPane user = new CodePane();
+    private final JScrollPane defaultsScroll = new JScrollPane(defaults);
+    private final JScrollPane userScroll = new JScrollPane(user);
+    private boolean synchronizingScroll;
+    private boolean restoringView;
     private String original;
     private boolean modified;
 
@@ -41,7 +47,9 @@ public final class TreeSettingsEditor extends JPanel {
             public void changedUpdate(DocumentEvent event) { }
         });
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                pane("Default settings — Read only", defaults), pane(rightTitle, user));
+                pane("Default settings — Read only", defaultsScroll), pane(rightTitle, userScroll));
+        linkScrollBars(defaultsScroll.getVerticalScrollBar(), userScroll.getVerticalScrollBar());
+        linkScrollBars(defaultsScroll.getHorizontalScrollBar(), userScroll.getHorizontalScrollBar());
         split.setResizeWeight(0.5);
         split.setDividerLocation(0.5);
         split.setBorder(null);
@@ -55,6 +63,53 @@ public final class TreeSettingsEditor extends JPanel {
 
     public void setText(String text) { user.setText(text); original = text; modified = false; }
 
+    public void setTextPreservingView(String text) {
+        if (text.equals(text())) return;
+        int dot = user.getCaret().getDot(), mark = user.getCaret().getMark();
+        Point left = defaultsScroll.getViewport().getViewPosition();
+        Point right = userScroll.getViewport().getViewPosition();
+        restoringView = true;
+        setText(text);
+        int length = user.getDocument().getLength();
+        user.getCaret().setDot(Math.min(mark, length));
+        user.getCaret().moveDot(Math.min(dot, length));
+        restorePosition(defaultsScroll, left);
+        restorePosition(userScroll, right);
+        // Text layout and caret visibility updates can run after the action listener.
+        SwingUtilities.invokeLater(() -> {
+            try {
+                defaultsScroll.validate();
+                userScroll.validate();
+                restorePosition(defaultsScroll, left);
+                restorePosition(userScroll, right);
+            } finally { restoringView = false; }
+        });
+    }
+
+    private static void restorePosition(JScrollPane scroll, Point position) {
+        JViewport viewport = scroll.getViewport();
+        Dimension size = viewport.getViewSize(), extent = viewport.getExtentSize();
+        viewport.setViewPosition(new Point(Math.max(0, Math.min(position.x, size.width - extent.width)),
+                Math.max(0, Math.min(position.y, size.height - extent.height))));
+    }
+
+    private void linkScrollBars(JScrollBar left, JScrollBar right) {
+        left.addAdjustmentListener(event -> synchronizeScroll(left, right));
+        right.addAdjustmentListener(event -> synchronizeScroll(right, left));
+    }
+
+    private void synchronizeScroll(JScrollBar source, JScrollBar target) {
+        if (synchronizingScroll || restoringView) return;
+        int sourceRange = source.getMaximum() - source.getMinimum() - source.getVisibleAmount();
+        int targetRange = target.getMaximum() - target.getMinimum() - target.getVisibleAmount();
+        if (sourceRange <= 0 || targetRange <= 0) return;
+        synchronizingScroll = true;
+        try {
+            double progress = (source.getValue() - source.getMinimum()) / (double) sourceRange;
+            target.setValue(target.getMinimum() + (int) Math.round(progress * targetRange));
+        } finally { synchronizingScroll = false; }
+    }
+
     public String text() { return modified ? user.getText() : original; }
     public void setEditingEnabled(boolean enabled) { user.setEditable(enabled); }
 
@@ -64,15 +119,14 @@ public final class TreeSettingsEditor extends JPanel {
         }
     }
 
-    private JPanel pane(String title, JTextPane editor) {
+    private JPanel pane(String title, JScrollPane scroll) {
         JPanel panel = new JPanel(new BorderLayout(0, 8));
         panel.setMinimumSize(new Dimension(220, 200));
         panel.setPreferredSize(new Dimension(540, 600));
         JLabel heading = new JLabel(title);
         heading.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogTitleFont());
         panel.add(heading, BorderLayout.NORTH);
-        JScrollPane scroll = new JScrollPane(editor);
-        scroll.setRowHeaderView(new LineNumbers(editor));
+        scroll.setRowHeaderView(new LineNumbers((JTextPane) scroll.getViewport().getView()));
         panel.add(scroll, BorderLayout.CENTER);
         return panel;
     }
@@ -82,8 +136,11 @@ public final class TreeSettingsEditor extends JPanel {
         editor.setMargin(new Insets(8, 10, 8, 10));
         editor.setText(text);
         editor.setEditable(editable);
-        editor.setToolTipText(editable ? "Edit JSONC parameters. Comments and trailing commas are allowed. Apply validates the text before changing the current tree."
-                : "Program defaults and parameter documentation. Read only; select and copy text. Each parameter lists its VOICE key.");
+        editor.setToolTipText(editable
+                ? TreeSettingsHelp.tooltip("Edit parameters", "Comments and trailing commas are allowed.",
+                        "Apply checks your edits before updating the current tree.")
+                : TreeSettingsHelp.tooltip("Program defaults", "Read only. You can select and copy text.",
+                        "Each parameter includes an explanation and its VOICE key."));
         editor.setFocusTraversalKeysEnabled(!editable);
         editor.setCaretPosition(0);
         editor.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "four-spaces");
@@ -134,6 +191,9 @@ public final class TreeSettingsEditor extends JPanel {
             setFont(editor.getFont());
             setOpaque(true);
             setBackground(UIManager.getColor("Panel.background"));
+            editor.addComponentListener(new ComponentAdapter() {
+                @Override public void componentResized(ComponentEvent event) { revalidate(); repaint(); }
+            });
             editor.getDocument().addDocumentListener(new DocumentListener() {
                 public void insertUpdate(DocumentEvent event) { revalidate(); repaint(); }
                 public void removeUpdate(DocumentEvent event) { revalidate(); repaint(); }
@@ -142,7 +202,8 @@ public final class TreeSettingsEditor extends JPanel {
         }
         @Override public Dimension getPreferredSize() {
             int digits = Integer.toString(editor.getDocument().getDefaultRootElement().getElementCount()).length();
-            return new Dimension(getFontMetrics(getFont()).charWidth('0') * Math.max(3, digits) + 14, 1);
+            return new Dimension(getFontMetrics(getFont()).charWidth('0') * Math.max(3, digits) + 14,
+                    editor.getPreferredSize().height);
         }
         @Override protected void paintComponent(Graphics graphics) {
             graphics.setColor(getBackground());
