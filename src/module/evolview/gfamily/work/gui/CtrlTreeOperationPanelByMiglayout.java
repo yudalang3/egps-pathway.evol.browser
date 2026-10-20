@@ -369,14 +369,14 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 		add(axisButton, gbc_axisButton);
 		axisButton.addActionListener(displayListener);
 
-		toggleButtonWH = new JToggleButton("Size");
-		toggleButtonWH.setMargin(new Insets(2, 4, 2, 4));
-//		toggleButtonWH = new JToggleButton("");
+		toggleButtonWH = new JToggleButton(new CanvasSizeIcon(
+				UnifiedAccessPoint.getLaunchProperty().getIconWidth(),
+				UnifiedAccessPoint.getLaunchProperty().getIconHeight()));
 		toggleButtonWH.setFocusable(false);
-//		toggleButtonWH.setIcon(IconObtainer.get("showInnerNodeLabelToggleButton.png"));
+		toggleButtonWH.getAccessibleContext().setAccessibleName("Show canvas size and margins");
 		toggleButtonWH.addActionListener(displayListener);
 		toggleButtonWH.setToolTipText(
-				"<html><body>Show width and height in the drawing panel. <br> \r\nThis is usefull when using the circular layout");
+				"Show or hide canvas width, height and top, left, bottom and right margins in the upper-left corner (pixels).");
 		GridBagConstraints gbc_toggleButtonWH = new GridBagConstraints();
 		gbc_toggleButtonWH.insets = new Insets(0, 0, 5, 5);
 		gbc_toggleButtonWH.gridx = 0;
@@ -583,6 +583,30 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 	protected void fitTreeToFrame() {
 		controller.reCalculateTreeLayoutAndRefreshViewPort();
 	}
+
+    private record CanvasSizeIcon(int width, int height) implements Icon {
+        public int getIconWidth() { return width; }
+        public int getIconHeight() { return height; }
+
+        public void paintIcon(Component component, Graphics graphics, int x, int y) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            try {
+                g.translate(x, y);
+                g.scale(width / 24.0, height / 24.0);
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setColor(component.isEnabled() ? component.getForeground() : new Color(155, 163, 172));
+                g.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g.drawPolyline(new int[] {2, 4, 6, 8, 10}, new int[] {8, 16, 11, 16, 8}, 5);
+                g.drawLine(12, 10, 15, 14);
+                g.drawLine(12, 14, 15, 10);
+                g.drawLine(18, 8, 18, 16);
+                g.drawLine(18, 12, 22, 12);
+                g.drawLine(22, 8, 22, 16);
+            } finally {
+                g.dispose();
+            }
+        }
+    }
 
 	private SeachDialog getSearchDialog() {
 		if (seachDialog == null) {

@@ -73,7 +73,7 @@ public final class TreeSettings {
         flag("Display/Show axis", true, "tree.show.axis.bar", "Display the coordinate axis where the layout supports it.",
                 TreeLayoutProperties::isShowAxisBar, TreeLayoutProperties::setShowAxisBar);
         flag("Display/Show title", true, "tree.show.title", "Display the statement below the tree.", TreeLayoutProperties::isShowTitle, TreeLayoutProperties::setShowTitle);
-        flag("Display/Show canvas size", false, "tree.show.width.height", "Display canvas width and height in pixels.",
+        flag("Display/Show canvas size", false, "tree.show.width.height", "Show or hide canvas width, height and top, left, bottom and right margins in the upper-left corner (pixels).",
                 TreeLayoutProperties::isShowWidthAndHeightString, TreeLayoutProperties::setShowWidthAndHeightString);
         text("Display/Title text", "The phylogenetic tree with {0} high-quality sequenced samples.", "tree.title.string",
                 "Bottom statement. {0} is replaced by the number of leaves.", TreeLayoutProperties::getTitleString, TreeLayoutProperties::setTitleString);

@@ -8,6 +8,7 @@ import module.evoltreio.NewickFormatConfig;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,10 +26,8 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 		List<Entry<String, VoiceValueParameterBean>> alreadyMapBean = new LinkedList<>(requiredParams.entrySet());
 
 		requiredParams.clear();
-		String propertiesDir = UnifiedAccessPoint.getLaunchProperty().getTestDataDir();
-		if (propertiesDir == null || propertiesDir.isBlank()) {
-			propertiesDir = EGPSProperties.PROPERTIES_DIR;
-		}
+		String propertiesDir = resolvePropertiesDir(
+				UnifiedAccessPoint.getLaunchProperty().getTestDataDir(), EGPSProperties.PROPERTIES_DIR);
 		addKeyValueEntryBean("@", "The Pathway Family Browser", "");
 
 		addKeyValueEntryBean("input.nwk.path",
@@ -79,6 +78,15 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 			requiredParams.put(entry.getKey(), entry.getValue());
 		}
 
+	}
+
+	static String resolvePropertiesDir(String configuredDir, String fallbackDir) {
+		String directory = configuredDir == null ? null : configuredDir.trim();
+		if (directory == null || directory.isEmpty() || directory.equalsIgnoreCase("null")
+				|| !new File(directory).isDirectory()) {
+			return fallbackDir;
+		}
+		return directory;
 	}
 
 	public ImporterBean4PathwayFamilyBrowser getImportBeanInfo(OrganizedParameterGetter str) {
