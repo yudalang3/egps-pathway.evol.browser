@@ -1,7 +1,6 @@
 package module.evolview.moderntreeviewer;
 
 import com.google.common.base.Strings;
-import egps2.EGPSProperties;
 import egps2.UnifiedAccessPoint;
 import egps2.builtin.modules.voice.bean.AbstractParamsAssignerAndParser4VOICE;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
@@ -38,7 +37,8 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
 
     private ParamsAssignerAndParser4ModernTreeView evolTreeParserMap4VOICM;
 
-    private byte exampleIndex = 0;
+    private int exampleIndex = 0;
+    private final java.util.concurrent.atomic.AtomicBoolean preparingExamples = new java.util.concurrent.atomic.AtomicBoolean();
 
     public VOICE4MTV(MTreeViewMainFace mTreeViewMainFace) {
         this.mTreeViewMainFace = mTreeViewMainFace;
@@ -51,7 +51,25 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
 
     @Override
     protected int getNumberOfExamples() {
-        return 3;
+        return ModernTreeExamples.ALL.size();
+    }
+
+    @Override
+    public void doUserImportAction() {
+        if (!preparingExamples.compareAndSet(false, true)) return;
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try { ModernTreeExamples.install(ModernTreeExamples.directory()); }
+            catch (java.io.IOException error) { throw new java.util.concurrent.CompletionException(error); }
+        }).whenComplete((ignored, error) -> SwingUtilities.invokeLater(() -> {
+            preparingExamples.set(false);
+            if (error != null) {
+                Throwable cause = error.getCause() == null ? error : error.getCause();
+                log.error("Unable to prepare tree examples", cause);
+                SwingDialog.showErrorMSGDialog("Tree examples", cause.getMessage()
+                        + "\nYou can still import your own tree file.");
+            }
+            super.doUserImportAction();
+        }));
     }
 
     private boolean whetherSameImportInfoBean(EvolTreeImportInfoBean newBean) {
@@ -76,31 +94,9 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
     @Override
     public String getExampleText() {
 
-        evolTreeParserMap4VOICM = new ParamsAssignerAndParser4ModernTreeView();
-
-        if (exampleIndex == 0) {
-            // Great Apes phylogenetic tree with divergence times in MYA (Million Years Ago)
-            // Human-Chimp: ~6.5 MYA, Chimp-Bonobo: ~1.5 MYA, Human/Chimp-Gorilla: ~8.5 MYA, Homininae-Orangutan: ~12.5 MYA
-            String nwkStr = "(((Human:6.5,(Chimpanzee:1.5,Bonobo:1.5):5):2,Gorilla:8.5):4,Orangutan:12.5);";
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.newick.text", nwkStr,
-                    "Great Apes phylogeny with divergence times (MYA). Direct input the nwk string content.");
-        } else if (exampleIndex == 1) {
-            String speciesTree = EGPSProperties.PROPERTIES_DIR + "/bioData/example/treeBarplot/01.speci.nwk";
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.newick.file", speciesTree, "Input the nwk file path.");
-        } else if (exampleIndex == 2) {
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.newick.file", "", "Input the nwk file path.");
-            evolTreeParserMap4VOICM.addKeyValueEntryBean("input.table.file",
-                    EGPSProperties.PROPERTIES_DIR + "/bioData/example/myTree.tpv",
-                    "Input the table-like tree file path.");
-            exampleIndex = -1;
-        }
-        exampleIndex++;
-
-        return evolTreeParserMap4VOICM.getExampleString().lines().map(line -> {
-            String key = line.stripLeading();
-            boolean source = key.startsWith("$input.newick.text=") || key.startsWith("$input.newick.file=") || key.startsWith("$input.table.file=");
-            return !key.startsWith("#") && !source && key.contains("=") ? "# " + line : line;
-        }).collect(java.util.stream.Collectors.joining("\n"));
+        String text = ModernTreeExamples.text(exampleIndex, ModernTreeExamples.directory());
+        exampleIndex = (exampleIndex + 1) % getNumberOfExamples();
+        return text;
     }
 
     @Override
@@ -124,7 +120,7 @@ public class VOICE4MTV extends AbstractGuiBaseVoiceFeaturedPanel {
         }
         TreeSettingsPreferences.State settings = loading.join();
         if (evolTreeParserMap4VOICM == null) {
-            getExampleText();
+            evolTreeParserMap4VOICM = new ParamsAssignerAndParser4ModernTreeView();
         }
 
         // 这个导入过程，如果更改需要注意三处：VOICE4MTV类的execute()；GeneFamilyMainFace类的initialize和MTreeViewMainFace的initializeGraphics()

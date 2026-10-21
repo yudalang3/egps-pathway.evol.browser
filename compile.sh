@@ -46,7 +46,10 @@ find src/module -type f \( \
     -name "*.html" -o \
     -name "*.fas" -o \
     -name "*.fasta" -o \
-    -name "*.fa" \
+    -name "*.fa" -o \
+    -name "*.nwk" -o \
+    -name "*.tpv" -o \
+    -name "*.tsv" \
 \) | while read file; do
     # 构建目标路径
     target=${file/src\//out\/production\/egps-pathway.evol.browser\/}

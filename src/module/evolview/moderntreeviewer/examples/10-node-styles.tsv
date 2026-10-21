@@ -1,0 +1,5 @@
+name	fillColor	circleRadius	lineThickness	displayName
+GroupA	#0072B2	5	3	true
+GroupB	#D55E00	5	3	true
+A1	#0072B2	3	2	true
+B1	#D55E00	3	2	true

@@ -40,6 +40,9 @@ for /R src\module %%F in (*) do (
     if /I "!EXT!"==".fas" call :copy_resource "%%~fF"
     if /I "!EXT!"==".fasta" call :copy_resource "%%~fF"
     if /I "!EXT!"==".fa" call :copy_resource "%%~fF"
+    if /I "!EXT!"==".nwk" call :copy_resource "%%~fF"
+    if /I "!EXT!"==".tpv" call :copy_resource "%%~fF"
+    if /I "!EXT!"==".tsv" call :copy_resource "%%~fF"
 )
 echo Resource copy completed.
 

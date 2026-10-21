@@ -1,0 +1,42 @@
+Modern Tree View example data
+============================
+All files are distributed inside the module JAR. Runtime copies are installed in
+config/bioData/example/modernTreeView; existing files are never overwritten.
+
+01 Great apes: original VOICE4MTV teaching example. The illustrative MYA values
+are not a cited or calibrated research result.
+02 Primates: line 2 of the repository's phylotree/visualization/primary/swing/
+test.tree.txt, with the terminating semicolon added. Teaching data, not sourced
+research; internal numeric labels represent bootstrap support (Newick format 0).
+03 Mammals: repository docs/spiral.layout.tree.nwk, unchanged. Teaching data;
+root-to-tip distances differ, so this is not a calibrated ultrametric time tree.
+
+04 bird.orders: exported with ape 5.8-1, write.tree(digits=15).
+Sibley, C. G. and Ahlquist, J. E. (1990). Phylogeny and Classification of Birds:
+A Study in Molecular Evolution. Yale University Press, figure 353.
+This historical hypothesis is not a claim about current avian consensus.
+Branch lengths: delta T50H from DNA/DNA hybridization, not millions of years.
+
+05 hivtree.newick: original Newick string from ape 5.8-1, unchanged.
+193 HIV-1 group M sequences from the Democratic Republic of Congo.
+Strimmer, K. and Pybus, O. G. (2001). Exploring the demographic history of DNA
+sequences using the generalized skyline plot. Molecular Biology and Evolution
+18:2298-2305. Original lengths retained; no time unit assigned by this viewer.
+
+Official dataset descriptions:
+https://emmanuelparadis.r-universe.dev/ape/doc/manual.html
+Upstream source: https://github.com/emmanuelparadis/ape
+Data 04 and 05 are redistributed under GPL version 2, selected from ape's
+GPL-2 | GPL-3 license options. See APE-DATA-GPL-2.txt. Attribution: ape authors
+and the cited data authors. Only these data resources use this upstream license;
+the source data files and conversion script are retained for reproducibility.
+
+06-12: synthetic demonstration data generated deterministically by
+scripts/generate_modern_tree_examples.R. Branches are illustrative distances;
+they are not measurements or biological inferences. Sample labels are unique.
+10-node-styles.tsv uses fillColor for branch color, circleRadius for node size,
+lineThickness for branch width, and displayName for label visibility.
+12 initially hides leaf labels; enable leaf.show.label to inspect tip names.
+
+Reproduction: R 4.5.2, ape 5.8-1; run the generator from the repository root.
+No runtime R installation, network request or random generation is required.

@@ -20,6 +20,21 @@
 	<li>使用左侧控制面板调整显示选项</li>
 </ol>
 
+<!-- example-data-sources-start -->
+<h3>示例数据与来源（12 例）</h3>
+<p>Example 依次提供教学树、真实研究树和合成演示树。每例的 VOICE 参数注释均注明来源、用途及必要的单位说明。</p>
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+<tr bgcolor="#ecf0f1"><th>示例</th><th>数据来源与解释</th></tr>
+<tr><td>1-3：类人猿、灵长类、哺乳动物</td><td>本仓库既有教学数据，分别来自原 VOICE4MTV 示例、绘图测试资源 test.tree.txt 第 2 行和 docs/spiral.layout.tree.nwk。它们没有可核实的研究文献来源；类人猿年代仅作示意，哺乳动物枝长不作为校准年代。</td></tr>
+<tr><td>4：鸟类目级树（23 叶）</td><td>来自 <b>ape::bird.orders，ape 5.8-1</b>，使用 write.tree(digits=15) 导出并校验。原始来源：Sibley, C. G. 与 Ahlquist, J. E. (1990)，<i>Phylogeny and Classification of Birds</i>，Yale University Press，图 353。枝长为 DNA/DNA 杂交指标 <b>Delta T50H</b>，不是百万年。这是历史研究假说。</td></tr>
+<tr><td>5：HIV-1 序列树（193 叶）</td><td>来自 <b>ape::hivtree.newick，ape 5.8-1</b>，保留原 Newick 字符串。原始来源：Strimmer, K. 与 Pybus, O. G. (2001)，<i>Exploring the demographic history of DNA sequences using the generalized skyline plot</i>，Molecular Biology and Evolution 18:2298-2305。数据为刚果民主共和国采集的 HIV-1 group M 序列，保留原枝长，不另行推定时间单位。</td></tr>
+<tr><td>6-12：平衡、梳状、多分叉、纯拓扑、表格及大树</td><td>由 scripts/generate_modern_tree_examples.R 确定性生成的合成演示数据；节点名和枝长不代表实测数据或生物学推断。大树分别为 64 和 256 叶。</td></tr>
+</table>
+<p><b>ape 数据许可：</b>示例 4、5 按 GPL-2 分发（从 ape 的 GPL-2 | GPL-3 选项中选择）；保留 ape 作者及原始数据作者的署名。完整许可见随示例分发的 <code>APE-DATA-GPL-2.txt</code>。来源说明见 <code>SOURCES.txt</code>。</p>
+<p>官方说明：<a href="https://emmanuelparadis.r-universe.dev/ape/doc/manual.html">ape 数据集手册</a>；上游：<a href="https://github.com/emmanuelparadis/ape">ape 源码仓库</a>。</p>
+<p>全部示例随模块源码及 JAR 分发；打开导入窗口时，只补齐默认 <code>config/bioData/example/modernTreeView/</code> 子目录中缺少的文件，已有文件直接读取并保留。运行时无需 R 或联网。每例的 VOICE 注释也指向该目录的来源说明。</p>
+<!-- example-data-sources-end -->
+
 <h3>右键菜单与安全编辑</h3>
 <p>查看子树、缩放、名称显隐、重命名和结构编辑以本次右键命中的节点为目标。右键已有选中节点或空白区域保留多选；左键空白区域清空选择。“选择后代”包含折叠后代，并可用于后续批量样式修改。</p>
 <p><b>Delete clade</b> 和 <b>Detach node</b> 必须先确认。对话框显示目标及其子树节点数、真实叶节点数，默认 Cancel；Enter、Esc 或关闭窗口均取消。根和最后剩余的叶不能删除。Delete clade 压缩非根单子父节点并累加枝长；Detach 保留单子父节点。两者均保留存活叶的根到叶距离。</p>
