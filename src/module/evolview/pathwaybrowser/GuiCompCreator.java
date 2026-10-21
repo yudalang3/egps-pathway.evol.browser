@@ -6,8 +6,6 @@ import module.evolview.pathwaybrowser.gui.analysis.panel.PathwayGalleryPanel;
 import module.evolview.pathwaybrowser.gui.analysis.panel.SpeciesInfoPanel;
 import module.evolview.pathwaybrowser.gui.analysis.panel.SpeciesTraitPanel;
 import module.evolview.pathwaybrowser.io.ImporterBean4PathwayFamilyBrowser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -22,7 +20,6 @@ import java.util.Optional;
  */
 public class GuiCompCreator {
 
-	private static final Logger log = LoggerFactory.getLogger(GuiCompCreator.class);
 	private final PathwayBrowserController controller;
 
 	public GuiCompCreator(PathwayBrowserController controller) {

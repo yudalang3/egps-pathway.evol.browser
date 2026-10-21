@@ -6,7 +6,6 @@ import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.gfamily.work.beans.LefControlPanelCollapseProperties;
 import module.evolview.gfamily.work.gui.ControlPanelContainer;
 import module.evolview.gfamily.work.gui.CtrlGenomeBrowserPanel;
-import module.evolview.gfamily.work.gui.CtrlSignalingComps;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ public class GBControlPanelContainner extends ControlPanelContainer {
 	protected String PERSISTENT_STORE_PATH = EGPSProperties.JSON_DIR.concat("/gb_control_panel.json");
 	private JXTaskPaneContainer taskPaneContainer;
 
-	private final Font globalFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
 	private final Font titleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 
 	public GBControlPanelContainner(GeneFamilyController controller) {
@@ -114,17 +112,5 @@ public class GBControlPanelContainner extends ControlPanelContainer {
 		return taskPane;
 	}
 
-	private JXTaskPane getComponentsPanel() {
-		JXTaskPane taskPane = new JXTaskPane();
-		taskPane.setCollapsed(false);
-		taskPane.setFont(titleFont);
-		taskPane.setTitle("Signaling pathway components");
-
-		CtrlSignalingComps debugPanel = new CtrlSignalingComps();
-		debugPanel.setController(controller);
-		taskPane.add(new JScrollPane(debugPanel));
-
-		return taskPane;
-	}
 
 }

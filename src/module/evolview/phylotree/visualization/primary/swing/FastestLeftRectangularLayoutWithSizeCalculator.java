@@ -89,25 +89,7 @@ public class FastestLeftRectangularLayoutWithSizeCalculator {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends EvolNode> ReflectGraphicNode<T> getButtomMostLeafNode(ReflectGraphicNode<T> node) {
-		ReflectGraphicNode<T> ret = node;
 
-		while (ret.getChildCount() > 0) {
-			ret = (ReflectGraphicNode<T>) ret.getLastChild();
-		}
-		return ret;
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends EvolNode> ReflectGraphicNode<T> getTopMostLeafNode(ReflectGraphicNode<T> node) {
-		ReflectGraphicNode<T> ret = node;
-
-		while (ret.getChildCount() > 0) {
-			ret = (ReflectGraphicNode<T>) ret.getFirstChild();
-		}
-		return ret;
-	}
 
 	private void preIterate2getStatics(EvolNode node, double cumulatedLength) {
 		double length = node.getLength();

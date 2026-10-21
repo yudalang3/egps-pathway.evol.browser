@@ -42,11 +42,6 @@ import org.slf4j.LoggerFactory;
  */
 public class FormatAwareNewickParser {
 
-	/**
-	 * Characters forbidden in unquoted Newick node names (per Wikipedia/PHYLIP standard).
-	 * These are: blanks, parentheses, square brackets, single quotes, colons, semicolons, commas.
-	 */
-	private static final String FORBIDDEN_CHARS_IN_UNQUOTED_NAME = "()[]':;, \t\n\r";
 
 	/**
 	 * Reference URL for the Newick format standard.
@@ -418,7 +413,6 @@ public class FormatAwareNewickParser {
 	private String parseLabel() {
 		skipWhitespace();
 
-		int start = pos;
 		StringBuilder label = new StringBuilder();
 		boolean inQuotes = false;
 		char quoteChar = 0;

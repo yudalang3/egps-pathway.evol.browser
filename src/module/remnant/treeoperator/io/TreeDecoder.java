@@ -368,13 +368,6 @@ public class TreeDecoder {
 		return Double.parseDouble(word);
 	}
 
-	private int getIntValue(String number) throws IllegalArgumentException {
-		try {
-			return Integer.parseInt(number);
-		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException("Wrong digit format for " + number);
-		}
-	}
 
 	protected int valueCharByBracket(char c) {
 		int value = 0;

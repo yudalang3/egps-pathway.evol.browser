@@ -84,7 +84,6 @@ public class ControlPanelContainer extends JPanel {
         List<JXTaskPane> listOfJxTaskPanes = new LinkedList<>();
 //		listOfJxTaskPanes.add(getDataInfoTaskPanel());
 //		listOfJxTaskPanes.add(getDataOperationTaskPanel());
-//		listOfJxTaskPanes.add(getColorSchemeTaskPanel());
         listOfJxTaskPanes.add(getTreeOperation());
 //		listOfJxTaskPanes.add(getBranchDisplayTaskPanel());
         listOfJxTaskPanes.add(getTreeLayoutTaskPanel());
@@ -154,22 +153,6 @@ public class ControlPanelContainer extends JPanel {
 //		return taskPane;
 //	}
 
-    private JXTaskPane getColorSchemeTaskPanel() {
-
-        JXTaskPane taskPane = new JXTaskPane();
-
-        taskPane.setFont(getTitleFont());
-        taskPane.setTitle("Color scheme");
-        JPanel jPanel = new JPanel(new BorderLayout());
-
-        colorSchemePanel = new CtrlColorSchemePanel();
-        colorSchemePanel.setController(controller);
-
-        jPanel.add(colorSchemePanel, BorderLayout.WEST);
-        taskPane.add(new JScrollPane(jPanel));
-        return taskPane;
-
-    }
 
 //	protected JXTaskPane getIdentificationNonMutPathTaskPanel() {
 //

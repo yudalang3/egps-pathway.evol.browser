@@ -664,10 +664,6 @@ public class GeneFamilyController {
 //	private void ladderizeNode(GraphicsNode currentNode, Map<Integer, List<GraphicsNode>> mapOfNodesInSameDeepth) {
 //		mapOfNodesInSameDeepth.clear();
 //		int childCount = currentNode.getChildCount();
-//		// If current node is leaf or all children is leaf,don't need to ladderize!
-//		if (currentNode.getChildCount() == 0 || isAllNodesAreLeaf(currentNode)) {
-//			return;
-//		}
 //		GraphicsNode tempNode = null;
 //		// if two or more child have same num of leaves, then add them to one List<Node>
 //		for (int i = 0; i < childCount; i++) {
@@ -703,16 +699,6 @@ public class GeneFamilyController {
 //		}
 //	}
 
-    private boolean isAllNodesAreLeaf(GraphicsNode node) {
-        boolean allIsLeaf = true;
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (node.getChildAt(i).getChildCount() != 0) {
-                allIsLeaf = false;
-                break;
-            }
-        }
-        return allIsLeaf;
-    }
 
     public String getMouthNameAbbr(String name) {
         return dateHandler.getMonthNameAbbr(name);

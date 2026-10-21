@@ -18,7 +18,6 @@ public class CalculatorAlleleFreq implements LocationCalculator<DrawingPropertyP
 
 	private int tick = 4;// 刻度尺长度
 	private double metrics = 20; // 刻度与value的高度
-	private double maxtick;
 
 	private GeneStructureInfo geneStructureInfo;
 

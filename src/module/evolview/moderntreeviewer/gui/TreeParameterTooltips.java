@@ -18,7 +18,6 @@ public final class TreeParameterTooltips {
         String body = escape(explanation);
         for (String action : new String[] {"Switch to a phylogram", "Use its numeric spiral", "Use the branch-length scale"})
             body = body.replace(". " + action, ".<br><br><b>Next step:</b> " + action);
-        if (available && !axis) body += "<br><br><b>Move:</b> Drag the scale or its label to reposition it.";
         return "<html><table width='400' cellpadding='3'><tr><td><b>" + title
                 + "</b><br><b>" + status + "</b><br><br>" + body
                 + "<br><br><font size='-1'>VOICE: " + (axis ? "display.show.axis.bar" : "display.show.scale.bar")

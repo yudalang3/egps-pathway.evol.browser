@@ -246,18 +246,6 @@ public class Upgma implements TreeReconMethod{
         return xmin;
     }
     
-    private void printDistanceMatrix(double[][] matrix, int size) {
-    	for (int i = 0; i < size - 1; i ++) {
-        	int length = i + 1;
-        	double[] targetedRow = matrix[i];
-            for (int j = 0; j < length; j ++) {
-            	double d = targetedRow[j];
-            	System.out.print(d + " ");
-            }
-            System.out.println();
-        }
-    	System.out.println();
-    }
     
 //    public static void main(String[] args) {
 ////    	int n = 7;

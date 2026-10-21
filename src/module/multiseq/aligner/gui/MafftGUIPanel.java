@@ -46,14 +46,12 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 	private static final long serialVersionUID = -2908588357598487831L;
 	protected Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
 	protected Font titleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
-	private JSplitPane mainSplitPane;
 	private JPanel leftToolPane;
 	private GridBagConstraints gridBagConstraints;
 
 	private JXTaskPane strategyJXTaskPane;
 	private JRadioButton strategy_Auto_JRadioButton;
 
-	private JXTaskPane alignUnrelatedSegmentsJXTaskPane;
 
 	private JButton alignSequencesJButton;
 	private JLabel strategyProgressiveMethodsJLabel;
@@ -65,24 +63,12 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 	private JRadioButton strategy_E_INS_i_JRadioButton;
 	private JRadioButton strategy_L_INS_i_JRadioButton;
 	private JRadioButton strategy_G_INS_i_JRadioButton;
-	private JRadioButton alignUnrelatedSegmentsAlignGappyRegionsJRadioButton;
-	private JRadioButton alignUnrelatedSegmentsLeaveGappyRegionsJRadioButton;
 	private JXTaskPane parametersJXTaskPane;
-	private JLabel parametersAminoAcidSequencesJLabel;
-	private JComboBox<String> parametersAminoAcidSequencesJComboBox;
-	private JLabel parametersNucleotideSequencesJLabel;
-	private JComponent parametersNucleotideSequencesJComboBox;
 	private JLabel parametersGapOpeningPenaltyJLabel;
 	private JSpinner parametersGapJSpinner;
 	private JLabel parametersGapJLabel;
 	private JLabel parametersOffsetJLabel;
 	private JSpinner parametersOffsetJSpinner;
-	private JRadioButton parametersScoreEffectJRadioButton;
-	private JRadioButton parametersScoreTreatedJRadioButton;
-	private JXTaskPane guideTreeJXTaskPane;
-	private JRadioButton guideTreeDefaultJRadioButton;
-	private JRadioButton guideTreeUpgmaJRadioButton;
-	private JCheckBox guideTreeOutputJCheckBox;
 	private JLabel parametersOffsetValueJLabel;
 	private JCheckBox parametersKeepOriginalJCheckBox;
 	
@@ -159,20 +145,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 					"G-INS-i (Very slow; recommended for <200 sequences with global homology)");
 			strategy_G_INS_i_JRadioButton.setFont(defaultFont);
 
-			String string1 = "Q-INS-i (Extremely slow; secondary structure of RNA is considered; recommended for a global alignment of highly";
-			String string2 = "     divergent ncRNAs with <200 sequences × <1,000 nucleotides; the number of iterative cycles is restricted to two)";
-
-//			strategy_Q_INS_i_JRadioButton = new JRadioButton(string1);
-//			strategy_Q_INS_i_JRadioButton.setFont(defaultFont);
-//
-//			JLabel strategy_Q_INS_i_JLabel = new JLabel(string2);
-//			strategy_Q_INS_i_JLabel.setFont(defaultFont);
-//			strategy_Q_INS_i_JLabel.addMouseListener(new MouseAdapter() {
-//				@Override
-//				public void mouseClicked(MouseEvent e) {
-//					strategy_Q_INS_i_JRadioButton.setSelected(true);
-//				}
-//			});
 
 			ButtonGroup strategyButtonGroup = new ButtonGroup();
 			strategyButtonGroup.add(strategy_Auto_JRadioButton);
@@ -183,7 +155,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 			strategyButtonGroup.add(strategy_E_INS_i_JRadioButton);
 			strategyButtonGroup.add(strategy_L_INS_i_JRadioButton);
 			strategyButtonGroup.add(strategy_G_INS_i_JRadioButton);
-			// strategyButtonGroup.add(strategy_Q_INS_i_JRadioButton);
 
 			gridBagConstraints = new GridBagConstraints();
 			gridBagConstraints.insets = new Insets(3, 0, 3, 0);
@@ -221,12 +192,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 			gridBagConstraints.gridx = 0;
 			gridBagConstraints.gridy = 9;
 			strategyJPane.add(strategy_G_INS_i_JRadioButton, gridBagConstraints);
-//			gridBagConstraints.gridx = 0;
-//			gridBagConstraints.gridy = 10;
-//			strategyJPane.add(strategy_Q_INS_i_JRadioButton, gridBagConstraints);
-//			gridBagConstraints.gridx = 0;
-//			gridBagConstraints.gridy = 11;
-//			strategyJPane.add(strategy_Q_INS_i_JLabel, gridBagConstraints);
 			strategyJXTaskPane.add(strategyJPane);
 		}
 		return strategyJXTaskPane;
@@ -238,32 +203,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 			parametersJXTaskPane = new JXTaskPane();
 			parametersJXTaskPane.setTitle("Parameters");
 			parametersJXTaskPane.setFont(titleFont);
-
-			// parametersAminoAcidSequencesJLabel = new JLabel(" Scoring matrix for amino
-			// acid sequences:");
-			// parametersAminoAcidSequencesJLabel.setFont(defaultFont);
-
-			// String[] parametersAminoAcidSequencesValue = { "BLOSUM30", "BLOSUM45",
-			// "BLOSUM62", "BLOSUM80", "JTT100",
-			// "JTT200" };
-
-			// parametersAminoAcidSequencesJComboBox = new
-			// JComboBox<String>(parametersAminoAcidSequencesValue);
-			// parametersAminoAcidSequencesJComboBox.setFont(defaultFont);
-			// parametersAminoAcidSequencesJComboBox.setPreferredSize(new Dimension(200,
-			// 18));
-
-			// parametersNucleotideSequencesJLabel = new JLabel(" Scoring matrix for
-			// nucleotide sequences:");
-			// parametersNucleotideSequencesJLabel.setFont(defaultFont);
-
-			// String[] parametersNucleotideSequencesValue = { "1PAM/k=2", "20PAM/k=2",
-			// "BLOSUM62", "200PAM/k=2" };
-			// parametersNucleotideSequencesJComboBox = new
-			// JComboBox<String>(parametersNucleotideSequencesValue);
-			// parametersNucleotideSequencesJComboBox.setFont(defaultFont);
-			// parametersNucleotideSequencesJComboBox.setPreferredSize(new Dimension(200,
-			// 18));
 
 			JPanel parametersGapJPanel = new JPanel(new GridBagLayout());
 
@@ -333,40 +272,8 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 			parametersKeepOriginalJCheckBox = new JCheckBox("Keep original sequences order");
 			parametersKeepOriginalJCheckBox.setFont(defaultFont);
 
-//			JLabel parametersScoreJLabel = new JLabel("  Score of N in nucleotide data:");
-//			parametersScoreJLabel.setFont(defaultFont);
-//
-//			parametersScoreEffectJRadioButton = new JRadioButton("(nzero) N has no effect on the alignment score");
-//
-//			parametersScoreEffectJRadioButton.setFont(defaultFont);
-//			parametersScoreEffectJRadioButton.setSelected(true);
-//
-//			parametersScoreTreatedJRadioButton = new JRadioButton("(nwildcard) N is treated like a wildcard.");
-//
-//			parametersScoreTreatedJRadioButton.setFont(defaultFont);
-//
-//			ButtonGroup parametersScoreButtonGroup = new ButtonGroup();
-//			parametersScoreButtonGroup.add(parametersScoreEffectJRadioButton);
-//			parametersScoreButtonGroup.add(parametersScoreTreatedJRadioButton);
-
 			JPanel parametersJPane = new JPanel(new GridBagLayout());
 			gridBagConstraints.insets = new Insets(3, 0, 3, 20);
-			// gridBagConstraints.gridx = 0;
-			// gridBagConstraints.gridy = 0;
-			// parametersJPane.add(parametersAminoAcidSequencesJLabel, gridBagConstraints);
-			// gridBagConstraints.gridx = 1;
-			// gridBagConstraints.gridy = 0;
-			// parametersJPane.add(parametersAminoAcidSequencesJComboBox,
-			// gridBagConstraints);
-
-			// gridBagConstraints.gridx = 0;
-			// gridBagConstraints.gridy = 1;
-			// parametersJPane.add(parametersNucleotideSequencesJLabel, gridBagConstraints);
-			// gridBagConstraints.gridx = 1;
-			// gridBagConstraints.gridy = 1;
-			// parametersJPane.add(parametersNucleotideSequencesJComboBox,
-			// gridBagConstraints);
-
 			gridBagConstraints.weightx = 0.0;
 			gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
 			gridBagConstraints.gridx = 0;
@@ -379,18 +286,6 @@ public class MafftGUIPanel extends AbstractAlignmentPanel {
 			gridBagConstraints.gridx = 0;
 			gridBagConstraints.gridy = 3;
 			parametersJPane.add(parametersKeepOriginalJCheckBox, gridBagConstraints);
-
-//			gridBagConstraints.gridx = 0;
-//			gridBagConstraints.gridy = 4;
-//			parametersJPane.add(parametersScoreJLabel, gridBagConstraints);
-
-//			gridBagConstraints.gridx = 0;
-//			gridBagConstraints.gridy = 5;
-//			parametersJPane.add(parametersScoreEffectJRadioButton, gridBagConstraints);
-//
-//			gridBagConstraints.gridx = 0;
-//			gridBagConstraints.gridy = 6;
-//			parametersJPane.add(parametersScoreTreatedJRadioButton, gridBagConstraints);
 
 			JPanel parametersJPane1 = new JPanel();
 			parametersJPane1.setLayout(new BorderLayout());

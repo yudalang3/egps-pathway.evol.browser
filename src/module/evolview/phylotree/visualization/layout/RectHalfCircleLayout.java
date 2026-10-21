@@ -179,8 +179,6 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 		g2d.setColor(rootNode.getDrawUnit().getLineColor());
 		g2d.setFont(treeLayoutProperties.getGlobalFont());
 
-		// for debug
-//		backGround(g2d);
 
 
 		recursiveDraw(rootNode, g2d);
@@ -304,51 +302,4 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 		g2d.draw(lineDrawUtil);
 	}
 
-	private void backGround(Graphics2D g2d) {
-		g2d.setColor(Color.LIGHT_GRAY);
-		{
-			Rectangle2D.Double rectangle2d = new Rectangle2D.Double();
-			rectangle2d.setFrameFromDiagonal(blankArea.getLeft(), blankArea.getTop(),
-					currentWidth - blankArea.getRight(), currentHeight - blankArea.getBottom());
-			g2d.draw(rectangle2d);
-		}
-
-		Rectangle2D.Double rectangle2d = new Rectangle2D.Double();
-		rectangle2d.setFrameFromDiagonal(canvasCenter.getX() - halfWorkRadius, blankArea.getTop() + halfWorkRadius,
-				canvasCenter.getX() + halfWorkRadius, currentHeight - blankArea.getBottom());
-		g2d.draw(rectangle2d);
-
-		Line2D.Double line = new Line2D.Double();
-		line.setLine(rectangle2d.getX(), rectangle2d.getY(), rectangle2d.getX() + rectangle2d.getWidth(),
-				rectangle2d.getY() + rectangle2d.getHeight());
-		g2d.draw(line);
-		line.setLine(rectangle2d.getX(), rectangle2d.getY() + rectangle2d.getHeight(),
-				rectangle2d.getX() + rectangle2d.getWidth(), rectangle2d.getY());
-		g2d.draw(line);
-
-
-		{
-			Ellipse2D.Double ellipse = new Ellipse2D.Double();
-			ellipse.setFrameFromCenter(canvasCenter.getX(), canvasCenter.getY(), canvasCenter.getX() - globalRadicus,
-					canvasCenter.getY() - globalRadicus);
-			g2d.draw(ellipse);
-		}
-
-		Arc2D.Double arc2d = new Arc2D.Double();
-		arc2d.setFrameFromCenter(topCircleCenter.getX(), topCircleCenter.getY(),
-				topCircleCenter.getX() - halfWorkRadius, topCircleCenter.getY() - halfWorkRadius);
-		arc2d.setAngleStart(0);
-		arc2d.setAngleExtent(180); // 180度表示半圆
-		g2d.draw(arc2d);
-
-		{
-			g2d.setColor(Color.black);
-			// canvas center
-			Ellipse2D.Double ellipse = new Ellipse2D.Double();
-			ellipse.setFrameFromCenter(canvasCenter.getX(), canvasCenter.getY(), canvasCenter.getX() - 5,
-					canvasCenter.getY() - 5);
-			g2d.fill(ellipse);
-
-		}
-	}
 }

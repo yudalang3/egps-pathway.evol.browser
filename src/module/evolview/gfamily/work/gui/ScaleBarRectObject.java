@@ -5,6 +5,8 @@ import module.evolview.model.tree.ScaleBarProperty;
 
 import java.awt.*;
 
+/** @deprecated Legacy programmatic adapter; the GUI no longer moves scale bars with the mouse. */
+@Deprecated
 public class ScaleBarRectObject extends RectObj{
 	
 	final ScaleBarProperty scaleBarProperty;

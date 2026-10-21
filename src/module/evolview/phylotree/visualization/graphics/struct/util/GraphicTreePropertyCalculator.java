@@ -124,7 +124,7 @@ public class GraphicTreePropertyCalculator {
 			int childCount = root.getChildCount();
 			for (int i = 0; i < childCount; i++) {
 				GraphicsNode child = (GraphicsNode) root.getChildAt(i);
-				boolean success = newroot.setChildAt(i, clone(child));
+				newroot.setChildAt(i, clone(child));
 			}
 		}
 		return newroot;

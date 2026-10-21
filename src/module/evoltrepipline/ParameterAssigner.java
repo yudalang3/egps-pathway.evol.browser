@@ -6,7 +6,7 @@ package module.evoltrepipline;
  * Note: Distance calculator configuration was moved to evoldist.operator.DistanceParameterConfigurer
  * to break circular dependency (evoldist ↔ evoltrepipline).
  *
- * This class is kept for backwards compatibility and may be deprecated in the future.
+ * This deprecated class is kept for backwards compatibility.
  *
  * @author yudalang
  * @deprecated Configuration methods have been moved to specific packages to break circular dependencies.

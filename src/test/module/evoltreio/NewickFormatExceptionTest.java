@@ -26,6 +26,9 @@ public class NewickFormatExceptionTest {
 		System.out.println("Passed: " + passCount);
 		System.out.println("Failed: " + failCount);
 		System.out.println("Total: " + (passCount + failCount));
+		if (failCount != 0) {
+			throw new AssertionError(failCount + " Newick exception checks failed");
+		}
 	}
 
 	private static void testFormatConfigValidation() {
@@ -125,7 +128,7 @@ public class NewickFormatExceptionTest {
 				NewickSyntaxException.SyntaxErrorType.UNMATCHED_PARENTHESIS,
 				"((A,B);", 0, ")", "end of string");
 		String msg2 = e2.getMessage();
-		if (msg2.contains("parenthesis") && msg2.contains("position 0")) {
+		if (msg2.contains("parenthesis") && msg2.contains("Position: 0") && e2.getPosition() == 0) {
 			pass("  Unmatched parenthesis exception has position");
 		} else {
 			fail("  Unmatched parenthesis exception message: " + msg2);
@@ -209,7 +212,7 @@ public class NewickFormatExceptionTest {
 		NewickParseException e1 = new NewickParseException(
 				"Invalid character", longNewick, 30);
 		String msg1 = e1.getMessage();
-		if (msg1.contains("Context") && msg1.contains("position 30")) {
+		if (msg1.contains("Context") && msg1.contains("Position: 30") && e1.getPosition() == 30) {
 			pass("  Context displayed for mid-string error");
 		} else {
 			fail("  Context not displayed: " + msg1);

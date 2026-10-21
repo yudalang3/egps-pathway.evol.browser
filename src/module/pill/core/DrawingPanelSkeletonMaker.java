@@ -8,8 +8,6 @@ import module.pill.images.ImageUtils;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTextBox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -24,7 +22,6 @@ import java.net.URL;
 import java.util.List;
 
 public class DrawingPanelSkeletonMaker extends JPanel {
-	private static final Logger logger = LoggerFactory.getLogger(DrawingPanelSkeletonMaker.class);
 
 	private static final long serialVersionUID = -9172512258793454429L;
 

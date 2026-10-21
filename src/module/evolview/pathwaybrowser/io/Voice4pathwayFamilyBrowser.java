@@ -9,14 +9,11 @@ import module.evolview.moderntreeviewer.io.TreeParser4MTV;
 import module.evolview.moderntreeviewer.io.TreePropertiesAssigner;
 import module.evolview.pathwaybrowser.PathwayFamilyMainFace;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.Optional;
 
 public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPanel {
-	private static final Logger log = LoggerFactory.getLogger(Voice4pathwayFamilyBrowser.class);
 	private final PathwayFamilyMainFace pathwayFamilyMainFace;
 	private final ParamsAssignerAndParser4pathwayFamBrowser paramsAssignerAndParser4pathwayFamBrowser = new ParamsAssignerAndParser4pathwayFamBrowser();
 

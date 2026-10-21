@@ -86,8 +86,7 @@ public class BinaryTree<E extends Comparable<E>> extends AbstractTree<E> {
 	 */
 	@Override
 	public boolean delete(E e) {
-		// Locate the node to be deleted and also locate its parent node
-		TreeNode parent = null;
+		// Locate the node to be deleted.
 		TreeNode current = root;
 		
 

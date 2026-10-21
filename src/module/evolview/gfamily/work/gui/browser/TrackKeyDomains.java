@@ -5,8 +5,6 @@ import module.evolview.gfamily.work.calculator.browser.LocationCalculator;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyElement;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertyKeyDomains;
 import module.evolview.gfamily.work.gui.browser.draw.DrawingPropertySequenceModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -20,7 +18,6 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class TrackKeyDomains extends AbstractTrackPanel {
 
-	private static final Logger logger = LoggerFactory.getLogger(TrackKeyDomains.class);
 
 	private CalculatorKeyDomains calculatorElementStructure;
 	private DrawingPropertyKeyDomains paintElements;

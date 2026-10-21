@@ -245,19 +245,41 @@ public class TreeSelectionRegressionTest {
         equal(f.a.getXSelf(), ax, "Panning does not edit selected nodes");
         require(f.properties.getSelectedNodes().size() == 2, "Panning retains selection");
 
+        for (boolean creative : new boolean[] {false, true}) {
+            f = new Fixture(TreeLayout.RECT_PHYLO_LEFT, creative);
+            f.tree.setTreePanelScale(200, 200);
+            f.viewport.doLayout();
+            f.viewport.setViewPosition(new Point(200, 200));
+            f.properties.setShowScaleBar(true);
+            var scale = f.tree.getScaleBarProperty();
+            scale.setxLocation(300); scale.setyLocation(300);
+            ax = f.a.getXSelf();
+            f.event(MouseEvent.MOUSE_MOVED, new Point(310, 305), 0);
+            require(f.tree.getCursor().getType() == Cursor.DEFAULT_CURSOR, "Scale has no special hover cursor");
+            f.drag(new Point(310, 305), new Point(270, 265), 0);
+            require(f.viewport.getViewPosition().equals(new Point(240, 240)), "Scale region uses ordinary panning");
+            equal(scale.getxLocation(), 300, "Panning does not move scale X");
+            equal(scale.getyLocation(), 300, "Panning does not move scale Y");
+            equal(f.a.getXSelf(), ax, "Panning does not edit nodes");
+        }
+
         f = new Fixture(TreeLayout.RECT_PHYLO_LEFT, true);
         f.select(f.a, f.c);
         f.properties.setShowScaleBar(true);
-        var rect = f.tree.getTreeListener().getScaleBarListenerObj();
-        rect.x = 10; rect.y = 10; rect.w = 50; rect.h = 20;
+        var scale = f.tree.getScaleBarProperty();
+        scale.setxLocation(10); scale.setyLocation(10);
         ax = f.a.getXSelf();
         f.drag(new Point(20, 15), new Point(50, 35), 0);
-        equal(rect.x, 40, "Scale bar moves independently in creative mode");
-        equal(rect.y, 30, "Scale bar retains click offset");
-        equal(f.a.getXSelf(), ax, "Scale dragging does not edit selected nodes");
-        f.drag(new Point(50, 35), new Point(80, 55), CTRL);
-        equal(rect.x, 40, "Ctrl box takes priority over scale dragging");
-        equal(f.a.getXSelf(), ax, "Ctrl box takes priority over group editing");
+        equal(f.a.getXSelf(), ax + 30, "Scale region uses existing creative group editing");
+        equal(scale.getxLocation(), 10, "Creative editing does not move scale X");
+        equal(scale.getyLocation(), 10, "Creative editing does not move scale Y");
+        ax = f.a.getXSelf();
+        f.drag(new Point(20, 15), new Point(50, 35), CTRL);
+        equal(f.a.getXSelf(), ax, "Ctrl box takes priority over creative editing");
+        equal(scale.getxLocation(), 10, "Ctrl box does not move scale X");
+        equal(scale.getyLocation(), 10, "Ctrl box does not move scale Y");
+        String help = module.evolview.moderntreeviewer.gui.TreeParameterTooltips.scaleHelp(false, true, true, "");
+        require(!help.contains("<b>Move:</b>") && !help.contains("Drag the scale"), "Help does not advertise scale dragging");
     }
 
     public static void main(String[] args) throws Exception {

@@ -8,7 +8,6 @@ PERFORMANCE OF THE PROGRAM AND DOCUMENTATION REMAINS WITH THE USER.
 */
 
 import java.awt.*;
-import java.util.Hashtable;
 
 /**
  *
@@ -62,7 +61,6 @@ public class VerticalLayout implements LayoutManager {
 	private int alignment; // LEFT, RIGHT, CENTER or BOTH...how the components are justified
 	private int anchor; // TOP, BOTTOM or CENTER ...where are the components positioned in an overlarge
 						// space
-	private Hashtable comps;
 
 //Constructors
 	/**

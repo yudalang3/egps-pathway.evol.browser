@@ -58,7 +58,6 @@ public class MafPositionConvetor {
 
 		MafFastaParser mfp = new MafFastaParser(file);
 
-		int numOfLines = 0;
 
 		while (mfp.parseBlocks()) {
 			MafBlock block = mfp.getBlock();
@@ -70,12 +69,6 @@ public class MafPositionConvetor {
 			if (chromosomePositionHandler != null) {
 				chromosomePositionHandler.handleOneMafBlock(lines, inputIndex);
 			}
-
-//        	numOfLines ++;
-//        	
-//        	if (numOfLines > 10 ) {
-//				break;
-//			}
 
 		}
 		mfp.close();

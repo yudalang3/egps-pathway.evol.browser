@@ -186,16 +186,18 @@ public class TreeViewStateRegressionTest {
         computations = tree.calculations; refreshes = tree.refreshes;
         bootstrap.doClick();
         require(tree.getLayoutProperties().getShowInnerNodePropertiesInfo().isShowInternalNodeBootstrap(), "Bootstrap icon commits model");
-        require(tree.calculations == computations && tree.refreshes == refreshes + 1, "Bootstrap click only redraws once");
+        require(tree.calculations == computations + 1 && tree.refreshes == refreshes + 1,
+                "Bootstrap click reflows label geometry and refreshes once");
         tree.getLayoutProperties().setShowTitle(true);
         tree.getLayoutProperties().setShowAxisBar(true);
         tree.getLayoutProperties().setShowWidthAndHeightString(true);
         tree.getLayoutProperties().setShowNodeBranchLength(true);
         tree.getLayoutProperties().getShowInnerNodePropertiesInfo().setShowInternalNodeLabel(true);
         tree.notifyTreeViewStateChanged();
-        require(controls.get(2).isSelected() && controls.get(3).isSelected() && controls.get(4).isSelected()
+        require(controls.get(2).isSelected() && controls.get(4).isSelected()
                 && controls.get(5).isSelected() && controls.get(6).isSelected(), "All model flags populate icons");
-        require(!controls.get(3).isEnabled(), "Plain circular layout does not draw an axis");
+        require(!controls.get(3).isEnabled() && !controls.get(3).isSelected() && tree.getLayoutProperties().isShowAxisBar(),
+                "Unsupported axis icon is off while the stored preference remains enabled");
         tree.updateViewAccording2TreeLayout(TreeLayout.OUTER_CIR_PHYLO_ALIGNED);
         require(controls.get(3).isEnabled() && controls.get(3).isSelected(), "Supported axis restores preference");
         screenshot(operation, pathway ? "pathway-operation" : "gene-operation");

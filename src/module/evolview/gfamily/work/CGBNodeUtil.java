@@ -3,14 +3,12 @@ package module.evolview.gfamily.work;
 import evoltree.struct.ArrayBasedNode;
 import evoltree.struct.EvolNode;
 import evoltree.struct.util.EvolNodeUtil;
-import module.evoltre.mutation.IMutation4Rec;
 import module.evolview.model.tree.CGBID;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.model.tree.NodeWithCGBID;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
 
@@ -605,54 +603,6 @@ public class CGBNodeUtil {
 		return Optional.ofNullable(ret.get());
 	}
 
-	/**
-	 * 
-	 * 它会处理好，剩下一个sibling的情况。
-	 * 
-	 * 注意：这里的inferMutaiton from two state after mutations list
-	 * 不是严格相等的，也就是说N->A不算一个突变。
-	 * yudalang: 因为程序没有用严格相等的参数导致了一个处理模糊碱基的逻辑错误,现在有点好奇当初不知道为什么没有执行严格的相等
-	 * 
-	 * @title deleteOneNode
-	 * @createdDate 2021-03-05 15:26
-	 * @lastModifiedDate 2021-03-05 15:26
-	 * @author yudalang
-	 * @since 1.7
-	 * 
-	 * @return void
-	 */
-
-	private static List<IMutation4Rec> inferMutationsForBinaryForkRemoveOneNode(NodeWithCGBID parent,
-                                                                                List<IMutation4Rec> mutOfParent, List<IMutation4Rec> mutsOfSister) throws ParseException {
-
-//		List<StateAfterMutation> fromStates = null;
-//		WholeGenomeRecover0304 wholeGenomeRecover2 = getWholeGenomeRecover();
-//		if (parent == null) {
-//			fromStates = wholeGenomeRecover2.getRootStatesAfterMutations();
-//		} else {
-//			Node4BasicNCov19 grandParent = (Node4BasicNCov19) parent.getParent();
-//			if (grandParent == null) {
-//				fromStates = wholeGenomeRecover2.getRootStatesAfterMutations();
-//			} else {
-//				List<IMutation4Rec> allMutationsFromRoot = NodeMutationOperator.getAllMutationsFromRoot(grandParent);
-//				fromStates = wholeGenomeRecover2.processAllMutation(allMutationsFromRoot);
-//			}
-//
-//		}
-//
-//		List<StateAfterMutation> toStates = MutationOperator.deepCloneListOfStateAfterMutation(fromStates);
-//		for (IMutation4Rec m : mutOfParent) {
-//			wholeGenomeRecover2.processOneMutation(m, toStates);
-//		}
-//		for (IMutation4Rec m : mutsOfSister) {
-//			wholeGenomeRecover2.processOneMutation(m, toStates);
-//		}
-//
-//		
-//		return getStatesDissector().inferMutationsOfTwoListsOfStateAfterMutationsStrictly(fromStates, toStates,
-//				wholeGenomeRecover2.getRefGenomeSequence());
-		return null;
-	}
 
 	public static GraphicsNode convertBasicNode2graphicsNode(NodeWithCGBID node) {
 		Function<NodeWithCGBID, GraphicsNode> generateNewRoot = root -> {

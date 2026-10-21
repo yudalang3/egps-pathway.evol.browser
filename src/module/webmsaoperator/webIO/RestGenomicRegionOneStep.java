@@ -37,7 +37,6 @@ public class RestGenomicRegionOneStep {
 	private boolean isSuccessful2GetPosition = false;
 	
 	//following codes are for multip step way to use this class
-	private int processIndex = 1;
 
 	public RestGenomicRegionOneStep() {
 	}
@@ -164,32 +163,6 @@ public class RestGenomicRegionOneStep {
 	 * @return true if we still need to call this method else means finished
 	 * @author yudalang
 	 */
-	/*public boolean getRegionStringMultiStep() {
-		switch (processIndex) {
-		case 1:
-			step1();
-			processIndex++;
-			break;
-		case 2:
-			step2();
-			processIndex++;
-			break;
-		case 3:
-			step3();
-			processIndex++;
-			break;
-		case 4:
-			step4();
-			processIndex++;
-			break;
-		default://processIndex more than last case!
-			
-		}
 
-		return true;
-	}
-	private void step1() {
-		
-	}*/
 
 }

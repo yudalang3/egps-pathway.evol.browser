@@ -1,6 +1,5 @@
 package module.evolview.pathwaybrowser.gui;
 
-import org.apache.poi.xslf.usermodel.XSLFSlide;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +7,6 @@ import java.awt.*;
 @SuppressWarnings("serial")
 public class EvoSelectionPressurePanel extends JPanel {
 
-	private XSLFSlide firstSlide;
 
 	public EvoSelectionPressurePanel(String path) {
 

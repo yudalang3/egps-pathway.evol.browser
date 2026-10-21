@@ -14,7 +14,6 @@ public class MouseListenerGeneStructure extends AbstractMouseListener {
     private boolean startDrag;
     private boolean endDrag;
     private boolean moveDrag;
-    private int trackHeight = 200;
 
     public MouseListenerGeneStructure(BrowserPanel genomeMain) {
 

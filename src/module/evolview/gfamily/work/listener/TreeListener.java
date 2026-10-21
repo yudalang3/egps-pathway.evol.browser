@@ -15,8 +15,6 @@ import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.apache.commons.compress.utils.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +31,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class TreeListener extends MouseAdapter implements KeyListener {
-	private static final Logger logger = LoggerFactory.getLogger(TreeListener.class);
 
 	private static final long TIME_DIFFERENCE_FOR_IDLE = 300;
 	private long lastMoveTime;
@@ -49,12 +46,12 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 	private final Line2D.Double repeatLine = new Line2D.Double();
 
+	@SuppressWarnings("deprecation") // Lazy storage for the public compatibility accessor only.
 	private RectObj scaleBarRectAdjust;
-	private boolean whetherScaleBarSelectedInDrag = false;
 
 	private Point origin;
 	private boolean isDragging = false;
-	private enum Gesture { NONE, SELECT, PAN, EDIT, SCALE }
+	private enum Gesture { NONE, SELECT, PAN, EDIT }
 	private Gesture gesture = Gesture.NONE;
 	private MouseEvent pressedEvent;
 	private GroupDragSession groupDrag;
@@ -91,6 +88,10 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		return treeLayoutProperties;
 	}
 
+	/**
+	 * @deprecated Retained for binary compatibility. Scale bars no longer handle mouse gestures.
+	 */
+	@Deprecated
 	public RectObj getScaleBarListenerObj() {
 		if (scaleBarRectAdjust == null) {
 			scaleBarRectAdjust = new ScaleBarRectObject(phylogeneticTreePanel.getScaleBarProperty());
@@ -117,10 +118,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 				Point end = arg0.getPoint();
 				rect4selectArea.setFrame(Math.min(origin.x, end.x), Math.min(origin.y, end.y),
 						Math.abs(end.x - origin.x), Math.abs(end.y - origin.y));
-				phylogeneticTreePanel.repaint();
-			}
-			case SCALE -> {
-				getScaleBarListenerObj().adjustPaintings(arg0.getX(), arg0.getY());
 				phylogeneticTreePanel.repaint();
 			}
 			case EDIT -> {
@@ -222,16 +219,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 		Component component = e.getComponent();
 
-		if (phylogeneticTreePanel.supportsScaleBar() && getTreeLayoutProperties().isShowScaleBar()) {
-			boolean contains = getScaleBarListenerObj().contains(point.getX(), point.getY());
-			if (contains) {
-				component.setCursor(Cursor.getPredefinedCursor(getScaleBarListenerObj().getCursorType()));
-				return;
-			} else {
-				component.setCursor(Cursor.getDefaultCursor());
-			}
-		}
-
 		Optional<GraphicsNode> optRet = judgeSelectedNode(point);
 		// Need to complete
 		if (optRet.isPresent()) {
@@ -312,7 +299,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 			}
 			phylogeneticTreePanel.notifyTreeViewStateChanged();
 			refreshPropertiesPanel();
-		} else if (gesture != Gesture.NONE && gesture != Gesture.SCALE) {
+		} else if (gesture != Gesture.NONE) {
 			actionForMouseClick(pressedEvent);
 		}
 		resetGesture();
@@ -326,7 +313,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		groupDrag = null;
 		gesture = Gesture.NONE;
 		isDragging = false;
-		whetherScaleBarSelectedInDrag = false;
 	}
 
 	@Override
@@ -341,18 +327,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		pressedEvent = arg0;
 		if (arg0.isControlDown()) {
 			gesture = Gesture.SELECT;
-			return;
-		}
-		if (treeLayoutProperties.isShowScaleBar() && phylogeneticTreePanel.supportsScaleBar()) {
-			Point point = arg0.getPoint();
-			boolean contains = getScaleBarListenerObj().contains(point.getX(), point.getY());
-			if (contains) {
-				getScaleBarListenerObj().setFirstPressedPoint(point.x, point.y);
-			}
-			this.whetherScaleBarSelectedInDrag = contains;
-		}
-		if (whetherScaleBarSelectedInDrag) {
-			gesture = Gesture.SCALE;
 			return;
 		}
 		if (treeLayoutProperties.isCreativeMode()) {
@@ -551,7 +525,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 
 		double distanceSq = point.distanceSq(xSelf, ySelf);
 
-//		logger.info("The dis is {}", distanceSq);
 		if (distanceSq < 10 * 10) {
 			return true;
 		}

@@ -24,7 +24,6 @@ public class CtrlGenomeBrowserPanel extends BaseCtrlPanel {
 	private final JButton moveOneRight;
 	private final JButton moveTwoRight;
 	private final JButton moveThreeRight;
-	private final int moveUnitLength = 1000;
 
 	private JSpinner spinnerWindowStep;
 	private JSpinner spinnerWindowSize;

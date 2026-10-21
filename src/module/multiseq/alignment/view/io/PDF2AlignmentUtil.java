@@ -59,9 +59,6 @@ public class PDF2AlignmentUtil {
 
 	}
 
-	private void exportDataWithContinuousAll(File outputFile) throws Exception {
-
-	}
 
 	private void exportDataWithLocalView(File outputFile) throws Exception {
 		OutputStream stream = new FileOutputStream(outputFile);

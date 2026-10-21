@@ -1,12 +1,10 @@
 package module.remnant.datapanel;
 
 import egps2.UnifiedAccessPoint;
-import egps2.modulei.IModuleLoader;
 import egps2.panels.dialog.SwingDialog;
 import module.remnant.datapanel.data.DataType;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -50,60 +48,6 @@ public class RightSuitableMethodsArea extends JPanel {
 		// shell.setLayout(new JideBoxLayout(shell,JideBoxLayout.Y_AXIS, 10));
 	}
 
-	/**
-	 * Add a button to the right pane in Default panel. Its title is @param tet, and
-	 * its states is
-	 * 
-	 * @param isDisable set the state of button.
-	 * @param text      tooltip content of the button.
-	 * 
-	 * @author ydl, yfq , mhl
-	 * @date 2018-7-30
-	 * @modify 2024-04-02
-	 */
-	private void addButton(String text, boolean isDisable, IModuleLoader moduleCommon) {
-		GraphicMehtodButton jButton = new GraphicMehtodButton(text, () -> {
-			revalidate();
-		});
-		jButton.setToolTipText(text);
-		jButton.setFont(defaultFont);
-		jButton.setEnabled(!isDisable);
-		jButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		jButton.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-		jButton.setAlignmentY(JLabel.CENTER_ALIGNMENT);
-		jButton.setOpaque(true);
-		jButton.setBackground(new Color(233, 233, 233));
-		jButton.setBorder(new EmptyBorder(20, 10, 20, 10));
-
-		Dimension dimension = new Dimension(180, 70);
-
-		JPanel jPanel = new JPanel(new GridLayout());
-		jPanel.setBorder(BorderFactory.createRaisedBevelBorder());
-		jPanel.add(jButton);
-		jPanel.setPreferredSize(dimension);
-		jPanel.setMaximumSize(dimension);
-
-		shell.add(jPanel);
-		shell.add(Box.createVerticalStrut(10));
-
-//		if (moduleCommon instanceof AbstractVCFMethod) {
-//			AbstractVCFMethod abstractVCFMethod = (AbstractVCFMethod) moduleCommon;
-//			RightMethodButton methodButton = new RightMethodButton(jButton, abstractVCFMethod, myDataEventManager.getDefaultPanel());
-//			methodButtons.add(methodButton);
-//		}else if (moduleCommon instanceof MethodsForMAF2TreeViewer) {
-//			MethodsForMAF2TreeViewer abstractMAFMethod = (MethodsForMAF2TreeViewer) moduleCommon;
-//			RightMethodButton methodButton = new RightMethodButton(jButton, abstractMAFMethod, myDataEventManager.getDefaultPanel());
-//			methodButtons.add(methodButton);
-//		}else if(moduleCommon instanceof MethodsForMAF2Distance) {
-//			MethodsForMAF2Distance abstractMAFMethod = (MethodsForMAF2Distance) moduleCommon;
-//			RightMethodButton methodButton = new RightMethodButton(jButton, abstractMAFMethod, myDataEventManager.getDefaultPanel());
-//			methodButtons.add(methodButton);
-//		}else {
-//			RightMethodButton methodButton = new RightMethodButton(jButton, moduleCommon);
-//			methodButtons.add(methodButton);
-//		}
-
-	}
 
 	public void clearButtons() {
 		methodButtons.clear();

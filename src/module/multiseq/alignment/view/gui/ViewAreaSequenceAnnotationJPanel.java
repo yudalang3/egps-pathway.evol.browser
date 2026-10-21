@@ -53,7 +53,6 @@ public class ViewAreaSequenceAnnotationJPanel extends JPanel implements MouseLis
 
 	@Override
 	public boolean contains(int x, int y) {
-		boolean inShape = false;
 		if (toolTipOn) {
 			if (shape == null) {
 				setToolTipText(null);

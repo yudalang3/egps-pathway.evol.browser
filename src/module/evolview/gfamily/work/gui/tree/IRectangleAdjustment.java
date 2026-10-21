@@ -1,5 +1,7 @@
 package module.evolview.gfamily.work.gui.tree;
 
+/** @deprecated Legacy scale-bar adjustment API, retained for compatibility. */
+@Deprecated
 public interface IRectangleAdjustment {
 	
 	boolean contains(double x, double y);

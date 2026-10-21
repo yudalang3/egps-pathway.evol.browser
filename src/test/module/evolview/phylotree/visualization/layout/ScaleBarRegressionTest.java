@@ -6,7 +6,6 @@ import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.para.TreeSettings;
 import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.model.tree.ScaleBarProperty;
-import module.evolview.gfamily.work.gui.ScaleBarRectObject;
 import module.evolview.pathwaybrowser.io.ImporterBean4PathwayFamilyBrowser;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 import module.evolview.moderntreeviewer.io.TreeParser4MTV;
@@ -124,11 +123,8 @@ public class ScaleBarRegressionTest {
                 close(pixels / value, edge / leaf.getRealBranchLength(), "Scale matches drawn branch: " + type);
                 require(scale.getLabel().endsWith("MYA"), "Scale unit");
                 require(new Rectangle(1000, 700).contains(scale.getBounds()), "Scale fits canvas");
-                ScaleBarRectObject drag = new ScaleBarRectObject(scale);
-                require(drag.contains(scale.getBounds().getCenterX(), scale.getBounds().getMaxY() - 1), "Label is draggable");
-                drag.setFirstPressedPoint((int) scale.getxLocation(), (int) scale.getyLocation());
-                drag.adjustPaintings(5000, 5000);
-                require(new Rectangle(1000, 700).contains(scale.getBounds()), "Drag clamped");
+                scale.setxLocation(5000); scale.setyLocation(5000);
+                require(new Rectangle(1000, 700).contains(scale.getBounds()), "Programmatic location remains clamped");
                 scale.setxLocation(120); scale.setyLocation(15);
             }
             properties.setNeedReverseAxisBar(true);

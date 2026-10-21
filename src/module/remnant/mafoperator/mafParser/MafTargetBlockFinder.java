@@ -54,7 +54,6 @@ public class MafTargetBlockFinder {
 
 		MafFastaParser mfp = new MafFastaParser(mafFile);
 
-		int numOfLines = 0;
 
 		while (mfp.parseBlocks()) {
 			MafBlock block = mfp.getBlock();
@@ -66,12 +65,6 @@ public class MafTargetBlockFinder {
 					chromosomePositionHandler.handleOneMafBlock(mafLine,lines);
 				}
 			}
-
-//        	numOfLines ++;
-//        	
-//        	if (numOfLines > 2000 ) {
-//				break;
-//			}
 
 		}
 		mfp.close();

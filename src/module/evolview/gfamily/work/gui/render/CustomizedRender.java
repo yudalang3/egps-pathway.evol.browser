@@ -22,7 +22,6 @@ public class CustomizedRender implements IColorRenderer {
 	private static int INDEX_OF_TYPE = 1;
 	private static int INDEX_OF_COLOR = 2;
 
-	private static final String TYPE_SELF = "self";
 	private static final String TYPE_ALL = "all";
 	private static final String BEFORE_RENDER_HEADER = "##RENDER_SCHEME=";
 

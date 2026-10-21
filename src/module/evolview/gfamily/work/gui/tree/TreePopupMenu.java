@@ -74,7 +74,6 @@ public class TreePopupMenu {
 
 	protected final String BUTTOM_HTML_STRING = "<br><i>Right click or left click with alt to see more information<br>"
 			+ "Right click and open new tab to see clade</i>";
-	private JMenuItem pasteNodeAsSiblingJMenuItem;
 	private JMenuItem detachNodeMenuItem;
 	private JMenuItem clearAnnotaton4blinkArea;
 	private JMenuItem clearCollapseNode;
@@ -83,8 +82,6 @@ public class TreePopupMenu {
 	private JMenuItem removeAllSelections;
 	private JMenuItem removeCustomizedColors;
 	protected JMenuItem selectDescendants;
-	private JMenuItem exportItem;
-	private JMenuItem refreshMutationFreq;
 
 	private JMenuItem displayNodeNameMenuItem;
 
@@ -140,23 +137,6 @@ public class TreePopupMenu {
 
 		return displayNodeNameMenuItem;
 	}
-
-// 这个功能暂时都去掉了
-//	private JMenuItem pasteNodeAsSiblingJMenuItem() {
-//
-//		pasteNodeAsSiblingJMenuItem = new JMenuItem("Paste node as sibling");
-//		pasteNodeAsSiblingJMenuItem.setToolTipText("Detach this node or cut this node.");
-//		pasteNodeAsSiblingJMenuItem.addActionListener(e -> {
-//			SwingUtilities.invokeLater(() -> {
-//				GraphicsNode element = tempDebugTuple.getElement();
-//				currNode.getParent().addChild(element);
-//				tempDebugTuple.setElement(null);
-//				controller.reCalculateTreeLayoutAndRefreshViewPort();
-//			});
-//		});
-//
-//		return pasteNodeAsSiblingJMenuItem;
-//	}
 
 	public void displayMoreInformation4leaf(GraphicsNode selectedNode) {
 		List<String> lists = new ArrayList<>();
@@ -942,34 +922,12 @@ public class TreePopupMenu {
 		phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
 	}
 
-	private JMenuItem getExportItem() {
-		if (exportItem == null) {
-			exportItem = new JMenuItem("Export");
-			exportItem.setIcon(IconObtainer.get("Export.png"));
-			exportItem.setToolTipText("Export pictures or data.");
-			exportItem.addActionListener(e -> {
-				exportPicturesOrData();
-			});
-		}
-		return exportItem;
-	}
 
 	protected void exportPicturesOrData() {
 
 //		controller.saveViewPanelAs();
 	}
 
-	private JMenuItem getRefreshMutationFreq() {
-		if (refreshMutationFreq == null) {
-			refreshMutationFreq = new JMenuItem("Refresh mutation freq.");
-			// refreshMutationFreq.setIcon(SarsCov2Icons.get("Export.png"));
-			refreshMutationFreq.setToolTipText("Refresh the mutation freq tarck in the genome browser.");
-			refreshMutationFreq.addActionListener(e -> {
-				refreshMutationFrequency();
-			});
-		}
-		return refreshMutationFreq;
-	}
 
 	public void refreshMutationFrequency() {
 		Runnable act = () -> {
@@ -1049,9 +1007,6 @@ public class TreePopupMenu {
 //		popLeafRigtClick.add(getDisplayGenomicMutationPresenterItem());
 //		popLeafRigtClick.add(getDisplayAAMutationPresenterItem());
 
-//		JMenuItem pasteNodeAsSiblingJMenuItem = pasteNodeAsSiblingJMenuItem();
-//		pasteNodeAsSiblingJMenuItem.setEnabled(tempDebugTuple.getElement() != null);
-//		popLeafRigtClick.add(pasteNodeAsSiblingJMenuItem);
 
 	}
 
@@ -1069,8 +1024,6 @@ public class TreePopupMenu {
 		getShowInRightByCurrentRootJMenuItem().setEnabled(!collapse);
 
 		// 下面这个功能现在用不到
-//		JMenuItem pasteNodeAsSiblingJMenuItem = pasteNodeAsSiblingJMenuItem();
-//		pasteNodeAsSiblingJMenuItem.setEnabled(tempDebugTuple.getElement() != null);
 
 		return popInternalNodeRightClick;
 	}

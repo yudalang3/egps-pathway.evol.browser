@@ -98,7 +98,6 @@ public class ViewAreaSequenceNameJPanel extends JPanel implements MouseListener,
 
 	@Override
 	public boolean contains(int x, int y) {
-		boolean inShape = false;
 		if (toolTipOn) {
 			if (shape == null) {
 				setToolTipText(null);

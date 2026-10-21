@@ -37,7 +37,9 @@ public class AligViewAbstractParamsAssignerAndParser extends AbstractParamsAssig
 		return ret;
 	}
 
-	// Legacy API for backward compatibility (deprecated)
+	/**
+	 * @deprecated Use {@link #getImportBean(OrganizedParameterGetter)} for organized parameters.
+	 */
 	@Deprecated
 	public AlignmentImportBean getImportBean(String str) {
 		AlignmentImportBean ret = new AlignmentImportBean();
