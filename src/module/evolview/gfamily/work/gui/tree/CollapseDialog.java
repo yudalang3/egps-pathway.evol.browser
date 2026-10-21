@@ -8,8 +8,11 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.function.BiConsumer;
 import java.util.prefs.Preferences;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CollapseDialog extends JDialog {
+	private static final Logger log = LoggerFactory.getLogger(CollapseDialog.class);
 
 	private final JPanel contentPanel = new JPanel();
 	private BiConsumer<Color, Integer> callBackConsumer;
@@ -32,7 +35,13 @@ public class CollapseDialog extends JDialog {
 	}
 	
 	public CollapseDialog(Color initialColor) {
-		super(UnifiedAccessPoint.getInstanceFrame(), true);
+		this(UnifiedAccessPoint.isGULaunched() ? UnifiedAccessPoint.getInstanceFrame() : null, initialColor);
+	}
+
+	public CollapseDialog(Window owner, Color initialColor) {
+		super(owner, ModalityType.APPLICATION_MODAL);
+		setTitle("Collapse clade");
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -44,7 +53,7 @@ public class CollapseDialog extends JDialog {
 		contentPanel.setLayout(gbl_contentPanel);
 		{
 			JLabel lblTraiangleSize = new JLabel(triangleSize);
-			lblTraiangleSize.setFont(new Font("Arial", Font.PLAIN, 16));
+			lblTraiangleSize.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogContentFont());
 			GridBagConstraints gbc_lblTraiangleSize = new GridBagConstraints();
 			gbc_lblTraiangleSize.insets = new Insets(0, 0, 5, 5);
 			gbc_lblTraiangleSize.gridx = 0;
@@ -53,13 +62,16 @@ public class CollapseDialog extends JDialog {
 		}
 		{
 
-			Preferences userNodeForPackage = Preferences.userNodeForPackage(this.getClass());
-			int previousValue = userNodeForPackage.getInt(triangleSize, 15);
+			int previousValue = 15;
+			try { previousValue = Preferences.userNodeForPackage(getClass()).getInt(triangleSize, 15); }
+			catch (SecurityException error) { log.warn("Collapse size preference is unavailable: {}", error.getMessage()); }
 
 			spinner = new JSpinner();
 			spinner.setModel(new SpinnerNumberModel(15, 1, 30, 1));
-			spinner.setFont(new Font("Arial", Font.PLAIN, 16));
-			spinner.setValue(previousValue);
+			spinner.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogContentFont());
+			spinner.setValue(Math.max(1, Math.min(30, previousValue)));
+			((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setFont(
+					UnifiedAccessPoint.getLaunchProperty().getDialogContentFont());
 			GridBagConstraints gbc_spinner = new GridBagConstraints();
 			gbc_spinner.fill = GridBagConstraints.HORIZONTAL;
 			gbc_spinner.insets = new Insets(0, 0, 5, 0);
@@ -69,7 +81,7 @@ public class CollapseDialog extends JDialog {
 		}
 		{
 			JLabel Color = new JLabel("Color");
-			Color.setFont(new Font("Arial", Font.PLAIN, 16));
+			Color.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogContentFont());
 			GridBagConstraints gbc_Color = new GridBagConstraints();
 			gbc_Color.insets = new Insets(0, 0, 0, 5);
 			gbc_Color.gridx = 0;
@@ -80,13 +92,14 @@ public class CollapseDialog extends JDialog {
 			btnCol = new JButton("Col");
 			btnCol.setIcon(new ColorIcon(initialColor));
 			btnCol.setForeground(initialColor);
-			btnCol.setFont(new Font("Arial", Font.PLAIN, 16));
+			btnCol.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());
 			GridBagConstraints gbc_btnCol = new GridBagConstraints();
 			gbc_btnCol.gridx = 2;
 			gbc_btnCol.gridy = 1;
 			contentPanel.add(btnCol, gbc_btnCol);
 			btnCol.addActionListener(e -> {
 				Color newColor = JColorChooser.showDialog(this, "Choose color", initialColor);
+				if (newColor == null) return;
 				btnCol.setForeground(newColor);
 				btnCol.setIcon(new ColorIcon(newColor));
 			});
@@ -97,7 +110,7 @@ public class CollapseDialog extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("OK");
-				okButton.setFont(new Font("Arial", Font.PLAIN, 16));
+				okButton.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());
 				okButton.addActionListener(e -> {
 					if (callBackConsumer != null) {
 						Color background = btnCol.getForeground();
@@ -105,8 +118,8 @@ public class CollapseDialog extends JDialog {
 						callBackConsumer.accept(background, value);
 					}
 
-					Preferences userNodeForPackage = Preferences.userNodeForPackage(this.getClass());
-					userNodeForPackage.putInt(triangleSize, (int) spinner.getValue());
+					try { Preferences.userNodeForPackage(getClass()).putInt(triangleSize, (int) spinner.getValue()); }
+					catch (SecurityException error) { log.warn("Unable to save collapse size preference: {}", error.getMessage()); }
 					this.dispose();
 				});
 				buttonPane.add(okButton);
@@ -114,7 +127,7 @@ public class CollapseDialog extends JDialog {
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
-				cancelButton.setFont(new Font("Arial", Font.PLAIN, 16));
+				cancelButton.setFont(UnifiedAccessPoint.getLaunchProperty().getDialogButtonFont());
 				cancelButton.addActionListener(e -> {
 					this.dispose();
 				});
@@ -122,7 +135,7 @@ public class CollapseDialog extends JDialog {
 			}
 		}
 
-		this.setLocationRelativeTo(UnifiedAccessPoint.getInstanceFrame());
+		this.setLocationRelativeTo(getOwner());
 		this.setSize(270, 200);
 	}
 
@@ -135,5 +148,9 @@ public class CollapseDialog extends JDialog {
 
 	public void setCallBackConsumer(BiConsumer<Color, Integer> callBackConsumer) {
 		this.callBackConsumer = callBackConsumer;
+	}
+
+	public void setTriangleSize(int size) {
+		spinner.setValue(size);
 	}
 }

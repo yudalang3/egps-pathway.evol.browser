@@ -24,6 +24,8 @@ Documentation follows this convention:
 
 ## Modern Tree View
 
+Context menus, deletion confirmation and leaf information export: [usage guide](modern_tree_view_context_menus.md).
+
 | Topic | English | 中文 |
 |------|---------|------|
 | Initialization mechanism | [modern_tree_view_initial_mechanism.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\modern_tree_view_initial_mechanism.md) | [modern_tree_view_initial_mechanism_zh.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\modern_tree_view_initial_mechanism_zh.md) |

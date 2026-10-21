@@ -103,6 +103,16 @@ public class AnnotationsProperties {
 		});
 	}
 
+	public void retainTreeNodes(Set<GraphicsNode> nodes) {
+		internalNode2LeafAnnos.removeIf(anno -> !nodes.contains(anno.getCurrentGraphicsNode()));
+		internalNode2LeafInsituAnnos.removeIf(anno -> !nodes.contains(anno.getCurrentGraphicsNode()));
+		outterSidewardAnnos.removeIf(anno -> !nodes.contains(anno.getCurrentGraphicsNode()));
+		leafNameAnnos.removeIf(anno -> !nodes.contains(anno.getCurrentGraphicsNode()));
+		Set<Integer> ids = new HashSet<>();
+		for (GraphicsNode node : nodes) ids.add(node.getID());
+		leafNameRenderMap.keySet().retainAll(ids);
+	}
+
 	public boolean hasAnnotation() {
 
 		boolean empty = internalNode2LeafAnnos.isEmpty() && internalNode2LeafInsituAnnos.isEmpty()

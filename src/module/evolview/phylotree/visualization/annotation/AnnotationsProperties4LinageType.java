@@ -101,6 +101,21 @@ public class AnnotationsProperties4LinageType {
 	public Map<Integer, Color> getLeafNameRenderMap() {
 		return leafNameRenderMap;
 	}
+
+	public void retainTreeNodes(Set<GraphicsNode> nodes) {
+		Set<Integer> ids = new HashSet<>();
+		for (GraphicsNode node : nodes) ids.add(node.getID());
+		// Cloned views may share these maps; pruning one tree must not alter another view.
+		nodeID2categlory = new HashMap<>(nodeID2categlory);
+		leafNameRenderMap = new HashMap<>(leafNameRenderMap);
+		nodeID2categlory.keySet().retainAll(ids);
+		leafNameRenderMap.keySet().retainAll(ids);
+		internalNode2LeafInsituAnnos.removeIf(anno -> anno.getCurrentGraphicsNode() != null
+				&& !nodes.contains(anno.getCurrentGraphicsNode()));
+		// Category styles have no node references. Their derived geometry is rebuilt by the layout.
+		sidewardAnno4LinageTypes.clear();
+		internalNode2leafAnno4LinageTypes.clear();
+	}
 	
 	public Map<String, Color> getCateg2colorMap() {
 		return categ2colorMap;

@@ -5,6 +5,7 @@ import egps2.builtin.modules.IconObtainer;
 import egps2.frame.MainFrameProperties;
 import egps2.frame.gui.dialog.DialogMoreInfoGenerator;
 import egps2.panels.dialog.EGPSFileChooser;
+import egps2.panels.dialog.SwingDialog;
 import egps2.utils.common.model.datatransfer.Tuple;
 import evoltree.struct.util.EvolNodeUtil;
 import evoltree.txtdisplay.TreeDrawUnit;
@@ -12,7 +13,6 @@ import module.evoltre.mutation.IMutation4Rec;
 import module.evolview.gfamily.work.gui.dialog.NodeAnnotationDialogContainer;
 import module.evolview.model.enums.BranchLengthType;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.model.tree.NodeUtils;
 import module.evolview.moderntreeviewer.IndependentModuleLoader;
 import module.evolview.phylotree.visualization.graphics.struct.CollapseProperty;
 import module.evolview.phylotree.visualization.layout.BaseLayout;
@@ -21,12 +21,16 @@ import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -36,6 +40,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class TreePopupMenu {
+	private static final Logger log = LoggerFactory.getLogger(TreePopupMenu.class);
 
 	private TreeLayoutProperties treeLayoutProperties;
 
@@ -74,7 +79,6 @@ public class TreePopupMenu {
 
 	protected final String BUTTOM_HTML_STRING = "<br><i>Right click or left click with alt to see more information<br>"
 			+ "Right click and open new tab to see clade</i>";
-	private JMenuItem detachNodeMenuItem;
 	private JMenuItem clearAnnotaton4blinkArea;
 	private JMenuItem clearCollapseNode;
 	private JMenuItem refreshPhylogeneticTreePanel;
@@ -83,7 +87,6 @@ public class TreePopupMenu {
 	private JMenuItem removeCustomizedColors;
 	protected JMenuItem selectDescendants;
 
-	private JMenuItem displayNodeNameMenuItem;
 
 	private PhylogeneticTreePanel phylogeneticTreePanel;
 
@@ -100,48 +103,34 @@ public class TreePopupMenu {
 	}
 
 	private JMenuItem detachNodeJMenuItem() {
-
-		detachNodeMenuItem = new JMenuItem("Detach node");
-		detachNodeMenuItem.setToolTipText("Detach this node or cut this node.");
-		detachNodeMenuItem.addActionListener(e -> {
-			currNode.getParent().removeChild(currNode);
-			this.phylogeneticTreePanel.refreshViewPort();
-		});
-
-		return detachNodeMenuItem;
+		GraphicsNode target = currNode;
+		JMenuItem item = new JMenuItem("Detach node");
+		item.setToolTipText("Confirm removal of this subtree. Keep surviving unary parents and branch lengths.");
+		item.setEnabled(phylogeneticTreePanel.canRemoveSubtree(target));
+		item.addActionListener(e -> phylogeneticTreePanel.removeSubtree(target, false));
+		return item;
 	}
 
 	private JMenuItem getDisplayNodeNameMenuItem() {
-		if (displayNodeNameMenuItem == null) {
-			displayNodeNameMenuItem = new JMenuItem("Display/Hide node name");
-			displayNodeNameMenuItem.setToolTipText("Display or hide node name inidividually");
-			displayNodeNameMenuItem.addActionListener(e -> {
-
-				List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-				if (!selectedNodes.isEmpty()) {
-					for (GraphicsNode graphicsNode : selectedNodes) {
-						TreeDrawUnit drawUnit = graphicsNode.getDrawUnit();
-						drawUnit.setDrawName(!drawUnit.isDrawName());
-					}
-
-					this.phylogeneticTreePanel.weakRefreshViewPort();
-				} else {
-					TreeDrawUnit drawUnit = currNode.getDrawUnit();
-					drawUnit.setDrawName(!drawUnit.isDrawName());
-					this.phylogeneticTreePanel.weakRefreshViewPort();
-				}
-
-			});
-
-		}
-
-		return displayNodeNameMenuItem;
+		GraphicsNode target = currNode;
+		JMenuItem item = new JMenuItem("Display/Hide node name");
+		item.setEnabled(phylogeneticTreePanel.canEditTreeNode(target));
+		item.setToolTipText("Toggle this node's label setting. The global label setting also applies.");
+		item.addActionListener(e -> {
+			if (!phylogeneticTreePanel.canEditTreeNode(target)) return;
+			TreeDrawUnit unit = target.getDrawUnit();
+			unit.setDrawName(!unit.isDrawName());
+			phylogeneticTreePanel.recalculatePreservingZoom();
+		});
+		return item;
 	}
 
 	public void displayMoreInformation4leaf(GraphicsNode selectedNode) {
 		List<String> lists = new ArrayList<>();
-		lists.add("Name: ".concat(selectedNode.getName()));
-		lists.add("Branch length: ".concat(String.valueOf(selectedNode.getLength())));
+		lists.add("Name: " + Objects.toString(selectedNode.getName(), ""));
+		lists.add("Real branch length: " + selectedNode.getRealBranchLength());
+		if (Double.compare(selectedNode.getLength(), selectedNode.getRealBranchLength()) != 0)
+			lists.add("Displayed branch length: " + selectedNode.getLength());
 
 		DialogMoreInfoGenerator dialog = new DialogMoreInfoGenerator(lists);
 		dialog.setTitle("Leaf node information");
@@ -160,50 +149,50 @@ public class TreePopupMenu {
 	}
 
 	private JMenuItem getRecolorJMenuItem4all() {
-		JMenuItem recolor = new JMenuItem("Recolor...");
-		recolor.setIcon(IconObtainer.get("color.png"));
-		recolor.setToolTipText("Recolor this node and its descendents, including internal nodes and leafs.");
-		ActionListener recolorActionListener = e -> {
-			// 直接弹出颜色选择器，不依赖controller
-			Color initialColor = currNode != null ? currNode.getDrawUnit().getLineColor() : Color.BLACK;
-			Color newColor = JColorChooser.showDialog(null, "Choose Color", initialColor);
-			if (newColor != null && currNode != null) {
-				// 只有内节点（有子节点）才询问是否应用到子节点
-				boolean applyToDescendants = false;
-				if (currNode.getChildCount() > 0) {
-					int result = JOptionPane.showConfirmDialog(null,
-							"Apply to all descendant nodes?",
-							"Recolor",
-							JOptionPane.YES_NO_OPTION);
-					applyToDescendants = (result == JOptionPane.YES_OPTION);
-				}
+		GraphicsNode target = currNode;
+		JMenuItem item = new JMenuItem("Recolor...");
+		item.setIcon(IconObtainer.get("color.png"));
+		item.setToolTipText("Recolor this node; optionally include all descendants.");
+		item.addActionListener(e -> {
+			if (!phylogeneticTreePanel.containsTreeNode(target)) return;
+			Color color = chooseBranchColor(target.getDrawUnit().getLineColor());
+			if (color == null) return;
+			int choice = target.getChildCount() == 0 ? JOptionPane.NO_OPTION : chooseRecolorScope();
+			if (choice != JOptionPane.YES_OPTION && choice != JOptionPane.NO_OPTION) return;
+			if (!phylogeneticTreePanel.containsTreeNode(target)) return;
+			for (GraphicsNode node : choice == JOptionPane.YES_OPTION
+					? PhylogeneticTreePanel.subtreeNodes(target) : List.of(target)) node.getDrawUnit().setLineColor(color);
+			phylogeneticTreePanel.notifyTreeViewStateChanged();
+			phylogeneticTreePanel.refreshGraphicSelectionControls();
+			phylogeneticTreePanel.refreshViewPort();
+		});
+		return item;
+	}
 
-				if (applyToDescendants) {
-					TreeOperationUtil.recursiveIterateTreeIF(currNode, node -> {
-						node.getDrawUnit().setLineColor(newColor);
-					});
-				} else {
-					currNode.getDrawUnit().setLineColor(newColor);
-				}
-				phylogeneticTreePanel.refreshViewPort();
-			}
-		};
-		recolor.addActionListener(recolorActionListener);
-		return recolor;
+	protected Color chooseBranchColor(Color initial) {
+		return JColorChooser.showDialog(phylogeneticTreePanel, "Choose Color", initial);
+	}
+
+	protected int chooseRecolorScope() {
+		return JOptionPane.showConfirmDialog(phylogeneticTreePanel, "Apply to all descendant nodes?", "Recolor",
+				JOptionPane.YES_NO_CANCEL_OPTION);
 	}
 
 	private JMenuItem getZoomInThisNodeJMenuItem() {
-		JMenuItem zoomInThisNode = new JMenuItem("Zoom to see node");
-		zoomInThisNode.setIcon(IconObtainer.get("zoomIn2.png"));
-		zoomInThisNode.setToolTipText("Zoom in the area of this node.");
-		zoomInThisNode.addActionListener(e -> {
-			List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-			if (selectedNodes.size() > 0) {
-				phylogeneticTreePanel.discreteZoomInOrOut(2500, 2500);
-				phylogeneticTreePanel.refreshViewPort();
-			}
+		GraphicsNode target = currNode;
+		JMenuItem item = new JMenuItem("Zoom to see node");
+		item.setIcon(IconObtainer.get("zoomIn2.png"));
+		item.setToolTipText("Zoom around this node and center it in the viewport.");
+		item.setEnabled(phylogeneticTreePanel.canEditTreeNode(target));
+		item.addActionListener(e -> {
+			if (!phylogeneticTreePanel.canEditTreeNode(target)) return;
+			phylogeneticTreePanel.continuouslyZoomInOrOut(2500, 2500,
+					new Point((int) target.getXSelf(), (int) target.getYSelf()));
+			SwingUtilities.invokeLater(() -> {
+				if (phylogeneticTreePanel.containsTreeNode(target)) phylogeneticTreePanel.scrollNodeToCenter(target);
+			});
 		});
-		return zoomInThisNode;
+		return item;
 	}
 
 	/**
@@ -213,6 +202,7 @@ public class TreePopupMenu {
 	 */
 	protected JPopupMenu getPopInternalNodeRightClick() {
 
+		GraphicsNode target = currNode;
 		popInternalNodeRightClick = new JPopupMenu();
 
 		JMenuItem showInRightByCurrentRoot = getShowInRightByCurrentRootJMenuItem();
@@ -222,8 +212,9 @@ public class TreePopupMenu {
 		annotation.setToolTipText("Annotate this clade.");
 		annotation.setIcon(IconObtainer.get("Annotation.png"));
 		annotation.addActionListener(e -> {
+			if (!phylogeneticTreePanel.canEditTreeNode(target)) return;
 			NodeAnnotationDialogContainer nodeAnnotationDialog = new NodeAnnotationDialogContainer(
-					phylogeneticTreePanel, currNode);
+					phylogeneticTreePanel, target);
 			phylogeneticTreePanel.setIsShowAnnotation(false);
 			nodeAnnotationDialog.setVisible(true);
 		});
@@ -232,44 +223,41 @@ public class TreePopupMenu {
 		ladderizeUp.setIcon(IconObtainer.get("ladderizeUp.png"));
 		ladderizeUp.setToolTipText("Ladderize up this clade.");
 		ladderizeUp.addActionListener(e -> {
-			SwingUtilities.invokeLater(() -> {
-				EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(currNode, true);
-				phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
-			});
+			if (!phylogeneticTreePanel.canEditTreeNode(target)) return;
+			EvolNodeUtil.initializeSize(target);
+			EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(target, true);
+			phylogeneticTreePanel.completeTreeStructureChange();
 		});
 
 		JMenuItem ladderizeDown = new JMenuItem("Ladderize down");
 		ladderizeDown.setIcon(IconObtainer.get("ladderizeDown.png"));
 		ladderizeDown.setToolTipText("Ladderize down this clade.");
 		ladderizeDown.addActionListener(e -> {
-			SwingUtilities.invokeLater(() -> {
-				EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(currNode, false);
-				phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
-			});
+			if (!phylogeneticTreePanel.canEditTreeNode(target)) return;
+			EvolNodeUtil.initializeSize(target);
+			EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(target, false);
+			phylogeneticTreePanel.completeTreeStructureChange();
 		});
 
 		JMenuItem collapseNode = new JMenuItem("Collapse");
 		collapseNode.setIcon(IconObtainer.get("collapse.png"));
 		collapseNode.setToolTipText("Collapse this node.");
 		collapseNode.addActionListener(e -> {
-			collapseThisNode(currNode);
+			collapseThisNode(target);
 		});
 
 		JMenuItem clearCollapseNode = new JMenuItem("Un-collapse this node");
 		clearCollapseNode.setIcon(IconObtainer.get("recoverCollapse.png"));
 		clearCollapseNode.setToolTipText("Recover this collapsed node.");
 		clearCollapseNode.addActionListener(e -> {
-			unCollapseThisNode(currNode);
+			unCollapseThisNode(target);
 		});
 
 		JMenuItem swapNodeJMenuItem = new JMenuItem("Swap nodes");
 		swapNodeJMenuItem.setIcon(IconObtainer.get("swapNode.png"));
 		swapNodeJMenuItem.setToolTipText("Swap this node with its sibling.");
 		swapNodeJMenuItem.addActionListener(e -> {
-			SwingUtilities.invokeLater(() -> {
-				swapNode(currNode);
-				phylogeneticTreePanel.updatePhylogeneticTreePanel();
-			});
+			swapNode(target);
 		});
 
 		clearAnnotatonJmenu4internalNode = new JMenuItem("Clear annotions");
@@ -277,47 +265,41 @@ public class TreePopupMenu {
 		clearAnnotatonJmenu4internalNode.setToolTipText("Clear annotations located in this node or descents.");
 		clearAnnotatonJmenu4internalNode.addActionListener(e -> {
 			Set<GraphicsNode> nodeSet = new HashSet<>();
-			TreeOperationUtil.recursiveIterateTreeIF(currNode, node -> {
+			TreeOperationUtil.recursiveIterateTreeIF(target, node -> {
 				nodeSet.add(node);
 			});
 			phylogeneticTreePanel.getMainAnnotationsProperties().clearSelectedAnnotation(nodeSet);
-			phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
+			phylogeneticTreePanel.recalculatePreservingZoom();
 		});
 
 		JMenuItem displayNodeInformation = new JMenuItem("Display more information");
 		displayNodeInformation.setIcon(IconObtainer.get("information.png"));
 		displayNodeInformation.setToolTipText("Display more information on node to closer see the details!");
 		displayNodeInformation.addActionListener(e -> {
-			displayMoreInformation4internalNode(currNode);
+			displayMoreInformation4internalNode(target);
 		});
 
 		JMenuItem outputLeavesInforJMenu = new JMenuItem("Export leaf information");
 		outputLeavesInforJMenu.setIcon(IconObtainer.get("Export.png"));
 		outputLeavesInforJMenu.setToolTipText("Export leaf information as tsv format.");
 		outputLeavesInforJMenu.addActionListener(e -> {
-
-			EGPSFileChooser egpsFileChooser = new EGPSFileChooser(this.getClass());
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("text(.txt)", "txt");
-			egpsFileChooser.setFileFilter(filter);
-			int showOpenDialog = egpsFileChooser.showSaveDialog(UnifiedAccessPoint.getInstanceFrame());
-			if (showOpenDialog == EGPSFileChooser.APPROVE_OPTION) {
-				exportLeavesInformation(egpsFileChooser.getSelectedFile());
-			}
-
+			if (!phylogeneticTreePanel.containsTreeNode(target)) return;
+			File destination = chooseLeafInformationFile();
+			if (destination != null) exportLeavesInformation(destination, target);
 		});
 
 		JMenuItem selectAllDescendant = new JMenuItem("Select all descendant nodes");
 		selectAllDescendant.setToolTipText("Select this clade and its descendants for subsequent node and branch styling.");
 		selectAllDescendant.setIcon(IconObtainer.get("selectall.png"));
 		selectAllDescendant.addActionListener(e -> {
-			selectedAllDescendants4SingleInternalNode(currNode);
+			selectedAllDescendants4SingleInternalNode(target);
 		});
 
 		JMenuItem clearSelect = new JMenuItem("Set all descendant nodes unselected");
 		clearSelect.setToolTipText("Clear selection marks from this clade and its descendants. Preserve colors and annotations.");
 		clearSelect.setIcon(IconObtainer.get("clearselect.png"));
 		clearSelect.addActionListener(e -> {
-			clearSelectionAllDescendants4SingleInternalNode(currNode);
+			clearSelectionAllDescendants4SingleInternalNode(target);
 		});
 
 		popInternalNodeRightClick.add(showInRightByCurrentRoot);
@@ -361,11 +343,114 @@ public class TreePopupMenu {
 //		popInternalNodeRightClick.add(getDisplayGenomicMutationPresenterItem());
 //		popInternalNodeRightClick.add(getDisplayAAMutationPresenterItem());
 
-		return popInternalNodeRightClick;
+
+		boolean editable = phylogeneticTreePanel.canEditTreeNode(target);
+		annotation.setEnabled(editable);
+		swapNodeJMenuItem.setEnabled(editable && target != phylogeneticTreePanel.getRootNode() && target.getParentCount() > 0 && target.getParent().getChildCount() > 1);
+		ladderizeUp.setEnabled(editable);
+		ladderizeDown.setEnabled(editable);
+		collapseNode.setEnabled(editable && !target.getCollapse());
+		clearCollapseNode.setEnabled(editable && target.getCollapse());
+		if (target.getCollapse()) popInternalNodeRightClick.add(collapsePropertiesItem(target));
+		clearAnnotatonJmenu4internalNode.setEnabled(phylogeneticTreePanel.getMainAnnotationsProperties().hasAnnotation());
+		return prepareMenu(popInternalNodeRightClick);
+	}
+
+	protected File chooseLeafInformationFile() {
+		EGPSFileChooser chooser = new EGPSFileChooser(this.getClass());
+		chooser.setFileFilter(new FileNameExtensionFilter("TSV (*.tsv, *.txt)", "tsv", "txt"));
+		return chooser.showSaveDialog() == EGPSFileChooser.APPROVE_OPTION ? chooser.getSelectedFile() : null;
 	}
 
 	protected void exportLeavesInformation(File localFinalFile) {
-		final File file = localFinalFile;
+		exportLeavesInformation(localFinalFile, currNode);
+	}
+
+	protected void exportLeavesInformation(File destination, GraphicsNode target) {
+		if (!phylogeneticTreePanel.containsTreeNode(target)) return;
+		Path path = destination.toPath();
+		String filename = path.getFileName().toString().toLowerCase(Locale.ROOT);
+		if (!filename.endsWith(".tsv") && !filename.endsWith(".txt")) path = Path.of(path.toString() + ".tsv");
+		List<LeafInformation> snapshot = leafInformationSnapshot(target);
+		Path output = path;
+		CompletableFuture.supplyAsync(() -> Files.exists(output)).whenComplete((exists, checkFailure) ->
+				SwingUtilities.invokeLater(() -> {
+			if (checkFailure != null) {
+				reportExportFailure(output, checkFailure);
+				return;
+			}
+			if (exists && !confirmOverwrite(output)) return;
+			CompletableFuture.runAsync(() -> {
+				try { writeLeafInformation(output, formatLeafInformation(snapshot)); }
+				catch (IOException error) { throw new java.io.UncheckedIOException(error); }
+			}).whenComplete((result, failure) -> SwingUtilities.invokeLater(() -> {
+				if (failure == null) reportExportResult(null);
+				else reportExportFailure(output, failure);
+			}));
+		}));
+	}
+
+	private void reportExportFailure(Path path, Throwable failure) {
+		log.error("Unable to export leaf information to {}", path, failure);
+		Throwable cause = failure.getCause() == null ? failure : failure.getCause();
+		reportExportResult("Unable to export leaf information: " + cause.getMessage());
+	}
+
+	protected boolean confirmOverwrite(Path path) {
+		return SwingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(phylogeneticTreePanel),
+				"Replace file?", "Replace existing file?\n" + path);
+	}
+
+	protected void writeLeafInformation(Path path, String snapshot) throws IOException {
+		Files.writeString(path, snapshot, StandardCharsets.UTF_8);
+	}
+
+	protected void reportExportResult(String error) {
+		if (error == null) SwingDialog.successExportDataDialog();
+		else SwingDialog.showErrorMSGDialog("Export leaf information", error);
+	}
+
+	public static String leafInformationTsv(GraphicsNode root) {
+		return formatLeafInformation(leafInformationSnapshot(root));
+	}
+
+	private record LeafInformation(String name, double length, double distance, int rgb, float width, boolean labelEnabled) { }
+
+	private static List<LeafInformation> leafInformationSnapshot(GraphicsNode root) {
+		List<LeafInformation> leaves = new ArrayList<>();
+		record Entry(GraphicsNode node, double distance) { }
+		ArrayDeque<Entry> pending = new ArrayDeque<>();
+		pending.push(new Entry(root, 0));
+		while (!pending.isEmpty()) {
+			Entry entry = pending.pop();
+			GraphicsNode node = entry.node();
+			if (node.getChildCount() == 0) {
+				TreeDrawUnit style = node.getDrawUnit();
+				leaves.add(new LeafInformation(node.getName(), node.getRealBranchLength(), entry.distance(),
+						style.getLineColor().getRGB(), style.getStrokeSize(), style.isDrawName()));
+			} else for (int i = node.getChildCount() - 1; i >= 0; i--) {
+				GraphicsNode child = (GraphicsNode) node.getChildAt(i);
+				pending.push(new Entry(child, entry.distance() + child.getRealBranchLength()));
+			}
+		}
+		return leaves;
+	}
+
+	private static String formatLeafInformation(List<LeafInformation> leaves) {
+		StringBuilder text = new StringBuilder("name\treal_branch_length\tdistance_from_clade_root\tbranch_color\tbranch_width\tlabel_enabled\n");
+		for (LeafInformation leaf : leaves) {
+			text.append(tsvField(leaf.name())).append('\t').append(leaf.length()).append('\t').append(leaf.distance()).append('\t')
+					.append(String.format(Locale.ROOT, "#%06X", leaf.rgb() & 0xFFFFFF)).append('\t')
+					.append(leaf.width()).append('\t').append(leaf.labelEnabled()).append('\n');
+		}
+		return text.toString();
+	}
+
+	private static String tsvField(String value) {
+		if (value == null) return "";
+		if (value.indexOf('\t') >= 0 || value.indexOf('\n') >= 0 || value.indexOf('\r') >= 0 || value.indexOf('"') >= 0)
+			return "\"" + value.replace("\"", "\"\"") + "\"";
+		return value;
 	}
 
 	/**
@@ -381,24 +466,49 @@ public class TreePopupMenu {
 	 * @return void
 	 */
 	public void collapseThisNode(GraphicsNode node) {
-		new Thread(() -> {
-			CollapseDialog collapseDialog = new CollapseDialog(node.getDrawUnit().getLineColor());
-			collapseDialog.setCallBackConsumer((color, integer) -> {
-				node.setCollapse(true);
-				getTreeLayoutProperties().initializeRoot();
-				Map<Integer, CollapseProperty> collapseProportyMaps = getTreeLayoutProperties()
-						.getCollapsePropertyMaps();
-				CollapseProperty collapseProperty = new CollapseProperty();
-				collapseProperty.setColor(color.getRed(), color.getGreen(), color.getBlue());
-				collapseProperty.setTriangleSize(integer);
-				collapseProportyMaps.put(node.getID(), collapseProperty);
-				// 现在我们不更新这个突变的Bar了
-				// controller.letGenomeViewUpdateStaticBarPlot(controller.getTreeLayoutProperties().getRoot());
-				phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
-			});
-			collapseDialog.setVisible(true);
-		}).start();
+		if (!SwingUtilities.isEventDispatchThread()) {
+			SwingUtilities.invokeLater(() -> collapseThisNode(node));
+			return;
+		}
+		if (!phylogeneticTreePanel.canEditTreeNode(node) || node.getChildCount() == 0) return;
+		CollapseDialog dialog = createCollapseDialog(node.getDrawUnit().getLineColor());
+		dialog.setCallBackConsumer((color, size) -> {
+			if (!phylogeneticTreePanel.canEditTreeNode(node)) return;
+			CollapseProperty property = new CollapseProperty();
+			property.setColor(color.getRed(), color.getGreen(), color.getBlue());
+			property.setTriangleSize(size);
+			node.setCollapse(true);
+			getTreeLayoutProperties().getCollapsePropertyMaps().put(node.getID(), property);
+			getTreeLayoutProperties().initializeRoot();
+			phylogeneticTreePanel.recalculatePreservingZoom();
+		});
+		dialog.setVisible(true);
+	}
 
+	protected CollapseDialog createCollapseDialog(Color initial) {
+		return new CollapseDialog(SwingUtilities.getWindowAncestor(phylogeneticTreePanel), initial);
+	}
+
+	private JMenuItem collapsePropertiesItem(GraphicsNode target) {
+		JMenuItem item = new JMenuItem("modify collapse property");
+		item.setToolTipText("Edit this collapsed clade's color and triangle size.");
+		item.setEnabled(phylogeneticTreePanel.canEditTreeNode(target));
+		item.addActionListener(e -> {
+			if (!phylogeneticTreePanel.canEditTreeNode(target) || !target.getCollapse()) return;
+			CollapseProperty property = getTreeLayoutProperties().getCollapsePropertyMaps().get(target.getID());
+			CollapseDialog dialog = createCollapseDialog(property == null ? target.getDrawUnit().getLineColor() : property.getColor());
+			if (property != null) dialog.setTriangleSize(property.getTriangleSize());
+			dialog.setCallBackConsumer((color, size) -> {
+				if (!phylogeneticTreePanel.canEditTreeNode(target) || !target.getCollapse()) return;
+				CollapseProperty updated = new CollapseProperty();
+				updated.setColor(color.getRed(), color.getGreen(), color.getBlue());
+				updated.setTriangleSize(size);
+				getTreeLayoutProperties().getCollapsePropertyMaps().put(target.getID(), updated);
+				phylogeneticTreePanel.recalculatePreservingZoom();
+			});
+			dialog.setVisible(true);
+		});
+		return item;
 	}
 
 	/**
@@ -414,15 +524,16 @@ public class TreePopupMenu {
 	 * @param node
 	 * @return void
 	 */
-	protected void unCollapseThisNode(GraphicsNode node) {
-		Runnable act = () -> {
-			node.setCollapse(false);
-			getTreeLayoutProperties().initializeRoot();
-			Map<Integer, CollapseProperty> collapseProportyMaps = getTreeLayoutProperties().getCollapsePropertyMaps();
-			collapseProportyMaps.remove(node.getID());
-			phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
-		};
-        SwingUtilities.invokeLater(act);
+	public void unCollapseThisNode(GraphicsNode node) {
+		if (!SwingUtilities.isEventDispatchThread()) {
+			SwingUtilities.invokeLater(() -> unCollapseThisNode(node));
+			return;
+		}
+		if (!phylogeneticTreePanel.canEditTreeNode(node)) return;
+		node.setCollapse(false);
+		getTreeLayoutProperties().getCollapsePropertyMaps().remove(node.getID());
+		getTreeLayoutProperties().initializeRoot();
+		phylogeneticTreePanel.recalculatePreservingZoom();
 	}
 
 	/**
@@ -439,10 +550,7 @@ public class TreePopupMenu {
 	 * @return void
 	 */
 	protected void selectedAllDescendants4SingleInternalNode(GraphicsNode currentNode) {
-		TreeOperationUtil.recursiveIterateTreeIF(currentNode, node -> {
-			node.getDrawUnit().setNodeSelected(true);
-		});
-		phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
+		phylogeneticTreePanel.selectSubtree(currentNode, true);
 	}
 
 	/**
@@ -458,10 +566,7 @@ public class TreePopupMenu {
 	 * @return void
 	 */
 	protected void clearSelectionAllDescendants4SingleInternalNode(GraphicsNode currentNode) {
-		TreeOperationUtil.recursiveIterateTreeIF(currentNode, node -> {
-			node.getDrawUnit().setNodeSelected(false);
-		});
-		phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
+		phylogeneticTreePanel.selectSubtree(currentNode, false);
 	}
 
 	/**
@@ -479,8 +584,10 @@ public class TreePopupMenu {
 	public void displayMoreInformation4internalNode(GraphicsNode selectedNode) {
 
 		List<String> lists = new ArrayList<>();
-		lists.add("Name: ".concat(selectedNode.getName()));
-		lists.add("Branch length: ".concat(String.valueOf(selectedNode.getLength())));
+		lists.add("Name: " + Objects.toString(selectedNode.getName(), ""));
+		lists.add("Real branch length: " + selectedNode.getRealBranchLength());
+		if (Double.compare(selectedNode.getLength(), selectedNode.getRealBranchLength()) != 0)
+			lists.add("Displayed branch length: " + selectedNode.getLength());
 		lists.add("Number of child: ".concat(String.valueOf(selectedNode.getChildCount())));
 		lists.add("Node size: ".concat(String.valueOf(selectedNode.getSize())));
 
@@ -503,35 +610,45 @@ public class TreePopupMenu {
 	 * @return JMenuItem
 	 */
 	protected JMenuItem getShowInRightByCurrentRootJMenuItem() {
+		GraphicsNode target = currNode;
+		JMenuItem item = new JMenuItem("View this clade in new tab");
+		item.setIcon(IconObtainer.get("tab.png"));
+		item.setToolTipText("Open an independent subtree using stored real branch lengths, including collapsed descendants.");
+		item.addActionListener(e -> {
+			if (!phylogeneticTreePanel.containsTreeNode(target)) return;
+			GraphicsNode copy = copySubtreeWithRealLengths(target);
+			TreeLayoutProperties properties = LeafLabelStateInitializer.createSubtreeViewProperties(copy, getTreeLayoutProperties());
+			IndependentModuleLoader loader = new IndependentModuleLoader();
+			loader.setHowModuleLaunchedWithData("Module launched by right click internal node.",
+					"Data source is from " + Objects.toString(target.getName(), ""));
+			loader.setModuleData(copy, properties);
+			openSubtree(loader);
+		});
+		showInRightByCurrentRoot = item;
+		return item;
+	}
 
-		if (showInRightByCurrentRoot == null) {
-			showInRightByCurrentRoot = new JMenuItem("View this clade in new tab");
-			showInRightByCurrentRoot.setIcon(IconObtainer.get("tab.png"));
-			showInRightByCurrentRoot.setToolTipText("Show this clade in a new tab");
-			showInRightByCurrentRoot.addActionListener(e -> {
-				List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-				if (selectedNodes.size() > 0) {
-					GraphicsNode graphicsNode = selectedNodes.get(0);
-					GraphicsNode convertBasicNode2graphicsNode = NodeUtils.convertBasicNode2graphicsNode(graphicsNode);
+	protected void openSubtree(IndependentModuleLoader loader) {
+		MainFrameProperties.loadTheModuleFromIModuleLoader(loader);
+	}
 
-					TreeLayoutProperties subtreeProperties = LeafLabelStateInitializer
-							.createSubtreeViewProperties(convertBasicNode2graphicsNode, getTreeLayoutProperties());
+	private JPopupMenu prepareMenu(JPopupMenu menu) {
+		Font font = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
+		for (Component component : menu.getComponents()) if (component instanceof JMenuItem item) item.setFont(font);
+		return menu;
+	}
 
-					IndependentModuleLoader independentModuleLoader = new IndependentModuleLoader();
-					independentModuleLoader.setHowModuleLaunchedWithData(
-							"Module launched by right click internal node.",
-							"Data source is from the ".concat(graphicsNode.getName()));
-					/**
-					 * treeLayoutProperties 可选，如果输入为null，会自动根据 root生成 treeLayoutProperties
-					 * 开发者也可以自己生成 TreeLayoutProperties类示例，进而设置一些参数
-					 */
-					independentModuleLoader.setModuleData(convertBasicNode2graphicsNode, subtreeProperties);
-					MainFrameProperties.loadTheModuleFromIModuleLoader(independentModuleLoader);
-				}
-			});
-		}
-
-		return showInRightByCurrentRoot;
+	public static GraphicsNode copySubtreeWithRealLengths(GraphicsNode source) {
+		GraphicsNode copy = EvolNodeUtil.convertNode(source, input -> {
+			GraphicsNode original = (GraphicsNode) input;
+			GraphicsNode node = new GraphicsNode();
+			node.setName(original.getName());
+			node.copyBootstrapFrom(original);
+			node.setRealBranchLength(original.getRealBranchLength());
+			return node;
+		});
+		copy.setRealBranchLength(0);
+		return copy;
 	}
 
 	/**
@@ -580,6 +697,7 @@ public class TreePopupMenu {
 	}
 
 	protected void swapNode(GraphicsNode find) {
+		if (!phylogeneticTreePanel.canEditTreeNode(find) || find == phylogeneticTreePanel.getRootNode() || find.getParentCount() == 0) return;
 		GraphicsNode par = (GraphicsNode) find.getParent();
 		int currChildIndex = par.indexOfChild(find);
 		int cc = par.getChildCount();
@@ -623,6 +741,7 @@ public class TreePopupMenu {
 			// 时间filter后，会有节点下只有一个child的情况，所以增加一个保护
 		}
 
+		phylogeneticTreePanel.completeTreeStructureChange();
 	}
 
 //	public JPopupMenu getLeafInfoPop(GraphicsNode node) {
@@ -757,22 +876,11 @@ public class TreePopupMenu {
 	 * @return void
 	 */
 	protected void clearAllCollapsedNodes() {
-		SwingUtilities.invokeLater(() -> {
-
-			treeLayoutProperties.clearCollapseProproties();
-
-			TreeOperationUtil.recursiveIterateTreeIF(getTreeLayoutProperties().getOriginalRootNode(), node -> {
-				node.setCollapse(false);
-			});
-
-			GraphicsNode rootNode = phylogeneticTreePanel.getRootNode();
-			TreeOperationUtil.recursiveIterateTreeIF(rootNode, node -> {
-				node.setCollapse(false);
-			});
-
-			phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
-
-		});
+		if (!phylogeneticTreePanel.isTreeLayoutReady()) return;
+		for (GraphicsNode node : PhylogeneticTreePanel.subtreeNodes(getTreeLayoutProperties().getOriginalRootNode())) node.setCollapse(false);
+		for (GraphicsNode node : PhylogeneticTreePanel.subtreeNodes(phylogeneticTreePanel.getRootNode())) node.setCollapse(false);
+		getTreeLayoutProperties().clearCollapseProproties();
+		phylogeneticTreePanel.recalculatePreservingZoom();
 	}
 
 	private JMenuItem getRefreshPhylogeneticTreePanel() {
@@ -791,7 +899,7 @@ public class TreePopupMenu {
 		if (recover2defaultGraphicEffects == null) {
 			recover2defaultGraphicEffects = new JMenuItem("Recover all graphics effects");
 			recover2defaultGraphicEffects.setIcon(IconObtainer.get("default.png"));
-			recover2defaultGraphicEffects.setToolTipText("Recover to default graphic effects.");
+			recover2defaultGraphicEffects.setToolTipText("Restore branch colors, line widths, node sizes and fonts. Keep labels, annotations and collapse settings.");
 			recover2defaultGraphicEffects.addActionListener(e -> {
 				recoverAllGraphicsEffects();
 			});
@@ -814,9 +922,7 @@ public class TreePopupMenu {
 			removeAllSelections.setIcon(IconObtainer.get("no_select.png"));
 			removeAllSelections.setToolTipText("Remove all selections( Added by search and left click.)");
 			removeAllSelections.addActionListener(e -> {
-				SwingUtilities.invokeLater(() -> {
-					removeAllSelections();
-				});
+				removeAllSelections();
 			});
 		}
 		return removeAllSelections;
@@ -835,19 +941,7 @@ public class TreePopupMenu {
 	 * @return void
 	 */
 	protected void removeAllSelections() {
-		List<GraphicsNode> selectedNodes = getTreeLayoutProperties().getSelectedNodes();
-		for (GraphicsNode node : selectedNodes) {
-			node.getDrawUnit().setBranchSelected(false);
-		}
-		selectedNodes.clear();
-		TreeOperationUtil.recursiveIterateTreeIF(getTreeLayoutProperties().getOriginalRootNode(), node -> {
-			TreeDrawUnit drawUnit = node.getDrawUnit();
-			if (drawUnit.isNodeSelected()) {
-				drawUnit.setNodeSelected(false);
-			}
-		});
-
-		phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
+		phylogeneticTreePanel.clearNodeSelection();
 	}
 
 	private JMenuItem getRemoveCustomizedColors() {
@@ -906,20 +1000,11 @@ public class TreePopupMenu {
 	 * @return void
 	 */
 	protected void selectAllDescendants() {
-
-		TreeOperationUtil.recursiveIterateTreeIF(getTreeLayoutProperties().getOriginalRootNode(), node -> {
-			if (node.getDrawUnit().isNodeSelected()) {
-				TreeOperationUtil.recursiveIterateTreeIF(node, inner -> {
-					// System.out.println(node.getID() + "true");
-					inner.getDrawUnit().setNodeSelected(true);
-				});
-				return true;
-			} else {
-				return false;
-			}
-		});
-
-		phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
+		Set<GraphicsNode> seeds = new LinkedHashSet<>(getTreeLayoutProperties().getSelectedNodes());
+		for (GraphicsNode node : PhylogeneticTreePanel.subtreeNodes(phylogeneticTreePanel.getRootNode())) {
+			if (node.getDrawUnit().isNodeSelected()) seeds.add(node);
+		}
+		for (GraphicsNode seed : seeds) phylogeneticTreePanel.selectSubtree(seed, true);
 	}
 
 
@@ -936,155 +1021,67 @@ public class TreePopupMenu {
 	}
 
 	public JPopupMenu getLeafRightClickPop(GraphicsNode currNodes, Component pan) {
+		if (currNodes.getChildCount() > 0) return getInternalNodeRightClickPop(currNodes);
 		currNode = currNodes;
-		if (popLeafRightClick == null) {
-			assembleLeafRightClickPopMenu();
-		}
-		return popLeafRightClick;
+		assembleLeafRightClickPopMenu();
+		return prepareMenu(popLeafRightClick);
 	}
 
 	protected void assembleLeafRightClickPopMenu() {
-
+		GraphicsNode target = currNode;
 		popLeafRightClick = new JPopupMenu();
-		JMenuItem recolor = getRecolorJMenuItem4all();
-
-		JMenuItem displayNodeInformation = new JMenuItem("Display more information");
-		displayNodeInformation.setIcon(IconObtainer.get("information.png"));
-		displayNodeInformation.setToolTipText("Show the node name, stored branch length and available metadata.");
-		displayNodeInformation.addActionListener(e -> {
-			displayMoreInformation4leaf(currNode);
-		});
-
-		JMenuItem swapNodeJMenuItem = new JMenuItem("Swap nodes");
-		swapNodeJMenuItem.setIcon(IconObtainer.get("swapNode.png"));
-		swapNodeJMenuItem.setToolTipText("Swap this node with its sibling.");
-		swapNodeJMenuItem.addActionListener(e -> {
-			SwingUtilities.invokeLater(() -> {
-				swapNode(currNode);
-				phylogeneticTreePanel.updatePhylogeneticTreePanel();
-			});
-		});
-
 		popLeafRightClick.add(getDisplayNodeNameMenuItem());
-		popLeafRightClick.add(displayNodeInformation);
-
+		JMenuItem info = new JMenuItem("Display more information");
+		info.setIcon(IconObtainer.get("information.png"));
+		info.setToolTipText("Show this node's name and real branch length, plus displayed length when different.");
+		info.addActionListener(e -> displayMoreInformation4leaf(target));
+		popLeafRightClick.add(info);
 		popLeafRightClick.add(getZoomInThisNodeJMenuItem());
-		popLeafRightClick.add(recolor);
+		popLeafRightClick.add(getRecolorJMenuItem4all());
 		popLeafRightClick.addSeparator();
-		popLeafRightClick.add(swapNodeJMenuItem);
-
-		if (currNode.getCollapse()) {
-			JMenuItem modifyCollapseProperty = new JMenuItem("modify collapse property");
-			modifyCollapseProperty.setToolTipText("Change the color and triangle size used to display this collapsed clade.");
-			modifyCollapseProperty.addActionListener(e -> {
-
-				Map<Integer, CollapseProperty> collapseProportyMaps = getTreeLayoutProperties()
-						.getCollapsePropertyMaps();
-
-				final CollapseProperty collapseProperty = collapseProportyMaps.get(currNode.getID());
-
-				CollapseDialog collapseDialog = new CollapseDialog(collapseProperty.getColor());
-
-				collapseDialog.setCallBackConsumer((color, integer) -> {
-					if (collapseProperty != null) {
-						collapseProperty.setColor(color.getRed(), color.getGreen(), color.getBlue());
-						collapseProperty.setTriangleSize(integer);
-						collapseProportyMaps.put(currNode.getID(), collapseProperty);
-						phylogeneticTreePanel.updatePhylogeneticTreePanel4fitFrame();
-					}
-				});
-				collapseDialog.setVisible(true);
-			});
-
-			popLeafRightClick.add(modifyCollapseProperty);
-		}
-
+		JMenuItem swap = new JMenuItem("Swap nodes");
+		swap.setIcon(IconObtainer.get("swapNode.png"));
+		swap.setToolTipText("Swap this node with its sibling without changing branch lengths.");
+		swap.setEnabled(phylogeneticTreePanel.canEditTreeNode(target) && target.getParentCount() > 0 && target.getParent().getChildCount() > 1);
+		swap.addActionListener(e -> {
+			swapNode(target);
+		});
+		popLeafRightClick.add(swap);
 		popLeafRightClick.add(detachNodeJMenuItem());
-
-//		popLeafRigtClick.addSeparator();
-//		popLeafRigtClick.add(getBackMutationPresenterItem());
-//		popLeafRigtClick.addSeparator();
-//		popLeafRigtClick.add(getDisplayGenomicMutationPresenterItem());
-//		popLeafRigtClick.add(getDisplayAAMutationPresenterItem());
-
-
 	}
 
 	public JPopupMenu getInternalNodeRightClickPop(GraphicsNode currNodes) {
 		currNode = currNodes;
-
-		if (popInternalNodeRightClick == null) {
-			getPopInternalNodeRightClick();
-		}
-		PhylogeneticTreePanel selectedPhylogeneticTreePanel = phylogeneticTreePanel;
-		boolean hasAnnotation = selectedPhylogeneticTreePanel.getMainAnnotationsProperties().hasAnnotation();
-		clearAnnotatonJmenu4internalNode.setEnabled(hasAnnotation);
-
-		boolean collapse = currNodes.getCollapse();
-		getShowInRightByCurrentRootJMenuItem().setEnabled(!collapse);
-
-		// 下面这个功能现在用不到
-
-		return popInternalNodeRightClick;
+		return getPopInternalNodeRightClick();
 	}
 
 	public JPopupMenu getBlinkAreaPop(Component component, Point point) {
-		if (blinkAreaPopupMenu == null) {
-			blinkAreaPopupMenu = new JPopupMenu();
-
-			getClearAnnotaton();
-
-			getClearCollapseNode();
-
-			blinkAreaPopupMenu.add(getRefreshPhylogeneticTreePanel());
-			blinkAreaPopupMenu.add(getRecover2defaultGraphicEffects());
-			blinkAreaPopupMenu.addSeparator();
-			blinkAreaPopupMenu.add(clearAnnotaton4blinkArea);
-			blinkAreaPopupMenu.add(clearCollapseNode);
-
-			blinkAreaPopupMenu.add(getRemoveAllSelectionsJMenuItem());
-
-			getRemoveCustomizedColors();
-
-			blinkAreaPopupMenu.add(getSelectDescendantsJMenuItem());
-//			popLeafRigtClick.add(removeCustomizedColors);
-
-			blinkAreaPopupMenu.addSeparator();
-
-			JMenuItem zoomInThisNode = new JMenuItem("Zoom the area");
-			zoomInThisNode.setIcon(IconObtainer.get("zoomIn2.png"));
-			zoomInThisNode.setToolTipText("Zoom in the area, adjust the zoom level on the advanced parameters panel.");
-			zoomInThisNode.addActionListener(e -> {
-
-				Timer timer = new Timer(200, new ActionListener() {
-					int count = 0;
-
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						phylogeneticTreePanel.continuouslyZoomInOrOut(200, 200, point);
-						// 当任务执行5次时，停止定时器
-						if (count >= 5) {
-							((Timer) e.getSource()).stop();
-						}
-						count++;
-					}
-				});
-
-				timer.start(); // 启动定时器
-
-			});
-			blinkAreaPopupMenu.add(zoomInThisNode);
-
-		}
-
-
-		boolean hasAnnotation = phylogeneticTreePanel.getMainAnnotationsProperties().hasAnnotation();
-		clearAnnotaton4blinkArea.setEnabled(hasAnnotation);
-		boolean hasCollapseNode = hasCollapsedNode();
-		clearCollapseNode.setEnabled(hasCollapseNode);
-//		removeCustomizedColors.setEnabled(true);
-
-		return blinkAreaPopupMenu;
+		Point anchor = new Point(point);
+		blinkAreaPopupMenu = new JPopupMenu();
+		// These tree-wide actions have no node context; each menu still owns its components.
+		refreshPhylogeneticTreePanel = recover2defaultGraphicEffects = clearAnnotaton4blinkArea = clearCollapseNode = null;
+		removeAllSelections = selectDescendants = null;
+		blinkAreaPopupMenu.add(getRefreshPhylogeneticTreePanel());
+		blinkAreaPopupMenu.add(getRecover2defaultGraphicEffects());
+		blinkAreaPopupMenu.addSeparator();
+		JMenuItem annotations = getClearAnnotaton();
+		annotations.setEnabled(phylogeneticTreePanel.getMainAnnotationsProperties().hasAnnotation());
+		blinkAreaPopupMenu.add(annotations);
+		JMenuItem expand = getClearCollapseNode();
+		expand.setEnabled(hasCollapsedNode() && phylogeneticTreePanel.isTreeLayoutReady());
+		blinkAreaPopupMenu.add(expand);
+		blinkAreaPopupMenu.add(getRemoveAllSelectionsJMenuItem());
+		blinkAreaPopupMenu.add(getSelectDescendantsJMenuItem());
+		blinkAreaPopupMenu.addSeparator();
+		JMenuItem zoom = new JMenuItem("Zoom the area");
+		zoom.setIcon(IconObtainer.get("zoomIn2.png"));
+		zoom.setToolTipText("Zoom around this right-click position.");
+		zoom.setEnabled(phylogeneticTreePanel.isTreeLayoutReady());
+		zoom.addActionListener(e -> {
+			if (phylogeneticTreePanel.isTreeLayoutReady()) phylogeneticTreePanel.continuouslyZoomInOrOut(1000, 1000, anchor);
+		});
+		blinkAreaPopupMenu.add(zoom);
+		return prepareMenu(blinkAreaPopupMenu);
 	}
 
 	/**

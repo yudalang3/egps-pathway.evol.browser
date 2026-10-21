@@ -8,7 +8,7 @@
 <blockquote>
 
 <h1><font color="#2c3e50">现代化树形视图</font></h1>
-<p>交互式可视化和操作进化树。支持多种树形布局、颜色配置和图形标注，可导出高质量矢量图形。</p>
+<p>交互式可视化和操作进化树。支持多种树形布局、颜色配置和图形标注，以及 Newick 和叶信息 TSV 导出。</p>
 
 <hr>
 
@@ -19,6 +19,14 @@
 	<li>点击 <b>执行</b> 查看可视化结果</li>
 	<li>使用左侧控制面板调整显示选项</li>
 </ol>
+
+<h3>右键菜单与安全编辑</h3>
+<p>查看子树、缩放、名称显隐、重命名和结构编辑以本次右键命中的节点为目标。右键已有选中节点或空白区域保留多选；左键空白区域清空选择。“选择后代”包含折叠后代，并可用于后续批量样式修改。</p>
+<p><b>Delete clade</b> 和 <b>Detach node</b> 必须先确认。对话框显示目标及其子树节点数、真实叶节点数，默认 Cancel；Enter、Esc 或关闭窗口均取消。根和最后剩余的叶不能删除。Delete clade 压缩非根单子父节点并累加枝长；Detach 保留单子父节点。两者均保留存活叶的根到叶距离。</p>
+<p>折叠内部节点可单独展开或修改折叠属性。Add sibling and merge 将原入枝均分，保持原有叶节点距离。新标签页使用真实枝长的独立子树副本。</p>
+<h3>叶信息与样式导出</h3>
+<p>内部节点右键 <b>Export leaf information</b> 导出 UTF-8 TSV，包含折叠分支中的真实叶节点。字段为 <code>name</code>、<code>real_branch_length</code>、<code>distance_from_clade_root</code>、<code>branch_color</code>、<code>branch_width</code>、<code>label_enabled</code>。</p>
+<p>距离不包含所选子树根的入枝；标签字段是节点自身设置，不代表当前视口可见性。默认使用 .tsv，也接受 .txt。保存路径会被记忆，覆盖已有文件须确认。</p>
 
 <hr>
 

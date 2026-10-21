@@ -53,10 +53,10 @@ public class NodeAnnotationDialogContainer extends JDialog {
 	private Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
 
 	public NodeAnnotationDialogContainer(PhylogeneticTreePanel phylogeneticTreePanel2, GraphicsNode curreNode) {
-		super(UnifiedAccessPoint.getInstanceFrame(), "Internal node Annotation", true);
+		super(SwingUtilities.getWindowAncestor(phylogeneticTreePanel2), "Internal node Annotation", ModalityType.APPLICATION_MODAL);
 		this.mainPhylogeneticTreePanel = phylogeneticTreePanel2;
 		setSize(900, 450);
-		setLocationRelativeTo(UnifiedAccessPoint.getInstanceFrame());
+		setLocationRelativeTo(getOwner());
 		this.curreNode = curreNode;
 		setContentPane(getJContentPane());
 		
@@ -151,7 +151,7 @@ public class NodeAnnotationDialogContainer extends JDialog {
 		jSplitPane.setRightComponent(phylogeneticTreePanel);
 
 		SwingUtilities.invokeLater(() -> {
-			
+			if (jTree == null || phylogeneticTreePanel == null) return;
 			AbstractShowAnnotationDialog node = (AbstractShowAnnotationDialog) jTree.getLastSelectedPathComponent();
 			node.configurateAnnotationProperty2preview();
 			phylogeneticTreePanel.setWidthAndHeight(400, 400);

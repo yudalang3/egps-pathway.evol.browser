@@ -2,7 +2,6 @@ package module.evolview.gfamily.work.listener;
 
 import egps2.UnifiedAccessPoint;
 import egps2.panels.dialog.SwingDialog;
-import evoltree.struct.EvolNode;
 import evoltree.struct.util.EvolNodeUtil;
 import evoltree.txtdisplay.TreeDrawUnit;
 import module.evolview.gfamily.work.gui.ScaleBarRectObject;
@@ -11,8 +10,6 @@ import module.evolview.gfamily.work.gui.tree.RectObj;
 import module.evolview.gfamily.work.gui.tree.TreePopupMenu;
 import module.evolview.common.SwingDebouncer;
 import module.evolview.model.tree.GraphicsNode;
-import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
-import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import org.apache.commons.compress.utils.Lists;
 
@@ -41,7 +38,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 	private GraphicsNode rootNode;
 	private final PhylogeneticTreePanel phylogeneticTreePanel;
 
-	private JPopupMenu jPopupMenu4creativeMode;
 	private TreePopupMenu jPopupMenu4normalMode;
 
 	private final Line2D.Double repeatLine = new Line2D.Double();
@@ -386,11 +382,10 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 					GraphicsNode selectedNode = optRet.get();
 					dealWithSelectedNodes(selectedNode);
 
-					boolean isLeaf = TreeDecideUtil.decideNodeTypeOfLeaf(selectedNode);
-					// 在进行filter后内节点可能变成叶子节点，所以不能单通过判断是否有child判断叶子，加上了name是否为空的判断
-					if (isLeaf && !selectedNode.getName().isEmpty()) {
-					} else {
-						getTreePopupMenu().collapseThisNode(selectedNode);
+					// Collapsed clades remain structural internal nodes and can be expanded again.
+					if (selectedNode.getChildCount() > 0) {
+						if (selectedNode.getCollapse()) getTreePopupMenu().unCollapseThisNode(selectedNode);
+						else getTreePopupMenu().collapseThisNode(selectedNode);
 					}
 				} else {
 					dealWithSelectedNodes(null);
@@ -438,12 +433,12 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 			}
 
 			if (treeLayoutProperties2.isCreativeMode()) {
-				JPopupMenu popup = getPopupMenu4creativeMode();
+				JPopupMenu popup = getPopupMenu4creativeMode(selectedNode);
 				popup.show(component, e.getX(), e.getY());
 			} else {
-				boolean isLeaf = TreeDecideUtil.decideNodeTypeOfLeaf(selectedNode);
-				// 在进行filter后内节点可能变成叶子节点，所以不能单通过判断是否有child判断叶子，加上了name是否为空的判断
-				if (isLeaf && !selectedNode.getName().isEmpty()) {
+				boolean isLeaf = selectedNode.getChildCount() == 0;
+				// Collapse changes presentation, not the node's structural role.
+				if (isLeaf) {
 					JPopupMenu popup = getTreePopupMenu().getLeafRightClickPop(selectedNode, component);
 					popup.show(component, e.getX(), e.getY());
 				} else {
@@ -456,7 +451,6 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 			// 当没有节点的时候
 			JPopupMenu popup = getTreePopupMenu().getBlinkAreaPop(component, e.getPoint());
 			popup.show(component, e.getX(), e.getY());
-			dealWithSelectedNodes(null);
 		}
 	}
 
@@ -518,6 +512,10 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		// 如果是隐藏的属性的话，那么应该直接返回false
 		if (node.hideNode()) {
 			return false;
+		}
+		for (GraphicsNode ancestor = node; ancestor != rootNode && ancestor.getParentCount() > 0;) {
+			ancestor = (GraphicsNode) ancestor.getParent();
+			if (ancestor.getCollapse()) return false;
 		}
 
 		double xSelf = node.getXSelf();
@@ -659,250 +657,89 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 	}
 
 	private JPopupMenu getPopupMenu4creativeMode() {
-		if (jPopupMenu4creativeMode == null) {
-			jPopupMenu4creativeMode = new JPopupMenu("Creative popup menu");
+		List<GraphicsNode> selected = treeLayoutProperties.getSelectedNodes();
+		return getPopupMenu4creativeMode(selected.isEmpty() ? null : selected.getFirst());
+	}
 
-			Font defaultFont = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
-
-			{
-				JMenuItem jMenuItem = new JMenuItem("Add child");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode graphicsNode = selectedNodes.get(0);
-					double realBranchLength = graphicsNode.getRealBranchLength();
-					if (graphicsNode.getChildCount() == 0) {
-
-						GraphicsNode graphicsNode2 = new GraphicsNode();
-						String name = "Leaf_" + GraphicsNode.nextID;
-						graphicsNode2.setName(name);
-						GraphicsNode graphicsNode3 = new GraphicsNode();
-						name = "Leaf_" + GraphicsNode.nextID;
-						graphicsNode3.setName(name);
-
-						graphicsNode.addChild(graphicsNode2);
-						graphicsNode.addChild(graphicsNode3);
-						graphicsNode2.setRealBranchLength(realBranchLength);
-						graphicsNode3.setRealBranchLength(realBranchLength);
-
-					} else {
-						GraphicsNode graphicsNode2 = new GraphicsNode();
-						String name = "Leaf_" + GraphicsNode.nextID;
-						graphicsNode2.setName(name);
-						graphicsNode2.setRealBranchLength(realBranchLength);
-						graphicsNode.addChild(graphicsNode2);
-					}
-
-					getTreeLayoutProperties().initializeRoot();
-					phylogeneticTreePanel.updatePhylogeneticTreePanel();
-				});
+	private JPopupMenu getPopupMenu4creativeMode(GraphicsNode target) {
+		JPopupMenu popup = new JPopupMenu("Creative popup menu");
+		boolean hasParent = target != null && target != rootNode && target.getParentCount() > 0;
+		creativeItem(popup, "Add child", target, true, node -> {
+			double length = node == rootNode ? 1 : node.getRealBranchLength();
+			int count = node.getChildCount() == 0 ? 2 : 1;
+			for (int i = 0; i < count; i++) node.addChild(newCreativeLeaf(length));
+			phylogeneticTreePanel.completeTreeStructureChange();
+		});
+		creativeItem(popup, "Add sibling", target, hasParent, node -> {
+			if (node.getParentCount() == 0) return;
+			node.getParent().addChild(newCreativeLeaf(node.getRealBranchLength()));
+			phylogeneticTreePanel.completeTreeStructureChange();
+		});
+		creativeItem(popup, "Add sibling and merge", target, hasParent, node -> {
+			if (node.getParentCount() == 0) return;
+			GraphicsNode parent = (GraphicsNode) node.getParent();
+			double half = node.getRealBranchLength() / 2;
+			GraphicsNode newParent = new GraphicsNode();
+			newParent.setRealBranchLength(half);
+			PhylogeneticTreePanel.replaceChild(parent, node, newParent);
+			node.setRealBranchLength(half);
+			newParent.addChild(node);
+			newParent.addChild(newCreativeLeaf(half));
+			phylogeneticTreePanel.completeTreeStructureChange();
+		});
+		creativeItem(popup, "Rename", target, true, node -> {
+			Optional<String> name = SwingDialog.showInputDialog(phylogeneticTreePanel,
+					node.getName() == null ? "" : node.getName());
+			if (name.isPresent() && phylogeneticTreePanel.canEditTreeNode(node)) {
+				node.setName(name.get());
+				phylogeneticTreePanel.recalculatePreservingZoom();
 			}
-
-			{
-				JMenuItem jMenuItem = new JMenuItem("Add sibling");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode graphicsNode = selectedNodes.get(0);
-					double realBranchLength = graphicsNode.getRealBranchLength();
-
-					EvolNode parent = graphicsNode.getParent();
-					GraphicsNode graphicsNode2 = new GraphicsNode();
-					String name = "Leaf_" + GraphicsNode.nextID;
-					graphicsNode2.setName(name);
-					graphicsNode2.setRealBranchLength(realBranchLength);
-					parent.addChild(graphicsNode2);
-
-					getTreeLayoutProperties().initializeRoot();
-					phylogeneticTreePanel.updatePhylogeneticTreePanel();
-				});
-			}
-			{
-				JMenuItem jMenuItem = new JMenuItem("Add sibling and merge");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode graphicsNode = selectedNodes.get(0);
-					double realBranchLength = graphicsNode.getRealBranchLength();
-
-					EvolNode parent = graphicsNode.getParent();
-					GraphicsNode graphicsNode2 = new GraphicsNode();
-					String name = "Leaf_" + GraphicsNode.nextID;
-					graphicsNode2.setName(name);
-					graphicsNode2.setRealBranchLength(realBranchLength);
-
-					graphicsNode.removeAllParent();
-
-					GraphicsNode newParent = new GraphicsNode();
-					newParent.setRealBranchLength(realBranchLength);
-					newParent.addChild(graphicsNode2);
-					newParent.addChild(graphicsNode);
-
-					parent.addChild(newParent);
-
-					getTreeLayoutProperties().initializeRoot();
-					phylogeneticTreePanel.updatePhylogeneticTreePanel();
-				});
-			}
-			{
-				JMenuItem jMenuItem = new JMenuItem("Rename");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode graphicsNode = selectedNodes.get(0);
-
-					String name = graphicsNode.getName();
-					name = name == null ? "" : name;
-					Optional<String> showInputDialog = SwingDialog.showInputDialog(UnifiedAccessPoint.getInstanceFrame(),
-							name);
-					if (showInputDialog.isPresent()) {
-						graphicsNode.setName(showInputDialog.get());
-
-						getTreeLayoutProperties().initializeRoot();
-
-						TreeLayout myLayout = treeLayoutProperties.getMyLayout();
-						getTreeLayoutProperties().initializeRoot();
-						phylogeneticTreePanel.updateViewAccording2TreeLayout(myLayout);
-					}
-
-				});
-			}
-
-			{
-				JMenuItem jMenuItem = new JMenuItem("Swap with sibling");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode graphicsNode = selectedNodes.get(0);
-					if (graphicsNode.getParentCount() == 0) {
-						return;
-					}
-
-					EvolNodeUtil.swapNodeWithSibling(graphicsNode);
-					phylogeneticTreePanel.updatePhylogeneticTreePanel();
-				});
-			}
-
-			{
-				JMenuItem jMenuItem = new JMenuItem("Ladderize up");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode node = selectedNodes.get(0);
-					EvolNodeUtil.initializeSize(node);
-					EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(node, true);
-					phylogeneticTreePanel.updatePhylogeneticTreePanel();
-				});
-			}
-
-			{
-				JMenuItem jMenuItem = new JMenuItem("Ladderize down");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode node = selectedNodes.get(0);
-					EvolNodeUtil.initializeSize(node);
-					EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(node, false);
-					phylogeneticTreePanel.updatePhylogeneticTreePanel();
-				});
-			}
-			{
-				JMenuItem jMenuItem = new JMenuItem("Delete clade");
-				jPopupMenu4creativeMode.add(jMenuItem);
-				jMenuItem.setFont(defaultFont);
-				jMenuItem.addActionListener(e -> {
-					if (!treeLayoutProperties.isCreativeMode()) return;
-					List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-					if (selectedNodes.isEmpty()) {
-						return;
-					}
-					GraphicsNode node = selectedNodes.get(0);
-
-					Optional<GraphicsNode> parentOpt = EvolNodeUtil.getParent(node);
-					if (!parentOpt.isPresent()) {
-						return;
-					}
-					GraphicsNode parent = parentOpt.get();
-					int childCount = parent.getChildCount();
-
-					if (childCount > 2) {
-						node.removeAllParent();
-						phylogeneticTreePanel.updatePhylogeneticTreePanel();
-						return;
-					}
-					Optional<GraphicsNode> grandParentOpt = EvolNodeUtil.getParent(parent);
-					if (!grandParentOpt.isPresent()) {
-						SwingDialog.showErrorMSGDialog("Delete error",
-								"Can not delete this clade, \nbecause the parent is a binary fork while the grand parent not exist.");
-						return;
-					}
-
-					GraphicsNode grandParent = grandParentOpt.get();
-					GraphicsNode[] childrenArray = EvolNodeUtil.getChildrenArray(parent);
-					parent.removeAllChild();
-					parent.removeAllParent();
-
-					for (GraphicsNode iter : childrenArray) {
-						if (iter != node) {
-							grandParent.addChild(iter);
-						}
-					}
-					phylogeneticTreePanel.updatePhylogeneticTreePanel();
-
-				});
-			}
-
-		}
-
-		for (Component component : jPopupMenu4creativeMode.getComponents()) if (component instanceof JMenuItem item) {
-			item.setToolTipText(switch (item.getText()) {
-				case "Add child" -> "Add a child to the selected node. A selected leaf becomes an internal node with two new leaves. Changes tree topology.";
-				case "Add sibling" -> "Add a new node under the selected node's parent. Changes tree topology; the root has no sibling.";
-				case "Add sibling and merge" -> "Group the selected node and a new sibling under a new parent. Changes tree topology.";
-				case "Rename" -> "Edit the selected node's stored name. Updates labels and exported tree data.";
-				case "Swap with sibling" -> "Exchange the displayed order of the selected node and a sibling. Keep branch lengths.";
-				case "Ladderize up" -> "Order descendants of the selected clade in ascending ladder order. Keep topology and branch lengths.";
-				case "Ladderize down" -> "Order descendants of the selected clade in descending ladder order. Keep topology and branch lengths.";
-				case "Delete clade" -> "Delete the selected node and all descendants from the tree. The root cannot be deleted.";
-				default -> item.getText();
+		});
+		creativeItem(popup, "Swap with sibling", target,
+				hasParent && target.getParent().getChildCount() > 1, node -> {
+			if (node.getParentCount() == 0 || node.getParent().getChildCount() < 2) return;
+			EvolNodeUtil.swapNodeWithSibling(node);
+			phylogeneticTreePanel.completeTreeStructureChange();
+		});
+		for (boolean up : new boolean[] {true, false}) {
+			creativeItem(popup, up ? "Ladderize up" : "Ladderize down", target,
+					target != null && target.getChildCount() > 0, node -> {
+				EvolNodeUtil.initializeSize(node);
+				EvolNodeUtil.ladderizeNodeAccording2sizeAndLength(node, up);
+				phylogeneticTreePanel.completeTreeStructureChange();
 			});
 		}
-		return jPopupMenu4creativeMode;
+		creativeItem(popup, "Delete clade", target, phylogeneticTreePanel.canRemoveSubtree(target),
+				node -> phylogeneticTreePanel.removeSubtree(node, true));
+		return popup;
+	}
+
+	private GraphicsNode newCreativeLeaf(double length) {
+		GraphicsNode leaf = new GraphicsNode();
+		leaf.setName("Leaf_" + leaf.getID());
+		leaf.setRealBranchLength(length);
+		leaf.getDrawUnit().setDrawName(treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel());
+		return leaf;
+	}
+
+	private void creativeItem(JPopupMenu popup, String name, GraphicsNode target, boolean applicable,
+			Consumer<GraphicsNode> action) {
+		JMenuItem item = new JMenuItem(name);
+		item.setFont(UnifiedAccessPoint.getLaunchProperty().getDefaultFont());
+		item.setEnabled(applicable && treeLayoutProperties.isCreativeMode() && phylogeneticTreePanel.canEditTreeNode(target));
+		item.setToolTipText(switch (name) {
+			case "Add child" -> "Add a child. A leaf becomes an internal node with two new leaves.";
+			case "Add sibling" -> "Add a sibling under this node's parent. The root has no sibling.";
+			case "Add sibling and merge" -> "Insert a parent and new sibling, splitting this node's incoming branch without changing existing leaf distances.";
+			case "Rename" -> "Edit this node's stored name and exported label.";
+			case "Swap with sibling" -> "Swap this node with an adjacent sibling without changing branch lengths.";
+			case "Delete clade" -> "Confirm removal of this subtree. Contract non-root unary parents and preserve surviving leaf distances.";
+			default -> "Order this clade's descendants without changing topology or branch lengths.";
+		});
+		item.addActionListener(event -> {
+			if (applicable && treeLayoutProperties.isCreativeMode() && phylogeneticTreePanel.canEditTreeNode(target)) action.accept(target);
+		});
+		popup.add(item);
 	}
 
 	private TreePopupMenu getTreePopupMenu() {

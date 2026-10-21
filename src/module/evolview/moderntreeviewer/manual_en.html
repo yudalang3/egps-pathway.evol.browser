@@ -8,7 +8,7 @@
 <blockquote>
 
 <h1><font color="#2c3e50">Modern Tree Viewer</font></h1>
-<p>Interactive visualization and operation of phylogenetic trees. Supports multiple tree layouts, color configurations, and graphical annotations with high-quality vector graphics export.</p>
+<p>Interactive visualization and operation of phylogenetic trees. Supports multiple tree layouts, color configurations, graphical annotations, and Newick and leaf-information TSV export.</p>
 
 <hr>
 
@@ -19,6 +19,14 @@
 	<li>Click <b>Execute</b> to visualize the tree</li>
 	<li>Use the left control panel to adjust display options</li>
 </ol>
+
+<h3>Context menus and safe editing</h3>
+<p>Single-node commands use the node clicked for this menu. Right-clicking a selected node or empty space preserves multiple selection; left-clicking empty space clears it. Selecting descendants includes collapsed descendants and enables subsequent bulk styling.</p>
+<p><b>Delete clade</b> and <b>Detach node</b> require confirmation showing the target and its subtree node/true-leaf counts. Cancel is the default; Enter, Escape and closing the window cancel. The root and final leaf cannot be deleted. Delete clade contracts non-root unary parents and adds their branch lengths to the survivor; Detach keeps unary parents. Surviving root-to-leaf distances are preserved.</p>
+<p>Collapsed internal nodes retain individual expansion and collapse-property editing. Add sibling and merge splits the original incoming edge equally, preserving existing leaf distances. New subtree tabs use independent copies of real branch lengths.</p>
+<h3>Leaf information and styles</h3>
+<p>An internal node's <b>Export leaf information</b> command writes UTF-8 TSV including true leaves hidden by collapse. Columns are <code>name</code>, <code>real_branch_length</code>, <code>distance_from_clade_root</code>, <code>branch_color</code>, <code>branch_width</code> and <code>label_enabled</code>.</p>
+<p>Distance excludes the selected clade root's incoming edge. The label field describes the per-node setting, rather than current viewport visibility. The default extension is .tsv; .txt is also supported. The chooser remembers the directory and confirms overwriting existing files.</p>
 
 <hr>
 

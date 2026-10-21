@@ -3,6 +3,8 @@ package module.evolview.gfamily.work.gui.tree;
 import egps2.UnifiedAccessPoint;
 import egps2.frame.gui.EGPSMainGuiUtil;
 import egps2.panels.dialog.SwingDialog;
+import egps2.panels.dialog.modern.ModernDialog;
+import egps2.panels.dialog.modern.ModernDialogType;
 import graphic.engine.guicalculator.BlankArea;
 import module.evolview.gfamily.work.listener.TreeListener;
 import module.evolview.model.tree.GraphicsNode;
@@ -18,6 +20,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.EnumMap;
+import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 
 /**
@@ -664,6 +671,150 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		firePropertyChange("treeViewState", null, this);
 	}
 
+	/** Structural traversal includes descendants hidden by collapse or label thinning. */
+	public static List<GraphicsNode> subtreeNodes(GraphicsNode root) {
+		List<GraphicsNode> nodes = new ArrayList<>();
+		ArrayDeque<GraphicsNode> pending = new ArrayDeque<>();
+		pending.push(root);
+		while (!pending.isEmpty()) {
+			GraphicsNode node = pending.pop();
+			nodes.add(node);
+			for (int i = node.getChildCount() - 1; i >= 0; i--) pending.push((GraphicsNode) node.getChildAt(i));
+		}
+		return nodes;
+	}
+
+	public boolean containsTreeNode(GraphicsNode node) {
+		while (node != null) {
+			if (node == rootNode) return true;
+			node = (GraphicsNode) node.getParent();
+		}
+		return false;
+	}
+
+	public boolean canEditTreeNode(GraphicsNode node) {
+		return containsTreeNode(node) && isTreeLayoutReady();
+	}
+
+	boolean isTreeLayoutReady() {
+		return layout != null && layoutReady && !isLayoutCalculationPending();
+	}
+
+	public void selectSubtree(GraphicsNode node, boolean selected) {
+		if (!containsTreeNode(node)) return;
+		List<GraphicsNode> selection = layoutProp.getSelectedNodes();
+		for (GraphicsNode descendant : subtreeNodes(node)) {
+			if (selected) {
+				if (!selection.contains(descendant)) selection.add(descendant);
+			} else {
+				selection.remove(descendant);
+				descendant.getDrawUnit().setNodeSelected(false);
+			}
+			descendant.getDrawUnit().setBranchSelected(selected);
+		}
+		notifyTreeViewStateChanged();
+		refreshGraphicSelectionControls();
+		refreshViewPort();
+	}
+
+	/** Complete every structural edit before exposing it to layout and operation controls. */
+	public void completeTreeStructureChange() {
+		List<GraphicsNode> nodes = subtreeNodes(rootNode);
+		Set<GraphicsNode> reachable = Collections.newSetFromMap(new IdentityHashMap<>());
+		reachable.addAll(nodes);
+		// Shared views may display just one clade; keep state belonging to other live clades.
+		if (rootNode != layoutProp.getOriginalRootNode()) reachable.addAll(subtreeNodes(layoutProp.getOriginalRootNode()));
+		layoutProp.getSelectedNodes().removeIf(node -> {
+			if (reachable.contains(node)) return false;
+			node.getDrawUnit().setBranchSelected(false);
+			node.getDrawUnit().setNodeSelected(false);
+			return true;
+		});
+		Set<Integer> ids = new java.util.HashSet<>();
+		for (GraphicsNode node : reachable) ids.add(node.getID());
+		layoutProp.getCollapsePropertyMaps().keySet().removeIf(id -> !ids.contains(id));
+		mainAnnotationsProperties.retainTreeNodes(reachable);
+		linageTypeAnnotationsProperties.retainTreeNodes(reachable);
+		layoutProp.initializeRoot();
+		recalculatePreservingZoom();
+		notifyTreeViewStateChanged();
+		refreshGraphicSelectionControls();
+		refreshViewPort();
+	}
+
+	void refreshGraphicSelectionControls() {
+		if (UnifiedAccessPoint.isGULaunched()) UnifiedAccessPoint.getInstanceFrame().refreshRightGraphicPropertiesPanel();
+	}
+
+	public boolean canRemoveSubtree(GraphicsNode target) {
+		if (!canEditTreeNode(target) || target == rootNode) return false;
+		Set<GraphicsNode> removed = Collections.newSetFromMap(new IdentityHashMap<>());
+		removed.addAll(subtreeNodes(target));
+		return subtreeNodes(rootNode).stream().anyMatch(node -> node.getChildCount() == 0 && !removed.contains(node));
+	}
+
+	/** Both removal actions confirm before changing topology, branch lengths or selection. */
+	public boolean removeSubtree(GraphicsNode target, boolean contractUnaryParents) {
+		if (!canRemoveSubtree(target)) return false;
+		List<GraphicsNode> removed = subtreeNodes(target);
+		long leaves = removed.stream().filter(node -> node.getChildCount() == 0).count();
+		if (!confirmSubtreeRemoval(target, removed.size(), leaves, contractUnaryParents)) return false;
+		if (!canRemoveSubtree(target)) return false;
+		GraphicsNode parent = (GraphicsNode) target.getParent();
+		parent.removeChild(target);
+		while (parent != rootNode) {
+			GraphicsNode grandParent = (GraphicsNode) parent.getParent();
+			if (parent.getChildCount() == 0) {
+				grandParent.removeChild(parent);
+			} else if (contractUnaryParents && parent.getChildCount() == 1) {
+				GraphicsNode child = (GraphicsNode) parent.getChildAt(0);
+				child.setRealBranchLength(child.getRealBranchLength() + parent.getRealBranchLength());
+				replaceChild(grandParent, parent, child);
+			} else break;
+			parent = grandParent;
+		}
+		completeTreeStructureChange();
+		return true;
+	}
+
+	public static void replaceChild(GraphicsNode parent, GraphicsNode oldChild, GraphicsNode replacement) {
+		List<GraphicsNode> children = new ArrayList<>();
+		for (int i = 0; i < parent.getChildCount(); i++) {
+			GraphicsNode child = (GraphicsNode) parent.getChildAt(i);
+			children.add(child == oldChild ? replacement : child);
+		}
+		replacement.removeAllParent();
+		parent.removeAllChild();
+		for (GraphicsNode child : children) parent.addChild(child);
+	}
+
+	protected boolean confirmSubtreeRemoval(GraphicsNode target, int nodes, long leaves, boolean contractUnaryParents) {
+		return createRemovalDialog(target, nodes, leaves, contractUnaryParents).showAndGetResult() == ModernDialog.DialogResult.OK;
+	}
+
+	protected ModernDialog createRemovalDialog(GraphicsNode target, int nodes, long leaves, boolean contractUnaryParents) {
+		String name = target.getName();
+		if (name == null || name.isBlank()) name = "Node " + target.getID();
+		String message = "Delete subtree: " + name + "\nNodes: " + nodes + "\nLeaf nodes: " + leaves
+				+ "\nIncludes descendants hidden by collapse."
+				+ (contractUnaryParents ? "\nNon-root parents with one remaining child will be contracted; distances are preserved." : "");
+		ModernDialog dialog = SwingDialog.builder().owner(SwingUtilities.getWindowAncestor(this))
+				.type(ModernDialogType.QUESTION).title(contractUnaryParents ? "Delete clade" : "Detach node")
+				.message(message).secondaryButton("Cancel", null).primaryButton("Delete", null).build();
+		dialog.setSize(dialog.getWidth(), dialog.getHeight() + 60);
+		setCancelDefault(dialog.getContentPane(), dialog.getRootPane());
+		return dialog;
+	}
+
+	private static void setCancelDefault(Container container, JRootPane root) {
+		for (Component component : container.getComponents()) {
+			if (component instanceof JButton button && "Cancel".equals(button.getText())) {
+				root.setDefaultButton(button);
+				SwingUtilities.invokeLater(button::requestFocusInWindow);
+			} else if (component instanceof Container child) setCancelDefault(child, root);
+		}
+	}
+
 	public void clearNodeSelection() {
 		layoutProp.getSelectedNodes().clear();
 		evoltree.struct.util.EvolNodeUtil.recursiveIterateTreeIF(layoutProp.getOriginalRootNode(), node -> {
@@ -672,6 +823,7 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		});
 		firePropertyChange("treeSelectionCleared", null, this);
 		notifyTreeViewStateChanged();
+		refreshGraphicSelectionControls();
 		refreshViewPort();
 	}
 

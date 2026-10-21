@@ -24,6 +24,8 @@
 
 ## Modern Tree View
 
+右键菜单、删除确认及叶信息导出：[使用说明](modern_tree_view_context_menus_zh.md)。
+
 | 主题 | English | 中文 |
 |------|---------|------|
 | 初始化机制 | [modern_tree_view_initial_mechanism.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\modern_tree_view_initial_mechanism.md) | [modern_tree_view_initial_mechanism_zh.md](C:\Users\yudal\Documents\project\eGPS2\jars\egps2_collections\egps-pathway.evol.browser\docs\current\modern_tree_view_initial_mechanism_zh.md) |
