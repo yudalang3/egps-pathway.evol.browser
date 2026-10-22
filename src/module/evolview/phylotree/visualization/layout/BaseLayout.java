@@ -512,27 +512,28 @@ public abstract class BaseLayout implements ITreeLayout {
 
 
         if (treeLayoutProperties.isShowNodeBranchLength()) {
-            g2d.setColor(Color.black);
-            g2d.setFont(treeLayoutProperties.getGlobalFont());
+            Graphics2D labelGraphics = (Graphics2D) g2d.create();
+            try {
+                labelGraphics.setColor(Color.black);
+                labelGraphics.setFont(treeLayoutProperties.getGlobalFont());
 
-            FontMetrics fontMetrics = g2d.getFontMetrics();
-            int height = fontMetrics.getAscent();
-            double angleIfNeeded = node.getAngleIfNeeded();
-            String drawString = String.valueOf(node.getRealBranchLength());
-            int stringWidth = fontMetrics.stringWidth(drawString);
+                FontMetrics fontMetrics = labelGraphics.getFontMetrics();
+                int height = fontMetrics.getAscent();
+                double angleIfNeeded = node.getAngleIfNeeded();
+                String drawString = String.valueOf(node.getRealBranchLength());
+                int stringWidth = fontMetrics.stringWidth(drawString);
 
-            double x_parent = node.getXParent();
-            int xx = (int) (0.5 * (x2 + x_parent - stringWidth));
-            int yy = (int) (y2 - 0.5 * height);
+                double x_parent = node.getXParent();
+                int xx = (int) (0.5 * (x2 + x_parent - stringWidth));
+                int yy = (int) (y2 - 0.5 * height);
 
-            if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
-                double radians = Math.toRadians(angleIfNeeded);
-                AffineTransform originalTransform = g2d.getTransform();
-                g2d.rotate(-radians, x2, y2);
-                g2d.drawString(drawString, xx, yy);
-                g2d.setTransform(originalTransform);
-            } else {
-                g2d.drawString(drawString, xx, yy);
+                if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
+                    double radians = Math.toRadians(angleIfNeeded);
+                    labelGraphics.rotate(-radians, x2, y2);
+                }
+                labelGraphics.drawString(drawString, xx, yy);
+            } finally {
+                labelGraphics.dispose();
             }
         }
 
