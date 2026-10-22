@@ -65,6 +65,7 @@ public final class TreeParameterTooltips {
                             + TreeSettings.tooltip(path);
                 }
                 if (path.equals("Spiral layout/Beta factor")) text = "The GUI spinner uses hundredths: 175 means 1.75. The canonical VOICE key uses the actual value. " + text;
+                if (path.equals("Circular layout/Inner radius ratio")) text = "The left panel uses percentages: 20 means a ratio of 0.2. " + text;
                 if (!hasTree) text = "Load a tree to use this control. " + text;
                 else if (!control.isEnabled()) {
                     String reason = path.equals("Display/Show scale bar") ? "A scale bar is unavailable in this layout. "
@@ -72,6 +73,7 @@ public final class TreeParameterTooltips {
                             : path.equals("Labels/Show bootstrap values") ? "This tree has no bootstrap values. "
                             : path.equals("Root/Root branch length") ? "Enable Show root branch to adjust this value. "
                             : path.equals("Spiral layout/Beta factor") ? "Select a Beta spiral to use this factor. "
+                            : path.equals("Circular layout/Inner radius ratio") ? "Select Inner cladogram to adjust the percentage. "
                             : path.equals("View/Lock aspect ratio") ? "This layout always uses uniform scaling. " : "";
                     if (control.getClientProperty("tree.unavailable.reason") instanceof String detail
                             && (path.equals("Display/Show scale bar") || path.equals("Display/Show axis"))) reason = detail + " ";

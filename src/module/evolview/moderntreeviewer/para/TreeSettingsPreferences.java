@@ -37,7 +37,7 @@ public final class TreeSettingsPreferences {
             State state;
             try {
                 if (Files.exists(path)) text = Files.readString(path, StandardCharsets.UTF_8);
-                state = new State(text, Map.copyOf(TreeSettings.parse(text)), null);
+                state = new State(text, java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(TreeSettings.parse(text))), null);
             } catch (IOException | IllegalArgumentException error) {
                 String warning = "Unable to load tree preferences from " + path + ": " + error.getMessage()
                         + ". Program defaults will be used. Repair this file before saving user defaults.";
@@ -70,7 +70,7 @@ public final class TreeSettingsPreferences {
 
     public CompletableFuture<Commit> saveAsync(String text) {
         // Validate before scheduling any filesystem changes, including calls outside the dialog.
-        Map<String, Object> parsed = Map.copyOf(TreeSettings.parse(text));
+        Map<String, Object> parsed = java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(TreeSettings.parse(text)));
         return loadAsync().thenApplyAsync(ignored -> {
             synchronized (this) {
                 Path temporary = null;

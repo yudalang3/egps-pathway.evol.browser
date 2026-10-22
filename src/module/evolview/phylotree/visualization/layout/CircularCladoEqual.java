@@ -14,14 +14,7 @@ public class CircularCladoEqual extends CircularPhylo {
 
 	@Override
 	public void calculateForPainting(int width, int height) {
-		// 让所有的枝长都一样！
-		TreeOperationUtil.letAllNodesBeEqualLength(rootNode);
-
-		super.calculateForPainting(width, height);
-		// 恢复枝长
-		TreeOperationUtil.recursiveIterateTreeIF(rootNode, node -> {
-			node.setDisplayedBranchLength(node.getRealBranchLength());
-		});
+		TreeOperationUtil.withEqualDisplayedBranchLengths(rootNode, () -> super.calculateForPainting(width, height));
 		//和TreeLayoutProperties 那里的设置不一样
 		this.scaleBarProperty.setIfDrawScaleBar(false);
 	}

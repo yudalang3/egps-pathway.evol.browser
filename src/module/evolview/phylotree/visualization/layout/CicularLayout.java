@@ -6,7 +6,6 @@ import module.evolview.model.tree.GraphicsNode;
 import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
 
 public abstract class CicularLayout extends BaseLayout {
 	@Override
@@ -56,7 +55,7 @@ public abstract class CicularLayout extends BaseLayout {
 		}
 
 		tracingPaintingProperty.path = generalPath;
-		tracingPaintingProperty.pointOfNode = new Point2D.Double(node.getXSelf(), node.getYSelf());
+		tracingPaintingProperty.pointOfNode = getDisplayedNodePosition(node);
 		tracingPaintingProperty.fillColor = color;
 
 		return tracingPaintingProperty;

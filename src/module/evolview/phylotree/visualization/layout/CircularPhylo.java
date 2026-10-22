@@ -28,7 +28,7 @@ public class CircularPhylo extends CicularLayout {
 	protected double biggestCircleRadicus;
 	protected int centerX;
 	protected int centerY;
-	protected int recursiveCalculateStartLength;
+	protected double recursiveCalculateStartLength;
 
 	public CircularPhylo(TreeLayoutProperties controller, GraphicsNode rootNode,
 			TreeLayoutHost phylogeneticTreePanel) {
@@ -47,7 +47,7 @@ public class CircularPhylo extends CicularLayout {
 		// Calculate available radius, reserving space for leaf labels if shown
 		double availableRadius = 0.5 * Math.min(workWidth, workHeight);
 		availableRadius -= getTipLabelReserve();
-		biggestCircleRadicus = Math.max(availableRadius, 50); // Ensure minimum radius
+		biggestCircleRadicus = Math.max(availableRadius, minimumTreeRadius());
 
 		calculateRatioAndChooseStartLength();
 
@@ -237,15 +237,51 @@ public class CircularPhylo extends CicularLayout {
 
 	protected void calculateRatioAndChooseStartLength() {
 		double avaliableLength = biggestCircleRadicus - treeLayoutProperties.getRootTipLength();
-		LongestRoot2leafBean maxLengthOfRoot2LeafNoOutgroup = GraphicTreePropertyCalculator
-				.getMaxLengthOfRoot2Leaf(rootNode);
+		LongestRoot2leafBean maxLengthOfRoot2LeafNoOutgroup = rootNode.getChildCount() == 0 || rootNode.getCollapse()
+				? new LongestRoot2leafBean(0, rootNode) : GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode);
 		canvas2logicRatio = maxLengthOfRoot2LeafNoOutgroup.getLength() > 0 ? avaliableLength / maxLengthOfRoot2LeafNoOutgroup.getLength() : 0;
 
-		recursiveCalculateStartLength = (int) treeLayoutProperties.getRootTipLength();
+		recursiveCalculateStartLength = treeLayoutProperties.getRootTipLength();
 
-		int workWidth = blankArea.getWorkWidth((int) currentWidth);
 		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafNoOutgroup.getLength(),
-				maxLengthOfRoot2LeafNoOutgroup.getLeaf(), workWidth);
+				maxLengthOfRoot2LeafNoOutgroup.getLeaf(), (int) Math.max(0, avaliableLength));
+	}
+
+	@Override
+	protected double minimumTreeRadius() {
+		return Math.max(50, treeLayoutProperties.getRootTipLength() + 50);
+	}
+
+	@Override
+	protected int minimumAxisTickSpacing(FontMetrics metrics) {
+		// One extra pixel covers integer rounding of the painted circle radii.
+		return metrics.getHeight() + 5;
+	}
+
+	protected double getCircularDecorationReserve() {
+		double reserve = 4;
+		var pending = new java.util.ArrayDeque<GraphicsNode>();
+		pending.push(rootNode);
+		while (!pending.isEmpty()) {
+			GraphicsNode node = pending.pop();
+			var unit = node.getDrawUnit();
+			// New nodes start hidden; afterCalculation makes the visible topology drawable.
+			double extent = unit.getCircleRadius();
+			if (node.getCollapse()) {
+				var property = getCollapseProporty(node);
+				int size = property == null ? 15 : property.getTriangleSize();
+				extent = Math.max(extent, Math.hypot(size, size));
+			}
+			double stroke = unit.getStroke() instanceof BasicStroke basic ? basic.getLineWidth() / 2.0 : 1;
+			reserve = Math.max(reserve, extent + Math.max(2, stroke) + 2);
+			if (!node.getCollapse()) for (int i = 0; i < node.getChildCount(); i++) pending.push((GraphicsNode) node.getChildAt(i));
+		}
+		return reserve;
+	}
+
+	@Override
+	protected double getTipLabelReserve() {
+		return Math.max(super.getTipLabelReserve(), getCircularDecorationReserve());
 	}
 
 	/**
@@ -253,7 +289,8 @@ public class CircularPhylo extends CicularLayout {
 	 */
 	private void recursiveCalculate(GraphicsNode node, double cumulateRealBranchLengthExceptCurrent) {
 
-		double radicus = calculateRadicus(cumulateRealBranchLengthExceptCurrent, node);
+		double radicus = node == rootNode ? cumulateRealBranchLengthExceptCurrent
+				: calculateRadicus(cumulateRealBranchLengthExceptCurrent, node);
 		// 这一行要比递归调用早！
 		node.setRadicusIfNeeded(radicus);
 		NodeType nodeType = TreeDecideUtil.decideNodeType(node, rootNode);
@@ -324,7 +361,7 @@ public class CircularPhylo extends CicularLayout {
 		sum += ((GraphicsNode) base.getChildAt(firstChildIndex)).getAngleIfNeeded();
 		sum += ((GraphicsNode) base.getChildAt(lastChildIndex)).getAngleIfNeeded();
 	
-		return sum / size;
+		return sum / 2;
 	}
 
 	@Override
@@ -414,6 +451,11 @@ public class CircularPhylo extends CicularLayout {
 //	}
 
 	protected void drawEachLine(Graphics2D g2d, GraphicsNode node) {
+		if (node == rootNode || node.getParentCount() == 0) {
+			commonDrawEachUnit(g2d, node, false);
+			rootDrawingProcess(g2d, node);
+			return;
+		}
 
 		commonDrawEachUnit(g2d, node, true);
 

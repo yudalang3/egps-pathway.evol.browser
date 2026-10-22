@@ -71,6 +71,7 @@ public class ParamsAssignerAndParser4ModernTreeView extends ParamsAssignerAndPar
         bean.setCircularStartDegree(p.getCircularLayoutPropertiy().getGlobalStartDegree());
         bean.setCircularExtentDegree(p.getCircularLayoutPropertiy().getGlobalExtendDegree());
         bean.setCircularInnerRadius(p.getCircularLayoutPropertiy().getInnerCircleRadicus());
+        bean.setCircularInnerRadiusRatio(p.getCircularLayoutPropertiy().getInnerRadiusRatio());
         bean.setSpiralExtentDegree(p.getSprialLayoutPropertiy().getGlobalExtendingDegree());
         bean.setSpiralGapFactor(p.getSprialLayoutPropertiy().getGapSize());
         bean.setSpiralBetaFactor((int) Math.round(p.getSprialLayoutPropertiy().getBetaFactor() * 100));

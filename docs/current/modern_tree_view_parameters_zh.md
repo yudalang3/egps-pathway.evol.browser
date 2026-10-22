@@ -37,7 +37,7 @@
 | Rectangular layout/Branch curvature | `layout.rectangular.branch.curvature.percent` | layout.rectangular.curvature | `0` | Branch curvature (0-100), rectangular layouts only. |
 | Circular layout/Start angle | `layout.circular.start.angle.degrees` | layout.circular.start.degree | `285` | Start angle in degrees (0-360), circular layouts only. |
 | Circular layout/Arc extent | `layout.circular.arc.extent.degrees` | layout.circular.extent.degree | `360` | Arc extent in degrees (0-360), circular layouts only. |
-| Circular layout/Inner radius | `layout.circular.inner.radius.px` | layout.circular.inner.radius | `50` | Inner radius in pixels (0-200), inward circular cladogram only. |
+| Circular layout/Inner radius ratio | `layout.circular.inner.radius.ratio` |  | `0.2` | 内半径除以外半径，取值0.2–1，仅作用于内翻环形。左侧界面使用20%–100%；100%时所有节点落在同一圆周。旧像素设置和null比例统一恢复为20%。 |
 | Spiral layout/Start angle | `layout.spiral.start.angle.degrees` | layout.spiral.start.degree | `0` | Start angle in degrees (0-360), spiral layouts only. |
 | Spiral layout/Total angle | `layout.spiral.total.angle.degrees` | layout.spiral.extent.degree | `720` | Total spiral angle in degrees (0-10000). |
 | Spiral layout/Arm spacing | `layout.spiral.arm.spacing.factor` | layout.spiral.gap.factor | `10` | Spacing factor between spiral arms (0-50); this is not a pixel distance. |
@@ -70,6 +70,8 @@
 | `input.node.styles.file` | advanced.node.visual.config, node.visual.config.path | `` | Node-style TSV file. Required column: name. Optional columns: fillColor, circleRadius, lineThickness, displayName. Overrides uniform imported styles. |
 
 ## Compatibility details
+
+- `layout.circular.inner.radius.ratio=0.2` 表示内半径为外半径的20%。左侧可设置20%–100%，100%时径向树枝收缩为零。旧参数 `layout.circular.inner.radius.px`、`layout.circular.inner.radius`、旧JSONC内径和null比例统一恢复为20%；同次输入显式比例优先。当前参数快照只保存比例。
 
 - `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.
 - Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.

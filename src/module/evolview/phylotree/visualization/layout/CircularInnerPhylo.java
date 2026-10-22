@@ -14,11 +14,13 @@ public class CircularInnerPhylo extends CircularPhylo{
 	protected void calculateRatioAndChooseStartLength() {
 		CircularLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getCircularLayoutPropertiy();
 		
-		double avaliableLength = biggestCircleRadicus -circularLayoutPropertiy.getInnerCircleRadicus();
-		double distance = GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode).getLength();
+		double avaliableLength = biggestCircleRadicus - circularLayoutPropertiy.resolveInnerRadius(biggestCircleRadicus);
+		double distance = rootNode.getChildCount() == 0 || rootNode.getCollapse() ? 0
+				: GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode).getLength();
         canvas2logicRatio = distance > 0 ? avaliableLength / distance : 0;
 		
-		recursiveCalculateStartLength = (int) biggestCircleRadicus;
+		recursiveCalculateStartLength = rootNode.getChildCount() == 0
+				? circularLayoutPropertiy.resolveInnerRadius(biggestCircleRadicus) : biggestCircleRadicus;
 		
 		
 		this.scaleBarProperty.setIfDrawScaleBar(false);
@@ -35,13 +37,26 @@ public class CircularInnerPhylo extends CircularPhylo{
 
 	@Override
 	protected double getTipLabelReserve() {
-		return Math.max(super.getTipLabelReserve(), treeLayoutProperties.isShowRoot()
+		return Math.max(getCircularDecorationReserve(), treeLayoutProperties.isShowRoot()
 				? Math.max(0, treeLayoutProperties.getRootTipLength()) + 2 : 0);
 	}
 
 	@Override
 	protected double minimumTreeRadius() {
-		return treeLayoutProperties.getCircularLayoutPropertiy().getInnerCircleRadicus() + 50;
+		if (!treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) return 50;
+		var metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+		double inner = 0;
+		for (GraphicsNode leaf : GraphicTreePropertyCalculator.getLeaves(rootNode)) {
+			if (leaf.getChildCount() == 0 && leaf.getDrawUnit().isDrawName() && leaf.getName() != null)
+				inner = Math.max(inner, metrics.stringWidth(leaf.getName()) + leaf.getDrawUnit().getCircleRadius() + 4 + metrics.getHeight());
+		}
+		return Math.max(50, inner / treeLayoutProperties.getCircularLayoutPropertiy().getInnerRadiusRatio());
+	}
+
+	@Override
+	protected TipLabelGeometry getTipLabelGeometry(GraphicsNode node, java.awt.FontMetrics metrics) {
+		return TipLabelGeometry.inwardAt(node.getAngleIfNeeded(), node.getDrawUnit().getCircleRadius(), node.getName(),
+				metrics, treeLayoutProperties.getCircularLayoutPropertiy().resolveInnerRadius(biggestCircleRadicus));
 	}
 
 	@Override

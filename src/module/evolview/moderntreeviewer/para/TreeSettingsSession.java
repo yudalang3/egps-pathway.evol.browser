@@ -13,14 +13,12 @@ public final class TreeSettingsSession {
     public TreeSettingsSession(PhylogeneticTreePanel tree, Supplier<PhylogeneticTreePanel> current, Map<String, Object> defaults) {
         this.tree = tree;
         this.current = current;
-        baseline = tree == null ? new LinkedHashMap<>(TreeSettings.defaults()) : TreeSettings.snapshot(tree);
-        if (tree == null) baseline.putAll(defaults);
+        baseline = tree == null ? mergeDefaults(defaults) : TreeSettings.snapshot(tree);
     }
     public boolean canApply() { return tree != null && current.get() == tree; }
     public void refreshDefaults(Map<String, Object> defaults) {
         if (tree == null) {
-            baseline = new LinkedHashMap<>(TreeSettings.defaults());
-            baseline.putAll(defaults);
+            baseline = mergeDefaults(defaults);
         }
     }
     public String unavailableReason() {
@@ -29,11 +27,16 @@ public final class TreeSettingsSession {
     }
     public String text() { return TreeSettings.documentText(baseline); }
     public Map<String, Object> values(String text) {
-        Map<String, Object> result = new LinkedHashMap<>(TreeSettings.defaults());
-        result.putAll(TreeSettings.parse(text));
+        Map<String, Object> result = mergeDefaults(TreeSettings.parse(text));
         if (Boolean.TRUE.equals(baseline.get("Fonts/Axis and scale bar/Inherit label font"))
                 && TreeSettings.changes(baseline, result).keySet().stream().anyMatch(p -> p.startsWith("Fonts/Axis and scale bar/") && !p.endsWith("Inherit label font")))
             result.put("Fonts/Axis and scale bar/Inherit label font", false);
+        return result;
+    }
+
+    private static Map<String, Object> mergeDefaults(Map<String, Object> values) {
+        Map<String, Object> result = new LinkedHashMap<>(TreeSettings.defaults());
+        result.putAll(TreeSettings.normalizeLegacyInnerRadius(values));
         return result;
     }
     public void apply(String text) {

@@ -37,7 +37,7 @@ Precedence: program defaults → user defaults → explicit VOICE → current tr
 | Rectangular layout/Branch curvature | `layout.rectangular.branch.curvature.percent` | layout.rectangular.curvature | `0` | Branch curvature (0-100), rectangular layouts only. |
 | Circular layout/Start angle | `layout.circular.start.angle.degrees` | layout.circular.start.degree | `285` | Start angle in degrees (0-360), circular layouts only. |
 | Circular layout/Arc extent | `layout.circular.arc.extent.degrees` | layout.circular.extent.degree | `360` | Arc extent in degrees (0-360), circular layouts only. |
-| Circular layout/Inner radius | `layout.circular.inner.radius.px` | layout.circular.inner.radius | `50` | Inner radius in pixels (0-200), inward circular cladogram only. |
+| Circular layout/Inner radius ratio | `layout.circular.inner.radius.ratio` |  | `0.2` | Inner radius divided by outer radius (0.2-1), inward circular cladogram only. The left panel uses 20-100%. At 1 all nodes share one circle. Old pixel settings and null ratios reset to 0.2. |
 | Spiral layout/Start angle | `layout.spiral.start.angle.degrees` | layout.spiral.start.degree | `0` | Start angle in degrees (0-360), spiral layouts only. |
 | Spiral layout/Total angle | `layout.spiral.total.angle.degrees` | layout.spiral.extent.degree | `720` | Total spiral angle in degrees (0-10000). |
 | Spiral layout/Arm spacing | `layout.spiral.arm.spacing.factor` | layout.spiral.gap.factor | `10` | Spacing factor between spiral arms (0-50); this is not a pixel distance. |
@@ -70,6 +70,8 @@ Precedence: program defaults → user defaults → explicit VOICE → current tr
 | `input.node.styles.file` | advanced.node.visual.config, node.visual.config.path | `` | Node-style TSV file. Required column: name. Optional columns: fillColor, circleRadius, lineThickness, displayName. Overrides uniform imported styles. |
 
 ## Compatibility details
+
+- `layout.circular.inner.radius.ratio=0.2` uses 20% of the outer radius. The left panel accepts 20-100%; 100% collapses radial branches onto one circle. Legacy `layout.circular.inner.radius.px`, `layout.circular.inner.radius`, old JSONC Inner radius and null ratios migrate to 20%. An explicit ratio takes priority. Current snapshots contain only the ratio.
 
 - `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.
 - Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.

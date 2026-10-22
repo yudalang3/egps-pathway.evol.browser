@@ -114,6 +114,7 @@ public final class TreeParameterAuditTest {
         if (path.equals("Spiral layout/Arm spacing")) return 18;
         if (path.equals("Circular layout/Arc extent")) return 270;
         if (path.equals("Circular layout/Inner radius")) return 85;
+        if (path.equals("Circular layout/Inner radius ratio")) return 0.5;
         if (path.equals("Slant layout/Tree width")) return 75.0;
         if (path.equals("Slant layout/Left margin")) return 30.0;
         if (path.equals("Slant layout/Rotation")) return 90;
@@ -197,7 +198,7 @@ public final class TreeParameterAuditTest {
         return result;
     }
     private static TreeLayout applicable(String path) {
-        if (path.equals("Circular layout/Inner radius")) return TreeLayout.INNER_CIR_CLADO;
+        if (path.startsWith("Circular layout/Inner radius")) return TreeLayout.INNER_CIR_CLADO;
         if (path.startsWith("Circular layout/")) return TreeLayout.OUTER_CIR_PHYLO;
         if (path.startsWith("Spiral layout/")) return TreeLayout.SPRIAL_BETA_PHYLO;
         if (path.startsWith("Slant layout/")) return TreeLayout.SLOPE_CLADO_ALIGNED_LEFT;
@@ -236,7 +237,7 @@ public final class TreeParameterAuditTest {
                         if (!d.path().equals(control.getClientProperty("tree.parameter"))) continue;
                         require(control.getToolTipText() != null && control.getToolTipText().contains(d.voice()), "GUI tooltip canonical key: " + d.path());
                         if (control instanceof JSpinner spinner) {
-                            double expected = ((Number) value).doubleValue() * (d.path().equals("Spiral layout/Beta factor") ? 100 : 1);
+                            double expected = ((Number) value).doubleValue() * (d.path().equals("Spiral layout/Beta factor") || d.path().equals("Circular layout/Inner radius ratio") ? 100 : 1);
                             require(equal(spinner.getValue(), expected), "GUI numeric sync: " + d.path() + " got " + spinner.getValue());
                         } else if (control instanceof AbstractButton toggle && value instanceof Boolean b) require(toggle.isSelected() == b, "GUI toggle sync: " + d.path());
                     }

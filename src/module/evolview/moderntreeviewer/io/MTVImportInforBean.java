@@ -22,6 +22,7 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
         this.circularStartDegree = source.circularStartDegree;
         this.circularExtentDegree = source.circularExtentDegree;
         this.circularInnerRadius = source.circularInnerRadius;
+        this.circularInnerRadiusRatio = source.circularInnerRadiusRatio;
         this.spiralExtentDegree = source.spiralExtentDegree;
         this.spiralGapFactor = source.spiralGapFactor;
         this.spiralBetaFactor = source.spiralBetaFactor;
@@ -56,7 +57,7 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
     // Registry values supplement legacy integer fields without changing the public Bean API or serialization.
     private transient java.util.Map<String, Object> explicitSettings = java.util.Map.of();
 
-    void setExplicitSettings(java.util.Map<String, Object> values) { explicitSettings = java.util.Map.copyOf(values); }
+    void setExplicitSettings(java.util.Map<String, Object> values) { explicitSettings = java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(values)); }
     java.util.Map<String, Object> explicitSettings() { return explicitSettings; }
 
 	// Layout settings
@@ -78,6 +79,7 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
 	protected int circularStartDegree = 285;   // 0-360
 	protected int circularExtentDegree = 360;  // 0-360
 	protected int circularInnerRadius = 50;    // 0-200, for Inner Cladogram
+	protected Double circularInnerRadiusRatio = 0.2;
 
 	// Spiral layout parameters
 	protected int spiralExtentDegree = 720;    // 0-10000
@@ -366,7 +368,12 @@ public class MTVImportInforBean extends EvolTreeImportInfoBean {
 
 	public void setCircularInnerRadius(int circularInnerRadius) {
 		this.circularInnerRadius = circularInnerRadius;
+		this.circularInnerRadiusRatio = 0.2;
 	}
+
+	public Double getCircularInnerRadiusRatio() { return circularInnerRadiusRatio; }
+
+	public void setCircularInnerRadiusRatio(Double ratio) { circularInnerRadiusRatio = ratio == null ? 0.2 : ratio; }
 
 	// Spiral layout getters/setters
 	public int getSpiralExtentDegree() {

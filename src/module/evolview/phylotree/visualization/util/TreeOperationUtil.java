@@ -132,6 +132,18 @@ public class TreeOperationUtil {
 		});
 	}
 
+	/** Temporarily use topology distances without losing caller-supplied display lengths. */
+	public static void withEqualDisplayedBranchLengths(GraphicsNode rootNode, Runnable calculation) {
+		Map<GraphicsNode, Double> original = new IdentityHashMap<>();
+		recursiveIterateTreeIF(rootNode, node -> { original.put(node, node.getDisplayedBranchLength()); });
+		try {
+			letAllNodesBeEqualLength(rootNode);
+			calculation.run();
+		} finally {
+			original.forEach(GraphicsNode::setDisplayedBranchLength);
+		}
+	}
+
 	/**
 	 * It will break search if meet the command!
 	 * 

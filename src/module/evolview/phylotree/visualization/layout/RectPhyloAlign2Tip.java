@@ -2,14 +2,12 @@ package module.evolview.phylotree.visualization.layout;
 
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.util.DrawUtil;
-import module.evolview.phylotree.visualization.util.TreeOperationUtil;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.List;
 
 public class RectPhyloAlign2Tip extends RectPhyloLayout {
-
-	private double rightMostXLocation;
 
 	final BasicStroke basicStroke;
 
@@ -22,27 +20,28 @@ public class RectPhyloAlign2Tip extends RectPhyloLayout {
 
 	@Override
 	protected void specificTreeDrawingProcess(Graphics2D g2d) {
-		rightMostXLocation = currentWidth - blankArea.getRight();
-
 		drawButtomAxis(g2d);
-		g2d.setStroke(basicStroke);
-		TreeOperationUtil.recursiveIterateTreeIF(rootNode, node -> {
-			if (node.getChildCount() == 0) {
-				double xx = node.getXSelf();
-				double ySelf = node.getYSelf();
-				if (xx < rightMostXLocation) {
-					// System.out.println(xx+"\t"+rightMostXLocation);
-					g2d.setColor(node.getDrawUnit().getLineColor());
-					g2d.drawLine((int) xx, (int) ySelf, (int) rightMostXLocation, (int) ySelf);
-				}
-			}
-		});
 	}
 
 	@Override
 	protected void leafLineDrawingProcess(Graphics2D g2d, GraphicsNode node) {
 		drawEachLines(g2d, node);
-		
+		if (node.getChildCount() == 0 && !node.hideNode()) {
+			Point2D.Double endpoint = getDisplayedNodePosition(node);
+			if (endpoint.x > node.getXSelf()) {
+				g2d.setStroke(basicStroke);
+				g2d.setColor(node.getDrawUnit().getLineColor());
+				lineDrawUtil.setLine(node.getXSelf(), node.getYSelf(), endpoint.x, endpoint.y);
+				g2d.draw(lineDrawUtil);
+			}
+		}
+	}
+
+	@Override
+	public Point2D.Double getDisplayedNodePosition(GraphicsNode node) {
+		return node.getChildCount() == 0
+				? new Point2D.Double(currentWidth - blankArea.getRight(), node.getYSelf())
+				: super.getDisplayedNodePosition(node);
 	}
 
 	@Override

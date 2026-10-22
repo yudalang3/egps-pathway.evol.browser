@@ -275,11 +275,16 @@ public abstract class BaseLayout implements ITreeLayout {
         maximumScaleDistance = maxLengthOfRoot2Leaf;
         FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getAxisFont());
         int labelWidth = metrics.stringWidth(BranchLengthTicks.format(maxLengthOfRoot2Leaf));
+        double previousOffset = java.lang.Double.NEGATIVE_INFINITY;
         for (BranchLengthTicks.Tick tick : BranchLengthTicks.calculate(maxLengthOfRoot2Leaf, drawWorkingWidth, labelWidth)) {
             double offset = drawWorkingWidth * (axisDistance(tick.value()) / maxLengthOfRoot2Leaf);
+            if (Math.abs(offset - previousOffset) < minimumAxisTickSpacing(metrics)) continue;
             buttomScaleBarDrawProperty.addElement(tick.label(), tick.value(), offset);
+            previousOffset = offset;
         }
     }
+
+    protected int minimumAxisTickSpacing(FontMetrics metrics) { return 0; }
 
     protected double axisDistance(double value) {
         return treeLayoutProperties.isNeedReverseAxisBar() ? maximumScaleDistance - value : value;
@@ -388,6 +393,10 @@ public abstract class BaseLayout implements ITreeLayout {
     }
 
     protected boolean usesTipLabels() { return false; }
+
+    protected TipLabelGeometry getTipLabelGeometry(GraphicsNode node, FontMetrics metrics) {
+        return TipLabelGeometry.at(node.getAngleIfNeeded(), node.getDrawUnit().getCircleRadius(), node.getName(), metrics);
+    }
 
     public void prepareLabelSpace() {
         treeLayoutProperties.synchronizeColumnLabelReserve(0);
@@ -634,8 +643,7 @@ public abstract class BaseLayout implements ITreeLayout {
         g2d.setFont(treeLayoutProperties.getGlobalFont());
 
         if (usesTipLabels()) {
-            TipLabelGeometry placement = TipLabelGeometry.at(node.getAngleIfNeeded(), circleRadius,
-                    drawString, g2d.getFontMetrics());
+            TipLabelGeometry placement = getTipLabelGeometry(node, g2d.getFontMetrics());
             Graphics2D labelGraphics = (Graphics2D) g2d.create();
             try {
                 labelGraphics.translate(x2, y2);
@@ -877,7 +885,7 @@ public abstract class BaseLayout implements ITreeLayout {
         }
 
         tracingPaintingProperty.path = generalPath;
-        tracingPaintingProperty.pointOfNode = new Point2D.Double(node.getXSelf(), node.getYSelf());
+        tracingPaintingProperty.pointOfNode = getDisplayedNodePosition(node);
         tracingPaintingProperty.fillColor = color;
 
         return tracingPaintingProperty;
@@ -1071,7 +1079,8 @@ public abstract class BaseLayout implements ITreeLayout {
 
         if (nodeType == NodeType.LEAF) {
             if (!node.hideNode()) {
-                drawEachLeafNameGraphicsIfNeeded(g2d, node, node.getXSelf(), node.getYSelf());
+                Point2D.Double point = getDisplayedNodePosition(node);
+                drawEachLeafNameGraphicsIfNeeded(g2d, node, point.x, point.y);
             }
             // 这里要return掉，不然collapse掉的点还会递归下去。collapse后用NodeType判定会判定为LEAF
             return;
@@ -1092,18 +1101,17 @@ public abstract class BaseLayout implements ITreeLayout {
         double x1 = node.getXParent();
         double y1 = node.getYParent();
 
-        double x2 = node.getXSelf();
-        double y2 = node.getYSelf();
-
         TreeDrawUnit drawUnit = node.getDrawUnit();
 
         if (drawUnit.isBranchSelected()) {
             paintSelectedRectangularSignatureDashLine(g2d, x1, y1);
-            paintSelectedRectangularSignatureDashLine(g2d, x2, y2);
+            Point2D.Double point = getDisplayedNodePosition(node);
+            paintSelectedRectangularSignatureDashLine(g2d, point.x, point.y);
         }
 
         if (drawUnit.isNodeSelected()) {
-            DrawUtil.paintSelectedRectangularSignatureSolidLine(g2d, x2, y2);
+            Point2D.Double point = getDisplayedNodePosition(node);
+            DrawUtil.paintSelectedRectangularSignatureSolidLine(g2d, point.x, point.y);
         }
 
         NodeType nodeType = TreeDecideUtil.decideNodeType(node, rootNode);
@@ -1117,6 +1125,11 @@ public abstract class BaseLayout implements ITreeLayout {
             recursiveDrawSelectedNode(g2d, (GraphicsNode) node.getChildAt(i));
         }
 
+    }
+
+    /** Visible marker position; branch geometry continues to use the stored node coordinates. */
+    public Point2D.Double getDisplayedNodePosition(GraphicsNode node) {
+        return new Point2D.Double(node.getXSelf(), node.getYSelf());
     }
 
     public double getCanvas2logicRatio() {

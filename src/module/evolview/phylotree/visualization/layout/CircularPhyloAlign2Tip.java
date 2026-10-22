@@ -6,6 +6,7 @@ import module.evolview.phylotree.visualization.util.DrawUtil;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 
 public class CircularPhyloAlign2Tip extends CircularPhylo {
 	@Override
@@ -37,20 +38,28 @@ public class CircularPhyloAlign2Tip extends CircularPhylo {
 	@Override
 	protected void leafLineDrawingProcess(Graphics2D g2d, GraphicsNode node) {
 		drawEachLine(g2d, node);
+		if (node.getChildCount() != 0 || node.hideNode()) return;
 
 		double radicusIfNeeded = node.getRadicusIfNeeded();
 		java.awt.geom.Point2D.Double tt = null;
 		if (radicusIfNeeded < biggestCircleRadicus) {
-			tt = GuiCalculator.calculateCircularLocation(node.getAngleIfNeeded(), biggestCircleRadicus, centerX,
-					centerY);
+			tt = getDisplayedNodePosition(node);
 
 			lineDrawUtil.setLine(tt.getX(), tt.getY(), node.getXSelf(), node.getYSelf());
 			g2d.setStroke(basicStroke);
+			g2d.setColor(node.getDrawUnit().getLineColor());
 			g2d.draw(lineDrawUtil);
 		} else {
 			tt = new java.awt.geom.Point2D.Double(node.getXSelf(), node.getYSelf());
 		}
 		
+	}
+
+	@Override
+	public Point2D.Double getDisplayedNodePosition(GraphicsNode node) {
+		return node.getChildCount() == 0
+				? GuiCalculator.calculateCircularLocation(node.getAngleIfNeeded(), biggestCircleRadicus, centerX, centerY)
+				: super.getDisplayedNodePosition(node);
 	}
 
 //	private void recursiveDraw(Graphics2D g2D, GraphicsNode node) {

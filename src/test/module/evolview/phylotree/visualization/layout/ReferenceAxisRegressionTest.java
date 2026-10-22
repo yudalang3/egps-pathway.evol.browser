@@ -32,6 +32,12 @@ public class ReferenceAxisRegressionTest {
                 graphics.dispose();
                 javax.imageio.ImageIO.write(image, "png", java.nio.file.Path.of("temp/scale-bar/" + type + "-axis-" + reverse + ".png").toFile());
                 var ticks = layout.buttomScaleBarDrawProperty.getTickValues();
+                if (layout instanceof CircularPhylo circle) {
+                    int fontHeight = new javax.swing.JPanel().getFontMetrics(properties.getAxisFont()).getHeight();
+                    for (int i = 1; i < ticks.size(); i++)
+                        require((ticks.get(i) - ticks.get(i - 1)) * circle.canvas2logicRatio >= fontHeight + 4,
+                                "Circular tick labels have radial separation");
+                }
                 require(ticks.getLast() < 1.07, "Last nice tick is inside the data domain");
                 for (double tick : ticks) {
                     double distance = reverse ? 1.07 - tick : tick;

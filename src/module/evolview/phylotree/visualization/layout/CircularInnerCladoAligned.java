@@ -15,22 +15,17 @@ public class CircularInnerCladoAligned extends CircularInnerPhylo{
 	@Override
 	public void calculateForPainting(int width, int height) {
 		
-		TreeOperationUtil.letAllNodesBeEqualLength(rootNode);
-		
-		super.calculateForPainting(width, height);
-		// 恢复枝长
-		int innerCircleRadicus = treeLayoutProperties.getCircularLayoutPropertiy().getInnerCircleRadicus();
-		TreeOperationUtil.recursiveIterateTreeIF(rootNode, node -> {
-			node.setDisplayedBranchLength(node.getRealBranchLength());
-
-			if (node.getChildCount() == 0) {
-				node.setRadicusIfNeeded(innerCircleRadicus);
-				assignLocation(node);
-			}
-		});
+		TreeOperationUtil.withEqualDisplayedBranchLengths(rootNode, () -> super.calculateForPainting(width, height));
 		this.scaleBarProperty.setIfDrawScaleBar(false);
 	}
 	
+	@Override
+	protected double calculateRadicus(double distance, GraphicsNode node) {
+		return node.getChildCount() == 0
+				? treeLayoutProperties.getCircularLayoutPropertiy().resolveInnerRadius(biggestCircleRadicus)
+				: super.calculateRadicus(distance, node);
+	}
+
 	protected boolean isLayoutSupportDrawScaleBar() {
 		return false;
 	}

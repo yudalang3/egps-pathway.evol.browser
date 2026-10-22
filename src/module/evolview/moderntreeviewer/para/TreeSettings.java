@@ -126,8 +126,11 @@ public final class TreeSettings {
                 p -> p.getCircularLayoutPropertiy().getGlobalStartDegree(), (p, v) -> p.getCircularLayoutPropertiy().setGlobalStartDegree(v.intValue()));
         number("Circular layout/Arc extent", 360, 0, 360, "layout.circular.extent.degree", "Arc extent in degrees (0-360), circular layouts only.",
                 p -> p.getCircularLayoutPropertiy().getGlobalExtendDegree(), (p, v) -> p.getCircularLayoutPropertiy().setGlobalExtendDegree(v.intValue()));
-        number("Circular layout/Inner radius", 50, 0, 200, "layout.circular.inner.radius", "Inner radius in pixels (0-200), inward circular cladogram only.",
-                p -> p.getCircularLayoutPropertiy().getInnerCircleRadicus(), (p, v) -> p.getCircularLayoutPropertiy().setInnerCircleRadicus(v.intValue()));
+        add("Circular layout/Inner radius ratio", 0.2, "layout.circular.inner.radius.ratio",
+                "Inner radius divided by outer radius (0.2-1), inward circular cladogram only. The left panel uses 20-100%. At 1 all nodes share one circle. Old pixel settings and null ratios reset to 0.2.",
+                value -> value == null ? 0.2 : numeric(value, 0.2, 1, false),
+                p -> p.getCircularLayoutPropertiy().getInnerRadiusRatio(),
+                (p, value) -> p.getCircularLayoutPropertiy().setInnerRadiusRatio((Double) value));
         number("Spiral layout/Start angle", 0, 0, 360, "layout.spiral.start.degree", "Start angle in degrees (0-360), spiral layouts only.",
                 p -> p.getSprialLayoutPropertiy().getGlobalStartDegree(), (p, v) -> p.getSprialLayoutPropertiy().setGlobalStartDegree(v.intValue()));
         number("Spiral layout/Total angle", 720, 0, 10000, "layout.spiral.extent.degree", "Total spiral angle in degrees (0-10000).",
@@ -318,6 +321,7 @@ public final class TreeSettings {
         for (InputSetting setting : inputSettings()) text.append("| `").append(setting.key).append("` | ")
                 .append(String.join(", ", setting.aliases)).append(" | `").append(setting.value).append("` | ").append(setting.description).append(" |\n");
         text.append("\n## Compatibility details\n\n")
+                .append("- `layout.circular.inner.radius.ratio=0.2` uses 20% of the outer radius. The left panel accepts 20-100%; 100% collapses radial branches onto one circle. Legacy `layout.circular.inner.radius.px`, `layout.circular.inner.radius`, old JSONC Inner radius and null ratios migrate to 20%. An explicit ratio takes priority. Current snapshots contain only the ratio.\n")
                 .append("- `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.\n")
                 .append("- Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.\n")
                 .append("- Legacy packed font keys are expanded before canonical family/size/style values. Explicit `font.axis.inherit.label.font` has final precedence. Empty legacy `font.axis` inherits labels; explicit axis attributes disable implicit inheritance.\n")
@@ -401,6 +405,15 @@ public final class TreeSettings {
     public static Map<String, Object> parse(String text) {
         Map<String, Object> result = new LinkedHashMap<>();
         flatten(SettingsJson.parse(text), "", result);
+        return normalizeLegacyInnerRadius(result);
+    }
+
+    static Map<String, Object> normalizeLegacyInnerRadius(Map<String, Object> values) {
+        Map<String, Object> result = new LinkedHashMap<>(values);
+        if (result.containsKey("Circular layout/Inner radius")) {
+            numeric(result.remove("Circular layout/Inner radius"), 0, 200, true);
+            result.putIfAbsent("Circular layout/Inner radius ratio", 0.2);
+        }
         return result;
     }
 
@@ -410,7 +423,8 @@ public final class TreeSettings {
             if (entry.getKey().toString().contains("/")) throw new IllegalArgumentException("Unknown setting: " + path);
             Setting setting = SETTINGS.stream().filter(s -> s.path.equals(path)).findFirst().orElse(null);
             try {
-                if (setting != null) result.put(path, setting.validate.apply(entry.getValue()));
+                if (path.equals("Circular layout/Inner radius")) result.put(path, numeric(entry.getValue(), 0, 200, true));
+                else if (setting != null) result.put(path, setting.validate.apply(entry.getValue()));
                 else if (SETTINGS.stream().anyMatch(s -> s.path.startsWith(path + "/")) && entry.getValue() instanceof Map<?, ?> group) flatten(group, path, result);
                 else throw new IllegalArgumentException("Unknown setting or invalid group");
             } catch (IllegalArgumentException error) {
@@ -446,6 +460,8 @@ public final class TreeSettings {
                     Boolean bool = org.apache.commons.lang3.BooleanUtils.toBooleanObject(raw);
                     if (bool == null) throw new IllegalArgumentException("Use T, F, true or false");
                     value = bool;
+                } else if (setting.path.equals("Circular layout/Inner radius ratio") && raw.equals("null")) {
+                    value = null;
                 } else if (setting.initial instanceof Number) {
                     value = Double.valueOf(raw);
                     if (key.equals("layout.spiral.beta.factor")) value = ((Number) value).doubleValue() / 100;
@@ -453,6 +469,15 @@ public final class TreeSettings {
                 if (setting.path.startsWith("Node style/") && "Mixed".equals(value)) throw new IllegalArgumentException("Mixed is a snapshot value, not a VOICE setting");
                 result.put(setting.path, setting.validate.apply(value));
             } catch (IllegalArgumentException error) { throw new IllegalArgumentException(key + " (" + setting.path + "): " + error.getMessage(), error); }
+        }
+        if (input != null && !result.containsKey("Circular layout/Inner radius ratio")) {
+            for (String legacy : List.of("layout.circular.inner.radius.px", "layout.circular.inner.radius")) {
+                if (supplied(input, legacy)) {
+                    numeric(Double.valueOf(input.getSimplifiedStringWithDefault(legacy)), 0, 200, true);
+                    result.put("Circular layout/Inner radius ratio", 0.2);
+                    break;
+                }
+            }
         }
         if (input != null && !supplied(input, "font.axis.inherit.label.font")
                 && result.keySet().stream().anyMatch(p -> p.startsWith("Fonts/Axis and scale bar/") && !p.endsWith("Inherit label font")))
@@ -473,6 +498,7 @@ public final class TreeSettings {
     }
 
     public static void apply(TreeLayoutProperties properties, Map<String, Object> values) {
+        values = normalizeLegacyInnerRadius(values);
         TreeLayout target = values.containsKey(LAYOUT) ? layout((String) values.get(LAYOUT)) : properties.getMyLayout();
         if (Boolean.TRUE.equals(values.get("Creative mode/Enabled")) && target != TreeLayout.RECT_PHYLO_LEFT && target != TreeLayout.RECT_PHYLO_ALIGN2TIP)
             throw new IllegalArgumentException("Creative mode requires a rectangular phylogram.");

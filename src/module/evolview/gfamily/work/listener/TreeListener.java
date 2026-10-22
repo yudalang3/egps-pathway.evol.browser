@@ -283,7 +283,7 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 			if (gesture == Gesture.SELECT) {
 				Set<GraphicsNode> selection = new LinkedHashSet<>(treeLayoutProperties.getSelectedNodes());
 				EvolNodeUtil.recursiveIterateTreeIFWithStop(rootNode, (GraphicsNode node) -> {
-					if (!node.hideNode() && rect4selectArea.contains(node.getXSelf(), node.getYSelf())) {
+					if (!node.hideNode() && rect4selectArea.contains(phylogeneticTreePanel.getCurrLayout().getDisplayedNodePosition(node))) {
 						selection.add(node);
 						node.getDrawUnit().setBranchSelected(true);
 					}
@@ -522,6 +522,9 @@ public class TreeListener extends MouseAdapter implements KeyListener {
 		double ySelf = node.getYSelf();
 
 		double distanceSq = point.distanceSq(xSelf, ySelf);
+		if (point.distanceSq(phylogeneticTreePanel.getCurrLayout().getDisplayedNodePosition(node)) < 10 * 10) {
+			return true;
+		}
 
 		if (distanceSq < 10 * 10) {
 			return true;

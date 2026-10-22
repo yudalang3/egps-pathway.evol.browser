@@ -5,6 +5,7 @@ import module.evolview.model.enums.TreeLayoutEnum;
 import module.evolview.pathwaybrowser.gui.BaseCtrlPanel;
 import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
+import module.evolview.phylotree.visualization.layout.CircularInnerRadiusControls;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -17,6 +18,7 @@ import java.awt.event.MouseEvent;
 @SuppressWarnings("serial")
 public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutPanel,ItemListener {
 	private boolean synchronizing;
+	private final CircularInnerRadiusControls innerRadiusControls;
 
 	private JCheckBox chckbxAlignToTip;
 	private JSpinner spinnerRootLength;
@@ -283,6 +285,23 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		sliderRootLength.setEnabled(false);
 		spinnerRootLength.setEnabled(false);
 
+		innerRadiusControls = new CircularInnerRadiusControls(globalFont,
+				() -> controller == null ? null : controller.getActiveTreeLayoutProperties(),
+				() -> controller.reCalculateTreeLayoutPreservingZoom());
+		for (Component component : getComponents()) {
+			GridBagConstraints constraints = gridBagLayout.getConstraints(component);
+			if (constraints.gridy >= 4) {
+				constraints.gridy++;
+				gridBagLayout.setConstraints(component, constraints);
+			}
+		}
+		GridBagConstraints radiusConstraints = new GridBagConstraints();
+		radiusConstraints.gridx = 0;
+		radiusConstraints.gridy = 4;
+		radiusConstraints.gridwidth = 2;
+		radiusConstraints.insets = new Insets(0, 0, 5, 0);
+		add(innerRadiusControls, radiusConstraints);
+
 	}
 
 	@Override
@@ -312,6 +331,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
 		TreeLayoutProperties treeLayoutProperties = controller.getActiveTreeLayoutProperties();
 		boolean showRoot = treeLayoutProperties.isShowRoot();
 		checkBoxShowOutgroup.setSelected(showRoot);
+		innerRadiusControls.synchronize(treeLayoutProperties);
 	}
 
 	@Override
@@ -353,6 +373,7 @@ public class SubCircularLayout extends BaseCtrlPanel implements Turn2ThisLayoutP
             sliderStartDegree.setValue(circular.getGlobalStartDegree());
             spinnerExtentDegree.setValue(circular.getGlobalExtendDegree());
             sliderExtentDegree.setValue(circular.getGlobalExtendDegree());
+            innerRadiusControls.synchronize(properties);
 
         } finally { synchronizing = false; }
     }

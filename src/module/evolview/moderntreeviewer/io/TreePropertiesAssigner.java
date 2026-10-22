@@ -78,6 +78,7 @@ public class TreePropertiesAssigner {
 		circularLayoutProperty.setGlobalStartDegree(object.getCircularStartDegree());
 		circularLayoutProperty.setGlobalExtendDegree(object.getCircularExtentDegree());
 		circularLayoutProperty.setInnerCircleRadicus(object.getCircularInnerRadius());
+		circularLayoutProperty.setInnerRadiusRatio(object.getCircularInnerRadiusRatio());
 
 		// Category %7.3: Spiral Layout
 		SprialLayoutProperty spiralLayoutProperty = treeLayoutProperties.getSprialLayoutPropertiy();

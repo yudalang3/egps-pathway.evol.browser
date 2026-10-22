@@ -14,19 +14,20 @@ public class CircularCladoAlign2Tip extends CircularPhylo {
 
 	@Override
 	public void calculateForPainting(int width, int height) {
-		// 让所有的枝长都一样！
-		super.calculateForPainting(width, height);
-		// 恢复枝长
-		TreeOperationUtil.recursiveIterateTreeIF(rootNode, node -> {
-			node.setDisplayedBranchLength(node.getRealBranchLength());
-
-			if (node.getChildCount() == 0) {
-				node.setRadicusIfNeeded(biggestCircleRadicus);
-				assignLocation(node);
-			}
-		});
+		TreeOperationUtil.withEqualDisplayedBranchLengths(rootNode, () -> super.calculateForPainting(width, height));
 		
 		this.scaleBarProperty.setIfDrawScaleBar(false);
+	}
+
+	@Override
+	protected double calculateRadicus(double distance, GraphicsNode node) {
+		return node.getChildCount() == 0 ? biggestCircleRadicus : super.calculateRadicus(distance, node);
+	}
+
+	@Override
+	protected void calculateRatioAndChooseStartLength() {
+		super.calculateRatioAndChooseStartLength();
+		if (rootNode.getChildCount() == 0) recursiveCalculateStartLength = biggestCircleRadicus;
 	}
 	
 	protected boolean isLayoutSupportDrawScaleBar() {

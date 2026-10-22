@@ -75,7 +75,8 @@ public class TreeSelectionRegressionTest {
         }
 
         Point point(GraphicsNode node) {
-            return new Point((int) Math.round(node.getXSelf()), (int) Math.round(node.getYSelf()));
+            var position = tree.getCurrLayout().getDisplayedNodePosition(node);
+            return new Point((int) Math.round(position.x), (int) Math.round(position.y));
         }
 
         void event(int type, Point point, int modifiers) {

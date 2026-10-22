@@ -121,6 +121,65 @@ public class TreeSettingsRegressionTest {
         require(TreeSettings.changes(Map.of("Labels/Show leaf names", true), Map.of()).containsKey("Labels/Show leaf names"), "Deleting an explicit default still resets the current tree");
     }
 
+    private static void testInnerRadiusCompatibility() throws Exception {
+        String ratioPath = "Circular layout/Inner radius ratio";
+        TreeLayoutProperties p = properties();
+        require(p.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(.2), "New trees use 20 percent");
+        Map<String, Object> legacy = TreeSettings.parse("{\"Circular layout\":{\"Inner radius\":35}}");
+        TreeSettings.apply(p, legacy);
+        require(p.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(.2), "Pixel-only settings migrate to 20 percent");
+        var snapshot = TreeSettings.explicitImport(null, p);
+        require(snapshot.get(ratioPath).equals(.2) && !snapshot.containsKey("Circular layout/Inner radius"), "Snapshots expose only the percentage ratio");
+        var restored = TreeSettings.parse(TreeSettings.documentText(snapshot));
+        TreeLayoutProperties copy = properties();
+        TreeSettings.apply(copy, restored);
+        require(copy.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(.2), "Migrated snapshot round trip preserves ratio");
+        var session = new TreeSettingsSession(null, () -> null, legacy);
+        require(TreeSettings.parse(session.text()).get(ratioPath).equals(.2), "No-tree session migrates old defaults");
+        session.refreshDefaults(legacy);
+        require(session.values("{\"Circular layout\":{\"Inner radius\":35}}").get(ratioPath).equals(.2), "Session migrates pixel radius to percentage");
+        Path storage = Files.createTempDirectory(OUTPUT, "inner-radius-").resolve("user.jsonc");
+        var preferences = new TreeSettingsPreferences(storage);
+        preferences.saveDefaultsAsync(snapshot).get(5, TimeUnit.SECONDS);
+        var loaded = new TreeSettingsPreferences(storage).loadAsync().get(5, TimeUnit.SECONDS);
+        require(loaded.warning() == null && loaded.values().get(ratioPath).equals(.2), "Preferences preserve migrated percentage");
+        for (double ratio : new double[]{.5, 1}) {
+            TreeSettings.apply(p, Map.of(ratioPath, ratio));
+            var saved = TreeSettings.explicitImport(null, p);
+            preferences.saveDefaultsAsync(saved).get(5, TimeUnit.SECONDS);
+            var reloaded = new TreeSettingsPreferences(storage).loadAsync().get(5, TimeUnit.SECONDS);
+            require(reloaded.warning() == null, "Percentage preferences reload successfully");
+            TreeSettings.apply(copy, reloaded.values());
+            require(copy.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(ratio), "50/100 percent survives saving and reloading");
+        }
+        var parser = new module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView();
+        var voice = new egps2.builtin.modules.voice.fastmodvoice.VoiceParameterParser();
+        var oldBean = parser.generateTreeFromKeyValue(voice.getOrganizedParameterGetter("$layout.circular.inner.radius.px=35\n$layout.circular.inner.radius.ratio=null"));
+        new module.evolview.moderntreeviewer.io.TreePropertiesAssigner().assign(copy, oldBean);
+        require(copy.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(.2), "VOICE and Bean migrate explicit null to 20 percent");
+        var ratioBean = parser.generateTreeFromKeyValue(voice.getOrganizedParameterGetter("$layout.circular.inner.radius.ratio=0.5\n$layout.circular.inner.radius.px=85"));
+        class CopiedInput extends module.evolview.moderntreeviewer.io.MTVImportInforBean {
+            CopiedInput(module.evolview.moderntreeviewer.io.MTVImportInforBean source) { super(source); }
+        }
+        require(new CopiedInput(oldBean).getCircularInnerRadiusRatio().equals(.2), "Bean copy preserves migrated ratio");
+        require(new CopiedInput(ratioBean).getCircularInnerRadiusRatio().equals(.5), "Bean copy preserves ratio");
+        new module.evolview.moderntreeviewer.io.TreePropertiesAssigner().assign(copy, ratioBean);
+        require(copy.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(.5), "Non-null ratio wins over pixels in the same input");
+        TreeSettings.apply(copy, legacy);
+        require(copy.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(.2), "Later legacy layer resets to 20 percent");
+        TreeSettings.apply(copy, Map.of(ratioPath, 1.0));
+        require(copy.getCircularLayoutPropertiy().getInnerRadiusRatio().equals(1.0), "Later ratio layer overrides pixels");
+        for (String key : List.of("layout.circular.inner.radius.px", "layout.circular.inner.radius")) {
+            var migrated = parser.generateTreeFromKeyValue(voice.getOrganizedParameterGetter("$" + key + "=35"));
+            require(migrated.getCircularInnerRadiusRatio().equals(.2), "Pixel-only VOICE alias migrates to 20 percent");
+        }
+        require(TreeSettings.parse("{\"Circular layout\":{\"Inner radius ratio\":null}}").get(ratioPath).equals(.2), "Old null JSONC migrates to 20 percent");
+        require(TreeSettings.parse("{\"Circular layout\":{\"Inner radius ratio\":0.5,\"Inner radius\":85}}").get(ratioPath).equals(.5), "Explicit ratio wins independently of JSONC key order");
+        invalid("{\"Circular layout\":{\"Inner radius ratio\":0.19}}", "Inner radius ratio");
+        invalid("{\"Circular layout\":{\"Inner radius ratio\":1.01}}", "Inner radius ratio");
+        invalid("{\"Circular layout\":{\"Inner radius ratio\":\"0.5\"}}", "Inner radius ratio");
+    }
+
     private static TreeSettingsPreferences testStorage() throws Exception {
         Path directory = Files.createTempDirectory(OUTPUT, "preferences-");
         Path path = directory.resolve("user.jsonc");
@@ -727,6 +786,7 @@ public class TreeSettingsRegressionTest {
     public static void main(String[] args) throws Exception {
         Files.createDirectories(OUTPUT);
         testParserAndMapping();
+        testInnerRadiusCompatibility();
         TreeSettingsPreferences preferences = testStorage();
         testReusableDefaults();
         testVoiceSchema();
