@@ -151,6 +151,14 @@ public class FormatAwareNewickParser {
 		int depth = 0;
 		for (int i = 0; i < newick.length(); i++) {
 			char c = newick.charAt(i);
+			if (c == '\'' || c == '"') {
+				try { i = NewickText.quotedEnd(newick, i) - 1; }
+				catch (IllegalArgumentException error) {
+					throw new NewickSyntaxException(NewickSyntaxException.SyntaxErrorType.INVALID_NODE_NAME,
+							newick, i, "closing quote", error.getMessage());
+				}
+				continue;
+			}
 			if (c == '(') {
 				depth++;
 			} else if (c == ')') {
@@ -208,38 +216,14 @@ public class FormatAwareNewickParser {
 	 * @return position of the problematic semicolon, or -1 if none found
 	 */
 	private int findUnquotedSemicolonBeforeEnd() {
-		boolean inQuotes = false;
-		int lastUnquotedSemicolon = -1;
-
 		for (int i = 0; i < newick.length(); i++) {
 			char c = newick.charAt(i);
-
-			// Track quoted strings (single quotes per Newick standard)
-			if (c == '\'') {
-				if (!inQuotes) {
-					inQuotes = true;
-				} else {
-					// Check for escaped quote ('')
-					if (i + 1 < newick.length() && newick.charAt(i + 1) == '\'') {
-						i++; // Skip the escaped quote
-						continue;
-					}
-					inQuotes = false;
-				}
+			if (c == '\'' || c == '"') {
+				i = NewickText.quotedEnd(newick, i) - 1;
 				continue;
 			}
-
-			// Track semicolons outside quotes
-			if (c == ';' && !inQuotes) {
-				if (i < newick.length() - 1) {
-					// Found a semicolon that is not at the end
-					return i;
-				}
-				lastUnquotedSemicolon = i;
-			}
+			if (c == ';' && i < newick.length() - 1) return i;
 		}
-
-		// All semicolons found are at the end (or inside quotes)
 		return -1;
 	}
 
@@ -412,42 +396,9 @@ public class FormatAwareNewickParser {
 	 */
 	private String parseLabel() {
 		skipWhitespace();
-
-		StringBuilder label = new StringBuilder();
-		boolean inQuotes = false;
-		char quoteChar = 0;
-
-		while (pos < newick.length()) {
-			char c = newick.charAt(pos);
-
-			// Handle quoted strings
-			if (!inQuotes && (c == '\'' || c == '"')) {
-				inQuotes = true;
-				quoteChar = c;
-				pos++;
-				continue;
-			}
-			if (inQuotes) {
-				if (c == quoteChar) {
-					inQuotes = false;
-					pos++;
-					continue;
-				}
-				label.append(c);
-				pos++;
-				continue;
-			}
-
-			// Stop at delimiters
-			if (c == '(' || c == ')' || c == ',' || c == ';') {
-				break;
-			}
-
-			label.append(c);
-			pos++;
-		}
-
-		return label.toString().trim();
+		int start = pos;
+		pos = NewickText.labelEnd(newick, start);
+		return newick.substring(start, pos).trim();
 	}
 
 	/**

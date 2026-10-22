@@ -35,7 +35,7 @@ public class TreeParser4Evoltree {
 		// Remove whitespace if requested
 		String processedNwk = nwkStr;
 		if (removeWhitespace) {
-			processedNwk = nwkStr.replaceAll("\\s+", "");
+			processedNwk = module.evoltreio.parser.NewickText.removeWhitespace(nwkStr);
 		}
 
 		// Use format-aware parser
@@ -114,13 +114,7 @@ public class TreeParser4Evoltree {
 			}
 
 			log.debug("Parsing tree from Newick file: {}", nwkPath);
-			List<String> lines = FileUtils.readLines(file, StandardCharsets.UTF_8);
-
-			StringBuilder sBuilder = new StringBuilder();
-			for (String string : lines) {
-				sBuilder.append(string);
-			}
-			String nwkStr = sBuilder.toString();
+			String nwkStr = java.nio.file.Files.readString(file.toPath(), StandardCharsets.UTF_8);
 			optRoot = Optional.of(getTree(nwkStr, removeWhitespace, formatConfig));
 
 		// Priority 3: Table-like format file

@@ -26,19 +26,19 @@ public class NWKGraphicsInternalCoderDecoder<T extends DefaultGraphicsPhyloNode>
 	@Override
 	public void parseNode(T node, String str) {
 		if (str.isEmpty()) return;
-		String[] parts = str.split(":", -1);
+		String[] parts = module.evoltreio.parser.NewickText.split(str).toArray(String[]::new);
 		if (parts.length < 2 || parts.length > 3)
 			throw new InputMismatchException("Invalid internal node: " + str);
 		node.clearBootstrapValue();
 		node.setName("");
 		if (parts.length == 3) {
-			node.setName(parts[0]);
+			node.setName(module.evoltreio.parser.NewickText.unquote(parts[0]));
 			if (!parts[1].isEmpty()) node.setBootstrapValue(Double.parseDouble(parts[1]));
 			node.setLength(Double.parseDouble(parts[2]));
 			return;
 		}
 		Double support = Doubles.tryParse(parts[0]);
-		if (support == null) node.setName(parts[0]);
+		if (support == null) node.setName(module.evoltreio.parser.NewickText.unquote(parts[0]));
 		else node.setBootstrapValue(support);
 		node.setLength(Double.parseDouble(parts[1]));
 	}
@@ -47,14 +47,14 @@ public class NWKGraphicsInternalCoderDecoder<T extends DefaultGraphicsPhyloNode>
 	public String codeNode(T node) {
 		sBuilder.setLength(0);
 		String name = node.isNameBootstrap() ? "" : node.getName();
-		if (!Strings.isNullOrEmpty(name)) sBuilder.append(name);
+		if (!Strings.isNullOrEmpty(name)) sBuilder.append(module.evoltreio.parser.NewickText.quote(name));
 		if (node.hasBootstrapValue()) {
 			if (sBuilder.length() > 0) sBuilder.append(COLON);
 			sBuilder.append(java.math.BigDecimal.valueOf(node.getBootstrapValue()).stripTrailingZeros().toPlainString());
 		} else if (!Strings.isNullOrEmpty(name) && Doubles.tryParse(name) != null) {
 			sBuilder.append(COLON);
 		}
-		sBuilder.append(COLON).append(convertRate2Decimal(node.getLength()));
+		sBuilder.append(COLON).append(Double.toString(node.getLength()));
 		return sBuilder.toString();
 	}
 

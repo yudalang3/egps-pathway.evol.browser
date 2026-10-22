@@ -9,8 +9,6 @@ import egps2.modulei.AdjusterFillAndLine;
 import egps2.modulei.IInformation;
 import egps2.modulei.IModuleLoader;
 import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.model.filefilter.SaveFilterNwk;
-import egps2.utils.common.util.SaveUtil;
 import module.evolview.gfamily.work.gui.CtrlTreeLayoutPanel;
 import module.evolview.gfamily.work.gui.CtrlTreeOperationPanelByMiglayout;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
@@ -19,24 +17,18 @@ import module.evolview.moderntreeviewer.gui.CreativeModeTaskPanel;
 import module.evolview.moderntreeviewer.para.TreeSettings;
 import module.evolview.moderntreeviewer.para.TreeSettingsDialog;
 import module.evolview.moderntreeviewer.para.TreeSettingsPreferences;
-import module.evolview.phylotree.visualization.graphics.phylogeny.PhyloGraphicsTreeEncoderDecoder;
 import module.evolview.phylotree.visualization.layout.LeafLabelStateInitializer;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import utils.storage.MapPersistence;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @SuppressWarnings("serial")
 public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine, IInformation {
@@ -62,6 +54,7 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 	private final String dividerKey = "mtv.divider.location";
 
 	private VOICE4MTV importHandler = new VOICE4MTV(this);
+	private final module.evolview.moderntreeviewer.io.TreeExportHandler exportHandler = new module.evolview.moderntreeviewer.io.TreeExportHandler();
 
 	private final String[] FEATURES = new String[] { "Convenient Operation", "Adjust graphics effects",
 			"Display tree information", "Utilize differenct tree layout", "Toggle creative mode", };
@@ -346,24 +339,12 @@ public class MTreeViewMainFace extends ModuleFace implements AdjusterFillAndLine
 
 	@Override
 	public boolean canExport() {
-		return true;
+		return phylogeneticTreePanel != null && !exportHandler.isSaving();
 	}
 
 	@Override
 	public void exportData() {
-
-		Consumer<String> txtAction = str -> {
-			GraphicsNode rootNode = phylogeneticTreePanel.getRootNode();
-			String code = new PhyloGraphicsTreeEncoderDecoder().encode(rootNode);
-			try {
-				String fileName = str.endsWith(".nwk") ? str :  str.concat(".nwk");
-				Files.writeString(Path.of(fileName), code);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		};
-
-		new SaveUtil().saveData(phylogeneticTreePanel, getClass(), Pair.of(new SaveFilterNwk(), txtAction));
+		exportHandler.export(phylogeneticTreePanel, getClass());
 	}
 
 	@Override

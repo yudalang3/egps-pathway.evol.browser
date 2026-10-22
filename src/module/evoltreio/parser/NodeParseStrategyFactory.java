@@ -272,7 +272,7 @@ public class NodeParseStrategyFactory {
 				setDistance(node, parts[1], parts[0], position, context);
 			} else {
 				// Internal: name only (use full label as name, ignore any colon)
-				setName(node, labelStr.contains(":") ? parts[0] : labelStr);
+				setName(node, parts[0]);
 			}
 		}
 

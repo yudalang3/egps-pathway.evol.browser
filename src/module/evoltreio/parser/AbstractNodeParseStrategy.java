@@ -52,14 +52,10 @@ public abstract class AbstractNodeParseStrategy implements NodeParseStrategy {
 			return new String[]{"", ""};
 		}
 
-		int colonIndex = label.lastIndexOf(':');
-		if (colonIndex == -1) {
-			return new String[]{label, ""};
-		}
-
-		String before = label.substring(0, colonIndex);
-		String after = colonIndex < label.length() - 1 ? label.substring(colonIndex + 1) : "";
-		return new String[]{before, after};
+		var parts = NewickText.split(label);
+		if (parts.size() == 1) return new String[]{NewickText.unquote(label), ""};
+		int last = parts.size() - 1;
+		return new String[]{NewickText.unquote(String.join(":", parts.subList(0, last))), parts.get(last)};
 	}
 
 	/**
