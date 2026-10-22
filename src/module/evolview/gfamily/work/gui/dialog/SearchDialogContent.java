@@ -1,9 +1,7 @@
 package module.evolview.gfamily.work.gui.dialog;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import egps2.UnifiedAccessPoint;
-import evoltree.struct.util.EvolNodeUtil;
 import module.evolview.gfamily.GeneFamilyController;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
@@ -14,6 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Objects;
 
 public class SearchDialogContent extends JPanel implements ActionListener {
@@ -31,6 +30,7 @@ public class SearchDialogContent extends JPanel implements ActionListener {
 
     private GeneFamilyController controller;
     private module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel observedTree;
+    private GraphicsNode searchedRoot;
     private final java.beans.PropertyChangeListener clearListener = event -> resetResults();
 
 	private FindSearchRecord findSearchRecord = new FindSearchRecord();
@@ -71,6 +71,7 @@ public class SearchDialogContent extends JPanel implements ActionListener {
         gbc_inputTextField.gridy = 0;
         add(inputTextField, gbc_inputTextField);
         inputTextField.setColumns(10);
+        inputTextField.addActionListener(this);
 
         findNextButton = new JButton("Find");
         findNextButton.addActionListener(this);
@@ -136,7 +137,6 @@ public class SearchDialogContent extends JPanel implements ActionListener {
 
         consoleTextField = new JTextField("Please input string");
         consoleTextField.setFont(defaultFont);
-        consoleTextField.setForeground(Color.lightGray);
         GridBagConstraints gbc_consoleTextField = new GridBagConstraints();
         gbc_consoleTextField.gridwidth = 3;
         gbc_consoleTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -145,7 +145,7 @@ public class SearchDialogContent extends JPanel implements ActionListener {
         add(consoleTextField, gbc_consoleTextField);
         consoleTextField.setColumns(10);
         consoleTextField.setEditable(false);
-        inputTextField.setToolTipText("Find nodes whose names contain this text. Matching is case-sensitive.");
+        inputTextField.setToolTipText("<html>Find node names containing this text in the current tree.<br>Matching is case-sensitive. Press Enter to find the next result.</html>");
         findNextButton.setToolTipText("Find the next matching node; wrap to the first result at the end.");
         findPrevButton.setToolTipText("Find the previous matching node; wrap to the last result at the beginning.");
         highlightAllButton.setToolTipText("Highlight all matching nodes, then close this window. Node colors remain unchanged.");
@@ -160,6 +160,7 @@ public class SearchDialogContent extends JPanel implements ActionListener {
 
     @Override public void addNotify() {
         super.addNotify();
+        resetResults();
         observedTree = controller.getActiveTreeLayoutProperties() == null ? null : controller.getSelectedPhylogeneticTreePanel();
         if (observedTree != null) observedTree.addPropertyChangeListener("treeSelectionCleared", clearListener);
     }
@@ -174,126 +175,101 @@ public class SearchDialogContent extends JPanel implements ActionListener {
     public void resetResults() {
         findRets.clear();
         findSearchRecord = new FindSearchRecord();
+        searchedRoot = null;
         if (findPrevButton != null) findPrevButton.setEnabled(false);
+        if (consoleTextField != null) consoleTextField.setText("Please input string");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-		String text = inputTextField.getText();
-		if (findNextButton == e.getSource()) {
-			if (Objects.equals(findSearchRecord.getStringToFind(), text)){
-                findSearchRecord.incrementCurrentHightNodeIndex();
-				if (findSearchRecord.getCurrentHightNodeIndex() >= findRets.size()) {
-                    findSearchRecord.resetToZero();
-				}
-                if (findRets.isEmpty()){
-                    return;
-                }
-				for (GraphicsNode graphicsNode : findRets) {
-					graphicsNode.getDrawUnit().setNodeSelected(false);
-				}
-				findRets.get(findSearchRecord.getCurrentHightNodeIndex()).getDrawUnit().setNodeSelected(true);
-				controller.refreshPhylogeneticTree();
-			}else{
-                findSearchRecord.resetToZero();
-				boolean targets = findTargets();
-				if (targets) {
-					return;
-				}
-				int size = findRets.size();
-				String concat = String.valueOf(size).concat("  nodes found.");
-				consoleTextField.setText(concat);
-				findRets.get(findSearchRecord.getCurrentHightNodeIndex()).getDrawUnit().setNodeSelected(true);
-				controller.refreshPhylogeneticTree();
-			}
-        } else if (highlightAllButton == e.getSource()) {
-            boolean targets = findTargets();
-            if (targets) {
-                return;
-            }
-
-            for (GraphicsNode graphicsNode : findRets) {
-                graphicsNode.getDrawUnit().setNodeSelected(true);
-            }
-
+        Object source = e.getSource();
+        if (source == closeButton) {
             disposeThis();
-
-            controller.refreshPhylogeneticTree();
-        } else if (clearHighlightsButton == e.getSource()) {
-            TreeLayoutProperties treeLayoutProperties = controller.getTreeLayoutProperties();
-            GraphicsNode rootNode = treeLayoutProperties.getOriginalRootNode();
-            EvolNodeUtil.recursiveIterateTreeIF(rootNode, node -> {
-                node.getDrawUnit().setNodeSelected(false);
-            });
+        } else if (source == clearHighlightsButton) {
+            TreeLayoutProperties properties = controller.getActiveTreeLayoutProperties();
+            if (properties != null) clearHighlights(properties.getOriginalRootNode());
             resetResults();
+            consoleTextField.setText(properties == null ? "Please input the tree first." : "Search highlights cleared.");
+            if (properties != null) controller.refreshPhylogeneticTree();
+        } else if (source == highlightAllButton) {
+            if (findTargets()) return;
+            for (GraphicsNode node : findRets) node.getDrawUnit().setNodeSelected(true);
             controller.refreshPhylogeneticTree();
-
-        } else if (findPrevButton == e.getSource()) {
-            if (findRets.isEmpty()) {
-                consoleTextField.setText("Current no nodes found.");
-            } else {
-                findSearchRecord.decreaseCurrentHightNodeIndex();
-                if (findSearchRecord.getCurrentHightNodeIndex() < 0) {
-                    short currentHightNodeIndex = (short) (findRets.size() - 1);
-                    findSearchRecord.setCurrentHightNodeIndex(currentHightNodeIndex);
-                }
-                for (GraphicsNode graphicsNode : findRets) {
-                    graphicsNode.getDrawUnit().setNodeSelected(false);
-                }
-                findRets.get(findSearchRecord.getCurrentHightNodeIndex()).getDrawUnit().setNodeSelected(true);
-                controller.refreshPhylogeneticTree();
-            }
-        } else if (closeButton == e.getSource()) {
             disposeThis();
+        } else if (source == findNextButton || source == inputTextField || source == findPrevButton) {
+            boolean previous = source == findPrevButton;
+            boolean sameSearch = controller.getActiveTreeLayoutProperties() != null
+                    && searchedRoot == controller.getSelectedPhylogeneticTreePanel().getRootNode()
+                    && Objects.equals(findSearchRecord.getStringToFind(), inputTextField.getText())
+                    && !findRets.isEmpty();
+            if (!sameSearch) {
+                if (findTargets()) return;
+                if (previous) findSearchRecord.setCurrentHightNodeIndex(findRets.size() - 1);
+            } else {
+                int index = findSearchRecord.getCurrentHightNodeIndex() + (previous ? -1 : 1);
+                findSearchRecord.setCurrentHightNodeIndex(Math.floorMod(index, findRets.size()));
+            }
+            for (GraphicsNode node : findRets) node.getDrawUnit().setNodeSelected(false);
+            int index = findSearchRecord.getCurrentHightNodeIndex();
+            GraphicsNode node = findRets.get(index);
+            node.getDrawUnit().setNodeSelected(true);
+            boolean hidden = false;
+            for (GraphicsNode parent = (GraphicsNode) node.getParent(); parent != null; parent = (GraphicsNode) parent.getParent()) {
+                if (parent.getCollapse()) { hidden = true; break; }
+            }
+            consoleTextField.setText((index + 1) + " / " + findRets.size() + ": " + node.getName()
+                    + (hidden ? " (inside a collapsed clade; expand it to view)" : ""));
+            controller.refreshPhylogeneticTree();
+            if (!hidden) controller.getSelectedPhylogeneticTreePanel().scrollNodeToCenter(node);
         }
-
-		findSearchRecord.setStringToFind(text);
     }
 
     /**
      * @return true if NOT find  any target
      */
     public boolean findTargets() {
-        findRets.clear();
-        String text = inputTextField.getText();
-        if (text.isEmpty()) {
-            consoleTextField.setText("Please input at least a character.");
-            return true;
-        }
-
-        TreeLayoutProperties treeLayoutProperties = controller.getTreeLayoutProperties();
-        if (treeLayoutProperties == null) {
+        resetResults();
+        TreeLayoutProperties properties = controller.getActiveTreeLayoutProperties();
+        if (properties == null) {
             consoleTextField.setText("Please input the tree first.");
             return true;
         }
-        GraphicsNode rootNode = treeLayoutProperties.getOriginalRootNode();
-
-        //不一致才要重新搜索
-        EvolNodeUtil.recursiveIterateTreeIF(rootNode, node -> {
+        clearHighlights(properties.getOriginalRootNode());
+        controller.refreshPhylogeneticTree();
+        String text = inputTextField.getText();
+        if (text.isBlank()) {
+            consoleTextField.setText("Please input at least a character.");
+            return true;
+        }
+        searchedRoot = controller.getSelectedPhylogeneticTreePanel().getRootNode();
+        findSearchRecord.setStringToFind(text);
+        ArrayDeque<GraphicsNode> pending = new ArrayDeque<>();
+        pending.push(searchedRoot);
+        while (!pending.isEmpty()) {
+            GraphicsNode node = pending.pop();
             String name = node.getName();
-            if (Strings.isNullOrEmpty(name)) {
-                return;
-            }
-            if (searchCriterial(name, text)) {
-                findRets.add(node);
-            }
-
-        });
-
+            if (name != null && name.contains(text)) findRets.add(node);
+            for (int i = node.getChildCount() - 1; i >= 0; i--) pending.push((GraphicsNode) node.getChildAt(i));
+        }
         findPrevButton.setEnabled(!findRets.isEmpty());
         if (findRets.isEmpty()) consoleTextField.setText("No matching nodes found.");
         return findRets.isEmpty();
     }
 
-    private void disposeThis() {
-        findRets.clear();
-        JDialog root = (JDialog) SwingUtilities.getRoot(this);
-        root.dispose();
+    private void clearHighlights(GraphicsNode root) {
+        ArrayDeque<GraphicsNode> pending = new ArrayDeque<>();
+        pending.push(root);
+        while (!pending.isEmpty()) {
+            GraphicsNode node = pending.pop();
+            node.getDrawUnit().setNodeSelected(false);
+            for (int i = node.getChildCount() - 1; i >= 0; i--) pending.push((GraphicsNode) node.getChildAt(i));
+        }
     }
 
-    private boolean searchCriterial(String nodeName, String searchChars) {
-        boolean ret = nodeName.contains(searchChars);
-        return ret;
+    private void disposeThis() {
+        resetResults();
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (window instanceof JDialog) window.dispose();
     }
 
 }

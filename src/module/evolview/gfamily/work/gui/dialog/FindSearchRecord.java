@@ -1,7 +1,7 @@
 package module.evolview.gfamily.work.gui.dialog;
 
 public class FindSearchRecord {
-    private short currentHightNodeIndex = 0;
+    private int currentHightNodeIndex = 0;
     private String stringToFind;
 
     public int getCurrentHightNodeIndex() {
@@ -15,7 +15,7 @@ public class FindSearchRecord {
         currentHightNodeIndex--;
     }
 
-    public void setCurrentHightNodeIndex(short currentHightNodeIndex) {
+    public void setCurrentHightNodeIndex(int currentHightNodeIndex) {
         this.currentHightNodeIndex = currentHightNodeIndex;
     }
 

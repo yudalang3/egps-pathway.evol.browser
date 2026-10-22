@@ -18,6 +18,7 @@ public class SeachDialog extends JDialog {
 	public SeachDialog(GeneFamilyController controller) {
 		super(UnifiedAccessPoint.getInstanceFrame(), true);
 		setTitle("Find nodes");
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 200);
 		setLayout(new BorderLayout());
 		SearchDialogContent comp = new SearchDialogContent(controller);
