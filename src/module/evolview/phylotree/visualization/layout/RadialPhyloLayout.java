@@ -242,6 +242,11 @@ public class RadialPhyloLayout extends RadicalLayout {
 
 				GraphicsNode firstLeaf = leaves.get(0);
 				GraphicsNode lastLeaf = leaves.get(leaves.size() - 1);
+                if (firstLeaf == lastLeaf) {
+                    tt.setDrawShape(new java.awt.geom.Ellipse2D.Double(firstLeaf.getXSelf()-3, firstLeaf.getYSelf()-3, 6, 6));
+                    continue;
+                }
+
 				GraphicsNode mrca = GraphicTreePropertyCalculator.getMostRecentCommonAnsester(firstLeaf, lastLeaf);
 				double centerX = mrca.getXSelf();
 				double centerY = mrca.getYSelf();
@@ -292,6 +297,12 @@ public class RadialPhyloLayout extends RadicalLayout {
 
 				GraphicsNode firstLeaf = leaves.get(0);
 				GraphicsNode lastLeaf = leaves.get(leaves.size() - 1);
+                if (firstLeaf == lastLeaf) {
+                    double x = firstLeaf.getXSelf() + 10, y = firstLeaf.getYSelf();
+                    tt.setTextLocationAndShape(x, y, new java.awt.geom.Line2D.Double(x,y-3,x,y+3));
+                    continue;
+                }
+
 				GraphicsNode mrca = GraphicTreePropertyCalculator.getMostRecentCommonAnsester(firstLeaf, lastLeaf);
 				double centerX = mrca.getXSelf();
 				double centerY = mrca.getYSelf();

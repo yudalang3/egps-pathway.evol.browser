@@ -140,6 +140,24 @@ public abstract class BaseLayout implements ITreeLayout {
     protected void afterCalculation() {
         if (isShowAnnotation) {
             configurateMainAnnotation(phylogeneticTreePanel.getMainAnnotationsProperties());
+            var annotations = phylogeneticTreePanel.getMainAnnotationsProperties();
+            for (var annotation : annotations.getInternalNode2LeafAnnos()) {
+                if (!annotation.shouldConfigurateAndPaint()) continue;
+                var leaves = GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
+                if (leaves.size() == 1) {
+                    var endpoint = getDisplayedNodePosition(leaves.getFirst());
+                    annotation.setDrawShape(new java.awt.geom.Ellipse2D.Double(endpoint.x-3, endpoint.y-3, 6, 6));
+                }
+            }
+            for (var annotation : annotations.getOutterSidewardAnnos()) {
+                if (!annotation.shouldConfigurateAndPaint()) continue;
+                var leaves = GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
+                if (leaves.size() == 1) {
+                    var endpoint = getDisplayedNodePosition(leaves.getFirst());
+                    annotation.setTextLocationAndShape(endpoint.x+10, endpoint.y,
+                            new Line2D.Double(endpoint.x+10, endpoint.y-3, endpoint.x+10, endpoint.y+3));
+                }
+            }
         }
 
         AnnotationsProperties4LinageType linageTypeAnnotationsProperties = phylogeneticTreePanel
@@ -399,7 +417,19 @@ public abstract class BaseLayout implements ITreeLayout {
     }
 
     public void prepareLabelSpace() {
-        treeLayoutProperties.synchronizeColumnLabelReserve(0);
+        treeLayoutProperties.synchronizeColumnLabelReserve(annotationTextReserve());
+    }
+
+    protected int annotationTextReserve() {
+        int reserve = 0;
+        for (var annotation : phylogeneticTreePanel.getMainAnnotationsProperties().getOutterSidewardAnnos()) {
+            if (!annotation.shouldConfigurateAndPaint()) continue;
+            var style = annotation.getSidewardNodeAnnotation();
+            FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(style.getTextFont());
+            reserve = Math.max(reserve, 30 + (style.isDrawTextHorizontal()
+                    ? metrics.stringWidth(style.getTextString()) : metrics.getHeight()));
+        }
+        return reserve;
     }
 
     private void prepareScaleSpace() {
@@ -426,7 +456,7 @@ public abstract class BaseLayout implements ITreeLayout {
                 for (int i = 0; i < node.getChildCount(); i++) pending.push((GraphicsNode) node.getChildAt(i));
             }
         }
-        return radius + 4 + (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()
+        return radius + 4 + annotationTextReserve() + (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()
                 ? getMaxLengthLeafNameWidthAccording2CurrentFont() + metrics.getHeight() : 0);
     }
 
@@ -676,60 +706,23 @@ public abstract class BaseLayout implements ITreeLayout {
 
         int yy = (int) (y2 + 0.5 * height);
 
-        // Special case: angle = 180 means draw text on LEFT side (for 180° rotated Slant layout)
-        if (angleIfNeeded == 180 || angleIfNeeded == -180) {
-            int stringWidth = fontMetrics.stringWidth(drawString);
-            int xxLeft = (int) (x2 - circleRadius - 4 - stringWidth);
-            g2d.drawString(drawString, xxLeft, yy);
-
-            Color color = leafNameRenderMap.get(node.getID());
-            if (color != null) {
-                g2d.setColor(color);
-                g2d.fillRect(xxLeft, yy - height, stringWidth, height);
-            } else {
-                color = leafNameRenderMap2.get(node.getID());
-                if (color != null) {
-                    g2d.setColor(color);
-                    g2d.fillRect(xxLeft, yy - height, stringWidth, height);
-                }
+        Graphics2D labelGraphics = (Graphics2D) g2d.create();
+        try {
+            int labelX = xx;
+            if (angleIfNeeded == 180 || angleIfNeeded == -180)
+                labelX = (int) (x2 - circleRadius - 4 - fontMetrics.stringWidth(drawString));
+            else if (angleIfNeeded != 0)
+                labelGraphics.rotate(-Math.toRadians(angleIfNeeded), x2, y2);
+            Color background = leafNameRenderMap.get(node.getID());
+            if (background == null) background = leafNameRenderMap2.get(node.getID());
+            if (background != null) {
+                labelGraphics.setColor(background);
+                labelGraphics.fillRect(labelX, yy - height, fontMetrics.stringWidth(drawString), height);
             }
-        } else if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
-            double radians = Math.toRadians(angleIfNeeded);
-            AffineTransform originalTransform = g2d.getTransform();
-            g2d.rotate(-radians, x2, y2);
-            g2d.drawString(drawString, xx, yy);
-            Color color = leafNameRenderMap.get(node.getID());
-            if (color != null) {
-                int stringWidth = fontMetrics.stringWidth(drawString);
-                g2d.setColor(color);
-                g2d.fillRect(xx, yy - height, stringWidth, height);
-            } else {
-                color = leafNameRenderMap2.get(node.getID());
-                if (color != null) {
-                    int stringWidth = fontMetrics.stringWidth(drawString);
-                    g2d.setColor(color);
-                    g2d.fillRect(xx, yy - height, stringWidth, height);
-                }
-            }
-
-            g2d.setTransform(originalTransform);
-        } else {
-            g2d.drawString(drawString, xx, yy);
-
-            Color color = leafNameRenderMap.get(node.getID());
-            if (color != null) {
-                int stringWidth = fontMetrics.stringWidth(drawString);
-                g2d.setColor(color);
-                g2d.fillRect(xx, yy - height, stringWidth, height);
-            } else {
-                color = leafNameRenderMap2.get(node.getID());
-                if (color != null) {
-                    int stringWidth = fontMetrics.stringWidth(drawString);
-                    g2d.setColor(color);
-                    g2d.fillRect(xx, yy - height, stringWidth, height);
-                }
-            }
-
+            labelGraphics.setColor(Color.BLACK);
+            labelGraphics.drawString(drawString, labelX, yy);
+        } finally {
+            labelGraphics.dispose();
         }
 
     }
@@ -781,17 +774,7 @@ public abstract class BaseLayout implements ITreeLayout {
      */
     @Override
     public void paintGraphics(Graphics2D g2d) {
-        if (isShowAnnotation) {
-            AnnotationsProperties annotationsProperties = phylogeneticTreePanel.getMainAnnotationsProperties();
-            List<DrawPropInternalNode2LeafAnno> internalNode2LeafAnnos = annotationsProperties
-                    .getInternalNode2LeafAnnos();
-            for (DrawPropInternalNode2LeafAnno tt : internalNode2LeafAnnos) {
-                if (tt.shouldConfigurateAndPaint()) {
-                    tt.drawAnnotation(g2d);
-                }
-            }
-
-        }
+        drawAnnotationBackgrounds(g2d);
         specificTreeDrawingProcess(g2d);
         firstRecursiveDraw(g2d, rootNode);
 
@@ -802,6 +785,21 @@ public abstract class BaseLayout implements ITreeLayout {
         commonTailInDrawingProcess(g2d);
         drawBootstrapLabels(g2d, rootNode);
         drawScaleBar(g2d);
+    }
+
+    protected void drawAnnotationBackgrounds(Graphics2D g2d) {
+        if (isShowAnnotation) {
+            AnnotationsProperties annotationsProperties = phylogeneticTreePanel.getMainAnnotationsProperties();
+            List<DrawPropInternalNode2LeafAnno> internalNode2LeafAnnos = annotationsProperties
+                    .getInternalNode2LeafAnnos();
+            for (DrawPropInternalNode2LeafAnno tt : internalNode2LeafAnnos) {
+                if (tt.shouldConfigurateAndPaint()) {
+                    Graphics2D background = (Graphics2D) g2d.create();
+                    try { tt.drawAnnotation(background); } finally { background.dispose(); }
+                }
+            }
+
+        }
     }
 
     /**
@@ -941,7 +939,7 @@ public abstract class BaseLayout implements ITreeLayout {
      *
      * @param g2d
      */
-    private void commonTailInDrawingProcess(Graphics2D g2d) {
+    protected void commonTailInDrawingProcess(Graphics2D g2d) {
 
         if (isShowAnnotation) {
             AnnotationsProperties annotationsProperties = phylogeneticTreePanel.getMainAnnotationsProperties();

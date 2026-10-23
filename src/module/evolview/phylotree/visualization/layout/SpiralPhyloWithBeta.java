@@ -105,10 +105,9 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double lastDeg = lastLeaf.getAngleIfNeeded();
-				GeneralPath clone = produceSpiralRing(startDeg, lastDeg - startDeg, alpha,
-						betaFactor * currentGraphicsNode.getRadicusIfNeeded(), alpha, betaFactor * maxBeta);
-
-				tt.setDrawShape(clone);
+				tt.setDrawShape(produceSpiralRing(startDeg, lastDeg - startDeg, alpha,
+                    betaFactor * currentGraphicsNode.getRadicusIfNeeded(), alpha,
+                    betaFactor * leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(maxBeta)));
 			}
 		}
 		// 这个注释要特殊处理

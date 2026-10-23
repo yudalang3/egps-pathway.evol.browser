@@ -10,6 +10,13 @@ public class CircularInnerPhylo extends CircularPhylo{
 		super(controller, rootNode,phylogeneticTreePanel);
 	}
 
+    @Override
+    protected double annotationLeafRadius(java.util.List<GraphicsNode> leaves) {
+        return leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).min().orElse(0);
+    }
+    @Override
+    protected double annotationOffset(double distance) { return -distance; }
+
 	@Override
 	protected void calculateRatioAndChooseStartLength() {
 		CircularLayoutProperty circularLayoutPropertiy = treeLayoutProperties.getCircularLayoutPropertiy();

@@ -29,7 +29,13 @@ public abstract class AnnotationRender {
 	 * @return
 	 */
 	public boolean shouldConfigurateAndPaint() {
-		return shouldConfigurateAndPaint;
+		if (!shouldConfigurateAndPaint || node == null) return false;
+        GraphicsNode ancestor = (GraphicsNode) node.getParent();
+        while (ancestor != null) {
+            if (ancestor.getCollapse()) return false;
+            ancestor = (GraphicsNode) ancestor.getParent();
+        }
+        return true;
 	}
 	/**
 	 * 配置好之后就绘制注释。但是配置是多样化的，对于不同的layout结果是不一样的！

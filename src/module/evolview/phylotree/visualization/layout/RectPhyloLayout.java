@@ -62,7 +62,7 @@ public class RectPhyloLayout extends RectangularLayout {
 	@Override
 	public void prepareLabelSpace() {
 		treeLayoutProperties.synchronizeColumnLabelReserve(treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()
-				? getMaxLengthLeafNameWidthAccording2CurrentFont() : 0);
+				? getMaxLengthLeafNameWidthAccording2CurrentFont() + annotationTextReserve() : annotationTextReserve());
 	}
 
 	@Override
@@ -81,13 +81,13 @@ public class RectPhyloLayout extends RectangularLayout {
 				double buttomMostY = lastLeaf.getYSelf();
 				double rightMostX = 0;
 				for (GraphicsNode nn : leaves) {
-					double xSelf = nn.getXSelf();
+					double xSelf = getDisplayedNodePosition(nn).x;
 					if (xSelf > rightMostX) {
 						rightMostX = xSelf;
 					}
 				}
 				Rectangle2D.Double rect = new Rectangle2D.Double(leftMostX, topMostY, rightMostX - leftMostX,
-						buttomMostY - topMostY);
+						Math.max(6, buttomMostY - topMostY));
 				tt.setDrawShape(rect);
 			}
 		}
@@ -108,7 +108,7 @@ public class RectPhyloLayout extends RectangularLayout {
 				double buttomMostY = lastLeaf.getYSelf();
 
 				double xx = getRightMostXLocation(leaves) + 5;
-				Line2D.Double rect = new Line2D.Double(xx, topMostY, xx, buttomMostY);
+				Line2D.Double rect = new Line2D.Double(xx, topMostY - (topMostY == buttomMostY ? 3 : 0), xx, buttomMostY + (topMostY == buttomMostY ? 3 : 0));
 				tt.setTextLocationAndShape(xx, 0.5 * (topMostY + buttomMostY), rect);
 			}
 		}

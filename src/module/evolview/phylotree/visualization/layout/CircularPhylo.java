@@ -86,6 +86,9 @@ public class CircularPhylo extends CicularLayout {
 
 	}
 
+    protected double annotationLeafRadius(List<GraphicsNode> leaves) { return biggestCircleRadicus; }
+    protected double annotationOffset(double distance) { return distance; }
+
 	@Override
 	protected void configurateMainAnnotation(AnnotationsProperties annotationsProperties) {
 		List<DrawPropInternalNode2LeafAnno> internalNode2LeafAnnos = annotationsProperties.getInternalNode2LeafAnnos();
@@ -99,18 +102,16 @@ public class CircularPhylo extends CicularLayout {
 
 				double innerRadicus = currentGraphicsNode.getRadicusIfNeeded();
 
-				double xSelf = firstLeaf.getXSelf();
-				double ySelf = firstLeaf.getYSelf();
-
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double endDeg = lastLeaf.getAngleIfNeeded();
 				double extentDeg = endDeg - startDeg;
+                if (extentDeg == 0) { startDeg -= 1; endDeg += 1; extentDeg = 2; }
 
 				GeneralPath sector = new GeneralPath();
-				sector.moveTo(xSelf, ySelf);
+
 				Arc2D.Double arc1 = new Arc2D.Double();
-				arc1.setArcByCenter(centerX, centerY, biggestCircleRadicus, startDeg, extentDeg, Arc2D.OPEN);
-				sector.append(arc1, true);
+				arc1.setArcByCenter(centerX, centerY, annotationLeafRadius(leaves), startDeg, extentDeg, Arc2D.OPEN);
+				sector.append(arc1, false);
 				arc1.setArcByCenter(centerX, centerY, innerRadicus, endDeg, -extentDeg, Arc2D.OPEN);
 				sector.append(arc1, true);
 				sector.closePath();
@@ -133,13 +134,14 @@ public class CircularPhylo extends CicularLayout {
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double endDeg = lastLeaf.getAngleIfNeeded();
 				double extentDeg = endDeg - startDeg;
+                if (extentDeg == 0) { startDeg -= 1; endDeg += 1; extentDeg = 2; }
 
 				double radicus = getRadicusForAnnotation(leaves.toArray(new GraphicsNode[1]));
 
 				Arc2D.Double arc1 = new Arc2D.Double();
-				arc1.setArcByCenter(centerX, centerY, radicus + 10, startDeg, extentDeg, Arc2D.OPEN);
+				arc1.setArcByCenter(centerX, centerY, Math.max(0, radicus + annotationOffset(10)), startDeg, extentDeg, Arc2D.OPEN);
 
-				Double point = GuiCalculator.calculateCircularLocation(startDeg + 0.5 * extentDeg, radicus + 20,
+				Double point = GuiCalculator.calculateCircularLocation(startDeg + 0.5 * extentDeg, Math.max(0, radicus + annotationOffset(20)),
 						centerX, centerY);
 				tt.setTextLocationAndShape(point.getX(), point.getY(), arc1);
 			}

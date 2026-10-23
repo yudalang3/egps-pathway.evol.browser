@@ -38,6 +38,7 @@ public class RectCladoAlign2tip extends RectPhyloLayout {
 				node.setXSelf(currentWidth - blankArea.getRight());
 			}
 		});
+		afterCalculation();
 		this.scaleBarProperty.setIfDrawScaleBar(false);
 	}
 

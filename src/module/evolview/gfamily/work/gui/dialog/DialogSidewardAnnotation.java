@@ -228,6 +228,7 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			rdTFFontStyle.addItem("Plain");
 			rdTFFontStyle.addItem("Bold");
 			rdTFFontStyle.addItem("Italic");
+			rdTFFontStyle.setSelectedItem(defaultFont.isBold() ? "Bold" : defaultFont.isItalic() ? "Italic" : "Plain");
 			rdTFFontStyle.addActionListener(refreshActionListener);
 			rdTFFontStyle.setFont(defaultFont);
 			parameterPanel.add(rdTFFontStyle, gridBagConstraints);
@@ -253,7 +254,11 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			rdTFFontsize.addItem("18");
 			rdTFFontsize.addItem("19");
 			rdTFFontsize.addItem("20");
-			rdTFFontsize.addActionListener(refreshActionListener);
+			String preferredSize = String.valueOf(defaultFont.getSize());
+            if (((DefaultComboBoxModel<String>) rdTFFontsize.getModel()).getIndexOf(preferredSize) < 0)
+                rdTFFontsize.addItem(preferredSize);
+            rdTFFontsize.setSelectedItem(preferredSize);
+            rdTFFontsize.addActionListener(refreshActionListener);
 			rdTFFontsize.setFont(defaultFont);
 			parameterPanel.add(rdTFFontsize, gridBagConstraints);
 

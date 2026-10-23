@@ -87,7 +87,9 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 		GraphicsNode root = rootNode;
 		// 将root的branchLength设置为0；否则会影响可视化
 //		root.setDisplayedBranchLength(0);
-		recursiveCalculate(root, root.getDisplayedBranchLength());
+		double storedRootLength = root.getDisplayedBranchLength();
+        root.setDisplayedBranchLength(0);
+        try { recursiveCalculate(root, 0); } finally { root.setDisplayedBranchLength(storedRootLength); }
 
 		this.scaleBarProperty.setIfDrawScaleBar(true);
 
@@ -131,48 +133,61 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 	}
 
 	public void assignValue(GraphicsNode node, double lineageLength, double currYAxisLength) {
-		double xx = 0;
-		double yy = 0;
-		if (currYAxisLength < rectH) {
-			xx = canvasCenter.getX() - lineageLength;
-			yy = currentHeight - blankArea.getBottom() - currYAxisLength;
-		} else if (currYAxisLength < highBound) {
-			double angleRadius = (currYAxisLength - rectH) / halfWorkRadius;
-			xx = topCircleCenter.getX() - lineageLength * FastMath.cos(angleRadius);
-			yy = topCircleCenter.getY() - lineageLength * FastMath.sin(angleRadius);
-			// 重要设置angleRadius
-			node.setAngleIfNeeded(angleRadius);
-		} else {
-			xx = canvasCenter.getX() + lineageLength;
-
-			yy = currentHeight - blankArea.getBottom() - (totalAvaliableLength - currYAxisLength);
-
-		}
-
-		node.setXSelf(xx);
-		node.setYSelf(yy);
+        Point2D.Double point = pointOnPerimeter(lineageLength, currYAxisLength);
+        if (currYAxisLength >= rectH && currYAxisLength < highBound)
+            node.setAngleIfNeeded((currYAxisLength - rectH) / halfWorkRadius);
+        node.setXSelf(point.x);
+        node.setYSelf(point.y);
 	}
 
 	public void assignValue4XYParent(GraphicsNode node, double lineageLength, double currYAxisLength) {
-		double xx = 0;
-		double yy = 0;
-		if (currYAxisLength < rectH) {
-			xx = canvasCenter.getX() - lineageLength;
-			yy = currentHeight - blankArea.getBottom() - currYAxisLength;
-		} else if (currYAxisLength < highBound) {
-			double angleRadius = (currYAxisLength - rectH) / halfWorkRadius;
-			xx = topCircleCenter.getX() - lineageLength * FastMath.cos(angleRadius);
-			yy = topCircleCenter.getY() - lineageLength * FastMath.sin(angleRadius);
-		} else {
-			xx = canvasCenter.getX() + lineageLength;
-
-			yy = currentHeight - blankArea.getBottom() - (totalAvaliableLength - currYAxisLength);
-
-		}
-
-		node.setXParent(xx);
-		node.setYParent(yy);
+        Point2D.Double point = pointOnPerimeter(lineageLength, currYAxisLength);
+        node.setXParent(point.x);
+        node.setYParent(point.y);
 	}
+
+    private Point2D.Double pointOnPerimeter(double radius, double perimeter) {
+        if (perimeter < rectH)
+            return new Point2D.Double(canvasCenter.x-radius, currentHeight-blankArea.getBottom()-perimeter);
+        if (perimeter < highBound) {
+            double angle=(perimeter-rectH)/halfWorkRadius;
+            return new Point2D.Double(topCircleCenter.x-radius*Math.cos(angle), topCircleCenter.y-radius*Math.sin(angle));
+        }
+        return new Point2D.Double(canvasCenter.x+radius, currentHeight-blankArea.getBottom()-(totalAvaliableLength-perimeter));
+    }
+    private Path2D annotationPath(double radius, double start, double end) {
+        Path2D path=new Path2D.Double();
+        int steps=Math.max(1,(int)Math.ceil(Math.abs(end-start)/3));
+        for(int i=0;i<=steps;i++) {
+            Point2D point=pointOnPerimeter(radius,start+(end-start)*i/steps);
+            if(i==0) path.moveTo(point.getX(),point.getY()); else path.lineTo(point.getX(),point.getY());
+        }
+        return path;
+    }
+    @Override
+    protected void configurateMainAnnotation(module.evolview.phylotree.visualization.annotation.AnnotationsProperties properties) {
+        super.configurateMainAnnotation(properties);
+        for(var annotation:properties.getInternalNode2LeafAnnos()) {
+            if(!annotation.shouldConfigurateAndPaint()) continue;
+            var node=annotation.getCurrentGraphicsNode();
+            var leaves=GraphicTreePropertyCalculator.getLeaves(node);
+            double start=leaves.getFirst().getDoubleVariable(), end=leaves.getLast().getDoubleVariable();
+            if(start==end) { annotation.setDrawShape(new Ellipse2D.Double(node.getXSelf()-3,node.getYSelf()-3,6,6)); continue; }
+            double outer=leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(0);
+            Path2D region=annotationPath(outer,start,end);
+            region.append(annotationPath(node.getRadicusIfNeeded(),end,start),true);
+            region.closePath(); annotation.setDrawShape(region);
+        }
+        for(var annotation:properties.getOutterSidewardAnnos()) {
+            if(!annotation.shouldConfigurateAndPaint()) continue;
+            var leaves=GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
+            double start=leaves.getFirst().getDoubleVariable(), end=leaves.getLast().getDoubleVariable();
+            if(start==end) { start-=3; end+=3; }
+            double radius=leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(0)+10;
+            Point2D point=pointOnPerimeter(radius+10,(start+end)/2);
+            annotation.setTextLocationAndShape(point.getX(),point.getY(),annotationPath(radius,start,end));
+        }
+    }
 
 	@Override
 	public void paintGraphics(Graphics2D g2d) {
@@ -181,7 +196,9 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 
 
 
+		drawAnnotationBackgrounds(g2d);
 		recursiveDraw(rootNode, g2d);
+		commonTailInDrawingProcess(g2d);
         drawScaleBar(g2d);
 	}
 
@@ -194,7 +211,7 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
 			g2d.fillOval((int) (xSelf - 2), (int) (ySelf - 2), 4, 4);
 
 			if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
-				g2d.drawString(node.getName(), (int) (xSelf - 2), (int) (ySelf - 2));
+				drawEachLeafNameGraphicsIfNeeded(g2d, node, xSelf, ySelf);
 			}
 
 			lineDrawUtil.setLine(xSelf, ySelf, node.getXParent(), node.getYParent());

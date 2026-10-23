@@ -210,6 +210,7 @@ public class DialogInternalNodeInsituAnnotation extends AbstractShowAnnotationDi
 			mrcaFontstyle.addItem("Plain");
 			mrcaFontstyle.addItem("Bold");
 			mrcaFontstyle.addItem("Italic");
+			mrcaFontstyle.setSelectedItem(defaultFont.isBold() ? "Bold" : defaultFont.isItalic() ? "Italic" : "Plain");
 			mrcaFontstyle.addActionListener(refreshActionListener);
 			mrcaFontstyle.setFont(defaultFont);
 			parameterPanel.add(mrcaFontstyle, gridBagConstraints);
@@ -235,7 +236,11 @@ public class DialogInternalNodeInsituAnnotation extends AbstractShowAnnotationDi
 			annoTextFontSize.addItem("18");
 			annoTextFontSize.addItem("19");
 			annoTextFontSize.addItem("20");
-			annoTextFontSize.addActionListener(refreshActionListener);
+			String preferredSize = String.valueOf(defaultFont.getSize());
+            if (((DefaultComboBoxModel<String>) annoTextFontSize.getModel()).getIndexOf(preferredSize) < 0)
+                annoTextFontSize.addItem(preferredSize);
+            annoTextFontSize.setSelectedItem(preferredSize);
+            annoTextFontSize.addActionListener(refreshActionListener);
 			annoTextFontSize.setFont(defaultFont);
 			parameterPanel.add(annoTextFontSize, gridBagConstraints);
 		}
