@@ -39,6 +39,17 @@ public class AnnotationLayoutRegressionTest {
    }
    layout.calculateForPainting(1000,800);var image=paint(layout);
    check(pixels(image,Color.MAGENTA.getRGB())>0,type+" kind="+kind+" visible");
+   if(kind==0 && layout instanceof CircularPhylo) {
+    var annotation=annotations.getOutterSidewardAnnos().getFirst();
+    if(annotation.getShape() instanceof java.awt.geom.Arc2D arc) {
+     var style=annotation.getSidewardNodeAnnotation();
+     double minimumRadius=arc.getWidth()/2+style.getLineStroke().getLineWidth()/2+style.getTextGap()-1;
+     check(pixels(image,Color.BLUE.getRGB())>0,type+" text visible");
+     for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)
+      if(image.getRGB(x,y)==Color.BLUE.getRGB())
+       check(Math.hypot(x-arc.getCenterX(),y-arc.getCenterY())>=minimumRadius,type+" text outside arc");
+    }
+   }
    if(type==TreeLayout.RECT_HALF_CIRCLE && kind==2) {
     int branchX=((int)a.getXSelf()+(int)a.getXParent())/2;
     int branchY=((int)a.getYSelf()+(int)a.getYParent())/2;
@@ -52,7 +63,32 @@ public class AnnotationLayoutRegressionTest {
   }
   var hidden=new DrawPropInternalNodeInsituAnno(a);clade.setCollapse(true);check(!hidden.shouldConfigurateAndPaint(),"Hidden descendant");clade.setCollapse(false);check(hidden.shouldConfigurateAndPaint(),"Expanded descendant");
  }
+ static void birds() throws Exception {
+  var input=new module.evolview.moderntreeviewer.io.MTVImportInforBean();
+  input.setInput_nwk_string(Files.readString(Path.of("src/module/evolview/moderntreeviewer/examples/04-bird-orders.nwk")));
+  for(var type: new TreeLayout[]{TreeLayout.OUTER_CIR_PHYLO,TreeLayout.OUTER_CIR_CLADO_ALIGNED,TreeLayout.OUTER_CIR_CLADO_EQUAL,TreeLayout.OUTER_CIR_PHYLO_ALIGNED,TreeLayout.INNER_CIR_CLADO}) {
+   var root=new module.evolview.moderntreeviewer.io.TreeParser4MTV().parseTree(input).orElseThrow();
+   var props=new TreeLayoutProperties(root);props.setMyLayout(type);props.setShowTitle(false);props.setShowAxisBar(false);props.setShowScaleBar(false);
+   LeafLabelStateInitializer.applyInitialLeafLabelState(props,true);
+   var panel=new PhylogeneticTreePanel(props);var vp=new JViewport();vp.setSize(1000,800);vp.setView(panel);panel.initializeLeftPanel();
+   var layout=panel.getCurrLayout();
+   for(var target:PhylogeneticTreePanel.subtreeNodes(root)) {
+    if(target.getChildCount()<2)continue;
+    for(boolean horizontal:new boolean[]{true,false}) {
+    panel.getMainAnnotationsProperties().clearAllAnnotation();
+    var style=new SidewardNodeAnnotation();style.setLineStroke(new BasicStroke(6));style.setLineColor(Color.RED);style.setTextColor(Color.BLUE);style.setTextString("Bird clade");style.setTextFont(new Font("Dialog",0,14));style.setDrawTextHorizontal(horizontal);
+    var anno=new DrawPropOutterSidewardAnno(style,target);anno.setJust4annotationNot4lineageTypeTrue();panel.getMainAnnotationsProperties().getOutterSidewardAnnos().add(anno);
+    layout.calculateForPainting(1000,800);var image=paint(layout);
+    var arc=(java.awt.geom.Arc2D)anno.getShape();
+    check(pixels(image,Color.BLUE.getRGB())>0,"Bird text visible "+type);
+    for(int y=0;y<800;y++)for(int x=0;x<1000;x++)if(image.getRGB(x,y)==Color.BLUE.getRGB())check(Math.hypot(x-arc.getCenterX(),y-arc.getCenterY())>=arc.getWidth()/2+style.getTextGap()+2,"Bird text outside "+type);
+    if(arc.getCenterX()>anno.getTextLocation().x)ImageIO.write(image,"png",Path.of("temp/annotation-layouts",type+"-birds-left.png").toFile());
+    }
+   }
+  }
+ }
  public static void main(String[] args) throws Exception {
+  birds();
   for(var type:TreeLayout.values()) {run(type,false);run(type,true);}
   org.slf4j.LoggerFactory.getLogger(AnnotationLayoutRegressionTest.class).info("Annotation matrix passed: {} layouts x 4 types x root/internal targets",TreeLayout.values().length);
  }

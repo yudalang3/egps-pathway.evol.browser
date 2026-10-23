@@ -44,17 +44,7 @@ public class RectPhyloAlign2Tip extends RectPhyloLayout {
 				: super.getDisplayedNodePosition(node);
 	}
 
-	@Override
-	protected double getRightMostXLocation(List<GraphicsNode> leaves) {
-		double ret = currentWidth - blankArea.getRight();
 
-		if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
-			ret += getMaxLengthLeafNameWidthAccording2CurrentFont();
-		} else {
-			ret += 15;
-		}
-		return ret;
-	}
 
 	@Override
 	protected double getRightMostXLocation4node2leafAnno(List<GraphicsNode> t) {

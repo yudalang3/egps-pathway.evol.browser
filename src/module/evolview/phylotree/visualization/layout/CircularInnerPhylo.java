@@ -14,8 +14,6 @@ public class CircularInnerPhylo extends CircularPhylo{
     protected double annotationLeafRadius(java.util.List<GraphicsNode> leaves) {
         return leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).min().orElse(0);
     }
-    @Override
-    protected double annotationOffset(double distance) { return -distance; }
 
 	@Override
 	protected void calculateRatioAndChooseStartLength() {

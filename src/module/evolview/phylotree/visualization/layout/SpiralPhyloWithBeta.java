@@ -126,7 +126,7 @@ public class SpiralPhyloWithBeta extends SprialLayout {
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double lastDeg = lastLeaf.getAngleIfNeeded();
 
-				GeneralPath clone = produceSpiral(startDeg, lastDeg - startDeg, alpha + 2, betaFactor * maxBeta);
+				GeneralPath clone = produceSpiral(startDeg, lastDeg - startDeg, alpha + tt.getSidewardNodeAnnotation().getLineGap()+tt.getSidewardNodeAnnotation().getLineStroke().getLineWidth()/2, betaFactor * maxBeta);
 
 				Double point = GuiCalculator.calculateSpiralLocation(alpha, betaFactor * maxBeta, 0.5 * (startDeg + lastDeg),
 						centerX, centerY);

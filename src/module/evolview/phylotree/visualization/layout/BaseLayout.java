@@ -152,10 +152,15 @@ public abstract class BaseLayout implements ITreeLayout {
             for (var annotation : annotations.getOutterSidewardAnnos()) {
                 if (!annotation.shouldConfigurateAndPaint()) continue;
                 var leaves = GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
-                if (leaves.size() == 1) {
+                if (leaves.size() == 1 && !(annotation.getShape() instanceof java.awt.geom.Arc2D)) {
                     var endpoint = getDisplayedNodePosition(leaves.getFirst());
-                    annotation.setTextLocationAndShape(endpoint.x+10, endpoint.y,
-                            new Line2D.Double(endpoint.x+10, endpoint.y-3, endpoint.x+10, endpoint.y+3));
+                    var style = annotation.getSidewardNodeAnnotation();
+                    var leaf = leaves.getFirst();
+                    double labelWidth = treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel() && leaf.getDrawUnit().isDrawName()
+                            ? phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont()).stringWidth(leaf.getName())+4 : 0;
+                    double x = endpoint.x+leaf.getDrawUnit().getCircleRadius()+labelWidth+style.getLineGap()+style.getLineStroke().getLineWidth()/2;
+                    annotation.setTextLocationAndShape(x, endpoint.y,
+                            new Line2D.Double(x, endpoint.y-3, x, endpoint.y+3));
                 }
             }
         }
@@ -426,7 +431,7 @@ public abstract class BaseLayout implements ITreeLayout {
             if (!annotation.shouldConfigurateAndPaint()) continue;
             var style = annotation.getSidewardNodeAnnotation();
             FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(style.getTextFont());
-            reserve = Math.max(reserve, 30 + (style.isDrawTextHorizontal()
+            reserve = Math.max(reserve, (int)Math.ceil(style.getLineGap()+style.getTextGap()+style.getLineStroke().getLineWidth()+12) + (style.isDrawTextHorizontal()
                     ? metrics.stringWidth(style.getTextString()) : metrics.getHeight()));
         }
         return reserve;

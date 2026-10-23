@@ -325,6 +325,7 @@ public class RadialPhyloLayout extends RadicalLayout {
 
 				double radicusForAnnotation = getRadicusForAnnotation(leaves.toArray(new GraphicsNode[1]), centerX,
 						centerY);
+                radicusForAnnotation += tt.getSidewardNodeAnnotation().getLineGap()+tt.getSidewardNodeAnnotation().getLineStroke().getLineWidth()/2;
 
 				Arc2D.Double arc1 = new Arc2D.Double();
 				arc1.setFrameFromCenter(centerX, centerY, centerX + radicusForAnnotation,

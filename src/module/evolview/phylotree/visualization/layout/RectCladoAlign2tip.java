@@ -42,17 +42,7 @@ public class RectCladoAlign2tip extends RectPhyloLayout {
 		this.scaleBarProperty.setIfDrawScaleBar(false);
 	}
 
-	@Override
-	protected double getRightMostXLocation(List<GraphicsNode> leaves) {
-		double ret = currentWidth - blankArea.getRight();
-		
-		if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
-			ret += getMaxLengthLeafNameWidthAccording2CurrentFont();
-		}else {
-			ret += 15;
-		}
-		return ret;
-	}
+
 	
 	@Override
 	protected double getRightMostXLocation4node2leafAnno(List<GraphicsNode> t) {

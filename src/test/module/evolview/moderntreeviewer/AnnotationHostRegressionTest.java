@@ -45,7 +45,7 @@ public class AnnotationHostRegressionTest {
      for(var window:Window.getWindows())if(window instanceof JDialog dialog && dialog.isShowing()) {
       if(!(dialog instanceof NodeAnnotationDialogContainer)) {failure.compareAndSet(null,new AssertionError("Unexpected dialog: "+dialog.getTitle()));dialog.dispose();continue;}
       if(handled[0])continue;handled[0]=true;
-      var preview=find(dialog,PhylogeneticTreePanel.class,null);
+      var preview=(PhylogeneticTreePanel)AnnotationDialogRegressionTest.field(dialog,"phylogeneticTreePanel");
       if(preview.getLayoutProperties()==panel.getLayoutProperties())failure.compareAndSet(null,new AssertionError("Shared preview"));
       find(dialog,JButton.class,"Cancel").doClick();timer.stop();
      }

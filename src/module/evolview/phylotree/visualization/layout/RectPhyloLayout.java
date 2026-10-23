@@ -107,7 +107,7 @@ public class RectPhyloLayout extends RectangularLayout {
 				double topMostY = firstLeaf.getYSelf();
 				double buttomMostY = lastLeaf.getYSelf();
 
-				double xx = getRightMostXLocation(leaves) + 5;
+				double xx = getRightMostXLocation(leaves) + tt.getSidewardNodeAnnotation().getLineGap() + tt.getSidewardNodeAnnotation().getLineStroke().getLineWidth()/2;
 				Line2D.Double rect = new Line2D.Double(xx, topMostY - (topMostY == buttomMostY ? 3 : 0), xx, buttomMostY + (topMostY == buttomMostY ? 3 : 0));
 				tt.setTextLocationAndShape(xx, 0.5 * (topMostY + buttomMostY), rect);
 			}

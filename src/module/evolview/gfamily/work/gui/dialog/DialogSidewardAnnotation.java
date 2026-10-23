@@ -30,6 +30,7 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 	private JComboBox<String> rdTFFontsize;
 	private NodeAnnotationDialogContainer nodeAnnotationDialog;
 	private JPanel parameterPanel;
+    private JSpinner lineGap, textGap;
 
 	public DialogSidewardAnnotation(NodeAnnotationDialogContainer nodeAnnotationDialog, String nodeName,
 			PhylogeneticTreePanel mainPhylogeneticTreePanel) {
@@ -126,13 +127,13 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			parameterPanel.add(lineStyleComboBox, gridBagConstraints);
 
 			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 3;
+			gridBagConstraints.gridy = 5;
 			JLabel annoText = new JLabel("Anno text:");
 			annoText.setFont(defaultFont);
 			parameterPanel.add(annoText, gridBagConstraints);
 
 			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 3;
+			gridBagConstraints.gridy = 5;
 			rdTextField = new JTextField();
 			rdTextField.setFont(defaultFont);
 			rdTextField.setPreferredSize(new Dimension(120, 25));
@@ -157,13 +158,13 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			parameterPanel.add(rdTextField, gridBagConstraints);
 
 			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 4;
+			gridBagConstraints.gridy = 6;
 			JLabel annoTextColor = new JLabel("Text color:");
 			annoTextColor.setFont(defaultFont);
 			parameterPanel.add(annoTextColor, gridBagConstraints);
 
 			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 4;
+			gridBagConstraints.gridy = 6;
 			textColorButton = new JButton();
 
 			textColorButton.setIcon(new ColorIcon(Color.BLACK));
@@ -184,13 +185,13 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			parameterPanel.add(textColorButton, gridBagConstraints);
 
 			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 5;
+			gridBagConstraints.gridy = 7;
 			JLabel annoTextfont = new JLabel("Text style:");
 			annoTextfont.setFont(defaultFont);
 			parameterPanel.add(annoTextfont, gridBagConstraints);
 
 			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 5;
+			gridBagConstraints.gridy = 7;
 			rdTFsty = new JComboBox<String>();
 			rdTFsty.setFont(defaultFont);
 			rdTFsty.setPreferredSize(new Dimension(120, 25));
@@ -200,13 +201,13 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			parameterPanel.add(rdTFsty, gridBagConstraints);
 
 			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 6;
+			gridBagConstraints.gridy = 8;
 			JLabel annoTextfontSize = new JLabel("Text font:");
 			annoTextfontSize.setFont(defaultFont);
 			parameterPanel.add(annoTextfontSize, gridBagConstraints);
 
 			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 6;
+			gridBagConstraints.gridy = 8;
 			String[] fontlist = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 			rdTFfont = new JComboBox<String>(fontlist);
 			rdTFfont.setSelectedItem(defaultFont.getFamily());
@@ -216,13 +217,13 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			parameterPanel.add(rdTFfont, gridBagConstraints);
 
 			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 7;
+			gridBagConstraints.gridy = 9;
 			JLabel mrcasylt = new JLabel("Font style:");
 			mrcasylt.setFont(defaultFont);
 			parameterPanel.add(mrcasylt, gridBagConstraints);
 
 			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 7;
+			gridBagConstraints.gridy = 9;
 			rdTFFontStyle = new JComboBox<String>();
 			rdTFFontStyle.setPreferredSize(new Dimension(120, 25));
 			rdTFFontStyle.addItem("Plain");
@@ -234,13 +235,13 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			parameterPanel.add(rdTFFontStyle, gridBagConstraints);
 
 			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 8;
+			gridBagConstraints.gridy = 10;
 			JLabel rdfs = new JLabel("Font size:");
 			rdfs.setFont(defaultFont);
 			parameterPanel.add(rdfs, gridBagConstraints);
 
 			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 8;
+			gridBagConstraints.gridy = 10;
 			rdTFFontsize = new JComboBox<String>();
 			rdTFFontsize.setPreferredSize(new Dimension(120, 25));
 			rdTFFontsize.addItem("10");
@@ -262,6 +263,19 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			rdTFFontsize.setFont(defaultFont);
 			parameterPanel.add(rdTFFontsize, gridBagConstraints);
 
+            lineGap = new JSpinner(new SpinnerNumberModel(10.0, 0.0, null, 1.0));
+            textGap = new JSpinner(new SpinnerNumberModel(6.0, 0.0, null, 1.0));
+            String[] gapNames = {"Line gap (px):", "Text gap (px):"};
+            JSpinner[] gapControls = {lineGap, textGap};
+            for (int i=0;i<2;i++) {
+                gridBagConstraints.gridy = 3+i; gridBagConstraints.gridx = 0;
+                JLabel label = new JLabel(gapNames[i]); label.setFont(defaultFont);
+                parameterPanel.add(label, gridBagConstraints);
+                gridBagConstraints.gridx = 1; gapControls[i].setFont(defaultFont);
+                parameterPanel.add(gapControls[i], gridBagConstraints);
+                gapControls[i].addChangeListener(e -> refreshActionListener.actionPerformed(null));
+            }
+
 		}
 
 		return parameterPanel;
@@ -269,6 +283,8 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 
 	private DrawPropOutterSidewardAnno getAnnotationProprty(GraphicsNode graphicsNode) {
 		SidewardNodeAnnotation nodeAnno = new SidewardNodeAnnotation();
+        nodeAnno.setLineGap(((Number)lineGap.getValue()).doubleValue());
+        nodeAnno.setTextGap(((Number)textGap.getValue()).doubleValue());
 		if (lineStyleComboBox.getSelectedItem().toString().equals("Round")) {
 			nodeAnno.setLineStroke(new BasicStroke(Integer.parseInt(lineWidthComboBox.getSelectedItem().toString()),
 					BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));

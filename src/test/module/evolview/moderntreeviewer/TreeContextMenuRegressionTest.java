@@ -467,7 +467,8 @@ public class TreeContextMenuRegressionTest {
             withModal(d -> "Internal node Annotation".equals(d.getTitle()), () -> item(annotationMenu.getInternalNodeRightClickPop(annotation.p), "Annotation...").doClick(), d -> button(d, "Cancel").doClick());
             require(!annotation.panel.getMainAnnotationsProperties().hasAnnotation(), "Cancel annotation preserves annotations");
             withModal(d -> "Internal node Annotation".equals(d.getTitle()), () -> item(annotationMenu.getInternalNodeRightClickPop(annotation.p), "Annotation...").doClick(), d -> {
-                var preview = components(d, PhylogeneticTreePanel.class).getFirst();
+                ((JTree)AnnotationDialogRegressionTest.field(d,"jTree")).setSelectionRow(1);
+                var preview = (PhylogeneticTreePanel) AnnotationDialogRegressionTest.field(d, "phylogeneticTreePanel");
                 require(preview.getLayoutProperties() != annotation.properties, "Preview owns independent settings");
                 require(!preview.getLayoutProperties().isShowTitle(), "Preview has no main tree title");
                 require(preview.getLayoutProperties().getLeaves().stream().allMatch(n -> n.getDrawUnit().isDrawName()), "Preview leaf labels visible");

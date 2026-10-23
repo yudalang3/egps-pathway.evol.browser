@@ -3,6 +3,12 @@ package module.evolview.phylotree.visualization.annotation;
 import java.awt.*;
 
 public class SidewardNodeAnnotation {
+    private double lineGap = 10;
+    private double textGap = 6;
+    public double getLineGap() { return lineGap; }
+    public void setLineGap(double value) { lineGap = value; }
+    public double getTextGap() { return textGap; }
+    public void setTextGap(double value) { textGap = value; }
 	// For line property
 	private BasicStroke lineStroke;
 	private Color lineColor;

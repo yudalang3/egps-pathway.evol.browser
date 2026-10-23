@@ -93,6 +93,13 @@ public class DrawPropInternalNodeInsituAnno extends AnnotationRender {
 		g2d.drawString(text, (float) centerX, (float) centerY);
 	}
 
+    public java.awt.geom.Rectangle2D getTextBounds(FontMetrics metrics) {
+        return new java.awt.geom.Rectangle2D.Double(drawShape.getBounds2D().getCenterX()+size+5,
+                drawShape.getBounds2D().getCenterY()-metrics.getAscent(),metrics.stringWidth(text),metrics.getHeight());
+    }
+    public Font getTextFont() { return font; }
+    public void setTextFont(Font value) { font = value; }
+
 	public GraphicsNode getCurrentGraphicsNode() {
 		return node;
 	}

@@ -87,7 +87,6 @@ public class CircularPhylo extends CicularLayout {
 	}
 
     protected double annotationLeafRadius(List<GraphicsNode> leaves) { return biggestCircleRadicus; }
-    protected double annotationOffset(double distance) { return distance; }
 
 	@Override
 	protected void configurateMainAnnotation(AnnotationsProperties annotationsProperties) {
@@ -136,12 +135,30 @@ public class CircularPhylo extends CicularLayout {
 				double extentDeg = endDeg - startDeg;
                 if (extentDeg == 0) { startDeg -= 1; endDeg += 1; extentDeg = 2; }
 
-				double radicus = getRadicusForAnnotation(leaves.toArray(new GraphicsNode[1]));
+				double radicus = 0;
+                var fm = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+                for (var leaf : GraphicTreePropertyCalculator.getLeaves(rootNode)) {
+                    var point = getDisplayedNodePosition(leaf);
+                    double markerRadius = leaf.getDrawUnit().getCircleRadius();
+                    if (leaf.getCollapse()) {
+                        var collapse = getCollapseProporty(leaf);
+                        markerRadius = Math.sqrt(2)*(collapse == null ? 15 : collapse.getTriangleSize());
+                    }
+                    radicus = Math.max(radicus, Math.hypot(point.x-centerX,point.y-centerY)+markerRadius);
+                    if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel() && leaf.getDrawUnit().isDrawName()) {
+                        var bounds = getTipLabelGeometry(leaf,fm).boundsAt(point.x,point.y).getBounds2D();
+                        for (double x : new double[]{bounds.getMinX(),bounds.getMaxX()})
+                            for (double y : new double[]{bounds.getMinY(),bounds.getMaxY()})
+                                radicus = Math.max(radicus,Math.hypot(x-centerX,y-centerY));
+                    }
+                }
+                var style = tt.getSidewardNodeAnnotation();
+                radicus += style.getLineGap()+style.getLineStroke().getLineWidth()/2;
 
 				Arc2D.Double arc1 = new Arc2D.Double();
-				arc1.setArcByCenter(centerX, centerY, Math.max(0, radicus + annotationOffset(10)), startDeg, extentDeg, Arc2D.OPEN);
+				arc1.setArcByCenter(centerX, centerY, radicus, startDeg, extentDeg, Arc2D.OPEN);
 
-				Double point = GuiCalculator.calculateCircularLocation(startDeg + 0.5 * extentDeg, Math.max(0, radicus + annotationOffset(20)),
+				Double point = GuiCalculator.calculateCircularLocation(startDeg + 0.5 * extentDeg, radicus,
 						centerX, centerY);
 				tt.setTextLocationAndShape(point.getX(), point.getY(), arc1);
 			}

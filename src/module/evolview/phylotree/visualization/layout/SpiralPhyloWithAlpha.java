@@ -113,7 +113,7 @@ public class SpiralPhyloWithAlpha extends SprialLayout {
 				double startDeg = firstLeaf.getAngleIfNeeded();
 				double lastDeg = lastLeaf.getAngleIfNeeded();
 
-				GeneralPath clone = produceSpiral(startDeg, lastDeg - startDeg, maxAlpha + 4, beta);
+				GeneralPath clone = produceSpiral(startDeg, lastDeg - startDeg, maxAlpha + tt.getSidewardNodeAnnotation().getLineGap()+tt.getSidewardNodeAnnotation().getLineStroke().getLineWidth()/2, beta);
 
 				Double point = GuiCalculator.calculateSpiralLocation(maxAlpha + 1, beta, 0.5 * (startDeg + lastDeg),
 						centerX, centerY);

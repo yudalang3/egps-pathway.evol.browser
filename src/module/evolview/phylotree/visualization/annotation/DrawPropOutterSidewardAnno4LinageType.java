@@ -46,9 +46,22 @@ public class DrawPropOutterSidewardAnno4LinageType {
 
 			Graphics2D textGraphics = (Graphics2D) g2d.create();
 			try {
-				if (!sidewardNodeAnnotation.isDrawTextHorizontal())
-					textGraphics.rotate(-Math.PI / 2, textXLocation, textYLocation);
-				textGraphics.drawString(text, textXLocation, textYLocation);
+				if (shape instanceof java.awt.geom.Arc2D arc) {
+                    double angle = -Math.toRadians(arc.getAngleStart()+arc.getAngleExtent()/2);
+                    double nx = Math.cos(angle), ny = Math.sin(angle);
+                    var metrics = textGraphics.getFontMetrics();
+                    double width = metrics.stringWidth(text), height = metrics.getHeight();
+                    boolean horizontal = sidewardNodeAnnotation.isDrawTextHorizontal();
+                    double support = (Math.abs(nx)*(horizontal?width:height)+Math.abs(ny)*(horizontal?height:width))/2;
+                    double radius = arc.getWidth()/2+sidewardNodeAnnotation.getLineStroke().getLineWidth()/2+sidewardNodeAnnotation.getTextGap()+support;
+                    textGraphics.translate(arc.getCenterX()+nx*radius,arc.getCenterY()+ny*radius);
+                    if (!horizontal) textGraphics.rotate(-Math.PI/2);
+                    textGraphics.drawString(text,(float)(-width/2),(metrics.getAscent()-metrics.getDescent())/2f);
+                } else {
+                    if (!sidewardNodeAnnotation.isDrawTextHorizontal())
+                        textGraphics.rotate(-Math.PI / 2, textXLocation, textYLocation);
+                    textGraphics.drawString(text, textXLocation, textYLocation);
+                }
 			} finally {
 				textGraphics.dispose();
 			}
@@ -63,7 +76,7 @@ public class DrawPropOutterSidewardAnno4LinageType {
 	public void setTextLocationAndShape(float x, float y, Shape shape) {
 		float lineWidth = sidewardNodeAnnotation.getLineStroke().getLineWidth();
 
-		this.textXLocation = (float) (x + lineWidth);
+		this.textXLocation = (float) (x + lineWidth / 2 + sidewardNodeAnnotation.getTextGap());
 		this.textYLocation = y;
 
 		this.shape = shape;

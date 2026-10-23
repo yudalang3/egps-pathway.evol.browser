@@ -66,24 +66,16 @@ public abstract class RectangularLayout extends BaseLayout {
 	 * @category annotation
 	 */
 	protected double getRightMostXLocation(List<GraphicsNode> leaves) {
-		double rightMostX = 0;
-
-		for (GraphicsNode nn : leaves) {
-			double xSelf = nn.getXSelf() ;
-			
-			if (xSelf > rightMostX) {
-				rightMostX = xSelf;
-			}
-		}
-		if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
-			int maxLengthLeafNameWidthAccording2CurrentGlobalFont = getMaxLengthLeafNameWidthAccording2CurrentFont();
-			rightMostX += maxLengthLeafNameWidthAccording2CurrentGlobalFont;
-		} else {
-			rightMostX += 15;
-			
-		}
-
-		return rightMostX;
+        double rightMostX = 0;
+        var metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+        for (GraphicsNode leaf : leaves) {
+            double right = getDisplayedNodePosition(leaf).x + leaf.getDrawUnit().getCircleRadius();
+            if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel() && leaf.getDrawUnit().isDrawName()
+                    && leaf.getChildCount() == 0 && leaf.getName() != null)
+                right += 4 + metrics.stringWidth(leaf.getName());
+            rightMostX = Math.max(rightMostX, right);
+        }
+        return rightMostX;
 	}
 	
 	protected double getRightMostXLocation4node2leafAnno(List<GraphicsNode> t) {

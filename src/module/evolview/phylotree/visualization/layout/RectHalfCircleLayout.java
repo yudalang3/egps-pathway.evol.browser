@@ -183,7 +183,7 @@ public class RectHalfCircleLayout extends RectPhyloLayout {
             var leaves=GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
             double start=leaves.getFirst().getDoubleVariable(), end=leaves.getLast().getDoubleVariable();
             if(start==end) { start-=3; end+=3; }
-            double radius=leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(0)+10;
+            double radius=leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(0)+annotation.getSidewardNodeAnnotation().getLineGap()+annotation.getSidewardNodeAnnotation().getLineStroke().getLineWidth()/2;
             Point2D point=pointOnPerimeter(radius+10,(start+end)/2);
             annotation.setTextLocationAndShape(point.getX(),point.getY(),annotationPath(radius,start,end));
         }
