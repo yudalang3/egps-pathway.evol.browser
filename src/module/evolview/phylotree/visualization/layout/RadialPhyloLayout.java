@@ -327,7 +327,7 @@ public class RadialPhyloLayout extends RadicalLayout {
 				Double point = GuiCalculator.calculateCircularLocation(startDeg + 0.5 * extentDeg - 1,
 						radicusForAnnotation + 20, centerX, centerY);
 
-				tt.setTextLocationAndShape(currentGraphicsNode.getXSelf(), currentGraphicsNode.getYSelf(), arc1);
+				tt.setTextLocationAndShape(point.getX(), point.getY(), arc1);
 			}
 		}
 		List<DrawPropInternalNodeInsituAnno> internalNode2LeafInsituAnnos = annotationsProperties

@@ -137,7 +137,13 @@ public class NodeAnnotationDialogContainer extends JDialog {
 
 		jSplitPane.setLeftComponent(splitPane);
 
-		phylogeneticTreePanel = new PhylogeneticTreePanel(mainPhylogeneticTreePanel.getLayoutProperties(),
+		var previewProperties = new module.evolview.phylotree.visualization.layout.TreeLayoutProperties(getAVirtureRoot());
+		previewProperties.setMyLayout(module.evolview.phylotree.visualization.graphics.struct.TreeLayout.RECT_CLADO_ALIGNED_LEFT);
+		previewProperties.setShowTitle(false);
+		previewProperties.setShowAxisBar(false);
+		previewProperties.setShowScaleBar(false);
+		module.evolview.phylotree.visualization.layout.LeafLabelStateInitializer.applyInitialLeafLabelState(previewProperties, true);
+		phylogeneticTreePanel = new PhylogeneticTreePanel(previewProperties,
 				getAVirtureRoot(), null, null);
 		phylogeneticTreePanel.setMainAnnotationsProperties(currentAnnotationsProperties);
 		
@@ -148,7 +154,7 @@ public class NodeAnnotationDialogContainer extends JDialog {
 		border.setTitleFont(defaultTitleFont);
 		phylogeneticTreePanel.setBorder(border);
 		
-		jSplitPane.setRightComponent(phylogeneticTreePanel);
+		jSplitPane.setRightComponent(new JScrollPane(phylogeneticTreePanel));
 
 		SwingUtilities.invokeLater(() -> {
 			if (jTree == null || phylogeneticTreePanel == null) return;
@@ -223,7 +229,7 @@ public class NodeAnnotationDialogContainer extends JDialog {
 				PhylogeneticTreePanel selectedPhylogeneticTreePanel = mainPhylogeneticTreePanel;
 				AnnotationsProperties mainAnnotationsProperties = selectedPhylogeneticTreePanel.getMainAnnotationsProperties();
 				mainAnnotationsProperties.addAnnotationProperties(currentAnnotationsProperties,curreNode);
-				selectedPhylogeneticTreePanel.setIsShowAnnotation(true);
+
 				selectedPhylogeneticTreePanel.updatePhylogeneticTreePanel();
 				dispose();
 			});
@@ -253,7 +259,7 @@ public class NodeAnnotationDialogContainer extends JDialog {
 		curreNode = null;
 		currentAnnotationsProperties = null;
 		virtureRoot = null;
-		mainPhylogeneticTreePanel.setIsShowAnnotation(true);
+
 		mainPhylogeneticTreePanel.updatePhylogeneticTreePanel();
 		dispose();
 	}

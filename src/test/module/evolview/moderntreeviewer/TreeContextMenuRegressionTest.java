@@ -467,6 +467,11 @@ public class TreeContextMenuRegressionTest {
             withModal(d -> "Internal node Annotation".equals(d.getTitle()), () -> item(annotationMenu.getInternalNodeRightClickPop(annotation.p), "Annotation...").doClick(), d -> button(d, "Cancel").doClick());
             require(!annotation.panel.getMainAnnotationsProperties().hasAnnotation(), "Cancel annotation preserves annotations");
             withModal(d -> "Internal node Annotation".equals(d.getTitle()), () -> item(annotationMenu.getInternalNodeRightClickPop(annotation.p), "Annotation...").doClick(), d -> {
+                var preview = components(d, PhylogeneticTreePanel.class).getFirst();
+                require(preview.getLayoutProperties() != annotation.properties, "Preview owns independent settings");
+                require(!preview.getLayoutProperties().isShowTitle(), "Preview has no main tree title");
+                require(preview.getLayoutProperties().getLeaves().stream().allMatch(n -> n.getDrawUnit().isDrawName()), "Preview leaf labels visible");
+                require(annotation.properties.getMyLayout() == TreeLayout.RECT_PHYLO_LEFT, "Opening annotation preserves main layout");
                 components(d, JTextField.class).getFirst().setText("Example clade"); button(d, "OK").doClick();
             });
             require(annotation.panel.getMainAnnotationsProperties().hasAnnotation(), "Annotation normal path commits");

@@ -781,6 +781,17 @@ public abstract class BaseLayout implements ITreeLayout {
      */
     @Override
     public void paintGraphics(Graphics2D g2d) {
+        if (isShowAnnotation) {
+            AnnotationsProperties annotationsProperties = phylogeneticTreePanel.getMainAnnotationsProperties();
+            List<DrawPropInternalNode2LeafAnno> internalNode2LeafAnnos = annotationsProperties
+                    .getInternalNode2LeafAnnos();
+            for (DrawPropInternalNode2LeafAnno tt : internalNode2LeafAnnos) {
+                if (tt.shouldConfigurateAndPaint()) {
+                    tt.drawAnnotation(g2d);
+                }
+            }
+
+        }
         specificTreeDrawingProcess(g2d);
         firstRecursiveDraw(g2d, rootNode);
 
@@ -934,14 +945,6 @@ public abstract class BaseLayout implements ITreeLayout {
 
         if (isShowAnnotation) {
             AnnotationsProperties annotationsProperties = phylogeneticTreePanel.getMainAnnotationsProperties();
-
-            List<DrawPropInternalNode2LeafAnno> internalNode2LeafAnnos = annotationsProperties
-                    .getInternalNode2LeafAnnos();
-            for (DrawPropInternalNode2LeafAnno tt : internalNode2LeafAnnos) {
-                if (tt.shouldConfigurateAndPaint()) {
-                    tt.drawAnnotation(g2d);
-                }
-            }
 
             List<DrawPropOutterSidewardAnno> outterSidewardAnnos = annotationsProperties.getOutterSidewardAnnos();
             for (DrawPropOutterSidewardAnno tt : outterSidewardAnnos) {

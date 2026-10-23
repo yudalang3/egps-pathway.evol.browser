@@ -215,7 +215,7 @@ public class TreePopupMenu {
 			if (!phylogeneticTreePanel.canEditTreeNode(target)) return;
 			NodeAnnotationDialogContainer nodeAnnotationDialog = new NodeAnnotationDialogContainer(
 					phylogeneticTreePanel, target);
-			phylogeneticTreePanel.setIsShowAnnotation(false);
+
 			nodeAnnotationDialog.setVisible(true);
 		});
 

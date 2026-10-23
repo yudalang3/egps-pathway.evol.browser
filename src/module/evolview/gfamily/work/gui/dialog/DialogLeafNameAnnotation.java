@@ -91,7 +91,7 @@ public class DialogLeafNameAnnotation extends AbstractShowAnnotationDialog {
 		currentAnnotationsProperties.clearAllAnnotation();
 		
 		GraphicsNode curreNode = nodeAnnotationDialog.getAVirtureRoot();
-		Color lineColor = changeColorButton.getBackground();
+		Color lineColor = ((ColorIcon) changeColorButton.getIcon()).getColor();
 		
 		DrawPropLeafNameAnno draPropAno = new DrawPropLeafNameAnno(lineColor, curreNode);
 		currentAnnotationsProperties.getLeafNameAnnos().add(draPropAno);

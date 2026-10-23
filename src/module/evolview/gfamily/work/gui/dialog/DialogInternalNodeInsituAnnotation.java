@@ -191,6 +191,7 @@ public class DialogInternalNodeInsituAnnotation extends AbstractShowAnnotationDi
 			gridBagConstraints.gridy = 5;
 			String[] fontlist = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 			fontComboBox = new JComboBox<String>(fontlist);
+			fontComboBox.setSelectedItem(defaultFont.getFamily());
 			fontComboBox.setFont(defaultFont);
 			fontComboBox.setPreferredSize(new Dimension(120, 25));
 			fontComboBox.addActionListener(refreshActionListener);

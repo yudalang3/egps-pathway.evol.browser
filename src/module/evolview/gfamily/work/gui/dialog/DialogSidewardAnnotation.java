@@ -172,7 +172,7 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			textColorButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					ColorIcon icon = (ColorIcon) lineColorButton.getIcon();
+					ColorIcon icon = (ColorIcon) textColorButton.getIcon();
 					Color newColor = JColorChooser.showDialog(nodeAnnotationDialog, "Choose Color", icon.getColor());
 
 					if (newColor != null) {
@@ -209,6 +209,7 @@ public class DialogSidewardAnnotation extends AbstractShowAnnotationDialog {
 			gridBagConstraints.gridy = 6;
 			String[] fontlist = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 			rdTFfont = new JComboBox<String>(fontlist);
+			rdTFfont.setSelectedItem(defaultFont.getFamily());
 			rdTFfont.setFont(defaultFont);
 			rdTFfont.addActionListener(refreshActionListener);
 			rdTFfont.setPreferredSize(new Dimension(120, 25));

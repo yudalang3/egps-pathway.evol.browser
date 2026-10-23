@@ -1,7 +1,6 @@
 package module.evolview.phylotree.visualization.annotation;
 
 import java.awt.*;
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 /**
@@ -45,19 +44,13 @@ public class DrawPropOutterSidewardAnno4LinageType {
 			g2d.setFont(sidewardNodeAnnotation.getTextFont());
 			String text = sidewardNodeAnnotation.getTextString();
 
-			if (shape instanceof Line2D) {
-				if (sidewardNodeAnnotation.isDrawTextHorizontal()) {
-					g2d.drawString(text, textXLocation, textYLocation);
-				} else {
-					final double degrees = Math.toRadians(-90);
-					float xx = textXLocation + 15;
-					float yy = (float) (textYLocation + 0.5 * g2d.getFontMetrics().stringWidth(text));
-					g2d.rotate(degrees, xx, yy);
-					g2d.drawString(text, xx, yy);
-					g2d.rotate(-degrees, xx, yy);
-				}
-			} else {
-				g2d.drawString(text, textXLocation, textYLocation);
+			Graphics2D textGraphics = (Graphics2D) g2d.create();
+			try {
+				if (!sidewardNodeAnnotation.isDrawTextHorizontal())
+					textGraphics.rotate(-Math.PI / 2, textXLocation, textYLocation);
+				textGraphics.drawString(text, textXLocation, textYLocation);
+			} finally {
+				textGraphics.dispose();
 			}
 		}
 
