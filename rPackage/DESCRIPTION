@@ -1,0 +1,11 @@
+Package: yytree
+Type: Package
+Title: Scriptable Interactive eGPS Trees
+Version: 0.1.0
+Authors@R: person("Dalang", "Yu", role = c("aut", "cre"), email = "yudalang@ucas.edu.cn")
+Description: Composable specifications for interactive phylogenetic trees using eGPS.
+License: Apache License (== 2.0)
+Encoding: UTF-8
+Depends: R (>= 4.2)
+Imports: jsonlite, rJava, ape
+Suggests: testthat
