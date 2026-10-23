@@ -1,5 +1,7 @@
 # yytree
 
+按功能编号的完整教学示例见 [examples/README.md](examples/README.md)，从基础树图到多轨注释、九种自由元件和千叶树，均可单独运行。
+
 `yytree` 将 R 的脚本化绘图与 eGPS Modern Tree View 的 Java 布局结合起来。执行 `print(y)` 打开独立 Swing 窗口，不启动 eGPS 主框架。R 对象保存绘图定义；窗口中的缩放和滚动不会改写 R 对象。
 
 ## 安装与初始化
