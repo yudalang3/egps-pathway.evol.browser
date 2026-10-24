@@ -8,6 +8,7 @@
 \alias{inner2leaf_highlight}
 \alias{inner_node_annotation}
 \alias{config_yytree}
+\alias{quit_yytree}
 \alias{leaf_annotation_rect}
 \alias{leaf_annotation_heatmap}
 \alias{free_text}
@@ -24,56 +25,58 @@
 \title{Composable interactive eGPS trees}
 \description{Build an ordinary R plotting specification and display it in an independent Java Swing window using eGPS Modern Tree View.}
 \usage{
-yytree(tree, width = 1000, height = 800, blank_top = 20, blank_left = 40, blank_bottom = 80, 
-    blank_right = 40) 
+yytree(tree, width = 1000, height = 800, blank_top = 20, blank_left = 40, blank_bottom = 80,
+    blank_right = 40)
 
-layout(code = NULL, name = NULL) 
+layout(code = NULL, name = NULL)
 
-leaf_labels(show = TRUE, align = c("right", "left", "center"), font_family = NULL, font_size = NULL) 
+leaf_labels(show = TRUE, align = c("right", "left", "center"), font_family = NULL, font_size = NULL)
 
-leaf_label_render(df) 
+leaf_label_render(df)
 
-leaf_render(size = NULL, fill = NULL, df = NULL) 
+leaf_render(size = NULL, fill = NULL, df = NULL)
 
-inner_node_render(size = NULL, fill = NULL, df = NULL, name1 = NULL, name2 = NULL) 
+inner_node_render(size = NULL, fill = NULL, df = NULL, name1 = NULL, name2 = NULL)
 
-inner2leaf_highlight(name1 = NULL, name2 = NULL, fill = "green", df = NULL) 
+inner2leaf_highlight(name1 = NULL, name2 = NULL, fill = "green", df = NULL)
 
-inner_node_annotation(name1 = NULL, name2 = NULL, text = NULL, shape = "rect", size = 20, fill = "pink", 
-    df = NULL) 
+inner_node_annotation(name1 = NULL, name2 = NULL, text = NULL, shape = "rect", size = 20, fill = "pink",
+    df = NULL)
 
-config_yytree(path2egps, max_memory = "4g") 
+config_yytree(path2egps, max_memory = "4g", restart = FALSE)
 
-leaf_annotation_rect(df, legend = "top_right", colors = NULL, width = 16) 
+quit_yytree()
 
-leaf_annotation_heatmap(x, legend = "top_right", colors = c("#2166AC", "white", "#B2182B"), limits = NULL, 
-    width = 16) 
+leaf_annotation_rect(df, legend = "top_right", colors = NULL, width = 16)
 
-free_text(x, y, text, mode = "relative", locator = "left", gap = 10, color = "black", 
-    size = 12) 
+leaf_annotation_heatmap(x, legend = "top_right", colors = c("#2166AC", "white", "#B2182B"), limits = NULL,
+    width = 16)
 
-free_ellipse(x, y, width, height, mode = "relative", fill_color = NA, line_color = "black", 
-    line_thickness = 1, line_type = "solid") 
+free_text(x, y, text, mode = "relative", locator = "left", gap = 10, color = "black",
+    size = 12)
 
-free_rectangle(x, y, width, height, mode = "relative", fill_color = NA, line_color = "black", 
-    line_thickness = 1, line_type = "solid") 
+free_ellipse(x, y, width, height, mode = "relative", fill_color = NA, line_color = "black",
+    line_thickness = 1, line_type = "solid")
 
-free_line(x1, y1, x2, y2, mode = "relative", line_color = "black", line_thickness = 1, 
-    line_type = "solid") 
+free_rectangle(x, y, width, height, mode = "relative", fill_color = NA, line_color = "black",
+    line_thickness = 1, line_type = "solid")
 
-free_arrow(x1, y1, x2, y2, mode = "relative", line_color = "black", line_thickness = 1, 
-    line_type = "solid") 
+free_line(x1, y1, x2, y2, mode = "relative", line_color = "black", line_thickness = 1,
+    line_type = "solid")
 
-free_polygon(points, mode = "relative", fill_color = NA, line_color = "black", line_thickness = 1, 
-    line_type = "solid") 
+free_arrow(x1, y1, x2, y2, mode = "relative", line_color = "black", line_thickness = 1,
+    line_type = "solid")
 
-free_bezier(points, mode = "relative", line_color = "black", line_thickness = 1, line_type = "solid") 
+free_polygon(points, mode = "relative", fill_color = NA, line_color = "black", line_thickness = 1,
+    line_type = "solid")
 
-free_bezier_ring(points1, points2, mode = "relative", fill_color = "grey", line_color = NA, line_thickness = 1, 
-    line_type = "solid") 
+free_bezier(points, mode = "relative", line_color = "black", line_thickness = 1, line_type = "solid")
 
-free_heatmap(x, y, width, height, matrix, mode = "relative", colors = c("#2166AC", "white", 
-    "#B2182B"), limits = NULL) 
+free_bezier_ring(points1, points2, mode = "relative", fill_color = "grey", line_color = NA, line_thickness = 1,
+    line_type = "solid")
+
+free_heatmap(x, y, width, height, matrix, mode = "relative", colors = c("#2166AC", "white",
+    "#B2182B"), limits = NULL)
 
 \method{print}{yytree}(x, ..., new_window = FALSE)
 \method{+}{yytree}(e1, e2)
@@ -100,7 +103,8 @@ free_heatmap(x, y, width, height, matrix, mode = "relative", colors = c("#2166AC
 \item{text}{Text to display.}
 \item{shape}{Node annotation shape: rect, ellipse or triangle.}
 \item{path2egps}{The eGPS installation directory containing dependency-egps and its Java runtime.}
-\item{max_memory}{Maximum Java heap, for example 4g. Fixed when the JVM starts.}
+\item{max_memory}{Maximum Java heap, for example 4g. Use restart = TRUE to change a running JVM.}
+\item{restart}{Restart the Java subprocess, closing all its windows. Defaults to FALSE.}
 \item{legend}{Legend corner: top_right, top_left, bottom_right, bottom_left, or none.}
 \item{colors}{Heatmap palette colors, or named category colors (optionally a list keyed by column).}
 \item{x}{Horizontal coordinate, or the numeric matrix for leaf_annotation_heatmap.}
@@ -127,8 +131,8 @@ free_heatmap(x, y, width, height, matrix, mode = "relative", colors = c("#2166AC
 \item{e1}{A yytree plot value.}
 \item{e2}{A yytree layer.}
 }
-\details{Call config_yytree before printing. Loading the package and constructing plot values do not start Java. Seven layouts preserve input branch lengths; aligned layouts only add display extensions. Add leaf_labels(show = TRUE) before leaf_label_render. Label rendering colors the label background. Leaf annotation rows match leaf names, not row positions. Multiple track layers append outwards. Missing annotations are left blank. Colors follow R RGBA conventions. The origin for free elements is the upper-left corner of the entire logical canvas. Ellipses use their centre; rectangles and free heatmaps use their upper-left corner. GUI zoom does not change the R value. The current preview is reused by default; print(x, new_window = TRUE) opens another independent view. Node size is radius; annotation size is box width.}
-\value{yytree returns a yytree object; layer functions return a yytree_layer. config_yytree invisibly returns effective runtime configuration. Printing invisibly returns the unchanged plot.}
+\details{Call config_yytree before printing. All previews reuse one Java subprocess. Closing windows only disposes the GUI. quit_yytree closes all windows and exits Java; call config_yytree again before printing. Use restart = TRUE to change a running configuration. After unexpected Java exit, the next print restarts it with the last successful configuration; old window state is lost. In-flight communication failures and interrupts terminate Java without replaying the request. R exit or package unload cleans up the subprocess. Loading the package and constructing plot values do not start Java. Seven layouts preserve input branch lengths; aligned layouts only add display extensions. Add leaf_labels(show = TRUE) before leaf_label_render. Label rendering colors the label background. Leaf annotation rows match leaf names, not row positions. Multiple track layers append outwards. Missing annotations are left blank. Colors follow R RGBA conventions. The origin for free elements is the upper-left corner of the entire logical canvas. Ellipses use their centre; rectangles and free heatmaps use their upper-left corner. GUI zoom does not change the R value. The current preview is reused by default; print(x, new_window = TRUE) opens another independent view. Node size is radius; annotation size is box width.}
+\value{yytree returns a yytree object; layer functions return a yytree_layer. config_yytree invisibly returns effective runtime configuration, including PID and log path. quit_yytree invisibly returns NULL. Printing invisibly returns the unchanged plot.}
 \examples{
 y <- yytree(hclust(dist(USArrests))) + yytree::layout(name = "slant") +
   leaf_labels(show = TRUE)

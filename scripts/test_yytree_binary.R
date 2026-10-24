@@ -7,8 +7,9 @@ library(yytree)
 stopifnot(!"rJava" %in% loadedNamespaces())
 plot <- yytree("('Homo sapiens':1,'Mus musculus':2);") + yytree::layout(name="circ_align") + leaf_labels()
 config_yytree(args[2])
-stopifnot(!any(grepl("egps.*jar",rJava::.jclassPath(),ignore.case=TRUE)))
-result <- rJava::.jcall(yytree:::.runtime$bridge,"S","renderPng",yytree:::.scene_json(plot),
+stopifnot(!"rJava" %in% loadedNamespaces(), yytree:::.runtime$process$get_pid() != Sys.getpid(),
+          jsonlite::fromJSON(yytree:::.runtime$config$probe)$pid == yytree:::.runtime$process$get_pid())
+result <- yytree:::.runtime_request("renderPng",yytree:::.scene_json(plot),
   file.path(normalizePath("temp/yytree-qa",winslash="/"),"binary-smoke.png"))
 stopifnot(jsonlite::fromJSON(result)$leaves==2L)
-cat("Windows ZIP installation, lazy Java startup and isolated class loading passed.\n")
+cat("Windows ZIP installation, lazy Java startup and isolated Java process passed.\n")

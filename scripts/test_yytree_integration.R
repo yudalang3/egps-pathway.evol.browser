@@ -26,7 +26,7 @@ for (code in seq_len(7)) {
     free_bezier_ring(points, points + cbind(rep(0,4),rep(.03,4))) +
     free_heatmap(.02,.9,.15,.05,matrix)
   payload <- yytree:::.scene_json(y)
-  result <- rJava::.jcall(yytree:::.runtime$bridge, "S", "renderPng", payload,
+  result <- yytree:::.runtime_request("renderPng", payload,
                         file.path(normalizePath(out, winslash = "/"), paste0("layout-", code, ".png")))
   stopifnot(!jsonlite::fromJSON(result)$desktopLaunched)
   geometry <- jsonlite::fromJSON(result)$tips
@@ -34,17 +34,17 @@ for (code in seq_len(7)) {
   cat("Layout", code, "passed\n")
 }
 if ("--gui" %in% args) {
-  cat(rJava::.jcall(yytree:::.runtime$bridge, "S", "testInteraction", payload,
+  cat(yytree:::.runtime_request("testInteraction", payload,
     file.path(normalizePath(out, winslash = "/"), "preview-flatlaf.png")), "\n")
   print(y)
-  first <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, FALSE)
-  second <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, FALSE)
-  third <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, TRUE)
+  first <- yytree:::.runtime_request("showPlot", payload, FALSE)
+  second <- yytree:::.runtime_request("showPlot", payload, FALSE)
+  third <- yytree:::.runtime_request("showPlot", payload, TRUE)
   stopifnot(first == second, first != third)
-  rJava::.jcall(yytree:::.runtime$bridge, "V", "closeAll")
-  reopened <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, FALSE)
+  yytree:::.runtime_request("closeAll")
+  reopened <- yytree:::.runtime_request("showPlot", payload, FALSE)
   stopifnot(reopened != first, reopened != third)
-  rJava::.jcall(yytree:::.runtime$bridge, "V", "closeAll")
+  yytree:::.runtime_request("closeAll")
 }
 if ("--benchmark" %in% args) {
   set.seed(1)
@@ -55,7 +55,7 @@ if ("--benchmark" %in% args) {
     plot <- yytree(phy,width=1600,height=1000)+leaf_annotation_heatmap(m,legend="none")
     json <- yytree:::.scene_json(plot)
     elapsed <- replicate(if (n == 1000L) 5 else 1,
-      system.time(rJava::.jcall(yytree:::.runtime$bridge,"S","renderPng",json,
+      system.time(yytree:::.runtime_request("renderPng",json,
         file.path(normalizePath(out,winslash="/"),paste0("benchmark-",n,".png"))))[["elapsed"]])
     timings[[as.character(n)]] <- list(seconds = elapsed, median = median(elapsed), p95 = unname(stats::quantile(elapsed,.95)))
     if (n == 1000L && "--gui" %in% args) {
@@ -63,7 +63,7 @@ if ("--benchmark" %in% args) {
       timings[[as.character(n)]]$gui_first_frame_seconds <- first_frame
       cat("1000-leaf GUI first frame including R serialization:",first_frame,"seconds\n")
       stopifnot(first_frame < 1)
-      rJava::.jcall(yytree:::.runtime$bridge,"V","closeAll")
+      yytree:::.runtime_request("closeAll")
     }
     cat(n,"leaves, 20 tracks: median",median(elapsed),"p95",stats::quantile(elapsed,.95),"seconds\n")
     if (n == 1000L) stopifnot(stats::quantile(elapsed,.95) < 1)

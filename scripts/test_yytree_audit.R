@@ -4,17 +4,17 @@ args <- commandArgs(trailingOnly = TRUE)
 library(yytree)
 egps <- args[1]
 config <- config_yytree(egps)
-loader <- yytree:::.runtime$loader
-stopifnot(identical(config_yytree(egps), config), identical(loader, yytree:::.runtime$loader))
+pid <- yytree:::.runtime$process$get_pid()
+stopifnot(identical(config_yytree(egps), config), identical(pid, yytree:::.runtime$process$get_pid()))
 conflict <- tryCatch(config_yytree(egps, max_memory = "2g"), error = conditionMessage)
-stopifnot(is.character(conflict), grepl("restart R", conflict, fixed = TRUE))
+stopifnot(is.character(conflict), grepl("restart = TRUE", conflict, fixed = TRUE))
 out <- file.path(getwd(), "temp", "yytree-audit")
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 results <- list()
 render <- function(y, name) {
   original <- serialize(y, NULL)
   path <- file.path(out, paste0(name, ".png"))
-  metadata <- jsonlite::fromJSON(rJava::.jcall(yytree:::.runtime$bridge, "S", "renderPng", yytree:::.scene_json(y), path))
+  metadata <- jsonlite::fromJSON(yytree:::.runtime_request("renderPng", yytree:::.scene_json(y), path))
   stopifnot(identical(serialize(y, NULL), original), !metadata$desktopLaunched)
   tips <- do.call(rbind, metadata$tips)
   stopifnot(all(is.finite(tips)), all(tips[, c(1, 3)] >= 0), all(tips[, c(1, 3)] <= y$canvas$width),

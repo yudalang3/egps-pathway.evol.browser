@@ -80,7 +80,10 @@ basic and interaction scripts explicitly demonstrate preview reuse and new windo
 - **21:** run the print calls separately to watch preview replacement; then inspect
   both windows, left-button drag, mouse-anchored wheel zoom, scrolling and inverse hover coordinates.
   Close both and call `print(y)` to reopen.
+  Windows share one JVM; closing them only disposes the GUI. Use `quit_yytree()`
+  to exit Java, then `config_yytree()` to start it again.
   分步运行打印语句观察预览更新，再检查双窗口、左键拖动、鼠标锚点缩放、滚动与悬停坐标；关闭后重新打印。
+  所有窗口共享同一个 JVM，关窗仅做 DISPOSE；`quit_yytree()` 退出 Java，`config_yytree()` 再启动。
 - **22–28:** branch lengths/merge heights, numbered/quoted names, immutable layers,
   partial annotations, caught validation errors, RDS restoration, large data and a complete figure.
   枝长与合并高度、编号和引号叶名、不可变图层、缺失注释、错误捕获、RDS、大树及综合图。

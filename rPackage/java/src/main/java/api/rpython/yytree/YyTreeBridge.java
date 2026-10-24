@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** Standalone, package-local-classloader entry point. No eGPS desktop launcher is used. */
+/** Standalone rendering bridge reused by one yytree JVM. No eGPS desktop launcher is used. */
 public final class YyTreeBridge {
     private JFrame current;
     private final List<JFrame> windows = new ArrayList<>();

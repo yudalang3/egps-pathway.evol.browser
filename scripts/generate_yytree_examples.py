@@ -274,6 +274,13 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
 # <<A canvas that fits entirely has no scrollable area; zoom in to pan it.|完全容纳于窗口的画布没有可滚动区域，放大后即可平移。>>
 # <<Scroll, then hover: the status bar reports relative, percent and logical pixels.|滚动后悬停：状态栏显示相对坐标、百分比和逻辑像素。>>
 # <<Close both windows, then run print(y): a fresh preview opens and R stays alive.|关闭两个窗口后运行 print(y)：重新打开预览，R 仍可继续使用。>>
+# <<Closing windows only disposes them; every print reuses the same JVM.|关窗只做 DISPOSE；每次 print 复用同一个 JVM。>>
+# <<Call this helper explicitly to quit Java and start a fresh preview.|需要退出 Java 并重新启动预览时，显式调用此函数。>>
+restart_preview <- function() {
+  quit_yytree()
+  config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
+  print(y)
+}
 ''', TREE_CODE, footer=False)
 
 add('tree_inputs', '<<Five tree inputs, names and branch lengths|五种树输入、叶名与枝长>>', '''
@@ -457,7 +464,10 @@ readme += '''
 - **21:** run the print calls separately to watch preview replacement; then inspect
   both windows, left-button drag, mouse-anchored wheel zoom, scrolling and inverse hover coordinates.
   Close both and call `print(y)` to reopen.
+  Windows share one JVM; closing them only disposes the GUI. Use `quit_yytree()`
+  to exit Java, then `config_yytree()` to start it again.
   分步运行打印语句观察预览更新，再检查双窗口、左键拖动、鼠标锚点缩放、滚动与悬停坐标；关闭后重新打印。
+  所有窗口共享同一个 JVM，关窗仅做 DISPOSE；`quit_yytree()` 退出 Java，`config_yytree()` 再启动。
 - **22–28:** branch lengths/merge heights, numbered/quoted names, immutable layers,
   partial annotations, caught validation errors, RDS restoration, large data and a complete figure.
   枝长与合并高度、编号和引号叶名、不可变图层、缺失注释、错误捕获、RDS、大树及综合图。

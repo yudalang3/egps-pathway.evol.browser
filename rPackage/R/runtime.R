@@ -1,6 +1,78 @@
 .runtime <- new.env(parent = emptyenv())
-config_yytree <- function(path2egps, max_memory = "4g") {
+.runtime$next_id <- 0
+
+.runtime_alive <- function() {
+  exists("process", .runtime, inherits = FALSE) && .runtime$process$is_alive()
+}
+
+.runtime_exchange <- function(process, command, arguments = list(), timeout = 30) {
+  if (!is.numeric(timeout) || length(timeout) != 1 || !is.finite(timeout) || timeout <= 0) stop("timeout must be positive and finite.")
+  .runtime$next_id <- .runtime$next_id + 1
+  id <- .runtime$next_id
+  request <- jsonlite::toJSON(list(id = id, command = command, args = unname(arguments)), auto_unbox = TRUE, null = "null", digits = NA)
+  pending <- charToRaw(enc2utf8(paste0(request, "\n")))
+  started <- proc.time()[["elapsed"]]
+  response <- tryCatch({
+    output <- ""
+    repeat {
+      if (proc.time()[["elapsed"]] - started >= timeout) stop("Java request timed out.")
+      if (length(pending)) pending <- process$write_input(pending)
+      process$poll_io(10)
+      output <- paste0(output, process$read_output())
+      if (grepl("\n", output, fixed = TRUE)) {
+        if (length(pending)) stop("Java replied before the request was fully written.")
+        reply <- jsonlite::fromJSON(output, simplifyVector = FALSE)
+        if (!is.list(reply) || !isTRUE(reply$id == id) || !is.logical(reply$ok) || length(reply$ok) != 1 || is.na(reply$ok)) stop("Invalid Java protocol response.")
+        break
+      }
+      if (!process$is_alive()) stop("Java process exited before replying.")
+    }
+    reply
+  }, error = function(e) {
+    try(process$kill(), silent = TRUE)
+    logfile <- process$get_error_file()
+    detail <- if (!is.null(logfile) && file.exists(logfile)) paste(utils::tail(readLines(logfile, warn = FALSE, encoding = "UTF-8"), 12), collapse = "\n") else ""
+    stop(conditionMessage(e), " No request was retried.",
+         if (nzchar(detail)) paste0("\n", detail), if (!is.null(logfile)) paste0("\nJava log: ", logfile), call. = FALSE)
+  }, interrupt = function(e) {
+    try(process$kill(), silent = TRUE)
+    stop(e)
+  })
+  if (!isTRUE(response$ok)) stop("Java ", command, " failed: ", response$error, call. = FALSE)
+  response$result
+}
+
+.runtime_stop <- function() {
+  if (!exists("process", .runtime, inherits = FALSE)) return(invisible(NULL))
+  process <- .runtime$process
+  if (process$is_alive()) {
+    deadline <- proc.time()[["elapsed"]] + 2
+    # One bounded shutdown exchange includes disposing all windows.
+    tryCatch(.runtime_exchange(process, "shutdown", timeout = 2), error = function(e) NULL,
+             interrupt = function(e) { try(process$kill(), silent = TRUE); NULL })
+    if (process$is_alive()) process$wait(max(0, (deadline - proc.time()[["elapsed"]]) * 1000))
+    if (process$is_alive()) process$kill()
+  }
+  rm("process", envir = .runtime)
+  invisible(NULL)
+}
+
+quit_yytree <- function() {
+  .runtime_stop()
+  if (exists("config", .runtime, inherits = FALSE)) rm("config", envir = .runtime)
+  if (exists("launch", .runtime, inherits = FALSE)) rm("launch", envir = .runtime)
+  invisible(NULL)
+}
+
+reg.finalizer(.runtime, function(e) {
+  try(.runtime_stop(), silent = TRUE)
+}, onexit = TRUE)
+
+.onUnload <- function(libpath) quit_yytree()
+
+config_yytree <- function(path2egps, max_memory = "4g", restart = FALSE) {
   if (!is.character(path2egps) || length(path2egps) != 1 || is.na(path2egps)) stop("path2egps must be one installation directory.")
+  if (!is.logical(restart) || length(restart) != 1 || is.na(restart)) stop("restart must be TRUE or FALSE.")
   root <- normalizePath(path2egps, winslash = "/", mustWork = TRUE)
   if (!is.character(max_memory) || length(max_memory) != 1 || is.na(max_memory) || !grepl("^[1-9][0-9]*[mMgG]$", max_memory)) stop("max_memory must be like '512m' or '4g'.")
   max_memory <- tolower(max_memory)
@@ -10,57 +82,56 @@ config_yytree <- function(path2egps, max_memory = "4g") {
   if (!dir.exists(java)) java <- Sys.getenv("JAVA_HOME")
   if (!nzchar(java)) stop("No bundled Java or JAVA_HOME found.")
   java <- normalizePath(java, winslash = "/", mustWork = TRUE)
-  if (exists("config", .runtime, inherits = FALSE)) {
-    if (!identical(.runtime$config$root, root) || !identical(.runtime$config$max_memory, max_memory)) stop("JVM configuration is fixed; restart R to change it.")
-    return(invisible(.runtime$config))
+  executable <- file.path(java, "bin", if (.Platform$OS.type == "windows") "java.exe" else "java")
+  if (!file.exists(executable)) stop("Java executable not found: ", executable)
+  if (exists("config", .runtime, inherits = FALSE) && !restart) {
+    if (!identical(.runtime$config$root, root) || !identical(.runtime$config$java, java) || !identical(.runtime$config$max_memory, max_memory)) stop("Use restart = TRUE to change Java configuration; existing windows will close.")
+    if (.runtime_alive()) return(invisible(.runtime$config))
   }
-  if (!"rJava" %in% loadedNamespaces()) Sys.setenv(JAVA_HOME = java)
-  if (!requireNamespace("rJava", quietly = TRUE)) stop("Install rJava before configuring yytree.")
-  running <- rJava::.jvmState()$initialized
+  bridgejar <- system.file("java", "yytree-bridge.jar", package = "yytree")
+  if (!nzchar(bridgejar)) stop("The yytree bridge JAR is missing; build and reinstall the package.")
   args <- c(paste0("-Xmx", max_memory), "-Dfile.encoding=UTF-8")
   argfile <- file.path(root, "eGPS2.args")
   if (file.exists(argfile)) {
     extra <- trimws(readLines(argfile, warn = FALSE))
-    extra <- extra[nzchar(extra) & !startsWith(extra, "#")]
-    extra <- extra[!grepl("^-Xmx", extra)]
+    extra <- extra[nzchar(extra) & !startsWith(extra, "#") & !grepl("^-Xmx", extra)]
     args <- c(args, sub("^(--add-(opens|exports)) ", "\\1=", extra))
   }
-  if (running) {
-    actual <- rJava::.jcall("java/lang/System", "S", "getProperty", "java.home")
-    heap <- rJava::.jcall(rJava::.jcall("java/lang/Runtime", "Ljava/lang/Runtime;", "getRuntime"), "J", "maxMemory")
-    requested <- as.numeric(sub("[mMgG]$", "", max_memory)) * if (grepl("[gG]$", max_memory)) 1024^3 else 1024^2
-    if (normalizePath(actual, winslash = "/") != java || abs(heap-requested) > requested * .05) stop("Existing JVM conflicts with requested Java or memory; restart R.")
-  }
-  bridgejar <- system.file("java", "yytree-bridge.jar", package = "yytree")
-  if (!nzchar(bridgejar)) stop("The yytree bridge JAR is missing; build and reinstall the package.")
-  loaded <- tryCatch({
-    if (!running) rJava::.jinit(parameters = args)
-    version <- rJava::.jcall("java/lang/System", "S", "getProperty", "java.specification.version")
-    if (as.numeric(version) < 25) stop("Java 25+ required; running Java ", version, ". Restart R with a compatible runtime.")
-    actual_java <- rJava::.jcall("java/lang/System", "S", "getProperty", "java.home")
-    if (normalizePath(actual_java, winslash = "/") != java) stop("Java was already loaded from ", actual_java, "; restart R before selecting ", java)
-    urls <- lapply(c(bridgejar, jars), function(path) {
-      file <- rJava::.jnew("java/io/File", path)
-      uri <- rJava::.jcall(file, "Ljava/net/URI;", "toURI")
-      rJava::.jcall(uri, "Ljava/net/URL;", "toURL")
-    })
-    parent <- rJava::.jcall("java/lang/ClassLoader", "Ljava/lang/ClassLoader;", "getPlatformClassLoader")
-    loader <- rJava::.jnew("java/net/URLClassLoader", rJava::.jarray(urls, contents.class = "java/net/URL"), parent)
-    bridge <- rJava::.jnew("api/rpython/yytree/YyTreeBridge", class.loader = loader)
-    list(loader = loader, bridge = bridge, probe = rJava::.jcall(bridge, "S", "probeRuntime"))
-  }, error = function(e) stop("Cannot initialize yytree against ", root, ": ", conditionMessage(e), call. = FALSE))
-  bridge <- loaded$bridge
-  probe <- loaded$probe
-  .runtime$bridge <- bridge
-  .runtime$loader <- loaded$loader
-  .runtime$config <- list(root = root, java = java, max_memory = max_memory, probe = probe)
+  args <- c(args, "-cp", paste(c(bridgejar, jars), collapse = .Platform$path.sep), "api.rpython.yytree.YyTreeProcess")
+  .runtime_start(list(root = root, java = java, max_memory = max_memory), list(command = executable, args = args))
+}
+
+.runtime_start <- function(config, launch) {
+  .runtime_stop()
+  logdir <- file.path(tempdir(), "yytree", "logs")
+  dir.create(logdir, recursive = TRUE, showWarnings = FALSE)
+  logfile <- tempfile("java-", tmpdir = logdir, fileext = ".log")
+  process <- processx::process$new(launch$command, launch$args, stdin = "|", stdout = "|", stderr = logfile,
+                                  encoding = "UTF-8", cleanup = TRUE, supervise = TRUE, windows_hide_window = TRUE)
+  initialized <- FALSE
+  on.exit(if (!initialized) try(process$kill(), silent = TRUE), add = TRUE)
+  probe <- tryCatch(.runtime_exchange(process, "probeRuntime"), error = function(e) {
+    stop("Cannot initialize yytree against ", config$root, ". Java 25+ is required. ", conditionMessage(e), call. = FALSE)
+  })
+  .runtime$process <- process
+  .runtime$config <- c(config[c("root", "java", "max_memory")], list(probe = probe, pid = process$get_pid(), log = logfile))
+  .runtime$launch <- launch
+  initialized <- TRUE
   invisible(.runtime$config)
 }
+
+.runtime_request <- function(command, ..., timeout = 30) {
+  if (!exists("config", .runtime, inherits = FALSE)) stop("Call config_yytree(path2egps) first.")
+  if (!.runtime_alive()) {
+    .runtime_start(.runtime$config, .runtime$launch)
+    warning("Java restarted; previous windows and their zoom/scroll state were lost.", call. = FALSE)
+  }
+  .runtime_exchange(.runtime$process, command, list(...), timeout = timeout)
+}
+
 print.yytree <- function(x, ..., new_window = FALSE) {
-  if (!exists("bridge", .runtime, inherits = FALSE)) stop("Call config_yytree(path2egps) first.")
   if (!is.logical(new_window) || length(new_window) != 1 || is.na(new_window)) stop("new_window must be TRUE or FALSE.")
-  payload <- .scene_json(x)
-  rJava::.jcall(.runtime$bridge, "S", "showPlot", payload, as.logical(new_window))
+  .runtime_request("showPlot", .scene_json(x), new_window)
   invisible(x)
 }
 

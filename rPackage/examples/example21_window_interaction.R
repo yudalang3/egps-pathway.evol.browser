@@ -24,3 +24,10 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
 # A canvas that fits entirely has no scrollable area; zoom in to pan it.
 # Scroll, then hover: the status bar reports relative, percent and logical pixels.
 # Close both windows, then run print(y): a fresh preview opens and R stays alive.
+# Closing windows only disposes them; every print reuses the same JVM.
+# Call this helper explicitly to quit Java and start a fresh preview.
+restart_preview <- function() {
+  quit_yytree()
+  config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
+  print(y)
+}

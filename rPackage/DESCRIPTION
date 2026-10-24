@@ -7,5 +7,5 @@ Description: Composable specifications for interactive phylogenetic trees using 
 License: Apache License (== 2.0)
 Encoding: UTF-8
 Depends: R (>= 4.2)
-Imports: jsonlite, rJava, ape
+Imports: jsonlite, processx (>= 3.8.6), ape
 Suggests: testthat

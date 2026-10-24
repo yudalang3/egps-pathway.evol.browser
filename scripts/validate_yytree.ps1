@@ -24,6 +24,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'R unit tests failed.' }
     & (Join-Path $R 'R.exe') CMD INSTALL "--library=$library" rPackage
     if ($LASTEXITCODE -ne 0) { throw 'Package installation failed.' }
+    $lifecycle = @('--vanilla','scripts/test_yytree_lifecycle.R',$Egps)
+    if ($Gui) { $lifecycle += '--gui' }
+    & (Join-Path $R 'Rscript.exe') @lifecycle | Tee-Object -FilePath (Join-Path $logs 'yytree-lifecycle.log')
+    if ($LASTEXITCODE -ne 0) { throw 'Process lifecycle tests failed.' }
     $integration = @('--vanilla','scripts/test_yytree_integration.R',$Egps,'temp/yytree-qa','--benchmark')
     if ($Gui) { $integration += '--gui' }
     & (Join-Path $R 'Rscript.exe') @integration | Tee-Object -FilePath (Join-Path $logs 'yytree-integration.log')

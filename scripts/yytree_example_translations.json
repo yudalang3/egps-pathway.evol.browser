@@ -69,6 +69,8 @@
   "A canvas that fits entirely has no scrollable area; zoom in to pan it.": "完全容纳于窗口的画布没有可滚动区域，放大后即可平移。",
   "Scroll, then hover: the status bar reports relative, percent and logical pixels.": "滚动后悬停：状态栏显示相对坐标、百分比和逻辑像素。",
   "Close both windows, then run print(y): a fresh preview opens and R stays alive.": "关闭两个窗口后运行 print(y)：重新打开预览，R 仍可继续使用。",
+  "Closing windows only disposes them; every print reuses the same JVM.": "关窗只做 DISPOSE；每次 print 复用同一个 JVM。",
+  "Call this helper explicitly to quit Java and start a fresh preview.": "需要退出 Java 并重新启动预览时，显式调用此函数。",
   "Five tree inputs, names and branch lengths": "五种树输入、叶名与枝长",
   "Newick/phylo retain branch lengths; hclust retains merge heights and leaf order.": "Newick 和 phylo 保留枝长，hclust 保留合并高度及叶序。",
   "Missing lengths use unit display lengths. Completely absent names become numbers.": "缺少枝长时以单位长度显示；完全没有叶名时生成编号。",

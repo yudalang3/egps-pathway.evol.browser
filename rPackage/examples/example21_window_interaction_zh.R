@@ -24,3 +24,10 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
 # 完全容纳于窗口的画布没有可滚动区域，放大后即可平移。
 # 滚动后悬停：状态栏显示相对坐标、百分比和逻辑像素。
 # 关闭两个窗口后运行 print(y)：重新打开预览，R 仍可继续使用。
+# 关窗只做 DISPOSE；每次 print 复用同一个 JVM。
+# 需要退出 Java 并重新启动预览时，显式调用此函数。
+restart_preview <- function() {
+  quit_yytree()
+  config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
+  print(y)
+}

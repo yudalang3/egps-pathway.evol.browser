@@ -14,7 +14,7 @@ library(yytree, lib.loc = lib)
 config_yytree("C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
 ```
 
-也可先运行 `.libPaths(c(lib, .libPaths()))`，再使用普通的 `library(yytree)`。这是项目内已经准备好的包加载库；它不会在加载时自动编译源码。Java 桥接更新后需要重启 R，才能加载新 JAR。生成的加载库不提交 Git，也不打进源码包。
+也可先运行 `.libPaths(c(lib, .libPaths()))`，再使用普通的 `library(yytree)`。这是项目内已经准备好的包加载库；它不会在加载时自动编译源码。Java 桥接更新后用 `quit_yytree()` 退出旧 JVM，重新安装包后再配置启动。生成的加载库不提交 Git，也不打进源码包。
 
 如果已经有验证好的 ZIP，只需在仓库根目录运行 `Rscript scripts/update_yytree_library.R` 即可刷新加载库；完整开发验收仍使用 `scripts/validate_yytree.ps1 -Gui`。
 
@@ -22,10 +22,10 @@ config_yytree("C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTe
 
 ## 安装与初始化
 
-首版已在 Windows、R 4.5.2、rJava 1.0.16 和 eGPS 自带 Java 25 上验证。需要事先安装 eGPS；本包只附带新增的桥接 JAR，不包含 eGPS 核心依赖。
+运行时通过 processx 管理独立 Java 子进程，不依赖 rJava。Windows 验收环境为 R 4.5.2、processx 3.8.6 和 eGPS 自带 Java 25。需要事先安装 eGPS；本包只附带新增的桥接 JAR，不包含 eGPS 核心依赖。
 
 ```r
-install.packages(c("rJava", "jsonlite", "ape"))
+install.packages(c("processx", "jsonlite", "ape"))
 # Windows 二进制包
 install.packages("yytree_0.1.0.zip", repos = NULL, type = "win.binary")
 # 或源代码包；包内已经包含编译好的 Java 桥接，不要求用户现场编译 Java
@@ -40,7 +40,17 @@ config_yytree(
 
 `library(yytree)` 不启动 JVM。配置时优先使用安装目录的 `jre`，也支持 `JAVA_HOME`。兼容的 Java 25 JRE 足以运行，只有重新编译桥接 JAR 才需要完整 JDK 25。
 
-请在其他 Java 包启动 JVM 前配置。Java 已经载入后，更换 Java 路径或增大堆内存需要重启 R。重复使用相同配置可直接返回。诊断信息包含实际 Java 版本、架构和 MTV 类来源。
+每个 R 会话只有一个 yytree JVM；`config_yytree()` 启动它，重复使用相同配置复用同一进程，不修改 R 的 `JAVA_HOME`，也不受其他 R 包的内嵌 JVM 配置影响。诊断信息包含实际 Java 版本、架构、MTV 类来源、PID 和日志路径。
+
+```r
+quit_yytree()                         # 关闭所有图窗并退出 JVM；可以重复调用
+config_yytree(path2egps, "4g")        # 显式启动，之后才可再次 print(y)
+config_yytree(path2egps, "8g", restart = TRUE) # 关闭旧窗口，以新配置重启 JVM
+```
+
+关闭 GUI 仅执行 DISPOSE，不退出 JVM；下次 `print(y)` 继续使用同一进程。只有意外退出时，下次绘图会使用最后成功配置自动启动新 JVM，并提示旧窗口和缩放/滚动状态丢失。通信中断、超时或用户中断时，本次请求不自动重发；通信故障会终止该 JVM，下次绘图再恢复。启动和请求默认超时 30 秒。`quit_yytree()` 是主动退出，不触发自动恢复，需再次调用 `config_yytree()`。
+
+正常退出 R 或卸载包时尝试关闭 Java，无法正常结束时强制终止；processx supervisor 负责 R 异常退出后的进程清理。stderr 日志位于 `tempdir()/yytree/logs`，路径也在 `config_yytree()` 的不可见返回值中。Java 崩溃或重启不会改变 R 中的绘图对象；不会恢复旧窗口的交互状态。
 
 ## 基本出图
 
@@ -118,7 +128,7 @@ print(y)
 
 独立预览窗使用 eGPS 自带的浅色 FlatLaf 和 SwingX 状态栏，保留原生标题栏与白色绘图区。按住鼠标左键拖动画布以平移，滚轮以指针位置为锚点缩放，也可使用滚动条。平移受画布边界限制；画布完全容纳于窗口时，放大后即可拖动。状态栏同时显示缩放比例、相对坐标、百分比和像素坐标，缩放、拖动、滚动后仍对应原始逻辑画布，可直接用于自由元件。交互不修改 R 对象或重新计算树布局。窗口依赖当前 R 进程；建议在 R/RStudio 的交互会话中使用。
 
-首次显示预览时才初始化 FlatLaf；加载 R 包、配置 Java 和离屏渲染不会设置主题。Swing 外观在同一 JVM 中共享，因此首次预览会影响随后创建的 Swing 组件，但不会主动刷新其他已有窗口；不启动 eGPS 主框架。
+首次显示预览时才初始化 FlatLaf；加载 R 包、配置 Java 和离屏渲染不会设置主题。Swing 外观只在 yytree 自己的 JVM 中共享，不影响其他 R 包的 Swing 组件；不启动 eGPS 主框架。
 
 ## 开发与验证
 
@@ -131,7 +141,7 @@ print(y)
 & 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla -e 'testthat::test_local("rPackage")'
 ```
 
-普通 R 测试不启动 JVM；集成脚本在独立 R 进程中验证七种布局、全部元件、窗口和性能。新画布不加载 VOICE、模块发现或 eGPS 主框架。
+普通 R 测试不启动 JVM；集成脚本在独立 R 进程中验证七种布局、全部元件、窗口和性能。`scripts/test_yytree_lifecycle.R` 另验证 JVM 复用、关窗重开、主动退出、崩溃恢复、大数据通信及 R 退出清理。新画布不加载 VOICE、模块发现或 eGPS 主框架。
 
 完整验收与生成 Windows ZIP、源码包：
 

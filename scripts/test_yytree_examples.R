@@ -43,7 +43,7 @@ for (file in files) {
   stopifnot(length(plots) > 0L, all(vapply(plots, inherits, FALSE, "yytree")))
   for (i in seq_along(plots)) {
     path <- file.path(output, paste0(tools::file_path_sans_ext(basename(file)), "-", i, ".png"))
-    metadata <- rJava::.jcall(yytree:::.runtime$bridge, "S", "renderPng",
+    metadata <- yytree:::.runtime_request("renderPng",
                              yytree:::.scene_json(plots[[i]]), path)
     decoded <- jsonlite::fromJSON(metadata)
     stopifnot(!decoded$desktopLaunched, file.info(path)$size > 0)

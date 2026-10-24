@@ -1,5 +1,5 @@
-test_that("loading and building values does not load rJava", {
-  if ("rJava" %in% loadedNamespaces()) expect_false(rJava::.jvmState()$initialized)
+test_that("loading and building values does not start Java", {
+  expect_false(yytree:::.runtime_alive())
   tree <- hclust(dist(USArrests))
   x <- yytree(tree)
   y <- x + yytree::layout(name = "slant") + leaf_labels()
