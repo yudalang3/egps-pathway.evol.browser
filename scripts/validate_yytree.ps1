@@ -31,6 +31,8 @@ try {
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_examples.R $Egps | Tee-Object -FilePath (Join-Path $logs 'yytree-examples.log')
     if ($LASTEXITCODE -ne 0) { throw 'Bilingual example validation failed.' }
     if ($Gui) {
+        & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_preview.R $Egps --hidpi
+        if ($LASTEXITCODE -ne 0) { throw 'High-DPI preview test failed.' }
         & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_example.R
         if ($LASTEXITCODE -ne 0) { throw 'Complete example failed.' }
     }

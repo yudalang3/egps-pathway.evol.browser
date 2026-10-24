@@ -37,11 +37,17 @@ public final class YyTreeBridge {
         result.put("java", System.getProperty("java.version"));
         result.put("architecture", System.getProperty("os.arch"));
         result.put("mtv", BaseLayout.class.getProtectionDomain().getCodeSource().getLocation().toString());
+        for(String name:List.of("com.formdev.flatlaf.FlatLightLaf","org.jdesktop.swingx.JXStatusBar")) {
+            Class<?> dependency=Class.forName(name,false,YyTreeBridge.class.getClassLoader());
+            dependency.getConstructor();
+            result.put(name,dependency.getProtectionDomain().getCodeSource().getLocation().toString());
+        }
         result.put("desktopLaunched", UnifiedAccessPoint.isGULaunched());
         return result.toJSONString();
     }
 
     public String showPlot(String json, boolean newWindow) throws Exception {
+        onEdt(YyTreePreview::initializeTheme);
         JSONObject scene = JSON.parseObject(json,Feature.OrderedField);
         YyTreePanel panel = preparePanel(scene);
         AtomicReference<String> result = new AtomicReference<>();
@@ -53,18 +59,18 @@ public final class YyTreeBridge {
                 windows.add(current);
                 JFrame frame = current;
                 frame.addWindowListener(new WindowAdapter() {
-                    @Override public void windowClosed(WindowEvent e) { windows.remove(frame); if(current==frame)current=null; }
+                    @Override public void windowClosed(WindowEvent e) { if(frame.getContentPane() instanceof YyTreePreview preview)preview.disposeInteraction();windows.remove(frame); if(current==frame)current=null; }
                     @Override public void windowActivated(WindowEvent e) { current=frame; }
                 });
             }
-            JLabel status = new JLabel(" Move over the canvas to inspect coordinates");
-            JScrollPane scroll = new JScrollPane(panel);
-            panel.installInteraction(scroll, status);
-            JPanel content = new JPanel(new BorderLayout());
-            content.add(scroll, BorderLayout.CENTER);
-            content.add(status, BorderLayout.SOUTH);
-            current.setContentPane(content);
-            scroll.setPreferredSize(new Dimension(Math.min(panel.logicalWidth, 1200), Math.min(panel.logicalHeight, 850)));
+            if(current.getContentPane() instanceof YyTreePreview previous)previous.disposeInteraction();
+            YyTreePreview preview=new YyTreePreview(panel);
+            current.setContentPane(preview);
+            GraphicsConfiguration configuration=current.getGraphicsConfiguration();
+            Rectangle screen=configuration.getBounds();Insets insets=Toolkit.getDefaultToolkit().getScreenInsets(configuration);
+            preview.scroll.setPreferredSize(new Dimension(
+                Math.min(Math.min(panel.logicalWidth,1200),Math.max(1,screen.width-insets.left-insets.right-60)),
+                Math.min(Math.min(panel.logicalHeight,850),Math.max(1,screen.height-insets.top-insets.bottom-100))));
             current.pack();
             current.setVisible(true);
             panel.paintImmediately(0, 0, panel.getWidth(), panel.getHeight());
@@ -76,12 +82,17 @@ public final class YyTreeBridge {
     public void closeAll() throws Exception { onEdt(() -> { for (JFrame frame : List.copyOf(windows)) frame.dispose(); current=null; }); }
 
     public String testInteraction(String json) throws Exception {
+        return testInteraction(json,null);
+    }
+
+    public String testInteraction(String json,String imagePath) throws Exception {
         String id=showPlot(json,true);
         AtomicReference<String> result=new AtomicReference<>();
+        AtomicReference<BufferedImage> snapshot=new AtomicReference<>();
         onEdt(()->{
-            JPanel content=(JPanel)current.getContentPane();
-            JScrollPane scroll=(JScrollPane)content.getComponent(0);
-            JLabel status=(JLabel)content.getComponent(1);
+            YyTreePreview content=(YyTreePreview)current.getContentPane();
+            JScrollPane scroll=content.scroll;
+            JLabel status=content.coordinates;
             YyTreePanel panel=(YyTreePanel)scroll.getViewport().getView();
             double before=panel.root.getXSelf();
             MouseWheelEvent wheel=new MouseWheelEvent(panel,MouseEvent.MOUSE_WHEEL,System.currentTimeMillis(),0,300,200,0,false,MouseWheelEvent.WHEEL_UNIT_SCROLL,1,-2);
@@ -91,8 +102,24 @@ public final class YyTreeBridge {
             if(panel.zoom<=1 || before!=panel.root.getXSelf())throw new IllegalStateException("Zoom recalculated layout or failed.");
             String expected=String.format(Locale.ROOT,"%.1f",300/panel.zoom);
             if(!status.getText().contains(expected))throw new IllegalStateException("Hover coordinates disagree with inverse zoom.");
-            JSONObject data=new JSONObject();data.put("window",id);data.put("zoom",panel.zoom);data.put("status",status.getText());data.put("desktopLaunched",UnifiedAccessPoint.isGULaunched());result.set(data.toJSONString());
+            JViewport viewport=scroll.getViewport();
+            viewport.setViewPosition(new Point(60,50));
+            MouseEvent press=new MouseEvent(panel,MouseEvent.MOUSE_PRESSED,System.currentTimeMillis(),InputEvent.BUTTON1_DOWN_MASK,260,250,1,false,MouseEvent.BUTTON1);
+            content.navigation.mousePressed(press);
+            MouseEvent drag=new MouseEvent(panel,MouseEvent.MOUSE_DRAGGED,System.currentTimeMillis(),InputEvent.BUTTON1_DOWN_MASK,225,225,0,false,MouseEvent.NOBUTTON);
+            content.navigation.mouseDragged(drag);
+            if(!viewport.getViewPosition().equals(new Point(95,75)))throw new IllegalStateException("Left drag failed to pan the preview.");
+            MouseEvent release=new MouseEvent(content.hint,MouseEvent.MOUSE_RELEASED,System.currentTimeMillis(),0,0,0,1,false,MouseEvent.BUTTON1);
+            content.navigation.eventDispatched(release);
+            if(content.navigation.isDragging() || panel.getCursor().getType()==Cursor.HAND_CURSOR)throw new IllegalStateException("Outside release left a stale drag.");
+            expected=String.format(Locale.ROOT,"%.1f",260/panel.zoom);
+            if(!status.getText().contains(expected) || before!=panel.root.getXSelf())throw new IllegalStateException("Pan changed layout or hover coordinates.");
+            if(!(UIManager.getLookAndFeel() instanceof com.formdev.flatlaf.FlatLightLaf))throw new IllegalStateException("FlatLaf was not initialized.");
+            if(content.statusBar.getHeight()<content.coordinates.getFontMetrics(content.coordinates.getFont()).getHeight())throw new IllegalStateException("Status bar clips its font.");
+            JSONObject data=new JSONObject();data.put("window",id);data.put("zoom",panel.zoom);data.put("status",status.getText());data.put("theme",UIManager.getLookAndFeel().getName());data.put("statusBar",content.statusBar.getClass().getName());data.put("dragPassed",true);data.put("desktopLaunched",UnifiedAccessPoint.isGULaunched());result.set(data.toJSONString());
+            if(imagePath!=null){BufferedImage image=new BufferedImage(content.getWidth(),content.getHeight(),BufferedImage.TYPE_INT_ARGB);Graphics2D g=image.createGraphics();try{content.printAll(g);}finally{g.dispose();}snapshot.set(image);}
         });
+        if(imagePath!=null)javax.imageio.ImageIO.write(snapshot.get(),"png",new File(imagePath));
         return result.get();
     }
 
@@ -532,14 +559,6 @@ public final class YyTreeBridge {
                 default -> throw new IllegalArgumentException("Unknown free element: "+type);
             }
             if(fill!=null){g.setColor(fill);g.fill(shape);}if(line!=null&&thickness>0){g.setColor(line);g.draw(shape);}
-        }
-        void installInteraction(JScrollPane scroll,JLabel status) {
-            scroll.setWheelScrollingEnabled(false);
-            addMouseMotionListener(new MouseMotionAdapter(){@Override public void mouseMoved(MouseEvent e){double x=e.getX()/zoom,y=e.getY()/zoom;status.setText(String.format(Locale.ROOT," Relative: (%.4f, %.4f)    Percent: (%.2f%%, %.2f%%)    Pixel: (%.1f, %.1f)",x/logicalWidth,y/logicalHeight,100*x/logicalWidth,100*y/logicalHeight,x,y));}});
-            addMouseWheelListener(e->{JViewport viewport=scroll.getViewport();Point before=viewport.getViewPosition();double old=zoom;zoom=Math.max(.1,Math.min(100,zoom*Math.pow(1.12,-e.getPreciseWheelRotation())));double ratio=zoom/old;
-                setPreferredSize(new Dimension((int)Math.ceil(logicalWidth*zoom),(int)Math.ceil(logicalHeight*zoom)));revalidate();
-                Point target=new Point((int)Math.round(e.getX()*ratio-(e.getX()-before.x)),(int)Math.round(e.getY()*ratio-(e.getY()-before.y)));
-                SwingUtilities.invokeLater(()->{Dimension extent=viewport.getExtentSize(),size=getPreferredSize();target.x=Math.max(0,Math.min(target.x,size.width-extent.width));target.y=Math.max(0,Math.min(target.y,size.height-extent.height));viewport.setViewPosition(target);repaint();});e.consume();});
         }
         @Override public ScaleBarProperty getScaleBarProperty(){return scale;}
         @Override public AnnotationsProperties getMainAnnotationsProperties(){return annotations;}

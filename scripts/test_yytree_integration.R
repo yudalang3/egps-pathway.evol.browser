@@ -34,7 +34,8 @@ for (code in seq_len(7)) {
   cat("Layout", code, "passed\n")
 }
 if ("--gui" %in% args) {
-  cat(rJava::.jcall(yytree:::.runtime$bridge, "S", "testInteraction", payload), "\n")
+  cat(rJava::.jcall(yytree:::.runtime$bridge, "S", "testInteraction", payload,
+    file.path(normalizePath(out, winslash = "/"), "preview-flatlaf.png")), "\n")
   print(y)
   first <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, FALSE)
   second <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, FALSE)

@@ -256,7 +256,7 @@ plots <- list(matrix = base + free_text(.1, .79, "<<Independent matrix|独立矩
 ''', TREE_CODE)
 
 add('window_interaction', '<<Update a preview and open an independent comparison|更新预览与打开独立比较窗口>>', '''
-original <- yytree(tree) + leaf_labels() + leaf_render(size = 3)
+original <- yytree(tree, width = 1600, height = 1200) + leaf_labels() + leaf_render(size = 3)
 updated <- original + leaf_render(df = data.frame(name = "Human", fill = "red", size = 7))
 comparison <- updated + yytree::layout(name = "slant")
 plots <- list(original = original, updated = updated, comparison = comparison)
@@ -267,7 +267,11 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
   print(comparison, new_window = TRUE)   # <<Keeps both results visible.|保留两个可见结果。>>
 }
 # <<Inspect: one red Human node in each of two windows, with different layouts.|检查：两个不同布局的窗口中，都有一个红色 Human 节点。>>
+# <<The large canvas can be panned immediately: hold the left button and drag.|此大画布可以直接平移：按住鼠标左键拖动。>>
+# <<Content follows the pointer; release outside the canvas also ends the drag.|内容跟随鼠标移动；在画布外松开鼠标也会结束拖动。>>
 # <<Wheel over a branch: it stays under the pointer while zooming.|把鼠标放在枝条上滚动：缩放时该位置保持在鼠标下方。>>
+# <<Then drag again: each window keeps its own zoom and scroll position.|缩放后再次拖动：各窗口分别保留自己的缩放和滚动位置。>>
+# <<A canvas that fits entirely has no scrollable area; zoom in to pan it.|完全容纳于窗口的画布没有可滚动区域，放大后即可平移。>>
 # <<Scroll, then hover: the status bar reports relative, percent and logical pixels.|滚动后悬停：状态栏显示相对坐标、百分比和逻辑像素。>>
 # <<Close both windows, then run print(y): a fresh preview opens and R stays alive.|关闭两个窗口后运行 print(y)：重新打开预览，R 仍可继续使用。>>
 ''', TREE_CODE, footer=False)
@@ -451,12 +455,33 @@ readme += '''
   九种自由元件；三种坐标以完整画布左上角为原点。矩形、热图用左上角定位，椭圆用中心定位。
   字号、文字间距和线宽使用逻辑像素，示例预留边距以避免遮挡。
 - **21:** run the print calls separately to watch preview replacement; then inspect
-  both windows, mouse-anchored wheel zoom, scrolling and inverse hover coordinates.
+  both windows, left-button drag, mouse-anchored wheel zoom, scrolling and inverse hover coordinates.
   Close both and call `print(y)` to reopen.
-  分步运行打印语句观察预览更新，再检查双窗口、鼠标锚点缩放、滚动与悬停坐标；关闭后重新打印。
+  分步运行打印语句观察预览更新，再检查双窗口、左键拖动、鼠标锚点缩放、滚动与悬停坐标；关闭后重新打印。
 - **22–28:** branch lengths/merge heights, numbered/quoted names, immutable layers,
   partial annotations, caught validation errors, RDS restoration, large data and a complete figure.
   枝长与合并高度、编号和引号叶名、不可变图层、缺失注释、错误捕获、RDS、大树及综合图。
+
+## Preview appearance and navigation / 预览外观与操作
+
+The first preview installs the light FlatLaf theme from the eGPS installation.
+The white drawing canvas is surrounded by light grey chrome and a SwingX status
+bar showing zoom and coordinates. The native window title bar is retained.
+Hold the left button to pan; wheel zoom remains anchored at the pointer.
+Panning stops at the canvas edges; if the entire canvas fits, zoom in first.
+These view changes do not modify the R plot definition or tree layout.
+
+首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
+保留原生标题栏。按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
+窗口时请先放大。交互仅改变视图，不修改 R 绘图定义或重新计算树布局。
+
+Swing look-and-feel is shared within the JVM. Loading/configuring yytree and
+offscreen rendering do not install the theme. Opening the first preview changes
+the shared theme for subsequent Swing components, without actively refreshing
+other existing windows. It does not launch the eGPS desktop.
+
+Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设置主题；首次显示预览会影响
+随后创建的 Swing 组件，但不会主动刷新其他已有窗口，也不会启动 eGPS 主框架。
 
 ## Validation / 验证
 

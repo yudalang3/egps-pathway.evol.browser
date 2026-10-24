@@ -78,12 +78,33 @@ basic and interaction scripts explicitly demonstrate preview reuse and new windo
   九种自由元件；三种坐标以完整画布左上角为原点。矩形、热图用左上角定位，椭圆用中心定位。
   字号、文字间距和线宽使用逻辑像素，示例预留边距以避免遮挡。
 - **21:** run the print calls separately to watch preview replacement; then inspect
-  both windows, mouse-anchored wheel zoom, scrolling and inverse hover coordinates.
+  both windows, left-button drag, mouse-anchored wheel zoom, scrolling and inverse hover coordinates.
   Close both and call `print(y)` to reopen.
-  分步运行打印语句观察预览更新，再检查双窗口、鼠标锚点缩放、滚动与悬停坐标；关闭后重新打印。
+  分步运行打印语句观察预览更新，再检查双窗口、左键拖动、鼠标锚点缩放、滚动与悬停坐标；关闭后重新打印。
 - **22–28:** branch lengths/merge heights, numbered/quoted names, immutable layers,
   partial annotations, caught validation errors, RDS restoration, large data and a complete figure.
   枝长与合并高度、编号和引号叶名、不可变图层、缺失注释、错误捕获、RDS、大树及综合图。
+
+## Preview appearance and navigation / 预览外观与操作
+
+The first preview installs the light FlatLaf theme from the eGPS installation.
+The white drawing canvas is surrounded by light grey chrome and a SwingX status
+bar showing zoom and coordinates. The native window title bar is retained.
+Hold the left button to pan; wheel zoom remains anchored at the pointer.
+Panning stops at the canvas edges; if the entire canvas fits, zoom in first.
+These view changes do not modify the R plot definition or tree layout.
+
+首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
+保留原生标题栏。按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
+窗口时请先放大。交互仅改变视图，不修改 R 绘图定义或重新计算树布局。
+
+Swing look-and-feel is shared within the JVM. Loading/configuring yytree and
+offscreen rendering do not install the theme. Opening the first preview changes
+the shared theme for subsequent Swing components, without actively refreshing
+other existing windows. It does not launch the eGPS desktop.
+
+Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设置主题；首次显示预览会影响
+随后创建的 Swing 组件，但不会主动刷新其他已有窗口，也不会启动 eGPS 主框架。
 
 ## Validation / 验证
 

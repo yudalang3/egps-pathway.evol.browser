@@ -21,6 +21,7 @@ public final class YyTreeGeometryTest {
         """;
 
     public static void main(String[] args) throws Exception {
+        String originalTheme=javax.swing.UIManager.getLookAndFeel().getClass().getName();
         new YyTreeBridge().probeRuntime();
         for (int code=1; code<=7; code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
@@ -70,6 +71,8 @@ public final class YyTreeGeometryTest {
             require(panel.coordinate(relative,"x",true)==panel.coordinate(pixel,"x",true),"Relative mismatch");
         }
         require(!egps2.UnifiedAccessPoint.isGULaunched(),"The eGPS desktop was launched");
+        require(originalTheme.equals(javax.swing.UIManager.getLookAndFeel().getClass().getName()),"Probe or layout initialized the preview theme");
+        require(java.awt.Frame.getFrames().length==0,"Probe or layout opened a window");
         System.out.println("Seven-layout geometry, MRCA, style, precision and coordinate checks passed.");
     }
     private static void require(boolean condition,String message) {
