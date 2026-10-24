@@ -36,6 +36,7 @@ yytree <- function(tree, width = 1000, height = 800,
   } else {
     stop("Expected hclust, phylo, a Newick string or a Newick file.")
   }
+  if (!anyNA(tree$labels) && all(!nzchar(tree$labels))) tree$labels <- as.character(seq_along(tree$labels))
   if (anyNA(tree$labels) || any(!nzchar(tree$labels)) || anyDuplicated(tree$labels))
     stop("Leaf names must be nonempty and unique.")
   if (any(!is.finite(tree$edges)) || any(tree$edges[, 3] < 0))

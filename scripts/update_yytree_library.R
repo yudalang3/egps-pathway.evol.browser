@@ -11,7 +11,8 @@ library(yytree, lib.loc = library_path)
 stopifnot(identical(normalizePath(getNamespaceInfo("yytree", "path"), winslash = "/"),
                     paste0(library_path, "/yytree")),
           !"rJava" %in% loadedNamespaces(),
-          inherits(yytree("(A:1,B:2);"), "yytree"))
+          inherits(yytree("(A:1,B:2);"), "yytree"),
+          identical(yytree("(:1,:2);")$tree$labels, c("1", "2")))
 installed_jar <- system.file("java", "yytree-bridge.jar", package = "yytree")
 stopifnot(identical(unname(tools::md5sum(installed_jar)),
                     unname(tools::md5sum("rPackage/inst/java/yytree-bridge.jar"))))

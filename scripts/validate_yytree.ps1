@@ -20,7 +20,7 @@ try {
     & (Join-Path $PSScriptRoot 'build_yytree_bridge.ps1') -Egps $Egps -Jdk $Jdk -Test
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/generate_yytree_help.R
     if ($LASTEXITCODE -ne 0) { throw 'Help generation failed.' }
-    & (Join-Path $R 'Rscript.exe') --vanilla -e 'testthat::test_local("rPackage", reporter="summary")'
+    & (Join-Path $R 'Rscript.exe') --vanilla -e 'testthat::test_local("rPackage", reporter="summary")' | Tee-Object -FilePath (Join-Path $logs 'yytree-unit.log')
     if ($LASTEXITCODE -ne 0) { throw 'R unit tests failed.' }
     & (Join-Path $R 'R.exe') CMD INSTALL "--library=$library" rPackage
     if ($LASTEXITCODE -ne 0) { throw 'Package installation failed.' }
@@ -28,6 +28,8 @@ try {
     if ($Gui) { $integration += '--gui' }
     & (Join-Path $R 'Rscript.exe') @integration | Tee-Object -FilePath (Join-Path $logs 'yytree-integration.log')
     if ($LASTEXITCODE -ne 0) { throw 'Integration tests failed.' }
+    & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_audit.R $Egps | Tee-Object -FilePath (Join-Path $logs 'yytree-audit.log')
+    if ($LASTEXITCODE -ne 0) { throw 'Functional audit failed.' }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_examples.R $Egps | Tee-Object -FilePath (Join-Path $logs 'yytree-examples.log')
     if ($LASTEXITCODE -ne 0) { throw 'Bilingual example validation failed.' }
     if ($Gui) {

@@ -20,6 +20,12 @@ test_that("Newick and phylo preserve input branch lengths", {
   unnamed <- phy
   unnamed$tip.label <- NULL
   expect_equal(yytree(unnamed)$tree$labels,as.character(1:3))
+  expect_equal(yytree("(:1,:2);")$tree$labels, c("1", "2"))
+  expect_equal(yytree("(,);")$tree$labels, c("1", "2"))
+  unnamed$tip.label <- rep("", 3)
+  expect_equal(yytree(unnamed)$tree$labels, as.character(1:3))
+  expect_identical(unnamed$tip.label, rep("", 3))
+  expect_error(yytree("(A:1,:2);"), "nonempty")
 })
 test_that("selectors and label dependency fail early", {
   x <- yytree("((A:1,B:2):1,C:3);")

@@ -249,11 +249,13 @@ public final class YyTreeBridge {
             properties.getShowLeafPropertiesInfo().setShowLeafLabel(false);
             labelFont = properties.getGlobalFont();
             if (labelFont == null) labelFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+            Font defaultLabelFont=labelFont;
             for (JSONObject layer : layers) {
                 String type = layer.getString("type");
                 if (type.equals("layout")) code = layer.getIntValue("code");
                 if (type.equals("leaf_labels")) {
                     labels = layer.getBooleanValue("show"); align = layer.getString("align");
+                    labelFont=defaultLabelFont;
                     if(layer.get("font_family")!=null)labelFont=new Font(layer.getString("font_family"),Font.PLAIN,labelFont.getSize());
                     if(layer.get("font_size")!=null)labelFont=labelFont.deriveFont(layer.getFloatValue("font_size"));
                 }
@@ -271,6 +273,14 @@ public final class YyTreeBridge {
             int bottom=m.getIntValue(2)+(curved?reserve:35), right=m.getIntValue(3)+reserve+legendReserve;
             if (logicalWidth-left-right < 30 || logicalHeight-top-bottom < 30)
                 throw new IllegalArgumentException("Canvas too small for labels and tracks; increase width/height.");
+            if(code==5 || code==6) {
+                // MTV derives the arch radius from height alone (0.3 * height).
+                // Fit that layout into both dimensions before calculating any coordinates.
+                int height=logicalHeight-top-bottom;
+                int fittedHeight=Math.min(height,(int)Math.floor((logicalWidth-left-right)/.6));
+                int spare=height-fittedHeight;
+                top+=spare/2;bottom+=spare-spare/2;
+            }
             properties.setBlankArea(new BlankArea(top,left,bottom,right));
             engine = switch(code) {
                 case 1,2 -> new RectPhyloLayout(properties,root,this);
@@ -434,13 +444,19 @@ public final class YyTreeBridge {
         void drawLabels(Graphics2D g) {
             FontMetrics fm=g.getFontMetrics();
             for(GraphicsNode leaf:leaves) {
-                Point2D p=anchor(leaf,6);double x=p.getX(),y=p.getY();int width=fm.stringWidth(leaf.getName());
-                if(code==1||code==2||code==7) x+=switch(align){case "right"->labelWidth-width-10;case "center"->(labelWidth-width-10)/2;default->0;};
-                else if(x<centerX) x-=width;
+                Rectangle2D bounds=labelBounds(leaf,fm);double x=bounds.getX();
+                double y=bounds.getY()+fm.getAscent()/2.0;int width=fm.stringWidth(leaf.getName());
                 Color background=labelColors.get(leaf);
                 if(background!=null){g.setColor(background);g.fill(new Rectangle2D.Double(x,y-fm.getAscent()/2.0,width,fm.getHeight()));}
                 g.setColor(Color.BLACK);g.drawString(leaf.getName(),(float)x,(float)(y+fm.getAscent()/2.0));
             }
+        }
+        Rectangle2D labelBounds(GraphicsNode leaf,FontMetrics fm) {
+            Point2D p=anchor(leaf,6);double x=p.getX();int width=fm.stringWidth(leaf.getName());
+            double areaWidth=labelWidth-10;
+            if(code>=3 && code<=6 && x<centerX) x-=areaWidth;
+            x+=switch(align){case "right"->areaWidth-width;case "center"->(areaWidth-width)/2;default->0;};
+            return new Rectangle2D.Double(x,p.getY()-fm.getAscent()/2.0,width,fm.getHeight());
         }
         List<GraphicsNode> descendants(GraphicsNode node) {List<GraphicsNode> out=new ArrayList<>();walk(node,n->{if(n.getChildCount()==0)out.add(n);});return out;}
         List<JSONObject> rows(JSONObject layer) {JSONArray df=layer.getJSONArray("df");if(df==null)return List.of(layer);List<JSONObject> out=new ArrayList<>();for(Object row:df){JSONObject merged=new JSONObject(new LinkedHashMap<>(layer));merged.putAll((JSONObject)row);out.add(merged);}return out;}
@@ -488,7 +504,7 @@ public final class YyTreeBridge {
                     for(int j=0;j<titles.size();j++) {for(GraphicsNode leaf:leaves){Integer row=indices.get(leaf.getName());if(row!=null)cell(g,leaf,offset,width,color(cells.getJSONArray(row).getString(j)));}trackTitle(g,titles.getString(j),offset+width/2);offset+=width;}
                     legend(g,layer.getString("legend"),String.join(", ",titles.toJavaList(String.class)),null,legendRows);
                     JSONArray palette=layer.getJSONArray("palette"),limits=layer.getJSONArray("limits");
-                    for(int j=0;j<5;j++)legend(g,layer.getString("legend"),String.format(Locale.ROOT,"%.3g",limits.getDoubleValue(0)+(limits.getDoubleValue(1)-limits.getDoubleValue(0))*j/4),color(palette.getString(j*255/4)),legendRows);
+                    for(int j=0;j<5;j++)legend(g,layer.getString("legend"),heatLegendLabel(limits,j),color(palette.getString(j*255/4)),legendRows);
                 }
                 offset+=4;
             }
@@ -511,7 +527,7 @@ public final class YyTreeBridge {
                     for(String title:columns.keySet()) for(Object value:columns.getJSONObject(title).getJSONArray("levels"))texts.add(title+": "+value);
                 } else if(layer.getString("type").equals("heatmap")) {
                     texts.add(String.join(", ",layer.getJSONArray("titles").toJavaList(String.class)));
-                    for(int i=0;i<5;i++)texts.add("-0.00000");
+                    for(int i=0;i<5;i++)texts.add(heatLegendLabel(layer.getJSONArray("limits"),i));
                 }
             }
             FontMetrics metrics=metricsHost.getFontMetrics(labelFont.deriveFont(10f));
@@ -524,6 +540,10 @@ public final class YyTreeBridge {
                 int reserve=width*((entry.getValue().size()+cap-1)/cap)+8;
                 if(position.endsWith("right"))legendReserve=Math.max(legendReserve,reserve);else leftLegendReserve=Math.max(leftLegendReserve,reserve);
             }
+        }
+        String heatLegendLabel(JSONArray limits,int index) {
+            double fraction=index/4.0;
+            return String.format(Locale.ROOT,"%.3g",limits.getDoubleValue(0)*(1-fraction)+limits.getDoubleValue(1)*fraction);
         }
         void legend(Graphics2D g,String position,String text,Color color,Map<String,Integer> rows) {
             if("none".equals(position))return;int row=rows.getOrDefault(position,0);rows.put(position,row+1);
