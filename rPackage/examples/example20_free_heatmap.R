@@ -1,21 +1,22 @@
-# 20. 自由放置热图
-# Run in R/RStudio after installing yytree. Set EGPS_HOME for another installation.
+# 20. An independent matrix placed inside a rectangle
+# Run this file independently in R/RStudio after installing yytree.
 library(yytree)
+# Set EGPS_HOME or replace the fallback with your eGPS installation directory.
 config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
 
 tree <- "(((Arabidopsis:1,Rice:1):1,Yeast:2):1,((Worm:1,Fly:1):1,(Zebrafish:2,(Frog:1,(Human:1,Mouse:1):1):1):1):1);"
-leaf_names <- yytree(tree)$tree$labels
-categories <- data.frame(name = leaf_names,
-  group = factor(c("plant", "plant", "fungus", rep("animal", 6))),
-  habitat = factor(c("land", "land", "land", "land", "land", "water", "water", "land", "land")))
-set.seed(42)
-measurements <- matrix(rnorm(length(leaf_names) * 4), length(leaf_names), 4,
-  dimnames = list(leaf_names, c("control", "treated", "score", "expression")))
 
-y <- yytree(tree) + leaf_labels() +
-  free_text(.04, .87, "Independent matrix", gap = 0) +
-  free_heatmap(.04, .89, .18, .08, measurements, colors = c("white", "orange", "red"))
-# This matrix has a free position and does not align to leaves; compare example12.
+base <- yytree(tree, blank_top = 100, blank_bottom = 200) + leaf_labels()
 
-if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") print(y)
+# This matrix needs no leaf names; it is independent of the tree.
+values <- matrix(seq(-2, 2, length.out = 24), nrow = 4)
+values[2, 3] <- NA_real_
+plots <- list(matrix = base + free_text(.1, .79, "Independent matrix", gap = 0) +
+  free_heatmap(.1, .82, .3, .12, values, limits = c(-2, 2), colors = c("blue", "white", "red")))
+# x/y is the top-left. NA cells stay blank; no tree-row matching occurs.
 
+# Each list entry opens independently; y remains available for further layers.
+y <- plots[[length(plots)]]
+if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
+  for (plot in plots) print(plot, new_window = TRUE)
+}

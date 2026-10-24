@@ -1,22 +1,22 @@
-# 15. 椭圆与矩形
-# Run in R/RStudio after installing yytree. Set EGPS_HOME for another installation.
+# 15. Shape origins, fill and transparency
+# Run this file independently in R/RStudio after installing yytree.
 library(yytree)
+# Set EGPS_HOME or replace the fallback with your eGPS installation directory.
 config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
 
 tree <- "(((Arabidopsis:1,Rice:1):1,Yeast:2):1,((Worm:1,Fly:1):1,(Zebrafish:2,(Frog:1,(Human:1,Mouse:1):1):1):1):1);"
-leaf_names <- yytree(tree)$tree$labels
-categories <- data.frame(name = leaf_names,
-  group = factor(c("plant", "plant", "fungus", rep("animal", 6))),
-  habitat = factor(c("land", "land", "land", "land", "land", "water", "water", "land", "land")))
-set.seed(42)
-measurements <- matrix(rnorm(length(leaf_names) * 4), length(leaf_names), 4,
-  dimnames = list(leaf_names, c("control", "treated", "score", "expression")))
 
-y <- yytree(tree) + leaf_labels() +
-  free_rectangle(.04, .05, .15, .06, fill_color = "#88CCFF66", line_color = "blue") +
-  free_ellipse(.8, .9, .08, .05, fill_color = "gold", line_color = NA) +
-  free_rectangle(4, 85, 12, 6, mode = "percent", fill_color = NA, line_type = "dashed")
-# Rectangles use the upper-left corner; ellipses use the centre.
+base <- yytree(tree, blank_top = 100, blank_bottom = 200) + leaf_labels()
 
-if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") print(y)
+plots <- list(shapes = base +
+  free_rectangle(.1, .8, .16, .08, fill_color = "#88CCFF66", line_color = "blue", line_thickness = 3) +
+  free_ellipse(.5, .85, .16, .08, fill_color = "gold", line_color = NA) +
+  free_rectangle(70, 80, 16, 8, mode = "percent", fill_color = NA, line_type = "dashed") +
+  free_ellipse(.8, .94, .08, .04, fill_color = NA, line_type = "dotted"))
+# Rectangle x/y is its top-left; ellipse x/y is its center. Width/height use mode units.
 
+# Each list entry opens independently; y remains available for further layers.
+y <- plots[[length(plots)]]
+if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
+  for (plot in plots) print(plot, new_window = TRUE)
+}

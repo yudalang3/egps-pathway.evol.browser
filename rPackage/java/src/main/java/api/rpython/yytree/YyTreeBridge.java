@@ -300,7 +300,7 @@ public final class YyTreeBridge {
             if(!Set.of("leaf_render","inner_node_render","leaf_label_render").contains(type)) return;
             JSONArray rows=layer.getJSONArray("df");
             if(rows!=null) for(Object row:rows) {
-                JSONObject style=new JSONObject(layer);style.putAll((JSONObject)row);
+                JSONObject style=new JSONObject(new LinkedHashMap<>(layer));style.putAll((JSONObject)row);
                 GraphicsNode node=type.equals("inner_node_render")?mrca(style.getString("name1"),style.getString("name2")):named.get(style.getString("name"));
                 if(node==null) throw new IllegalArgumentException("Unknown leaf.");
                 styleNode(node,style,type);
@@ -416,7 +416,7 @@ public final class YyTreeBridge {
             }
         }
         List<GraphicsNode> descendants(GraphicsNode node) {List<GraphicsNode> out=new ArrayList<>();walk(node,n->{if(n.getChildCount()==0)out.add(n);});return out;}
-        List<JSONObject> rows(JSONObject layer) {JSONArray df=layer.getJSONArray("df");if(df==null)return List.of(layer);List<JSONObject> out=new ArrayList<>();for(Object row:df){JSONObject merged=new JSONObject(layer);merged.putAll((JSONObject)row);out.add(merged);}return out;}
+        List<JSONObject> rows(JSONObject layer) {JSONArray df=layer.getJSONArray("df");if(df==null)return List.of(layer);List<JSONObject> out=new ArrayList<>();for(Object row:df){JSONObject merged=new JSONObject(new LinkedHashMap<>(layer));merged.putAll((JSONObject)row);out.add(merged);}return out;}
         void highlight(Graphics2D g,JSONObject layer) {
             for(JSONObject row:rows(layer)) {
                 GraphicsNode node=mrca(row.getString("name1"),row.getString("name2"));List<GraphicsNode> d=descendants(node);

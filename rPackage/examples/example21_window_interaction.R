@@ -1,22 +1,22 @@
-# 21. 窗口交互和并排比较
-# Run in R/RStudio after installing yytree. Set EGPS_HOME for another installation.
+# 21. Update a preview and open an independent comparison
+# Run this file independently in R/RStudio after installing yytree.
 library(yytree)
+# Set EGPS_HOME or replace the fallback with your eGPS installation directory.
 config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
 
 tree <- "(((Arabidopsis:1,Rice:1):1,Yeast:2):1,((Worm:1,Fly:1):1,(Zebrafish:2,(Frog:1,(Human:1,Mouse:1):1):1):1):1);"
-leaf_names <- yytree(tree)$tree$labels
-categories <- data.frame(name = leaf_names,
-  group = factor(c("plant", "plant", "fungus", rep("animal", 6))),
-  habitat = factor(c("land", "land", "land", "land", "land", "water", "water", "land", "land")))
-set.seed(42)
-measurements <- matrix(rnorm(length(leaf_names) * 4), length(leaf_names), 4,
-  dimnames = list(leaf_names, c("control", "treated", "score", "expression")))
 
-y <- yytree(tree) + leaf_labels() + leaf_render(size = 3)
-# The normal footer opens the current preview. The following optional comparison
-# opens another window; wheel zoom and hover coordinates stay local to each GUI.
-comparison <- y + yytree::layout(name = "slant")
-if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") print(comparison, new_window = TRUE)
-
-if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") print(y)
-
+original <- yytree(tree) + leaf_labels() + leaf_render(size = 3)
+updated <- original + leaf_render(df = data.frame(name = "Human", fill = "red", size = 7))
+comparison <- updated + yytree::layout(name = "slant")
+plots <- list(original = original, updated = updated, comparison = comparison)
+y <- updated
+if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
+  print(original)
+  print(updated)                         # Updates the same window.
+  print(comparison, new_window = TRUE)   # Keeps both results visible.
+}
+# Inspect: one red Human node in each of two windows, with different layouts.
+# Wheel over a branch: it stays under the pointer while zooming.
+# Scroll, then hover: the status bar reports relative, percent and logical pixels.
+# Close both windows, then run print(y): a fresh preview opens and R stays alive.

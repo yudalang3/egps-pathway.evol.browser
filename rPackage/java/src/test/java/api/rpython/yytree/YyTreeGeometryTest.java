@@ -38,6 +38,22 @@ public final class YyTreeGeometryTest {
             require(panel.sizes.get(a)==6,"Partial style reset earlier radius");
             require(panel.fills.get(a).getRed()==255,"Partial style did not override color");
             require(panel.fills.get(b).getBlue()==255,"Local style leaked to another leaf");
+            JSONObject annotations=JSON.parseObject("""
+                {"type":"inner_node_annotation","shape":"rect","df":[
+                  {"name1":"A","name2":"B","text":"AB","shape":"ellipse"},
+                  {"name1":"A","name2":"C","text":"AC","shape":"triangle"}]}
+                """);
+            var annotationRows=panel.rows(annotations);
+            require(annotationRows.get(0)!=annotationRows.get(1),"Annotation rows share a mutable object");
+            require(annotationRows.get(0).getString("text").equals("AB"),"First annotation was overwritten");
+            require(annotationRows.get(1).getString("shape").equals("triangle"),"Second annotation shape lost");
+            require(!annotations.containsKey("text") && annotations.getString("shape").equals("rect"),"Row merge changed layer defaults");
+            JSONObject styles=JSON.parseObject("""
+                {"type":"leaf_render","df":[{"name":"A","size":12},{"name":"B","fill":"#FFD700FF"}]}
+                """);
+            panel.applyStyle(styles);
+            require(panel.sizes.get(a)==12 && panel.sizes.get(b)==6,"One style row leaked size into another row");
+            require(!styles.containsKey("size"),"Style merge changed the layer");
             if(code==2)require(panel.tips.get(a).x==panel.tips.get(b).x,"Rectangular tips do not align");
             if(code==4)for(GraphicsNode node:panel.leaves) {
                 Point2D point=panel.tips.get(node);

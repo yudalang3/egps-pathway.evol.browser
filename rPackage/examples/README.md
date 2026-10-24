@@ -1,71 +1,109 @@
-# yytree 功能示例
+# yytree examples / 中英文功能示例
 
-每个编号脚本都可单独运行，包含自己的示例树、数据和运行环境初始化。建议在 R 或 RStudio 交互会话中逐个体验。
+28 topics, 56 standalone scripts. Files without a suffix are fully English;
+`*_zh.R` files contain Chinese teaching comments and explanatory figure text.
+The paired scripts use identical data, APIs and drawing parameters.
 
-## 开始使用
+28 个主题共 56 份独立脚本。英文版无后缀，中文版以 `_zh.R` 结尾。
+物种名、数据键和 API 参数值保持一致，便于对照。
 
-先安装已生成的 yytree 包，再设置 eGPS 安装路径：
+## Start / 开始使用
+
+Install yytree first, then run either language in an interactive R/RStudio session.
+先安装 yytree，然后在交互式 R 或 RStudio 中选择一种语言运行：
 
 ```r
 Sys.setenv(EGPS_HOME = "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
 source("rPackage/examples/example1_basic.R", encoding = "UTF-8")
-source("rPackage/examples/example2_leaf_labels.R", encoding = "UTF-8")
+# Or / 或者：
+source("rPackage/examples/example1_basic_zh.R", encoding = "UTF-8")
 ```
 
-上面使用仓库根目录作为工作目录；也可把 source 的文件名改为绝对路径。每份脚本最后的 `y` 都是普通 R 绘图对象，可以继续 `y + ...` 并 `print(y)`。比较型示例另有 `plots` 列表，默认分别打开窗口。
+Paths assume the repository root as the working directory; absolute paths also work.
+Change EGPS_HOME to your installation. A Java/memory change requires restarting R.
+示例路径以仓库根目录为工作目录，也可使用绝对路径。Java 或内存配置变更需要重启 R。
 
-默认使用 eGPS 自带 Java 和 4g 堆内存；同一 R 会话可连续运行多个示例。改变 Java 或内存配置前需要重启 R。
+Every script contains its own setup and data. `plots` holds all results and `y` is a
+plot you can extend with `+`. Most comparison scripts open one window per result;
+basic and interaction scripts explicitly demonstrate preview reuse and new windows.
+每份脚本都包含初始化及数据，`plots` 保存全部结果，`y` 可继续添加图层。
+比较型示例会打开多个窗口；基础和交互示例明确演示预览更新与新建窗口。
 
-## 示例索引
+## Coverage and entry points / 功能覆盖与入口
 
-| 文件 | 内容 |
-|---|---|
-| [example1_basic.R](example1_basic.R) | 基础出图 |
-| [example2_leaf_labels.R](example2_leaf_labels.R) | 叶标签与字体 |
-| [example3_leaf_label_colors.R](example3_leaf_label_colors.R) | 叶标签背景色 |
-| [example4_leaf_nodes.R](example4_leaf_nodes.R) | 叶节点和入边样式 |
-| [example5_inner_nodes.R](example5_inner_nodes.R) | MRCA 内节点样式 |
-| [example6_clade_highlights.R](example6_clade_highlights.R) | 分支背景高亮 |
-| [example7_inner_annotations.R](example7_inner_annotations.R) | 内节点形状与文字 |
-| [example8_rectangular_layouts.R](example8_rectangular_layouts.R) | 矩形与终端对齐 |
-| [example9_circular_layouts.R](example9_circular_layouts.R) | 环形树与环带 |
-| [example10_arch_layouts.R](example10_arch_layouts.R) | 拱形树与外轮廓 |
-| [example11_categorical_tracks.R](example11_categorical_tracks.R) | 多列分类注释与配色 |
-| [example12_numeric_heatmap.R](example12_numeric_heatmap.R) | 连续数值热图 |
-| [example13_combined_tracks.R](example13_combined_tracks.R) | 多种轨道与图例组合 |
-| [example14_text_and_coordinates.R](example14_text_and_coordinates.R) | 文字与三种坐标 |
-| [example15_ellipses_and_rectangles.R](example15_ellipses_and_rectangles.R) | 椭圆与矩形 |
-| [example16_lines_and_arrows.R](example16_lines_and_arrows.R) | 线型和箭头 |
-| [example17_polygons.R](example17_polygons.R) | 任意多边形 |
-| [example18_bezier_curves.R](example18_bezier_curves.R) | 贝塞尔曲线和控制点 |
-| [example19_bezier_ribbons.R](example19_bezier_ribbons.R) | 贝塞尔色带 |
-| [example20_free_heatmap.R](example20_free_heatmap.R) | 自由放置热图 |
-| [example21_window_interaction.R](example21_window_interaction.R) | 窗口交互和并排比较 |
-| [example22_tree_inputs.R](example22_tree_inputs.R) | 五种树输入方式 |
-| [example23_style_composition.R](example23_style_composition.R) | 不可变对象与局部覆盖 |
-| [example24_missing_annotations.R](example24_missing_annotations.R) | 缺失行和 NA 单元格 |
-| [example25_all_layouts.R](example25_all_layouts.R) | 七种布局逐一比较 |
-| [example26_save_plot_definition.R](example26_save_plot_definition.R) | 保存和恢复绘图定义 |
-| [example27_large_tree.R](example27_large_tree.R) | 千叶树和二十列轨道 |
-| [example28_complete_biological_figure.R](example28_complete_biological_figure.R) | 完整生物学注释图 |
+| English | 中文 | Demonstration / 展示内容 |
+|---|---|---|
+| [example1_basic.R](example1_basic.R) | [example1_basic_zh.R](example1_basic_zh.R) | Basic: Newick and hierarchical clustering / 基础用法：Newick 与层次聚类 |
+| [example2_leaf_labels.R](example2_leaf_labels.R) | [example2_leaf_labels_zh.R](example2_leaf_labels_zh.R) | Label visibility, alignment and fonts / 叶标签开关、对齐与字体 |
+| [example3_leaf_label_colors.R](example3_leaf_label_colors.R) | [example3_leaf_label_colors_zh.R](example3_leaf_label_colors_zh.R) | Label backgrounds and the visibility prerequisite / 标签背景色与显示前提 |
+| [example4_leaf_nodes.R](example4_leaf_nodes.R) | [example4_leaf_nodes_zh.R](example4_leaf_nodes_zh.R) | Global and per-leaf node and incoming-edge styles / 全局与局部叶节点、入边样式 |
+| [example5_inner_nodes.R](example5_inner_nodes.R) | [example5_inner_nodes_zh.R](example5_inner_nodes_zh.R) | Global nodes and explicit MRCA selection / 全局内节点与显式 MRCA 选择 |
+| [example6_clade_highlights.R](example6_clade_highlights.R) | [example6_clade_highlights_zh.R](example6_clade_highlights_zh.R) | Nested clade highlights and data-frame selectors / 嵌套分支高亮与数据框选择 |
+| [example7_inner_annotations.R](example7_inner_annotations.R) | [example7_inner_annotations_zh.R](example7_inner_annotations_zh.R) | MRCA shapes and text / MRCA 形状与文字 |
+| [example8_rectangular_layouts.R](example8_rectangular_layouts.R) | [example8_rectangular_layouts_zh.R](example8_rectangular_layouts_zh.R) | Rectangular phylogram and aligned tips / 矩形枝长树与终端对齐 |
+| [example9_circular_layouts.R](example9_circular_layouts.R) | [example9_circular_layouts_zh.R](example9_circular_layouts_zh.R) | Circular layouts with categorical and numeric rings / 环形布局及分类、数值环带 |
+| [example10_arch_layouts.R](example10_arch_layouts.R) | [example10_arch_layouts_zh.R](example10_arch_layouts_zh.R) | Arch layouts with outer annotation tracks / 拱形布局与外轮廓注释轨道 |
+| [example11_categorical_tracks.R](example11_categorical_tracks.R) | [example11_categorical_tracks_zh.R](example11_categorical_tracks_zh.R) | Automatic colors, named palettes and shuffled rows / 自动配色、命名色板与乱序行 |
+| [example12_numeric_heatmap.R](example12_numeric_heatmap.R) | [example12_numeric_heatmap_zh.R](example12_numeric_heatmap_zh.R) | Shared automatic scale and explicit heatmap limits / 共享自动色阶与显式热图范围 |
+| [example13_combined_tracks.R](example13_combined_tracks.R) | [example13_combined_tracks_zh.R](example13_combined_tracks_zh.R) | Appending tracks and positioning legends / 追加轨道与图例位置 |
+| [example14_text_and_coordinates.R](example14_text_and_coordinates.R) | [example14_text_and_coordinates_zh.R](example14_text_and_coordinates_zh.R) | Coordinate equivalence and text anchors / 坐标等价与文字锚点 |
+| [example15_ellipses_and_rectangles.R](example15_ellipses_and_rectangles.R) | [example15_ellipses_and_rectangles_zh.R](example15_ellipses_and_rectangles_zh.R) | Shape origins, fill and transparency / 形状原点、填充与透明度 |
+| [example16_lines_and_arrows.R](example16_lines_and_arrows.R) | [example16_lines_and_arrows_zh.R](example16_lines_and_arrows_zh.R) | Line widths, three line types and arrow endpoints / 线宽、三种线型与箭头端点 |
+| [example17_polygons.R](example17_polygons.R) | [example17_polygons_zh.R](example17_polygons_zh.R) | Filled and outline polygons / 填充与空心多边形 |
+| [example18_bezier_curves.R](example18_bezier_curves.R) | [example18_bezier_curves_zh.R](example18_bezier_curves_zh.R) | Cubic Bezier curves and their control polygon / 三次贝塞尔曲线与控制多边形 |
+| [example19_bezier_ribbons.R](example19_bezier_ribbons.R) | [example19_bezier_ribbons_zh.R](example19_bezier_ribbons_zh.R) | Closed ribbons between two cubic curves / 两条三次曲线闭合形成的色带 |
+| [example20_free_heatmap.R](example20_free_heatmap.R) | [example20_free_heatmap_zh.R](example20_free_heatmap_zh.R) | An independent matrix placed inside a rectangle / 放置在指定矩形中的独立矩阵 |
+| [example21_window_interaction.R](example21_window_interaction.R) | [example21_window_interaction_zh.R](example21_window_interaction_zh.R) | Update a preview and open an independent comparison / 更新预览与打开独立比较窗口 |
+| [example22_tree_inputs.R](example22_tree_inputs.R) | [example22_tree_inputs_zh.R](example22_tree_inputs_zh.R) | Five tree inputs, names and branch lengths / 五种树输入、叶名与枝长 |
+| [example23_style_composition.R](example23_style_composition.R) | [example23_style_composition_zh.R](example23_style_composition_zh.R) | Immutable composition and later field overrides / 不可变组合与后续字段覆盖 |
+| [example24_missing_annotations.R](example24_missing_annotations.R) | [example24_missing_annotations_zh.R](example24_missing_annotations_zh.R) | Partial rows, NA cells and invalid annotation names / 部分行、NA 单元格与非法注释名称 |
+| [example25_all_layouts.R](example25_all_layouts.R) | [example25_all_layouts_zh.R](example25_all_layouts_zh.R) | All seven layouts with both annotation types / 七种布局同时展示两类轨道 |
+| [example26_save_plot_definition.R](example26_save_plot_definition.R) | [example26_save_plot_definition_zh.R](example26_save_plot_definition_zh.R) | Save and restore an ordinary R plot definition / 保存与恢复普通 R 绘图定义 |
+| [example27_large_tree.R](example27_large_tree.R) | [example27_large_tree_zh.R](example27_large_tree_zh.R) | One thousand tips and twenty numeric tracks / 千叶树与二十列数值轨道 |
+| [example28_complete_biological_figure.R](example28_complete_biological_figure.R) | [example28_complete_biological_figure_zh.R](example28_complete_biological_figure_zh.R) | A complete biological annotation figure / 完整的生物学注释图 |
 
-## 建议体验顺序
+## What to inspect / 观察要点
 
-1. 先运行 1～7，理解标签、节点样式和 MRCA 注释。
-2. 运行 8～13，比较布局及分类、连续轨道的组合方式。
-3. 运行 14～20，体验全部九种自由绘图元件和三种坐标单位。
-4. 运行 21，滚轮缩放、使用滚动条，并查看状态栏的比例、百分比和逻辑像素值。
-5. 运行 22～28，查看树输入、样式覆盖、缺失数据、RDS 保存、大树和综合图。
+- **1–7:** inputs become complete plots; label alignment, node sizes, incoming-edge colors,
+  MRCA selectors, transparent backgrounds and all three annotation shapes.
+  输入到显示的完整流程；标签对齐、节点及入边颜色、MRCA、透明背景与三种注释形状。
+- **8–13, 25:** dashed alignment preserves real branches; tracks follow rectangular,
+  circular and arch contours; compare automatic/named palettes, shared/fixed scales,
+  appended tracks and all four legend corners plus hidden legends.
+  对齐虚线不改变枝长；比较各布局轨道、自动与显式配色、色阶、轨道追加及图例位置。
+- **14–20:** all nine free elements. Three coordinate modes share the full-canvas
+  top-left origin. Rectangles/heatmaps use top-left; ellipses use center.
+  Text size, gap and line thickness are logical pixels. Reserved margins keep free
+  elements clear of the tree.
+  九种自由元件；三种坐标以完整画布左上角为原点。矩形、热图用左上角定位，椭圆用中心定位。
+  字号、文字间距和线宽使用逻辑像素，示例预留边距以避免遮挡。
+- **21:** run the print calls separately to watch preview replacement; then inspect
+  both windows, mouse-anchored wheel zoom, scrolling and inverse hover coordinates.
+  Close both and call `print(y)` to reopen.
+  分步运行打印语句观察预览更新，再检查双窗口、鼠标锚点缩放、滚动与悬停坐标；关闭后重新打印。
+- **22–28:** branch lengths/merge heights, numbered/quoted names, immutable layers,
+  partial annotations, caught validation errors, RDS restoration, large data and a complete figure.
+  枝长与合并高度、编号和引号叶名、不可变图层、缺失注释、错误捕获、RDS、大树及综合图。
 
-`free_ellipse` 以中心定位，`free_rectangle` 和 `free_heatmap` 以左上角定位。相对坐标以画布宽高为 1，百分比以宽高为 100；字号、线宽和节点大小使用逻辑像素。自由元件最后绘制，可能覆盖树或其他注释，位置可自行调整。
-
-## 批量验证
-
-在仓库根目录运行：
+## Validation / 验证
 
 ```powershell
 & 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_examples.R
 ```
 
-验证脚本关闭自动弹窗，逐一执行所有示例，并把每幅图通过同一 Java 渲染器输出至 `temp/yytree-examples`，汇总记录放在 `logs/yytree-examples.json`。交互体验仍应单独在 R/RStudio 中运行对应示例。
+Only the 28 English scripts execute. Chinese scripts are parsed and compared as R
+syntax trees after normalizing the declared display-text translations; they are
+never sourced. Every result in `plots` renders to `temp/yytree-examples`.
+The report is `logs/yytree-examples.json`. GUI checks run separately:
 
+只执行 28 份英文版；中文版仅做语法解析，并在归一化已声明的说明文字翻译后比较语法树，
+不重复执行。全部绘图输出至 `temp/yytree-examples`，报告放在 `logs/yytree-examples.json`。
+GUI 交互另行检查：
+
+```powershell
+& 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_integration.R $env:EGPS_HOME temp/yytree-qa --gui
+```
+
+The paired source is maintained in `scripts/generate_yytree_examples.py`;
+regenerate both languages together to keep their drawing logic synchronized.
+中英文统一维护在该生成脚本中，修改时同时生成两套，避免绘图逻辑漂移。

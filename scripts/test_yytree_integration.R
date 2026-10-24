@@ -41,6 +41,9 @@ if ("--gui" %in% args) {
   third <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, TRUE)
   stopifnot(first == second, first != third)
   rJava::.jcall(yytree:::.runtime$bridge, "V", "closeAll")
+  reopened <- rJava::.jcall(yytree:::.runtime$bridge, "S", "showPlot", payload, FALSE)
+  stopifnot(reopened != first, reopened != third)
+  rJava::.jcall(yytree:::.runtime$bridge, "V", "closeAll")
 }
 if ("--benchmark" %in% args) {
   set.seed(1)

@@ -28,6 +28,8 @@ try {
     if ($Gui) { $integration += '--gui' }
     & (Join-Path $R 'Rscript.exe') @integration | Tee-Object -FilePath (Join-Path $logs 'yytree-integration.log')
     if ($LASTEXITCODE -ne 0) { throw 'Integration tests failed.' }
+    & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_examples.R $Egps | Tee-Object -FilePath (Join-Path $logs 'yytree-examples.log')
+    if ($LASTEXITCODE -ne 0) { throw 'Bilingual example validation failed.' }
     if ($Gui) {
         & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_example.R
         if ($LASTEXITCODE -ne 0) { throw 'Complete example failed.' }
