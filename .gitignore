@@ -54,3 +54,4 @@ egps-pathway.browser-*.jar
 logs/
 orig_matrials/
 temp/
+/rPackage/library/

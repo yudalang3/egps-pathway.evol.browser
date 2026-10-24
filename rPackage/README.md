@@ -2,6 +2,20 @@
 
 按功能编号的完整教学示例见 [examples/README.md](examples/README.md)：28 个主题各有英文 `.R` 和中文 `_zh.R`，共 56 份独立脚本。基础示例同时展示 Newick 与 `hclust(dist(...))`，其余覆盖多轨注释、九种自由元件和千叶树。批量验证只执行英文版，中文版检查语法与逻辑一致性。
 
+## 直接加载本地开发版
+
+项目提供固定加载目录 `rPackage/library`。完整验收脚本成功后，自动把已验证的最新版更新到这里；日常使用无需自己安装 ZIP。在新的 R 会话中运行：
+
+```r
+lib <- "C:/Users/yudal/Documents/project/eGPS2/jars/egps2_collections/egps-pathway.evol.browser/rPackage/library"
+library(yytree, lib.loc = lib)
+config_yytree("C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+```
+
+也可先运行 `.libPaths(c(lib, .libPaths()))`，再使用普通的 `library(yytree)`。这是项目内已经准备好的包加载库；它不会在加载时自动编译源码。Java 桥接更新后需要重启 R，才能加载新 JAR。生成的加载库不提交 Git，也不打进源码包。
+
+如果已经有验证好的 ZIP，只需在仓库根目录运行 `Rscript scripts/update_yytree_library.R` 即可刷新加载库；完整开发验收仍使用 `scripts/validate_yytree.ps1 -Gui`。
+
 `yytree` 将 R 的脚本化绘图与 eGPS Modern Tree View 的 Java 布局结合起来。执行 `print(y)` 打开独立 Swing 窗口，不启动 eGPS 主框架。R 对象保存绘图定义；窗口中的缩放和滚动不会改写 R 对象。
 
 ## 安装与初始化

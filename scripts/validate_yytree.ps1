@@ -50,4 +50,6 @@ try {
     } finally { Pop-Location }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_binary.R (Join-Path $dist 'yytree_0.1.0.zip') $Egps
     if ($LASTEXITCODE -ne 0) { throw 'Windows ZIP installation smoke test failed.' }
+    & (Join-Path $R 'Rscript.exe') --vanilla scripts/update_yytree_library.R (Join-Path $dist 'yytree_0.1.0.zip')
+    if ($LASTEXITCODE -ne 0) { throw 'Stable local library update failed.' }
 } finally { Pop-Location }
