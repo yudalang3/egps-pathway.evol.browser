@@ -51,6 +51,8 @@ public final class YyTreeBridge {
         JSONObject scene = JSON.parseObject(json,Feature.OrderedField);
         YyTreePanel panel = preparePanel(scene);
         AtomicReference<String> result = new AtomicReference<>();
+        AtomicReference<YyTreePreview> content = new AtomicReference<>();
+        AtomicReference<JFrame> window = new AtomicReference<>();
         onEdt(() -> {
             if (newWindow || current == null || !current.isDisplayable()) {
                 current = new JFrame("yytree — Modern Tree View");
@@ -73,14 +75,31 @@ public final class YyTreeBridge {
                 Math.min(current.getHeight(), screen.height-insets.top-insets.bottom));
             current.validate();
             preview.fitToViewport();
-            current.setVisible(true);
-            panel.paintImmediately(0, 0, panel.getWidth(), panel.getHeight());
+            preview.cache.start();
+            content.set(preview);
+            window.set(current);
             result.set(Integer.toHexString(System.identityHashCode(current)));
         });
+        awaitRendering(content.get());
+        onEdt(() -> window.get().setVisible(true));
+        // Native window realization can adjust the viewport, particularly at 200% DPI.
+        awaitRendering(content.get());
+        onEdt(() -> panel.paintImmediately(0, 0, panel.getWidth(), panel.getHeight()));
         return result.get();
     }
 
     public void closeAll() throws Exception { onEdt(() -> { for (JFrame frame : List.copyOf(windows)) frame.dispose(); current=null; }); }
+
+    static void awaitRendering(YyTreePreview preview) throws Exception {
+        if (SwingUtilities.isEventDispatchThread()) return;
+        AtomicReference<java.util.concurrent.CompletableFuture<Void>> ready = new AtomicReference<>();
+        AtomicReference<Boolean> current = new AtomicReference<>(false);
+        do {
+            onEdt(() -> { preview.cache.request(); ready.set(preview.cache.ready); });
+            ready.get().get();
+            onEdt(() -> current.set(preview.cache.isCurrent()));
+        } while (!current.get());
+    }
 
     public String testInteraction(String json) throws Exception {
         return testInteraction(json,null);
@@ -90,8 +109,10 @@ public final class YyTreeBridge {
         String id=showPlot(json,true);
         AtomicReference<String> result=new AtomicReference<>();
         AtomicReference<BufferedImage> snapshot=new AtomicReference<>();
+        AtomicReference<YyTreePreview> preview=new AtomicReference<>();
         onEdt(()->{
             YyTreePreview content=(YyTreePreview)current.getContentPane();
+            preview.set(content);
             JScrollPane scroll=content.scroll;
             JLabel status=content.coordinates;
             YyTreePanel panel=(YyTreePanel)scroll.getViewport().getView();
@@ -125,7 +146,16 @@ public final class YyTreeBridge {
             if(!(UIManager.getLookAndFeel() instanceof com.formdev.flatlaf.FlatLightLaf))throw new IllegalStateException("FlatLaf was not initialized.");
             if(content.statusBar.getHeight()<content.coordinates.getFontMetrics(content.coordinates.getFont()).getHeight())throw new IllegalStateException("Status bar clips its font.");
             JSONObject data=new JSONObject();data.put("window",id);data.put("zoom",panel.zoom);data.put("status",status.getText());data.put("theme",UIManager.getLookAndFeel().getName());data.put("statusBar",content.statusBar.getClass().getName());data.put("dragPassed",true);data.put("desktopLaunched",UnifiedAccessPoint.isGULaunched());result.set(data.toJSONString());
-            if(imagePath!=null){BufferedImage image=new BufferedImage(content.getWidth(),content.getHeight(),BufferedImage.TYPE_INT_ARGB);Graphics2D g=image.createGraphics();try{content.printAll(g);}finally{g.dispose();}snapshot.set(image);}
+        });
+        awaitRendering(preview.get());
+        if(imagePath!=null)onEdt(()->{
+            YyTreePreview content=preview.get();
+            AffineTransform device=content.getGraphicsConfiguration().getDefaultTransform();
+            BufferedImage image=new BufferedImage((int)Math.ceil(content.getWidth()*device.getScaleX()),
+                (int)Math.ceil(content.getHeight()*device.getScaleY()),BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g=image.createGraphics();
+            try{g.scale(device.getScaleX(),device.getScaleY());content.printAll(g);}finally{g.dispose();}
+            snapshot.set(image);
         });
         if(imagePath!=null)javax.imageio.ImageIO.write(snapshot.get(),"png",new File(imagePath));
         return result.get();
@@ -185,6 +215,8 @@ public final class YyTreeBridge {
     }
 
     static final class YyTreePanel extends JPanel implements TreeLayoutHost {
+        YyTreePreview preview;
+        final java.util.concurrent.atomic.AtomicInteger sceneDrawCount = new java.util.concurrent.atomic.AtomicInteger();
         final JSONObject scene;
         final List<JSONObject> layers = new ArrayList<>();
         final Map<Integer, GraphicsNode> nodes = new LinkedHashMap<>();
@@ -405,10 +437,12 @@ public final class YyTreeBridge {
         @Override protected void paintComponent(Graphics graphics) {
             super.paintComponent(graphics); Graphics2D g=(Graphics2D)graphics.create();
             try {
-                g.scale(zoom,zoom);drawScene(g);
+                if (preview == null) { g.scale(zoom,zoom);drawScene(g); }
+                else { preview.cache.paint(g); preview.paintHover(g); }
             } finally {g.dispose();}
         }
         void drawScene(Graphics2D g) {
+                sceneDrawCount.incrementAndGet();
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setFont(labelFont);
                 for(JSONObject layer:layers) if(layer.getString("type").equals("inner2leaf_highlight")) highlight(g,layer);

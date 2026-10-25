@@ -9,7 +9,15 @@ import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.*;
+import java.awt.image.BufferedImage;
+import java.util.Comparator;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
+import org.slf4j.LoggerFactory;
+import module.evolview.model.tree.GraphicsNode;
 
 /** Window chrome and view-only navigation. All access is confined to the EDT. */
 final class YyTreePreview extends JPanel {
@@ -19,8 +27,18 @@ final class YyTreePreview extends JPanel {
     final JXStatusBar statusBar = new JXStatusBar();
     final JLabel zoomLabel = new JLabel("100%", SwingConstants.CENTER);
     final JLabel coordinates = new JLabel("Move over the canvas to inspect coordinates");
+    final JLabel snappedCoordinates = new JLabel("Snap: —");
+    final JCheckBox crosshair = new JCheckBox("Show Crosshair", true);
+    final JCheckBox snap = new JCheckBox("Snap To Point", true);
     final JLabel hint = new JLabel("Left drag to pan  ·  Wheel to zoom");
     final Navigation navigation;
+    final ViewCache cache = new ViewCache();
+    final java.util.List<NodePoint> nodePoints;
+    NodePoint hovered;
+    private Point hoverPointer;
+    private final java.beans.PropertyChangeListener displayListener = e -> { cache.request(); refreshHover(); };
+
+    record NodePoint(int id, GraphicsNode node, double x, double y) { }
 
     static void initializeTheme() {
         if (themeInitialized) return;
@@ -39,6 +57,14 @@ final class YyTreePreview extends JPanel {
     YyTreePreview(YyTreeBridge.YyTreePanel canvas) {
         super(new BorderLayout());
         this.canvas = canvas;
+        canvas.preview = this;
+        nodePoints = canvas.nodes.entrySet().stream().sorted(Comparator.comparingInt(java.util.Map.Entry::getKey))
+            .map(entry -> {
+                GraphicsNode node = entry.getValue();
+                Point2D point = node.getChildCount() == 0 ? canvas.tips.get(node)
+                    : new Point2D.Double(node.getXSelf(), node.getYSelf());
+                return new NodePoint(entry.getKey(), node, point.getX(), point.getY());
+            }).toList();
         Font font = UnifiedAccessPoint.getLaunchProperty().getDefaultFont();
         Color background = new Color(245, 246, 248);
         Color separator = new Color(220, 224, 230);
@@ -52,6 +78,18 @@ final class YyTreePreview extends JPanel {
         surround.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         surround.add(scroll);
         add(surround, BorderLayout.CENTER);
+        JPanel toolbar = new JPanel(new net.miginfocom.swing.MigLayout("insets 4 10, gap 12", "[][]", "[]"));
+        toolbar.setBackground(background);
+        for (JCheckBox control : new JCheckBox[]{crosshair, snap}) {
+            if (font != null) control.setFont(font);
+            control.setOpaque(false);
+            toolbar.add(control);
+        }
+        crosshair.setToolTipText("<html>Show dashed guides through the pointer or snapped node.<br>Node highlighting and information remain available when hidden.</html>");
+        snap.setToolTipText("<html>Align the crosshair to the nearest node within 12 interface pixels.<br>Node highlighting remains available when snapping is off.<br>Zooming always stays anchored at the actual pointer.</html>");
+        crosshair.addActionListener(e -> refreshHover());
+        snap.addActionListener(e -> refreshHover());
+        add(toolbar, BorderLayout.NORTH);
 
         // SwingX's OS-specific delegate otherwise paints a legacy gradient/grip
         // even under FlatLaf. Retain its layout with a plain themed background.
@@ -68,7 +106,7 @@ final class YyTreePreview extends JPanel {
         statusBar.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createMatteBorder(1, 0, 0, 0, separator),
             BorderFactory.createEmptyBorder(5, 8, 5, 8)));
-        for (JLabel label : new JLabel[]{zoomLabel, coordinates, hint}) {
+        for (JLabel label : new JLabel[]{zoomLabel, coordinates, snappedCoordinates, hint}) {
             if (font != null) label.setFont(font);
             label.setForeground(new Color(65, 73, 85));
         }
@@ -76,20 +114,235 @@ final class YyTreePreview extends JPanel {
         hint.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 4));
         hint.setToolTipText("Hold the left mouse button and drag to pan the scrollable canvas. Use the wheel to zoom at the pointer.");
         coordinates.setMinimumSize(new Dimension(0, coordinates.getPreferredSize().height));
+        JPanel readouts = new JPanel(new GridLayout(2, 1));
+        readouts.setOpaque(false);
+        readouts.add(coordinates);
+        readouts.add(snappedCoordinates);
+        readouts.setMinimumSize(new Dimension(0, readouts.getPreferredSize().height));
         statusBar.add(zoomLabel, new JXStatusBar.Constraint(80));
-        statusBar.add(coordinates, new JXStatusBar.Constraint(JXStatusBar.Constraint.ResizeBehavior.FILL));
+        statusBar.add(readouts, new JXStatusBar.Constraint(JXStatusBar.Constraint.ResizeBehavior.FILL));
         statusBar.add(hint);
-        statusBar.setPreferredSize(new Dimension(0, coordinates.getPreferredSize().height + 16));
+        statusBar.setPreferredSize(new Dimension(0, readouts.getPreferredSize().height + 16));
         add(statusBar, BorderLayout.SOUTH);
         navigation = new Navigation();
+        canvas.addPropertyChangeListener("graphicsConfiguration", displayListener);
         addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { hint.setVisible(getWidth() >= 1120); }
         });
     }
 
-    void disposeInteraction() { navigation.dispose(); }
+    void disposeInteraction() {
+        navigation.dispose();
+        clearHover();
+        cache.dispose();
+        canvas.removePropertyChangeListener("graphicsConfiguration", displayListener);
+        canvas.preview = null;
+    }
 
     void fitToViewport() { navigation.fitToViewport(); }
+
+    static String html(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
+
+    private String nodeName(NodePoint point) {
+        String name = point.node().getName();
+        return name == null || name.isBlank() ? "Node #" + point.id() : name;
+    }
+
+    void clearHover() {
+        hovered = null;
+        canvas.setToolTipText(null);
+        snappedCoordinates.setText("Snap: —");
+        snappedCoordinates.setToolTipText(null);
+        canvas.repaint();
+    }
+
+    void refreshHover() {
+        navigation.updateStatus();
+        NodePoint previous = hovered;
+        hovered = null;
+        if (hoverPointer != null && !navigation.isDragging() && (!cache.active || cache.isCurrent())) {
+            Point view = scroll.getViewport().getViewPosition();
+            Rectangle visible = scroll.getViewport().getViewRect();
+            double x = view.x + hoverPointer.x, y = view.y + hoverPointer.y;
+            if (visible.contains(x, y)
+                && x >= 0 && y >= 0 && x < canvas.logicalWidth * canvas.zoom && y < canvas.logicalHeight * canvas.zoom) {
+                double closest = 12 * 12;
+                for (NodePoint point : nodePoints) {
+                    double screenX = point.x() * canvas.zoom, screenY = point.y() * canvas.zoom;
+                    if (!visible.contains(screenX, screenY)) continue;
+                    double distance = Point2D.distanceSq(x, y, screenX, screenY);
+                    if (distance <= 12 * 12 && (hovered == null || distance < closest)) {
+                        hovered = point;
+                        closest = distance;
+                    }
+                }
+            }
+        }
+        if (hovered != previous) {
+            String tooltip = null;
+            if (hovered != null) {
+                GraphicsNode node = hovered.node();
+                String type = node == canvas.root ? "Root" : node.getChildCount() == 0 ? "Leaf" : "Internal";
+                tooltip = String.format(Locale.ROOT,
+                    "<html><table width='360'><tr><td><b>%s</b><br>Node #%d · %s<br>Incoming branch length: %s<br>Logical position: (%.3f, %.3f)</td></tr></table></html>",
+                    html(nodeName(hovered)), hovered.id(), type,
+                    node == canvas.root ? "N/A (root)" : Double.toString(node.getRealBranchLength()), hovered.x(), hovered.y());
+            }
+            canvas.setToolTipText(tooltip);
+        }
+        String snapped = snap.isSelected() && hovered != null
+            ? String.format(Locale.ROOT, "Snap: %s   Pixel: (%.1f, %.1f)",
+                hovered.node().getName() == null || hovered.node().getName().isBlank() ? nodeName(hovered)
+                    : nodeName(hovered) + " [#" + hovered.id() + "]", hovered.x(), hovered.y())
+            : "Snap: —";
+        // Plain text can contain biological names beginning with Swing's HTML prefix.
+        snappedCoordinates.putClientProperty("html.disable", true);
+        snappedCoordinates.setText(snapped);
+        snappedCoordinates.setToolTipText("<html>" + html(snapped) + "</html>");
+        canvas.repaint();
+    }
+
+    Point2D crosshairPoint() {
+        if (hoverPointer == null || navigation.isDragging()) return null;
+        Point view = scroll.getViewport().getViewPosition();
+        if (snap.isSelected() && hovered != null)
+            return new Point2D.Double(hovered.x() * canvas.zoom, hovered.y() * canvas.zoom);
+        return new Point2D.Double(view.x + hoverPointer.x, view.y + hoverPointer.y);
+    }
+
+    void paintHover(Graphics2D graphics) {
+        if (!cache.isCurrent() || navigation.isDragging() || hoverPointer == null) return;
+        Rectangle2D bounds = new Rectangle2D.Double(0, 0, canvas.logicalWidth * canvas.zoom, canvas.logicalHeight * canvas.zoom);
+        Rectangle2D visible = bounds.createIntersection(scroll.getViewport().getViewRect());
+        Point2D pointer = crosshairPoint();
+        if (pointer == null || !visible.contains(pointer)) return;
+        Graphics2D g = (Graphics2D)graphics.create();
+        try {
+            g.clip(visible);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (crosshair.isSelected()) {
+                g.setColor(new Color(120, 140, 165, 170));
+                g.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10, new float[]{4, 4}, 0));
+                g.draw(new Line2D.Double(visible.getMinX(), pointer.getY(), visible.getMaxX(), pointer.getY()));
+                g.draw(new Line2D.Double(pointer.getX(), visible.getMinY(), pointer.getX(), visible.getMaxY()));
+            }
+            if (hovered != null) {
+                double x = hovered.x() * canvas.zoom, y = hovered.y() * canvas.zoom;
+                g.setColor(new Color(231, 76, 60, 90));
+                g.fill(new Ellipse2D.Double(x - 11, y - 11, 22, 22));
+                g.setColor(new Color(231, 76, 60));
+                g.fill(new Ellipse2D.Double(x - 5.5, y - 5.5, 11, 11));
+                g.setColor(Color.WHITE);
+                g.setStroke(new BasicStroke(1.5f));
+                g.draw(new Ellipse2D.Double(x - 5.5, y - 5.5, 11, 11));
+            }
+        } finally { g.dispose(); }
+    }
+
+    /** One device-resolution viewport image; a single worker coalesces newer views. */
+    final class ViewCache {
+        record Key(Rectangle visible, double zoom, GraphicsConfiguration configuration, double scaleX, double scaleY) { }
+        private Key desired, rendered, failed;
+        private BufferedImage image;
+        private SwingWorker<BufferedImage, Void> worker;
+        private boolean active, disposed;
+        CompletableFuture<Void> ready = new CompletableFuture<>();
+
+        private Key key() {
+            Rectangle visible = scroll.getViewport().getViewRect().intersection(new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight()));
+            GraphicsConfiguration configuration = canvas.getGraphicsConfiguration();
+            AffineTransform transform = configuration == null ? new AffineTransform() : configuration.getDefaultTransform();
+            return new Key(visible, canvas.zoom, configuration, transform.getScaleX(), transform.getScaleY());
+        }
+
+        boolean isCurrent() { return image != null && Objects.equals(rendered, key()); }
+
+        void start() { active = true; request(); }
+
+        void request() {
+            if (!active || disposed) return;
+            Key latest = key();
+            if (latest.visible().isEmpty()) return;
+            if (isCurrent()) { desired = latest; if (worker == null) ready.complete(null); return; }
+            if (latest.equals(failed)) return;
+            desired = latest;
+            if (hovered != null) clearHover();
+            if (ready.isDone()) ready = new CompletableFuture<>();
+            if (worker != null) return;
+            Key target = desired;
+            worker = new SwingWorker<>() {
+                @Override protected BufferedImage doInBackground() {
+                    Rectangle rect = target.visible();
+                    BufferedImage buffer = new BufferedImage(Math.max(1, (int)Math.ceil(rect.width * target.scaleX())),
+                        Math.max(1, (int)Math.ceil(rect.height * target.scaleY())), BufferedImage.TYPE_INT_RGB);
+                    Graphics2D g = buffer.createGraphics();
+                    try {
+                        g.setColor(Color.WHITE);
+                        g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+                        g.scale(target.scaleX(), target.scaleY());
+                        g.translate(-rect.x, -rect.y);
+                        g.scale(target.zoom(), target.zoom());
+                        canvas.drawScene(g);
+                    } catch (RuntimeException | Error error) {
+                        buffer.flush();
+                        throw error;
+                    } finally { g.dispose(); }
+                    return buffer;
+                }
+
+                @Override protected void done() {
+                    worker = null;
+                    try {
+                        BufferedImage buffer = get();
+                        if (!disposed && target.equals(key())) {
+                            if (image != null) image.flush();
+                            image = buffer;
+                            rendered = target;
+                            ready.complete(null);
+                            refreshHover();
+                        } else buffer.flush();
+                    } catch (CancellationException ignored) {
+                        // Closing a preview cancels its only pending render.
+                    } catch (Exception error) {
+                        if (!disposed) {
+                            failed = target;
+                            ready.completeExceptionally(error);
+                            LoggerFactory.getLogger(YyTreePreview.class).error("Cannot render yytree preview", error);
+                        }
+                    }
+                    if (!disposed) {
+                        request();
+                        canvas.repaint();
+                    }
+                }
+            };
+            worker.execute();
+        }
+
+        void paint(Graphics2D g) {
+            request();
+            if (isCurrent()) {
+                AffineTransform placement = AffineTransform.getTranslateInstance(rendered.visible().x, rendered.visible().y);
+                placement.scale(1 / rendered.scaleX(), 1 / rendered.scaleY());
+                g.drawImage(image, placement, null);
+            } else {
+                Rectangle rect = scroll.getViewport().getViewRect();
+                g.setColor(new Color(65, 73, 85));
+                g.drawString(Objects.equals(failed, key()) ? "Unable to render tree preview." : "Rendering tree...", rect.x + 12, rect.y + 24);
+            }
+        }
+
+        void dispose() {
+            disposed = true;
+            if (worker != null) worker.cancel(true);
+            if (image != null) image.flush();
+            image = null;
+            if (ready.isDone()) ready = new CompletableFuture<>();
+            ready.completeExceptionally(new CancellationException("Preview closed"));
+        }
+    }
 
     final class Navigation extends MouseAdapter implements AWTEventListener {
         private Point pressPointer, pressView, lastPointer;
@@ -99,9 +352,11 @@ final class YyTreePreview extends JPanel {
             @Override public void componentResized(ComponentEvent e) {
                 if (autoFit) fitToViewport();
                 else scroll.getViewport().setViewPosition(bounded(scroll.getViewport().getViewPosition()));
+                cache.request();
+                refreshHover();
             }
         };
-        private final ChangeListener viewListener = e -> updateStatus();
+        private final ChangeListener viewListener = e -> { cache.request(); refreshHover(); };
         private final HierarchyListener hierarchyListener = e -> {
             if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && !canvas.isShowing()) endDrag();
         };
@@ -133,6 +388,7 @@ final class YyTreePreview extends JPanel {
             scroll.getViewport().setViewSize(size);
             scroll.getViewport().setViewPosition(new Point());
             updateStatus();
+            cache.request();
             canvas.revalidate();
             canvas.repaint();
         }
@@ -151,19 +407,33 @@ final class YyTreePreview extends JPanel {
 
         private void updateStatus() {
             zoomLabel.setText(String.format(Locale.ROOT, "%.0f%%", canvas.zoom * 100));
-            if (lastPointer == null) return;
+            if (lastPointer == null) {
+                coordinates.setText("Mouse: —");
+                return;
+            }
             Point view = scroll.getViewport().getViewPosition();
             double x = (view.x + lastPointer.x) / canvas.zoom;
             double y = (view.y + lastPointer.y) / canvas.zoom;
             String text = String.format(Locale.ROOT,
-                "Relative: (%.4f, %.4f)   Percent: (%.2f%%, %.2f%%)   Pixel: (%.1f, %.1f)",
+                "Mouse: Relative: (%.4f, %.4f)   Percent: (%.2f%%, %.2f%%)   Pixel: (%.1f, %.1f)",
                 x / canvas.logicalWidth, y / canvas.logicalHeight,
                 100 * x / canvas.logicalWidth, 100 * y / canvas.logicalHeight, x, y);
             coordinates.setText(text);
             coordinates.setToolTipText(text);
         }
 
-        @Override public void mouseMoved(MouseEvent e) { lastPointer = pointer(e); updateStatus(); }
+        @Override public void mouseMoved(MouseEvent e) {
+            lastPointer = pointer(e);
+            hoverPointer = new Point(lastPointer);
+            refreshHover();
+        }
+
+        @Override public void mouseExited(MouseEvent e) {
+            hoverPointer = null;
+            lastPointer = null;
+            clearHover();
+            updateStatus();
+        }
 
         @Override public void mousePressed(MouseEvent e) {
             if (!SwingUtilities.isLeftMouseButton(e)) return;
@@ -173,6 +443,7 @@ final class YyTreePreview extends JPanel {
             pressView = scroll.getViewport().getViewPosition();
             previousCursor = canvas.getCursor();
             canvas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            clearHover();
             // Only listen globally during a drag, so a release over another component
             // cannot leave a stale drag or keep a closed preview alive.
             Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK);
@@ -182,6 +453,7 @@ final class YyTreePreview extends JPanel {
             if (!isDragging()) return;
             if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) == 0) { endDrag(); return; }
             lastPointer = pointer(e);
+            hoverPointer = new Point(lastPointer);
             scroll.getViewport().setViewPosition(bounded(new Point(
                 pressView.x + pressPointer.x - lastPointer.x,
                 pressView.y + pressPointer.y - lastPointer.y)));
@@ -204,12 +476,14 @@ final class YyTreePreview extends JPanel {
             pressView = null;
             canvas.setCursor(previousCursor);
             Toolkit.getDefaultToolkit().removeAWTEventListener(this);
+            refreshHover();
         }
 
         @Override public void mouseWheelMoved(MouseWheelEvent e) {
             if (e.getPreciseWheelRotation() == 0) return;
             endDrag();
             lastPointer = pointer(e);
+            hoverPointer = new Point(lastPointer);
             double oldZoom = canvas.zoom;
             double minimumZoom = Math.min(.1, Math.min(oldZoom, fitZoom()));
             autoFit = false;
@@ -226,7 +500,8 @@ final class YyTreePreview extends JPanel {
             scroll.getViewport().setViewPosition(bounded(new Point(
                 (int)Math.round(logicalX * canvas.zoom - lastPointer.x),
                 (int)Math.round(logicalY * canvas.zoom - lastPointer.y))));
-            updateStatus();
+            cache.request();
+            refreshHover();
             canvas.repaint();
             e.consume();
         }

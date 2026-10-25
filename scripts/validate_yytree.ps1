@@ -44,6 +44,8 @@ try {
         foreach ($scale in @('1','2')) {
             & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreePreviewFitTest
             if ($LASTEXITCODE -ne 0) { throw "Preview fit GUI test failed at display scale $scale." }
+            & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeHoverTest
+            if ($LASTEXITCODE -ne 0) { throw "Hover GUI test failed at display scale $scale." }
         }
         & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_preview.R $Egps
         if ($LASTEXITCODE -ne 0) { throw 'Normal-DPI preview test failed.' }

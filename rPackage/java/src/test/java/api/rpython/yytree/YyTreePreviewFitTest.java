@@ -74,6 +74,7 @@ public final class YyTreePreviewFitTest {
         try {
             for (int[] dimensions : new int[][]{{1000,800},{1000,1000},{4000,3000}}) {
                 bridge.showPlot(scene(dimensions[0],dimensions[1]),false);
+                var shown = new java.util.concurrent.atomic.AtomicReference<YyTreePreview>();
                 SwingUtilities.invokeAndWait(() -> {
                     JFrame frame=null;
                     for (Window window:Window.getWindows())
@@ -81,6 +82,7 @@ public final class YyTreePreviewFitTest {
                             && candidate.getContentPane() instanceof YyTreePreview) frame=candidate;
                     require(frame!=null,"Preview window not found");
                     var preview=(YyTreePreview)frame.getContentPane();
+                    shown.set(preview);
                     assertFits(preview);
                     GraphicsConfiguration configuration=frame.getGraphicsConfiguration();
                     Insets insets=Toolkit.getDefaultToolkit().getScreenInsets(configuration);
@@ -98,9 +100,14 @@ public final class YyTreePreviewFitTest {
                     frame.validate();
                     notifyResize(preview);
                     assertFits(preview);
-                    double scale=configuration.getDefaultTransform().getScaleX();
-                    BufferedImage image=new BufferedImage(preview.getWidth(),preview.getHeight(),BufferedImage.TYPE_INT_ARGB);
+                });
+                YyTreeBridge.awaitRendering(shown.get());
+                SwingUtilities.invokeAndWait(() -> {
+                    var preview=shown.get();
+                    double scale=preview.canvas.getGraphicsConfiguration().getDefaultTransform().getScaleX();
+                    BufferedImage image=new BufferedImage((int)Math.ceil(preview.getWidth()*scale),(int)Math.ceil(preview.getHeight()*scale),BufferedImage.TYPE_INT_ARGB);
                     Graphics2D graphics=image.createGraphics();
+                    graphics.scale(scale,scale);
                     try { preview.printAll(graphics); } finally { graphics.dispose(); }
                     try {
                         ImageIO.write(image,"png",Path.of("temp/yytree-qa/initial-fit-"+dimensions[0]+"x"+dimensions[1]

@@ -18,6 +18,10 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
 }
 # Inspect: one red Human node in each of two windows, with different layouts.
 # The full canvas initially fits the window; resize it before wheel zoom to keep fitting.
+# Hover near a leaf, an internal junction, or the root: it glows and its tooltip identifies the node.
+# Show Crosshair and Snap To Point start on. Within 12 interface pixels, the crosshair snaps to the nearest node.
+# Turn snapping off: the crosshair follows the pointer, but node highlighting and tooltips remain.
+# Mouse reports pointer coordinates; Snap reports the node's logical position. Each window keeps its own switches.
 # Zoom in until scrollbars appear, then hold the left button and drag.
 # Content follows the pointer; release outside the canvas also ends the drag.
 # Wheel over a branch: it stays under the pointer while zooming.

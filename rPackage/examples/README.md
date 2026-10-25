@@ -100,12 +100,24 @@ the drawing exceeds the viewport. Printing again starts a fresh fitted view.
 Hold the left button to pan; wheel zoom remains anchored at the pointer.
 Panning stops at the canvas edges; if the entire canvas fits, zoom in first.
 These view changes do not modify the R plot definition or tree layout.
+Hover within 12 interface pixels of a leaf, internal node, or root to inspect it.
+Show Crosshair and Snap To Point default to on: guides snap to the nearest node,
+while the Mouse and Snap status rows distinguish pointer and node coordinates.
+Turning snapping off retains node highlighting and standard Swing tooltips;
+hiding the crosshair also retains inspection. Dragging hides hover overlays.
+The viewport image is cached in the background; pointer motion only draws the
+guides and glow. Exports contain no hover overlays, and printing resets switches.
 
 首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
 保留原生标题栏。宽高指定逻辑画布像素；初始完整显示且不主动放大小图，首次滚轮前随窗口
 调整自动适配。滚轮后保留手动倍率，仅溢出时显示对应滚动条；重新打印恢复自动适配。
 按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
 窗口时请先放大。交互仅改变视图，不修改 R 绘图定义或重新计算树布局。
+靠近叶节点、内部节点或根节点的 12 个界面像素内即可检查节点。Show Crosshair 和
+Snap To Point 默认开启，十字线吸附最近节点，Mouse 与 Snap 两行区分鼠标和节点坐标。
+关闭吸附仍保留节点高亮及标准 Swing 悬停提示；隐藏十字线也不影响节点检查。
+拖动期间隐藏悬停层。可见画面由后台缓存，鼠标移动只绘制辅助线和光晕。
+导出图不包含悬停效果，重新打印恢复默认开关；这些交互不接入 MTV 界面。
 
 Swing look-and-feel is shared within the JVM. Loading/configuring yytree and
 offscreen rendering do not install the theme. Opening the first preview changes

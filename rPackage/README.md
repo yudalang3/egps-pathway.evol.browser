@@ -20,6 +20,8 @@ config_yytree("C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTe
 
 `yytree` 将 R 的脚本化绘图与 eGPS Modern Tree View 的 Java 布局结合起来。执行 `print(y)` 打开独立 Swing 窗口，不启动 eGPS 主框架。R 对象保存绘图定义；窗口中的缩放和滚动不会改写 R 对象。
 
+节点悬停交互位于 yytree 独立预览中，与 MTV 界面分离。`Show Crosshair` 和 `Snap To Point` 默认开启：鼠标靠近任意树节点 12 个界面像素内时，节点发亮，十字线吸附其显示位置。关闭吸附后，节点高亮和标准 Swing 提示仍保留；隐藏十字线也不影响检查节点。提示显示名称／编号、叶／内部／根节点类型、入枝长度及逻辑坐标，根节点的入枝长度不适用。底部 `Mouse` 保留鼠标坐标，`Snap` 显示吸附节点坐标。拖动时隐藏悬停效果，释放后重新命中；缩放始终锚定真实鼠标位置。两个开关在各窗口独立保存，重新打印恢复默认。静态画面按可见区域和设备分辨率在后台缓存，鼠标移动不重新绘制整树。交互层不改变 R 对象、节点样式或导出图像。
+
 ## 安装与初始化
 
 运行时通过 processx 管理独立 Java 子进程，不依赖 rJava。Windows 验收环境为 R 4.5.2、processx 3.8.6 和 eGPS 自带 Java 25。需要事先安装 eGPS；本包只附带新增的桥接 JAR，不包含 eGPS 核心依赖。
