@@ -34,18 +34,21 @@ install.packages("yytree_0.1.0.zip", repos = NULL, type = "win.binary")
 library(yytree)
 config_yytree(
   path2egps = "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest",
-  max_memory = "4g"
+  max_memory_heap = "4g",
+  max_memory_stack = "8m"
 )
 ```
 
 `library(yytree)` 不启动 JVM。配置时优先使用安装目录的 `jre`，也支持 `JAVA_HOME`。兼容的 Java 25 JRE 足以运行，只有重新编译桥接 JAR 才需要完整 JDK 25。
+
+`max_memory_heap` 控制对象数据的堆内存（`-Xmx`，默认 `4g`），`max_memory_stack` 控制各线程的调用栈（`-Xss`，默认 `8m`）。深链树的 `StackOverflowError` 应调整栈，而非增加堆；栈仍有有限深度上限。两个参数都直接传入 Java 启动命令，更改其中任一项需 `restart = TRUE`。旧的 `max_memory=` 参数已移除，改用 `max_memory_heap=`。
 
 每个 R 会话只有一个 yytree JVM；`config_yytree()` 启动它，重复使用相同配置复用同一进程，不修改 R 的 `JAVA_HOME`，也不受其他 R 包的内嵌 JVM 配置影响。诊断信息包含实际 Java 版本、架构、MTV 类来源、PID 和日志路径。
 
 ```r
 quit_yytree()                         # 关闭所有图窗并退出 JVM；可以重复调用
 config_yytree(path2egps, "4g")        # 显式启动，之后才可再次 print(y)
-config_yytree(path2egps, "8g", restart = TRUE) # 关闭旧窗口，以新配置重启 JVM
+config_yytree(path2egps, max_memory_heap = "8g", max_memory_stack = "16m", restart = TRUE) # 关闭旧窗口，以新配置重启 JVM
 ```
 
 关闭 GUI 仅执行 DISPOSE，不退出 JVM；下次 `print(y)` 继续使用同一进程。只有意外退出时，下次绘图会使用最后成功配置自动启动新 JVM，并提示旧窗口和缩放/滚动状态丢失。通信中断、超时或用户中断时，本次请求不自动重发；通信故障会终止该 JVM，下次绘图再恢复。启动和请求默认超时 30 秒。`quit_yytree()` 是主动退出，不触发自动恢复，需再次调用 `config_yytree()`。

@@ -130,14 +130,25 @@ yytree <- function(tree, width = 1000, height = 800,
   if (length(roots) != 1 || length(tree$root) != 1 || roots != tree$root) stop("Tree must have exactly one root.")
   tips <- setdiff(edges[, 2], edges[, 1])
   if (!setequal(tips, seq_along(tree$labels))) stop("Leaf identifiers do not match labels.")
-  pending <- tree$root
-  visited <- integer()
-  while (length(pending)) {
-    if (any(pending %in% visited)) stop("Tree contains a cycle.")
-    visited <- c(visited, pending)
-    pending <- edges[edges[, 1] %in% pending, 2]
+  nodes <- unique(as.vector(ids))
+  children <- split(match(ids[, 2], nodes),
+                    factor(match(ids[, 1], nodes), levels = seq_along(nodes)))
+  pending <- integer(length(nodes))
+  pending[1] <- match(tree$root, nodes)
+  visited <- logical(length(nodes))
+  first <- last <- 1L
+  while (first <= last) {
+    node <- pending[first]
+    first <- first + 1L
+    if (visited[node]) stop("Tree contains a cycle.")
+    visited[node] <- TRUE
+    descendants <- children[[node]]
+    if (length(descendants)) {
+      pending[last + seq_along(descendants)] <- descendants
+      last <- last + length(descendants)
+    }
   }
-  if (!setequal(visited, as.vector(ids))) stop("Tree contains disconnected nodes.")
+  if (!all(visited)) stop("Tree contains disconnected nodes.")
   invisible(TRUE)
 }
 

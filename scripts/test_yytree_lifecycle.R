@@ -30,7 +30,10 @@ main <- function() {
   process <- yytree:::.runtime$process
   pid <- process$get_pid()
   stopifnot(pid != Sys.getpid(), identical(config_yytree(egps), configuration), !"rJava" %in% loadedNamespaces())
-  failure(config_yytree(egps, max_memory = "2g"), "restart = TRUE")
+  stopifnot(configuration$max_memory_heap == "4g", configuration$max_memory_stack == "8m",
+            all(c("-Xmx4g", "-Xss8m") %in% jsonlite::fromJSON(configuration$probe)$jvmArguments))
+  failure(config_yytree(egps, max_memory_heap = "2g"), "restart = TRUE")
+  failure(config_yytree(egps, max_memory_stack = "16m"), "restart = TRUE")
   stopifnot(process$is_alive())
   failure(config_yytree(file.path(output, "missing")), "path")
   empty <- file.path(output, "empty")
@@ -73,9 +76,16 @@ main <- function() {
   previous_java <- Sys.getenv("JAVA_HOME", unset = NA_character_)
   on.exit(if (is.na(previous_java)) Sys.unsetenv("JAVA_HOME") else Sys.setenv(JAVA_HOME = previous_java), add = TRUE)
   Sys.setenv(JAVA_HOME = configuration$java)
+  writeLines(c(readLines(file.path(egps, "eGPS2.args"), warn = FALSE),
+    "-Xmxinvalid", "-Xssinvalid", "-XX:MaxHeapSize=1", "-XX:ThreadStackSize=1"),
+    file.path(unicode_home, "eGPS2.args"))
   unicode_config <- config_yytree(unicode_home)
   stopifnot(jsonlite::fromJSON(unicode_config$probe)$pid == unicode_config$pid,
             Sys.getenv("JAVA_HOME") == configuration$java)
+  java_args <- jsonlite::fromJSON(unicode_config$probe)$jvmArguments
+  stopifnot(sum(startsWith(java_args, "-Xmx")) == 1, sum(startsWith(java_args, "-Xss")) == 1,
+            all(c("-Xmx4g", "-Xss8m") %in% java_args),
+            !any(grepl("^-XX:(MaxHeapSize|ThreadStackSize)=", java_args)))
   quit_yytree()
   # Startup failures must report diagnostics and leave no usable process.
   previous_options <- Sys.getenv("JAVA_TOOL_OPTIONS", unset = NA_character_)
@@ -84,11 +94,12 @@ main <- function() {
   failure(config_yytree(egps), "Cannot initialize yytree")
   stopifnot(!yytree:::.runtime_alive())
   if (is.na(previous_options)) Sys.unsetenv("JAVA_TOOL_OPTIONS") else Sys.setenv(JAVA_TOOL_OPTIONS = previous_options)
-  configuration <- config_yytree(egps, max_memory = "512m")
+  configuration <- config_yytree(egps, max_memory_heap = "512m")
   process <- yytree:::.runtime$process
-  restarted <- config_yytree(egps, max_memory = "768m", restart = TRUE)
+  restarted <- config_yytree(egps, max_memory_heap = "768m", max_memory_stack = "16m", restart = TRUE)
   stopifnot(!process$is_alive(), restarted$pid != configuration$pid)
   stopifnot(abs(jsonlite::fromJSON(restarted$probe)$maxMemory - 768 * 1024^2) < 768 * 1024^2 * .05)
+  stopifnot("-Xss16m" %in% jsonlite::fromJSON(restarted$probe)$jvmArguments)
   process <- yytree:::.runtime$process
   process$kill()
   # Recovery must retain the resolved Java executable, even if R's environment changes.
@@ -102,7 +113,8 @@ main <- function() {
     invokeRestart("muffleWarning")
   })
   stopifnot(recovered, yytree:::.runtime$process$get_pid() != process$get_pid(),
-            identical(serialize(scene, NULL), original))
+            identical(serialize(scene, NULL), original), yytree:::.runtime$config$max_memory_stack == "16m",
+            "-Xss16m" %in% jsonlite::fromJSON(yytree:::.runtime$config$probe)$jvmArguments)
   process <- yytree:::.runtime$process
   # A deadline shorter than one poll deterministically invalidates the session.
   failure(yytree:::.runtime_request("renderPng", payload, path, timeout = .001), "timed out")

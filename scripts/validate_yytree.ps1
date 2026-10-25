@@ -28,6 +28,10 @@ try {
     if ($Gui) { $lifecycle += '--gui' }
     & (Join-Path $R 'Rscript.exe') @lifecycle | Tee-Object -FilePath (Join-Path $logs 'yytree-lifecycle.log')
     if ($LASTEXITCODE -ne 0) { throw 'Process lifecycle tests failed.' }
+    $deepTrees = @('--vanilla','scripts/test_yytree_deep_trees.R',$Egps)
+    if ($Gui) { $deepTrees += '--gui' }
+    & (Join-Path $R 'Rscript.exe') @deepTrees | Tee-Object -FilePath (Join-Path $logs 'yytree-deep-trees.log')
+    if ($LASTEXITCODE -ne 0) { throw 'Deep tree and memory tests failed.' }
     $integration = @('--vanilla','scripts/test_yytree_integration.R',$Egps,'temp/yytree-qa','--benchmark')
     if ($Gui) { $integration += '--gui' }
     & (Join-Path $R 'Rscript.exe') @integration | Tee-Object -FilePath (Join-Path $logs 'yytree-integration.log')

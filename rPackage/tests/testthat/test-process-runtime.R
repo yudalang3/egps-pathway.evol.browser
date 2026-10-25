@@ -46,7 +46,55 @@ test_that("quit is idempotent and deliberate quit requires config before printin
   expect_false(yytree:::.runtime_alive())
   expect_error(print(yytree("(A:1,B:2);")), "config_yytree")
   expect_error(config_yytree(".", restart = NA), "restart must")
-  expect_error(config_yytree(".", max_memory = "0g"), "max_memory must")
+  expect_error(config_yytree(".", max_memory_heap = "0g"), "max_memory_heap must")
+  expect_error(config_yytree(".", max_memory_stack = "bad"), "max_memory_stack must")
+  expect_error(config_yytree(".", max_memory = "4g"), "matches multiple")
+})
+
+test_that("finalization stops its own runtime and leaves the current one alive", {
+  make_process <- function() {
+    state <- new.env()
+    state$alive <- TRUE
+    list(state = state, is_alive = function() state$alive,
+         kill = function() state$alive <- FALSE,
+         write_input = function(bytes) stop("closed transport"),
+         get_error_file = function() NULL, wait = function(ms) NULL)
+  }
+  runtime <- yytree:::.runtime
+  old <- new.env(parent = emptyenv())
+  old$next_id <- 0
+  old$process <- make_process()
+  previous <- old$process
+  current <- make_process()
+  runtime$process <- current
+  on.exit(quit_yytree(), add = TRUE)
+  yytree:::.runtime_finalize(old)
+  expect_false(previous$is_alive())
+  expect_false(exists("process", old, inherits = FALSE))
+  expect_true(current$is_alive())
+})
+
+test_that("interrupting the shutdown wait still clears a deliberate quit", {
+  state <- new.env()
+  state$alive <- TRUE
+  runtime <- yytree:::.runtime
+  runtime$config <- list()
+  runtime$launch <- list()
+  runtime$process <- list(
+    is_alive = function() state$alive,
+    write_input = function(bytes) {
+      state$id <- jsonlite::fromJSON(rawToChar(bytes))$id
+      raw(0)
+    },
+    poll_io = function(ms) NULL,
+    read_output = function() paste0(jsonlite::toJSON(list(id = state$id, ok = TRUE), auto_unbox = TRUE), "\n"),
+    wait = function(ms) stop(structure(list(message = "interrupt shutdown"), class = c("interrupt", "condition"))),
+    kill = function() state$alive <- FALSE)
+  on.exit(quit_yytree(), add = TRUE)
+  interrupted <- tryCatch(quit_yytree(), interrupt = function(e) TRUE)
+  expect_true(interrupted)
+  expect_false(state$alive)
+  expect_false(any(c("process", "config", "launch") %in% ls(runtime)))
 })
 
 test_that("quit forcibly terminates an unresponsive subprocess after its grace period", {

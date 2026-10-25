@@ -75,3 +75,28 @@ test_that("heatmaps share the raw scale and support clipping and all missing dat
   expect_true(all(is.na(leaf_annotation_heatmap(m)$cells)))
   expect_equal(leaf_annotation_heatmap(m)$limits, c(0, 1))
 })
+
+test_that("heatmap normalization handles extreme finite values without missing cells", {
+  m <- matrix(c(-1e308, 0, 1e308, NA_real_), 4,
+              dimnames = list(c("A", "B", "C", "D"), "value"))
+  mapped <- leaf_annotation_heatmap(m, colors = c("black", "white"))
+  expect_identical(mapped$cells[1:3, 1], c("#000000FF", "#808080FF", "#FFFFFFFF"))
+  expect_true(is.na(mapped$cells[4, 1]))
+  expect_identical(free_heatmap(.1, .1, .2, .2, m, colors = c("black", "white"))$cells, mapped$cells)
+  expect_identical(leaf_annotation_heatmap(m, colors = c("black", "white"), limits = c(-1, 1))$cells, mapped$cells)
+  expect_equal(mapped$limits, c(-1e308, 1e308))
+})
+
+test_that("deep and multifurcating trees preserve data and disconnected cycles fail", {
+  for (type in c("left", "star")) {
+    tree <- ape::stree(10000, type = type)
+    original <- tree
+    value <- yytree(tree)
+    expect_equal(unname(value$tree$edges[, 1:2]), unname(tree$edge))
+    expect_identical(value$tree$labels, tree$tip.label)
+    expect_identical(tree, original)
+  }
+  invalid <- list(labels = c("A", "B"), root = 3,
+    edges = rbind(c(3, 1, 1), c(3, 2, 1), c(4, 5, 1), c(5, 4, 1)))
+  expect_error(yytree:::.validate_tree(invalid), "disconnected")
+})

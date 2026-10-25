@@ -43,7 +43,7 @@ inner2leaf_highlight(name1 = NULL, name2 = NULL, fill = "green", df = NULL)
 inner_node_annotation(name1 = NULL, name2 = NULL, text = NULL, shape = "rect", size = 20, fill = "pink",
     df = NULL)
 
-config_yytree(path2egps, max_memory = "4g", restart = FALSE)
+config_yytree(path2egps, max_memory_heap = "4g", max_memory_stack = "8m", restart = FALSE)
 
 quit_yytree()
 
@@ -103,7 +103,8 @@ free_heatmap(x, y, width, height, matrix, mode = "relative", colors = c("#2166AC
 \item{text}{Text to display.}
 \item{shape}{Node annotation shape: rect, ellipse or triangle.}
 \item{path2egps}{The eGPS installation directory containing dependency-egps and its Java runtime.}
-\item{max_memory}{Maximum Java heap, for example 4g. Use restart = TRUE to change a running JVM.}
+\item{max_memory_heap}{Maximum Java heap (-Xmx), for example 4g. Use restart = TRUE to change a running JVM.}
+\item{max_memory_stack}{Per-thread Java stack (-Xss), for example 8m. Use restart = TRUE to change it; increasing heap does not increase the stack.}
 \item{restart}{Restart the Java subprocess, closing all its windows. Defaults to FALSE.}
 \item{legend}{Legend corner: top_right, top_left, bottom_right, bottom_left, or none.}
 \item{colors}{Heatmap palette colors, or named category colors (optionally a list keyed by column).}

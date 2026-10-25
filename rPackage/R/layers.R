@@ -27,7 +27,14 @@ leaf_annotation_rect <- function(df, legend = "top_right", colors = NULL, width 
   if (length(limits) != 2 || any(!is.finite(limits)) || limits[1] > limits[2]) stop("Invalid heatmap limits.")
   palette <- grDevices::colorRampPalette(colors, alpha = TRUE)(256)
   span <- diff(limits)
-  index <- if (span == 0) matrix(128, nrow(x), ncol(x)) else 1 + round(255 * pmax(0, pmin(1, (x - limits[1]) / span)))
+  clipped <- pmax(limits[1], pmin(limits[2], x))
+  if (span == 0) index <- matrix(128, nrow(x), ncol(x)) else {
+    if (is.finite(span)) fraction <- (clipped - limits[1]) / span else {
+      magnitude <- max(abs(limits))
+      fraction <- (clipped / magnitude - limits[1] / magnitude) / (limits[2] / magnitude - limits[1] / magnitude)
+    }
+    index <- 1 + round(255 * pmax(0, pmin(1, fraction)))
+  }
   cells <- matrix(.color(palette[as.vector(index)]), nrow(x), ncol(x))
   cells[is.na(x)] <- NA_character_
   list(cells = cells, limits = limits, palette = .color(palette))

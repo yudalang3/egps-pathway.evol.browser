@@ -3,7 +3,8 @@ exports <- readLines("rPackage/NAMESPACE")
 exports <- sub("export\\((.*)\\)","\\1",exports[startsWith(exports,"export(")])
 descriptions <- c(tree="A hclust or phylo object, one Newick string, or a Newick file path.",
  path2egps="The eGPS installation directory containing dependency-egps and its Java runtime.",
- max_memory="Maximum Java heap, for example 4g. Use restart = TRUE to change a running JVM.",
+ max_memory_heap="Maximum Java heap (-Xmx), for example 4g. Use restart = TRUE to change a running JVM.",
+ max_memory_stack="Per-thread Java stack (-Xss), for example 8m. Use restart = TRUE to change it; increasing heap does not increase the stack.",
  restart="Restart the Java subprocess, closing all its windows. Defaults to FALSE.",
  df="A data frame keyed by name, or by name1 and name2 for MRCA selectors.",
  name1="First leaf name identifying an MRCA.",name2="Second distinct leaf name identifying an MRCA.",

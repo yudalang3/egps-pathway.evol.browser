@@ -6,7 +6,7 @@ egps <- args[1]
 config <- config_yytree(egps)
 pid <- yytree:::.runtime$process$get_pid()
 stopifnot(identical(config_yytree(egps), config), identical(pid, yytree:::.runtime$process$get_pid()))
-conflict <- tryCatch(config_yytree(egps, max_memory = "2g"), error = conditionMessage)
+conflict <- tryCatch(config_yytree(egps, max_memory_heap = "2g"), error = conditionMessage)
 stopifnot(is.character(conflict), grepl("restart = TRUE", conflict, fixed = TRUE))
 out <- file.path(getwd(), "temp", "yytree-audit")
 dir.create(out, recursive = TRUE, showWarnings = FALSE)

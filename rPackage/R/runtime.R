@@ -5,10 +5,10 @@
   exists("process", .runtime, inherits = FALSE) && .runtime$process$is_alive()
 }
 
-.runtime_exchange <- function(process, command, arguments = list(), timeout = 30) {
+.runtime_exchange <- function(process, command, arguments = list(), timeout = 30, runtime = .runtime) {
   if (!is.numeric(timeout) || length(timeout) != 1 || !is.finite(timeout) || timeout <= 0) stop("timeout must be positive and finite.")
-  .runtime$next_id <- .runtime$next_id + 1
-  id <- .runtime$next_id
+  runtime$next_id <- runtime$next_id + 1
+  id <- runtime$next_id
   request <- jsonlite::toJSON(list(id = id, command = command, args = unname(arguments)), auto_unbox = TRUE, null = "null", digits = NA)
   pending <- charToRaw(enc2utf8(paste0(request, "\n")))
   started <- proc.time()[["elapsed"]]
@@ -42,40 +42,49 @@
   response$result
 }
 
-.runtime_stop <- function() {
-  if (!exists("process", .runtime, inherits = FALSE)) return(invisible(NULL))
-  process <- .runtime$process
+.runtime_stop <- function(runtime = .runtime) {
+  if (!exists("process", runtime, inherits = FALSE)) return(invisible(NULL))
+  process <- runtime$process
+  on.exit({
+    try(if (process$is_alive()) process$kill(), silent = TRUE)
+    if (exists("process", runtime, inherits = FALSE) && identical(runtime$process, process))
+      rm("process", envir = runtime)
+  }, add = TRUE)
   if (process$is_alive()) {
     deadline <- proc.time()[["elapsed"]] + 2
     # One bounded shutdown exchange includes disposing all windows.
-    tryCatch(.runtime_exchange(process, "shutdown", timeout = 2), error = function(e) NULL,
-             interrupt = function(e) { try(process$kill(), silent = TRUE); NULL })
+    tryCatch(.runtime_exchange(process, "shutdown", timeout = 2, runtime = runtime), error = function(e) NULL)
     if (process$is_alive()) process$wait(max(0, (deadline - proc.time()[["elapsed"]]) * 1000))
-    if (process$is_alive()) process$kill()
   }
-  rm("process", envir = .runtime)
   invisible(NULL)
 }
 
 quit_yytree <- function() {
-  .runtime_stop()
-  if (exists("config", .runtime, inherits = FALSE)) rm("config", envir = .runtime)
-  if (exists("launch", .runtime, inherits = FALSE)) rm("launch", envir = .runtime)
+  runtime <- .runtime
+  on.exit({
+    fields <- intersect(c("config", "launch"), ls(runtime))
+    if (length(fields)) rm(list = fields, envir = runtime)
+  }, add = TRUE)
+  .runtime_stop(runtime)
   invisible(NULL)
 }
 
-reg.finalizer(.runtime, function(e) {
-  try(.runtime_stop(), silent = TRUE)
-}, onexit = TRUE)
+.runtime_finalize <- function(runtime) {
+  tryCatch(.runtime_stop(runtime), error = function(e) NULL, interrupt = function(e) NULL)
+}
+
+reg.finalizer(.runtime, .runtime_finalize, onexit = TRUE)
 
 .onUnload <- function(libpath) quit_yytree()
 
-config_yytree <- function(path2egps, max_memory = "4g", restart = FALSE) {
+config_yytree <- function(path2egps, max_memory_heap = "4g", max_memory_stack = "8m", restart = FALSE) {
   if (!is.character(path2egps) || length(path2egps) != 1 || is.na(path2egps)) stop("path2egps must be one installation directory.")
   if (!is.logical(restart) || length(restart) != 1 || is.na(restart)) stop("restart must be TRUE or FALSE.")
   root <- normalizePath(path2egps, winslash = "/", mustWork = TRUE)
-  if (!is.character(max_memory) || length(max_memory) != 1 || is.na(max_memory) || !grepl("^[1-9][0-9]*[mMgG]$", max_memory)) stop("max_memory must be like '512m' or '4g'.")
-  max_memory <- tolower(max_memory)
+  if (!is.character(max_memory_heap) || length(max_memory_heap) != 1 || is.na(max_memory_heap) || !grepl("^[1-9][0-9]*[mMgG]$", max_memory_heap)) stop("max_memory_heap must be like '512m' or '4g'.")
+  if (!is.character(max_memory_stack) || length(max_memory_stack) != 1 || is.na(max_memory_stack) || !grepl("^[1-9][0-9]*[kKmMgG]$", max_memory_stack)) stop("max_memory_stack must be like '512k' or '8m'.")
+  max_memory_heap <- tolower(max_memory_heap)
+  max_memory_stack <- tolower(max_memory_stack)
   jars <- list.files(file.path(root, "dependency-egps"), "\\.jar$", full.names = TRUE)
   if (!length(jars)) stop("No dependency-egps JARs found at the supplied installation.")
   java <- file.path(root, "jre")
@@ -85,20 +94,22 @@ config_yytree <- function(path2egps, max_memory = "4g", restart = FALSE) {
   executable <- file.path(java, "bin", if (.Platform$OS.type == "windows") "java.exe" else "java")
   if (!file.exists(executable)) stop("Java executable not found: ", executable)
   if (exists("config", .runtime, inherits = FALSE) && !restart) {
-    if (!identical(.runtime$config$root, root) || !identical(.runtime$config$java, java) || !identical(.runtime$config$max_memory, max_memory)) stop("Use restart = TRUE to change Java configuration; existing windows will close.")
+    if (!identical(.runtime$config$root, root) || !identical(.runtime$config$java, java) ||
+        !identical(.runtime$config$max_memory_heap, max_memory_heap) || !identical(.runtime$config$max_memory_stack, max_memory_stack)) stop("Use restart = TRUE to change Java configuration; existing windows will close.")
     if (.runtime_alive()) return(invisible(.runtime$config))
   }
   bridgejar <- system.file("java", "yytree-bridge.jar", package = "yytree")
   if (!nzchar(bridgejar)) stop("The yytree bridge JAR is missing; build and reinstall the package.")
-  args <- c(paste0("-Xmx", max_memory), "-Dfile.encoding=UTF-8")
+  args <- c(paste0("-Xmx", max_memory_heap), paste0("-Xss", max_memory_stack), "-Dfile.encoding=UTF-8")
   argfile <- file.path(root, "eGPS2.args")
   if (file.exists(argfile)) {
     extra <- trimws(readLines(argfile, warn = FALSE))
-    extra <- extra[nzchar(extra) & !startsWith(extra, "#") & !grepl("^-Xmx", extra)]
+    extra <- extra[nzchar(extra) & !startsWith(extra, "#") & !grepl("^-X(mx|ss)|^-XX:(MaxHeapSize|ThreadStackSize)=", extra)]
     args <- c(args, sub("^(--add-(opens|exports)) ", "\\1=", extra))
   }
   args <- c(args, "-cp", paste(c(bridgejar, jars), collapse = .Platform$path.sep), "api.rpython.yytree.YyTreeProcess")
-  .runtime_start(list(root = root, java = java, max_memory = max_memory), list(command = executable, args = args))
+  .runtime_start(list(root = root, java = java, max_memory_heap = max_memory_heap, max_memory_stack = max_memory_stack),
+                 list(command = executable, args = args))
 }
 
 .runtime_start <- function(config, launch) {
@@ -114,7 +125,8 @@ config_yytree <- function(path2egps, max_memory = "4g", restart = FALSE) {
     stop("Cannot initialize yytree against ", config$root, ". Java 25+ is required. ", conditionMessage(e), call. = FALSE)
   })
   .runtime$process <- process
-  .runtime$config <- c(config[c("root", "java", "max_memory")], list(probe = probe, pid = process$get_pid(), log = logfile))
+  .runtime$config <- c(config[c("root", "java", "max_memory_heap", "max_memory_stack")],
+                       list(probe = probe, pid = process$get_pid(), log = logfile))
   .runtime$launch <- launch
   initialized <- TRUE
   invisible(.runtime$config)

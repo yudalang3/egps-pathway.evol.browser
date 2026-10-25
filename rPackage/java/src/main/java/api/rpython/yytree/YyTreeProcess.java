@@ -12,6 +12,8 @@ import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -39,6 +41,7 @@ public final class YyTreeProcess {
                             JSONObject probe = JSON.parseObject(bridge.probeRuntime());
                             probe.put("pid", ProcessHandle.current().pid());
                             probe.put("maxMemory", Runtime.getRuntime().maxMemory());
+                            probe.put("jvmArguments", ManagementFactory.getRuntimeMXBean().getInputArguments());
                             yield probe.toJSONString();
                         }
                         case "showPlot" -> bridge.showPlot(arguments.getString(0), arguments.getBooleanValue(1));
@@ -54,10 +57,16 @@ public final class YyTreeProcess {
                     };
                     response.put("ok", true);
                     response.put("result", result);
-                } catch (Exception e) {
+                } catch (Exception | StackOverflowError e) {
                     log.error("yytree request failed", e);
                     response.put("ok", false);
-                    response.put("error", e.toString());
+                    Throwable cause = e;
+                    while (cause instanceof InvocationTargetException && cause.getCause() != null)
+                        cause = cause.getCause();
+                    String message = cause.toString();
+                    if (cause instanceof StackOverflowError)
+                        message += ". Increase max_memory_stack with config_yytree(..., restart = TRUE). Increasing max_memory_heap does not increase the thread stack.";
+                    response.put("error", message);
                 }
                 protocol.println(response.toJSONString());
                 if (protocol.checkError() || shutdown) break;
