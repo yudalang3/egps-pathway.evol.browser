@@ -41,6 +41,12 @@ try {
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_examples.R $Egps | Tee-Object -FilePath (Join-Path $logs 'yytree-examples.log')
     if ($LASTEXITCODE -ne 0) { throw 'Bilingual example validation failed.' }
     if ($Gui) {
+        foreach ($scale in @('1','2')) {
+            & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreePreviewFitTest
+            if ($LASTEXITCODE -ne 0) { throw "Preview fit GUI test failed at display scale $scale." }
+        }
+        & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_preview.R $Egps
+        if ($LASTEXITCODE -ne 0) { throw 'Normal-DPI preview test failed.' }
         & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_preview.R $Egps --hidpi
         if ($LASTEXITCODE -ne 0) { throw 'High-DPI preview test failed.' }
         & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_example.R
@@ -62,4 +68,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Windows ZIP installation smoke test failed.' }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/update_yytree_library.R (Join-Path $dist 'yytree_0.1.0.zip')
     if ($LASTEXITCODE -ne 0) { throw 'Stable local library update failed.' }
+    if ($Gui) {
+        & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_basic_preview.R $Egps
+        if ($LASTEXITCODE -ne 0) { throw 'Fresh local package basic preview test failed.' }
+    }
 } finally { Pop-Location }

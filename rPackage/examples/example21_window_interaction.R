@@ -17,7 +17,8 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
   print(comparison, new_window = TRUE)   # Keeps both results visible.
 }
 # Inspect: one red Human node in each of two windows, with different layouts.
-# The large canvas can be panned immediately: hold the left button and drag.
+# The full canvas initially fits the window; resize it before wheel zoom to keep fitting.
+# Zoom in until scrollbars appear, then hold the left button and drag.
 # Content follows the pointer; release outside the canvas also ends the drag.
 # Wheel over a branch: it stays under the pointer while zooming.
 # Then drag again: each window keeps its own zoom and scroll position.

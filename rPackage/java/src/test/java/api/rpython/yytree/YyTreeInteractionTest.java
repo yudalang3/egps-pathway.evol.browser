@@ -21,6 +21,8 @@ public final class YyTreeInteractionTest {
             var viewport=preview.scroll.getViewport();
             viewport.setExtentSize(new Dimension(600,400));
             viewport.setViewSize(panel.getPreferredSize());
+            wheel(preview,100,100,-1);
+            wheel(preview,100,100,1);
             var navigation=preview.navigation;
             Cursor initialCursor=panel.getCursor();
 

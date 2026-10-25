@@ -93,12 +93,18 @@ basic and interaction scripts explicitly demonstrate preview reuse and new windo
 The first preview installs the light FlatLaf theme from the eGPS installation.
 The white drawing canvas is surrounded by light grey chrome and a SwingX status
 bar showing zoom and coordinates. The native window title bar is retained.
+Canvas width and height are logical pixels. The preview initially fits the whole
+canvas without enlarging it, and follows window resizing until the first wheel
+zoom. Afterwards resizing keeps the manual zoom; scrollbars appear only when
+the drawing exceeds the viewport. Printing again starts a fresh fitted view.
 Hold the left button to pan; wheel zoom remains anchored at the pointer.
 Panning stops at the canvas edges; if the entire canvas fits, zoom in first.
 These view changes do not modify the R plot definition or tree layout.
 
 首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
-保留原生标题栏。按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
+保留原生标题栏。宽高指定逻辑画布像素；初始完整显示且不主动放大小图，首次滚轮前随窗口
+调整自动适配。滚轮后保留手动倍率，仅溢出时显示对应滚动条；重新打印恢复自动适配。
+按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
 窗口时请先放大。交互仅改变视图，不修改 R 绘图定义或重新计算树布局。
 
 Swing look-and-feel is shared within the JVM. Loading/configuring yytree and

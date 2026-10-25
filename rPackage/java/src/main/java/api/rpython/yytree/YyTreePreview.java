@@ -43,10 +43,10 @@ final class YyTreePreview extends JPanel {
         Color background = new Color(245, 246, 248);
         Color separator = new Color(220, 224, 230);
         setBackground(background);
-        scroll = new JScrollPane(canvas);
+        scroll = new JScrollPane(canvas, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setBorder(BorderFactory.createLineBorder(separator));
         scroll.getViewport().setBackground(background);
-        scroll.setPreferredSize(new Dimension(Math.min(canvas.logicalWidth, 1200), Math.min(canvas.logicalHeight, 850)));
+        scroll.getViewport().setPreferredSize(new Dimension(canvas.logicalWidth, canvas.logicalHeight));
         JPanel surround = new JPanel(new BorderLayout());
         surround.setBackground(background);
         surround.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -89,9 +89,18 @@ final class YyTreePreview extends JPanel {
 
     void disposeInteraction() { navigation.dispose(); }
 
+    void fitToViewport() { navigation.fitToViewport(); }
+
     final class Navigation extends MouseAdapter implements AWTEventListener {
         private Point pressPointer, pressView, lastPointer;
         private Cursor previousCursor;
+        private boolean autoFit = true;
+        private final ComponentAdapter resizeListener = new ComponentAdapter() {
+            @Override public void componentResized(ComponentEvent e) {
+                if (autoFit) fitToViewport();
+                else scroll.getViewport().setViewPosition(bounded(scroll.getViewport().getViewPosition()));
+            }
+        };
         private final ChangeListener viewListener = e -> updateStatus();
         private final HierarchyListener hierarchyListener = e -> {
             if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && !canvas.isShowing()) endDrag();
@@ -104,6 +113,28 @@ final class YyTreePreview extends JPanel {
             canvas.addMouseWheelListener(this);
             canvas.addHierarchyListener(hierarchyListener);
             scroll.getViewport().addChangeListener(viewListener);
+            scroll.getViewport().addComponentListener(resizeListener);
+        }
+
+        private double fitZoom() {
+            Dimension extent = scroll.getViewport().getExtentSize();
+            return Math.min(1, Math.min((double)extent.width / canvas.logicalWidth,
+                (double)extent.height / canvas.logicalHeight));
+        }
+
+        void fitToViewport() {
+            Dimension extent = scroll.getViewport().getExtentSize();
+            if (!autoFit || extent.width <= 0 || extent.height <= 0) return;
+            endDrag();
+            canvas.zoom = fitZoom();
+            Dimension size = new Dimension(Math.min(extent.width, Math.max(1, (int)Math.ceil(canvas.logicalWidth * canvas.zoom))),
+                Math.min(extent.height, Math.max(1, (int)Math.ceil(canvas.logicalHeight * canvas.zoom))));
+            if (!size.equals(canvas.getPreferredSize())) canvas.setPreferredSize(size);
+            scroll.getViewport().setViewSize(size);
+            scroll.getViewport().setViewPosition(new Point());
+            updateStatus();
+            canvas.revalidate();
+            canvas.repaint();
         }
 
         boolean isDragging() { return pressPointer != null; }
@@ -176,16 +207,22 @@ final class YyTreePreview extends JPanel {
         }
 
         @Override public void mouseWheelMoved(MouseWheelEvent e) {
+            if (e.getPreciseWheelRotation() == 0) return;
             endDrag();
             lastPointer = pointer(e);
             double oldZoom = canvas.zoom;
-            canvas.zoom = Math.max(.1, Math.min(100, oldZoom * Math.pow(1.12, -e.getPreciseWheelRotation())));
+            double minimumZoom = Math.min(.1, Math.min(oldZoom, fitZoom()));
+            autoFit = false;
+            scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            canvas.zoom = Math.max(minimumZoom, Math.min(100, oldZoom * Math.pow(1.12, -e.getPreciseWheelRotation())));
             double logicalX = e.getX() / oldZoom, logicalY = e.getY() / oldZoom;
             Dimension size = new Dimension((int)Math.ceil(canvas.logicalWidth * canvas.zoom),
                 (int)Math.ceil(canvas.logicalHeight * canvas.zoom));
             canvas.setPreferredSize(size);
             scroll.getViewport().setViewSize(size);
             canvas.revalidate();
+            if (scroll.getWidth() > 0 && scroll.getHeight() > 0) scroll.doLayout();
             scroll.getViewport().setViewPosition(bounded(new Point(
                 (int)Math.round(logicalX * canvas.zoom - lastPointer.x),
                 (int)Math.round(logicalY * canvas.zoom - lastPointer.y))));
@@ -201,6 +238,7 @@ final class YyTreePreview extends JPanel {
             canvas.removeMouseWheelListener(this);
             canvas.removeHierarchyListener(hierarchyListener);
             scroll.getViewport().removeChangeListener(viewListener);
+            scroll.getViewport().removeComponentListener(resizeListener);
         }
     }
 }

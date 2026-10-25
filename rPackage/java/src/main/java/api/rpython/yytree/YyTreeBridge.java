@@ -68,10 +68,11 @@ public final class YyTreeBridge {
             current.setContentPane(preview);
             GraphicsConfiguration configuration=current.getGraphicsConfiguration();
             Rectangle screen=configuration.getBounds();Insets insets=Toolkit.getDefaultToolkit().getScreenInsets(configuration);
-            preview.scroll.setPreferredSize(new Dimension(
-                Math.min(Math.min(panel.logicalWidth,1200),Math.max(1,screen.width-insets.left-insets.right-60)),
-                Math.min(Math.min(panel.logicalHeight,850),Math.max(1,screen.height-insets.top-insets.bottom-100))));
             current.pack();
+            current.setSize(Math.min(current.getWidth(), screen.width-insets.left-insets.right),
+                Math.min(current.getHeight(), screen.height-insets.top-insets.bottom));
+            current.validate();
+            preview.fitToViewport();
             current.setVisible(true);
             panel.paintImmediately(0, 0, panel.getWidth(), panel.getHeight());
             result.set(Integer.toHexString(System.identityHashCode(current)));
@@ -95,11 +96,18 @@ public final class YyTreeBridge {
             JLabel status=content.coordinates;
             YyTreePanel panel=(YyTreePanel)scroll.getViewport().getView();
             double before=panel.root.getXSelf();
-            MouseWheelEvent wheel=new MouseWheelEvent(panel,MouseEvent.MOUSE_WHEEL,System.currentTimeMillis(),0,300,200,0,false,MouseWheelEvent.WHEEL_UNIT_SCROLL,1,-2);
+            double oldZoom=panel.zoom;
+            Dimension extent=scroll.getViewport().getExtentSize();
+            if(panel.getPreferredSize().width>extent.width || panel.getPreferredSize().height>extent.height
+                || scroll.getHorizontalScrollBar().isVisible() || scroll.getVerticalScrollBar().isVisible())
+                throw new IllegalStateException("Initial preview does not fit the viewport.");
+            double targetZoom=Math.max((extent.width+200.0)/panel.logicalWidth,(extent.height+200.0)/panel.logicalHeight);
+            int rotations=Math.max(2,(int)Math.ceil(Math.log(targetZoom/oldZoom)/Math.log(1.12)));
+            MouseWheelEvent wheel=new MouseWheelEvent(panel,MouseEvent.MOUSE_WHEEL,System.currentTimeMillis(),0,300,200,0,false,MouseWheelEvent.WHEEL_UNIT_SCROLL,1,-rotations);
             for(MouseWheelListener listener:panel.getMouseWheelListeners())listener.mouseWheelMoved(wheel);
             MouseEvent move=new MouseEvent(panel,MouseEvent.MOUSE_MOVED,System.currentTimeMillis(),0,300,200,0,false);
             for(MouseMotionListener listener:panel.getMouseMotionListeners())listener.mouseMoved(move);
-            if(panel.zoom<=1 || before!=panel.root.getXSelf())throw new IllegalStateException("Zoom recalculated layout or failed.");
+            if(panel.zoom<=oldZoom || before!=panel.root.getXSelf())throw new IllegalStateException("Zoom recalculated layout or failed.");
             String expected=String.format(Locale.ROOT,"%.1f",300/panel.zoom);
             if(!status.getText().contains(expected))throw new IllegalStateException("Hover coordinates disagree with inverse zoom.");
             JViewport viewport=scroll.getViewport();

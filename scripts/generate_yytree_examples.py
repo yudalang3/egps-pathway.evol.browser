@@ -267,7 +267,8 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
   print(comparison, new_window = TRUE)   # <<Keeps both results visible.|保留两个可见结果。>>
 }
 # <<Inspect: one red Human node in each of two windows, with different layouts.|检查：两个不同布局的窗口中，都有一个红色 Human 节点。>>
-# <<The large canvas can be panned immediately: hold the left button and drag.|此大画布可以直接平移：按住鼠标左键拖动。>>
+# <<The full canvas initially fits the window; resize it before wheel zoom to keep fitting.|首次完整显示画布；使用滚轮前，调整窗口会自动适配。>>
+# <<Zoom in until scrollbars appear, then hold the left button and drag.|放大至出现滚动条后，按住鼠标左键拖动。>>
 # <<Content follows the pointer; release outside the canvas also ends the drag.|内容跟随鼠标移动；在画布外松开鼠标也会结束拖动。>>
 # <<Wheel over a branch: it stays under the pointer while zooming.|把鼠标放在枝条上滚动：缩放时该位置保持在鼠标下方。>>
 # <<Then drag again: each window keeps its own zoom and scroll position.|缩放后再次拖动：各窗口分别保留自己的缩放和滚动位置。>>
@@ -477,12 +478,18 @@ readme += '''
 The first preview installs the light FlatLaf theme from the eGPS installation.
 The white drawing canvas is surrounded by light grey chrome and a SwingX status
 bar showing zoom and coordinates. The native window title bar is retained.
+Canvas width and height are logical pixels. The preview initially fits the whole
+canvas without enlarging it, and follows window resizing until the first wheel
+zoom. Afterwards resizing keeps the manual zoom; scrollbars appear only when
+the drawing exceeds the viewport. Printing again starts a fresh fitted view.
 Hold the left button to pan; wheel zoom remains anchored at the pointer.
 Panning stops at the canvas edges; if the entire canvas fits, zoom in first.
 These view changes do not modify the R plot definition or tree layout.
 
 首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
-保留原生标题栏。按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
+保留原生标题栏。宽高指定逻辑画布像素；初始完整显示且不主动放大小图，首次滚轮前随窗口
+调整自动适配。滚轮后保留手动倍率，仅溢出时显示对应滚动条；重新打印恢复自动适配。
+按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
 窗口时请先放大。交互仅改变视图，不修改 R 绘图定义或重新计算树布局。
 
 Swing look-and-feel is shared within the JVM. Loading/configuring yytree and
