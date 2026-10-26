@@ -46,6 +46,8 @@ try {
             if ($LASTEXITCODE -ne 0) { throw "Preview fit GUI test failed at display scale $scale." }
             & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeHoverTest
             if ($LASTEXITCODE -ne 0) { throw "Hover GUI test failed at display scale $scale." }
+            & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeScaleControlTest
+            if ($LASTEXITCODE -ne 0) { throw "Scale controls GUI test failed at display scale $scale." }
         }
         & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_preview.R $Egps
         if ($LASTEXITCODE -ne 0) { throw 'Normal-DPI preview test failed.' }
@@ -70,7 +72,13 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Windows ZIP installation smoke test failed.' }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/update_yytree_library.R (Join-Path $dist 'yytree_0.1.0.zip')
     if ($LASTEXITCODE -ne 0) { throw 'Stable local library update failed.' }
+    $circularLabels = @('--vanilla','scripts/test_yytree_circular_labels.R',$Egps)
+    if ($Gui) { $circularLabels += '--gui' }
+    & (Join-Path $R 'Rscript.exe') @circularLabels
+    if ($LASTEXITCODE -ne 0) { throw 'Circular label regression failed.' }
     if ($Gui) {
+        & (Join-Path $R 'Rscript.exe') @circularLabels --hidpi
+        if ($LASTEXITCODE -ne 0) { throw 'High-DPI circular label regression failed.' }
         & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_basic_preview.R $Egps
         if ($LASTEXITCODE -ne 0) { throw 'Fresh local package basic preview test failed.' }
     }

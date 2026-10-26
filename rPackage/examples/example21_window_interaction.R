@@ -22,6 +22,9 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
 # Show Crosshair and Snap To Point start on. Within 12 interface pixels, the crosshair snaps to the nearest node.
 # Turn snapping off: the crosshair follows the pointer, but node highlighting and tooltips remain.
 # Mouse reports pointer coordinates; Snap reports the node's logical position. Each window keeps its own switches.
+# Fit frame resets panning and fits the current window again, keeping the two hover switches.
+# Width (%) and Height (%) are linked: enter 125.5 in either field and press Enter or leave it to apply uniform zoom.
+# 100% always means the first fitted display size. After resizing, Fit frame can show a different percentage.
 # Zoom in until scrollbars appear, then hold the left button and drag.
 # Content follows the pointer; release outside the canvas also ends the drag.
 # Wheel over a branch: it stays under the pointer while zooming.

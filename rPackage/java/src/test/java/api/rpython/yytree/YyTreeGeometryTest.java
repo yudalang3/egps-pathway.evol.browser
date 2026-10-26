@@ -83,7 +83,8 @@ public final class YyTreeGeometryTest {
             require(panel.coordinate(relative,"y",false)==panel.coordinate(pixel,"y",false),"Pixel mismatch");
             require(panel.coordinate(relative,"x",true)==panel.coordinate(pixel,"x",true),"Relative mismatch");
         }
-        for(int code=3;code<=6;code++) {
+        testCircularLabels();
+        for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
             scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"leaf_labels\",\"show\":true,\"align\":\"left\"}"));
@@ -197,6 +198,64 @@ public final class YyTreeGeometryTest {
         AtomicReference<YyTreeBridge.YyTreePanel> reference=new AtomicReference<>();
         SwingUtilities.invokeAndWait(()->reference.set(new YyTreeBridge.YyTreePanel(scene)));
         reference.get().prepare();return reference.get();
+    }
+    private static void testCircularLabels() throws Exception {
+        for(int code:new int[]{3,4}) {
+            JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+            scene.getJSONArray("layers").getJSONObject(0).put("code",code);
+            scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"leaf_labels\",\"show\":true,\"align\":\"right\"}"));
+            scene.getJSONObject("tree").getJSONArray("labels").set(1,"Long leaf name WWW");
+            var panel=prepare(scene);
+            panel.labelColors.put(panel.leaves.get(1),java.awt.Color.YELLOW);
+            var metrics=panel.metricsHost.getFontMetrics(panel.labelFont);
+            var leaf=panel.leaves.get(1);
+            Point2D.Double tip=panel.tips.get(leaf);
+            double radius=tip.distance(panel.centerX,panel.centerY);
+            for(double angle:new double[]{0,45,89,90,91,135,180,225,269,270,271,315,360}) {
+                leaf.setAngleIfNeeded(angle);
+                tip.setLocation(panel.centerX+radius*Math.cos(Math.toRadians(angle)),panel.centerY-radius*Math.sin(Math.toRadians(angle)));
+                var placement=module.evolview.phylotree.visualization.layout.TipLabelGeometry.at(angle,6,leaf.getName(),metrics);
+                var expected=placement.boundsAt(tip.x,tip.y).getBounds2D();
+                var actual=panel.labelBounds(leaf,metrics);
+                require(Math.abs(actual.getX()-expected.getX())<1e-7 && Math.abs(actual.getY()-expected.getY())<1e-7
+                    && Math.abs(actual.getWidth()-expected.getWidth())<1e-7 && Math.abs(actual.getHeight()-expected.getHeight())<1e-7,
+                    "Circular label does not follow the MTV tip geometry at "+angle+" in layout "+code);
+            }
+            panel=prepare(scene);
+            panel.labelColors.put(panel.leaves.get(1),java.awt.Color.YELLOW);
+            for(double scale:new double[]{.65,1,1.25,2}) {
+                int width=(int)Math.ceil(panel.logicalWidth*scale),height=(int)Math.ceil(panel.logicalHeight*scale);
+                BufferedImage actual=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+                BufferedImage expected=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+                var g=actual.createGraphics();g.scale(scale,scale);g.setFont(panel.labelFont);
+                var transform=g.getTransform();panel.drawLabels(g);
+                require(transform.equals(g.getTransform()),"Circular labels changed the caller transform");g.dispose();
+                g=expected.createGraphics();g.scale(scale,scale);g.setFont(panel.labelFont);
+                for(GraphicsNode node:panel.leaves) {
+                    var p=panel.tips.get(node);
+                    var placement=module.evolview.phylotree.visualization.layout.TipLabelGeometry.at(node.getAngleIfNeeded(),6,node.getName(),g.getFontMetrics());
+                    var label=(java.awt.Graphics2D)g.create();label.translate(p.x,p.y);label.rotate(placement.rotation());
+                    if(panel.labelColors.containsKey(node)){label.setColor(panel.labelColors.get(node));label.fill(placement.box());}
+                    label.setColor(java.awt.Color.BLACK);label.drawString(node.getName(),(float)placement.x(),(float)placement.baseline());label.dispose();
+                }
+                g.dispose();
+                require(Arrays.equals(actual.getRGB(0,0,width,height,null,0,width),expected.getRGB(0,0,width,height,null,0,width)),
+                    "Circular label painting differs from MTV at scale "+scale);
+            }
+            int[] right=labelPixels(panel);
+            scene.getJSONArray("layers").getJSONObject(3).put("align","left");
+            var left=prepare(scene);left.labelColors.put(left.leaves.get(1),java.awt.Color.YELLOW);
+            require(Arrays.equals(right,labelPixels(left)),"Circular labels still use horizontal column alignment");
+            var image=new BufferedImage(panel.logicalWidth,panel.logicalHeight,BufferedImage.TYPE_INT_RGB);
+            var g=image.createGraphics();g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
+            panel.drawScene(g);
+            require(java.awt.RenderingHints.VALUE_ANTIALIAS_ON.equals(g.getRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING)),"Shape antialiasing is off");
+            require(java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON.equals(g.getRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING)),"Text antialiasing is off");
+            g.dispose();
+            require(Arrays.stream(image.getRGB(0,0,image.getWidth(),image.getHeight(),null,0,image.getWidth()))
+                .anyMatch(pixel->{int r=(pixel>>16)&255,b=pixel&255;return r>0 && r<255 && r==b && r==((pixel>>8)&255);}),
+                "Circular rendering has no antialiased edge pixels");
+        }
     }
     private static int[] labelPixels(YyTreeBridge.YyTreePanel panel) {
         BufferedImage image=new BufferedImage(panel.logicalWidth,panel.logicalHeight,BufferedImage.TYPE_INT_ARGB);

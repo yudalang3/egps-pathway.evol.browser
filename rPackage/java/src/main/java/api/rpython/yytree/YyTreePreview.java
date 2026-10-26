@@ -30,12 +30,18 @@ final class YyTreePreview extends JPanel {
     final JLabel snappedCoordinates = new JLabel("Snap: —");
     final JCheckBox crosshair = new JCheckBox("Show Crosshair", true);
     final JCheckBox snap = new JCheckBox("Snap To Point", true);
+    final JButton fitFrame = new JButton("Fit frame");
+    final JSpinner widthPercent = new JSpinner(new SpinnerNumberModel(100.0, 0.0, null, 1.0));
+    final JSpinner heightPercent = new JSpinner(new SpinnerNumberModel(100.0, 0.0, null, 1.0));
     final JLabel hint = new JLabel("Left drag to pan  ·  Wheel to zoom");
     final Navigation navigation;
     final ViewCache cache = new ViewCache();
     final java.util.List<NodePoint> nodePoints;
     NodePoint hovered;
     private Point hoverPointer;
+    private double initialZoom = Double.NaN;
+    private boolean updatingScaleControls;
+    private double displayedPercent = Double.NaN, displayedMinimum = Double.NaN, displayedMaximum = Double.NaN;
     private final java.beans.PropertyChangeListener displayListener = e -> { cache.request(); refreshHover(); };
 
     record NodePoint(int id, GraphicsNode node, double x, double y) { }
@@ -78,7 +84,24 @@ final class YyTreePreview extends JPanel {
         surround.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         surround.add(scroll);
         add(surround, BorderLayout.CENTER);
-        JPanel toolbar = new JPanel(new net.miginfocom.swing.MigLayout("insets 4 10, gap 12", "[][]", "[]"));
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 4) {
+            @Override public Dimension preferredLayoutSize(Container parent) {
+                Dimension natural = super.preferredLayoutSize(parent);
+                if (parent.getWidth() <= 0) return natural;
+                Insets insets = parent.getInsets();
+                int available = parent.getWidth() - insets.left - insets.right - 2 * getHgap();
+                int rowWidth = 0, rowHeight = 0, height = insets.top + insets.bottom + 2 * getVgap();
+                for (Component child : parent.getComponents()) if (child.isVisible()) {
+                    Dimension size = child.getPreferredSize();
+                    if (rowWidth > 0 && rowWidth + getHgap() + size.width > available) {
+                        height += rowHeight + getVgap(); rowWidth = 0; rowHeight = 0;
+                    }
+                    rowWidth += (rowWidth == 0 ? 0 : getHgap()) + size.width;
+                    rowHeight = Math.max(rowHeight, size.height);
+                }
+                return new Dimension(natural.width, height + rowHeight);
+            }
+        });
         toolbar.setBackground(background);
         for (JCheckBox control : new JCheckBox[]{crosshair, snap}) {
             if (font != null) control.setFont(font);
@@ -89,6 +112,15 @@ final class YyTreePreview extends JPanel {
         snap.setToolTipText("<html>Align the crosshair to the nearest node within 12 interface pixels.<br>Node highlighting remains available when snapping is off.<br>Zooming always stays anchored at the actual pointer.</html>");
         crosshair.addActionListener(e -> refreshHover());
         snap.addActionListener(e -> refreshHover());
+        if (font != null) fitFrame.setFont(font);
+        fitFrame.setToolTipText("<html>Fit the whole canvas to the current window and reset panning.<br>Restore automatic fitting while keeping the hover switches.<br>100% always refers to the first fitted view, even after resizing the window.</html>");
+        fitFrame.addActionListener(e -> fitFrame());
+        toolbar.add(fitFrame);
+        toolbar.add(scaleControl("Width (%)", widthPercent, font));
+        toolbar.add(scaleControl("Height (%)", heightPercent, font));
+        toolbar.addComponentListener(new ComponentAdapter() {
+            @Override public void componentResized(ComponentEvent e) { toolbar.revalidate(); }
+        });
         add(toolbar, BorderLayout.NORTH);
 
         // SwingX's OS-specific delegate otherwise paints a legacy gradient/grip
@@ -111,6 +143,7 @@ final class YyTreePreview extends JPanel {
             label.setForeground(new Color(65, 73, 85));
         }
         zoomLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 12));
+        zoomLabel.setToolTipText("<html>Scale relative to the first fitted view (100%).<br>Width and height always scale together.</html>");
         hint.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 4));
         hint.setToolTipText("Hold the left mouse button and drag to pan the scrollable canvas. Use the wheel to zoom at the pointer.");
         coordinates.setMinimumSize(new Dimension(0, coordinates.getPreferredSize().height));
@@ -140,6 +173,68 @@ final class YyTreePreview extends JPanel {
     }
 
     void fitToViewport() { navigation.fitToViewport(); }
+
+    void fitFrame() { navigation.fitFrame(); }
+
+    void captureInitialScale() {
+        if (Double.isNaN(initialZoom)) initialZoom = canvas.zoom;
+        updateScaleControls();
+    }
+
+    double scalePercent() { return Double.isNaN(initialZoom) ? 100 : canvas.zoom / initialZoom * 100; }
+
+    private JPanel scaleControl(String title, JSpinner spinner, Font font) {
+        JPanel group = new JPanel(new net.miginfocom.swing.MigLayout("insets 0, gap 4", "[][90!]", "[]"));
+        group.setOpaque(false);
+        JLabel label = new JLabel(title);
+        label.setLabelFor(spinner);
+        if (font != null) { label.setFont(font); spinner.setFont(font); }
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(spinner, "0.0");
+        spinner.setEditor(editor);
+        if (font != null) editor.getTextField().setFont(font);
+        editor.getTextField().setFocusLostBehavior(JFormattedTextField.COMMIT_OR_REVERT);
+        spinner.addChangeListener(e -> {
+            if (updatingScaleControls) return;
+            double percent = ((Number)spinner.getValue()).doubleValue();
+            captureInitialScale();
+            double target = initialZoom * percent / 100;
+            if (!Double.isFinite(percent) || percent < navigation.minimumZoom() / initialZoom * 100 || percent > 100 / initialZoom * 100) {
+                updateScaleControls();
+                return;
+            }
+            Dimension extent = scroll.getViewport().getExtentSize();
+            navigation.setZoom(target, new Point2D.Double(extent.width / 2.0, extent.height / 2.0), true);
+        });
+        editor.getTextField().addActionListener(e -> {
+            try { spinner.commitEdit(); }
+            catch (java.text.ParseException error) { editor.getTextField().setValue(spinner.getValue()); }
+        });
+        group.add(label); group.add(spinner, "growx");
+        return group;
+    }
+
+    private void updateScaleControls() {
+        double baseline = Double.isNaN(initialZoom) ? canvas.zoom : initialZoom;
+        double percent = scalePercent();
+        double minimum = navigation.minimumZoom() / baseline * 100, maximum = 100 / baseline * 100;
+        if (Double.compare(percent, displayedPercent) == 0 && Double.compare(minimum, displayedMinimum) == 0
+            && Double.compare(maximum, displayedMaximum) == 0
+            && Double.compare(((Number)widthPercent.getValue()).doubleValue(), percent) == 0
+            && Double.compare(((Number)heightPercent.getValue()).doubleValue(), percent) == 0) return;
+        updatingScaleControls = true;
+        try {
+            for (JSpinner spinner : new JSpinner[]{widthPercent, heightPercent}) {
+                SpinnerNumberModel model = (SpinnerNumberModel)spinner.getModel();
+                model.setMinimum(minimum); model.setMaximum(maximum); model.setValue(percent);
+                String help = String.format(Locale.ROOT,
+                    "<html>Uniform scale relative to the first fitted view.<br>Editing either dimension updates both; the visible centre stays fixed.<br>Allowed range: %.3f%% to %.3f%%. Step: 1 percentage point.</html>", minimum, maximum);
+                spinner.setToolTipText(help);
+                ((JSpinner.DefaultEditor)spinner.getEditor()).getTextField().setToolTipText(help);
+            }
+            zoomLabel.setText(String.format(Locale.ROOT, "%.1f%%", percent));
+            displayedPercent = percent; displayedMinimum = minimum; displayedMaximum = maximum;
+        } finally { updatingScaleControls = false; }
+    }
 
     static String html(String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
@@ -377,6 +472,24 @@ final class YyTreePreview extends JPanel {
                 (double)extent.height / canvas.logicalHeight));
         }
 
+        private double minimumZoom() {
+            double fit = fitZoom();
+            return Math.min(.1, Math.min(canvas.zoom, fit > 0 ? fit : canvas.zoom));
+        }
+
+        void fitFrame() {
+            captureInitialScale();
+            endDrag();
+            hoverPointer = null;
+            lastPointer = null;
+            clearHover();
+            autoFit = true;
+            scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+            scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            if (scroll.getWidth() > 0 && scroll.getHeight() > 0) scroll.doLayout();
+            fitToViewport();
+        }
+
         void fitToViewport() {
             Dimension extent = scroll.getViewport().getExtentSize();
             if (!autoFit || extent.width <= 0 || extent.height <= 0) return;
@@ -406,7 +519,7 @@ final class YyTreePreview extends JPanel {
         }
 
         private void updateStatus() {
-            zoomLabel.setText(String.format(Locale.ROOT, "%.0f%%", canvas.zoom * 100));
+            updateScaleControls();
             if (lastPointer == null) {
                 coordinates.setText("Mouse: —");
                 return;
@@ -481,29 +594,36 @@ final class YyTreePreview extends JPanel {
 
         @Override public void mouseWheelMoved(MouseWheelEvent e) {
             if (e.getPreciseWheelRotation() == 0) return;
+            captureInitialScale();
             endDrag();
             lastPointer = pointer(e);
             hoverPointer = new Point(lastPointer);
+            setZoom(canvas.zoom * Math.pow(1.12, -e.getPreciseWheelRotation()), lastPointer, false);
+            e.consume();
+        }
+
+        private void setZoom(double targetZoom, Point2D anchor, boolean centreAnchor) {
+            endDrag();
             double oldZoom = canvas.zoom;
-            double minimumZoom = Math.min(.1, Math.min(oldZoom, fitZoom()));
+            Point view = scroll.getViewport().getViewPosition();
+            double logicalX = (view.x + anchor.getX()) / oldZoom, logicalY = (view.y + anchor.getY()) / oldZoom;
             autoFit = false;
             scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            canvas.zoom = Math.max(minimumZoom, Math.min(100, oldZoom * Math.pow(1.12, -e.getPreciseWheelRotation())));
-            double logicalX = e.getX() / oldZoom, logicalY = e.getY() / oldZoom;
+            canvas.zoom = Math.max(minimumZoom(), Math.min(100, targetZoom));
             Dimension size = new Dimension((int)Math.ceil(canvas.logicalWidth * canvas.zoom),
                 (int)Math.ceil(canvas.logicalHeight * canvas.zoom));
             canvas.setPreferredSize(size);
             scroll.getViewport().setViewSize(size);
             canvas.revalidate();
             if (scroll.getWidth() > 0 && scroll.getHeight() > 0) scroll.doLayout();
+            Dimension extent = scroll.getViewport().getExtentSize();
             scroll.getViewport().setViewPosition(bounded(new Point(
-                (int)Math.round(logicalX * canvas.zoom - lastPointer.x),
-                (int)Math.round(logicalY * canvas.zoom - lastPointer.y))));
+                (int)Math.round(logicalX * canvas.zoom - (centreAnchor ? extent.width / 2.0 : anchor.getX())),
+                (int)Math.round(logicalY * canvas.zoom - (centreAnchor ? extent.height / 2.0 : anchor.getY())))));
             cache.request();
             refreshHover();
             canvas.repaint();
-            e.consume();
         }
 
         void dispose() {

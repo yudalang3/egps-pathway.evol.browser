@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import egps2.UnifiedAccessPoint;
+import egps2.frame.gui.EGPSMainGuiUtil;
 import graphic.engine.guicalculator.BlankArea;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.model.tree.ScaleBarProperty;
@@ -84,7 +85,7 @@ public final class YyTreeBridge {
         onEdt(() -> window.get().setVisible(true));
         // Native window realization can adjust the viewport, particularly at 200% DPI.
         awaitRendering(content.get());
-        onEdt(() -> panel.paintImmediately(0, 0, panel.getWidth(), panel.getHeight()));
+        onEdt(() -> { content.get().captureInitialScale(); panel.paintImmediately(0, 0, panel.getWidth(), panel.getHeight()); });
         return result.get();
     }
 
@@ -233,7 +234,7 @@ public final class YyTreeBridge {
             @Override public FontMetrics getFontMetrics(Font font) {
                 BufferedImage image=new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
                 Graphics2D graphics=image.createGraphics();
-                try { return graphics.getFontMetrics(font); } finally { graphics.dispose(); }
+                try { EGPSMainGuiUtil.setupHighQualityRendering(graphics); return graphics.getFontMetrics(font); } finally { graphics.dispose(); }
             }
         };
         final ScaleBarProperty scale = new ScaleBarProperty();
@@ -302,10 +303,14 @@ public final class YyTreeBridge {
                 if (type.equals("track")) trackWidth += layer.getJSONObject("columns").size() * number(layer,"width",16) + 4;
                 if (type.equals("heatmap")) trackWidth += layer.getJSONArray("titles").size() * number(layer,"width",16) + 4;
             }
+            for(JSONObject layer:layers) applyStyle(layer);
             prepareLegends();
             properties.setGlobalFont(labelFont);
             FontMetrics metrics = metricsHost.getFontMetrics(labelFont);
             labelWidth = labels ? leaves.stream().mapToInt(n -> metrics.stringWidth(n.getName())).max().orElse(0)+12 : 0;
+            if(labels && (code==3||code==4))
+                labelWidth=Math.max(labelWidth,leaves.stream().mapToDouble(n->Math.hypot(
+                    metrics.stringWidth(n.getName())+Math.ceil(sizes.getOrDefault(n,0.0))+4,metrics.getHeight())).max().orElse(0));
             JSONArray m = scene.getJSONObject("canvas").getJSONArray("margins");
             int reserve = (int)Math.ceil(labelWidth + trackWidth + 12);
             boolean curved = code >= 3 && code <= 6;
@@ -349,7 +354,6 @@ public final class YyTreeBridge {
                 tips.put(n,tip);
             }
             walk(root,n -> { if(n.getChildCount()>0) positions.put(n,meanChildren(n)); });
-            for(JSONObject layer:layers) applyStyle(layer);
         }
         double meanChildren(GraphicsNode node) {
             double sum=0;
@@ -443,7 +447,8 @@ public final class YyTreeBridge {
         }
         void drawScene(Graphics2D g) {
                 sceneDrawCount.incrementAndGet();
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+                EGPSMainGuiUtil.setupHighQualityRendering(g);
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
                 g.setFont(labelFont);
                 for(JSONObject layer:layers) if(layer.getString("type").equals("inner2leaf_highlight")) highlight(g,layer);
                 drawTree(g);
@@ -466,8 +471,9 @@ public final class YyTreeBridge {
                 if(node.getChildCount()>0 && (code==3||code==4)) {
                     GraphicsNode first=(GraphicsNode)node.getChildAt(0),last=(GraphicsNode)node.getChildAt(node.getChildCount()-1);
                     double radius=Point2D.distance(centerX,centerY,node.getXSelf(),node.getYSelf());
-                    double a=-Math.toRadians(first.getAngleIfNeeded()),b=-Math.toRadians(last.getAngleIfNeeded());
-                    Path2D path=new Path2D.Double();for(int i=0;i<=100;i++){double t=a+(b-a)*i/100;double x=centerX+radius*Math.cos(t),y=centerY+radius*Math.sin(t);if(i==0)path.moveTo(x,y);else path.lineTo(x,y);}g.draw(path);
+                    double a=first.getAngleIfNeeded(),b=last.getAngleIfNeeded();
+                    Arc2D.Double arc=new Arc2D.Double();
+                    arc.setArcByCenter(centerX,centerY,radius,a,b-a,Arc2D.OPEN);g.draw(arc);
                 }
                 if(node.getChildCount()>0 && (code==5||code==6)) {
                     GraphicsNode first=(GraphicsNode)node.getChildAt(0),last=(GraphicsNode)node.getChildAt(node.getChildCount()-1);
@@ -486,6 +492,18 @@ public final class YyTreeBridge {
         void drawLabels(Graphics2D g) {
             FontMetrics fm=g.getFontMetrics();
             for(GraphicsNode leaf:leaves) {
+                if(code==3||code==4) {
+                    TipLabelGeometry placement=circularLabelGeometry(leaf,fm);
+                    Point2D tip=tips.get(leaf);
+                    Graphics2D label=(Graphics2D)g.create();
+                    try {
+                        label.translate(tip.getX(),tip.getY());label.rotate(placement.rotation());
+                        Color background=labelColors.get(leaf);
+                        if(background!=null){label.setColor(background);label.fill(placement.box());}
+                        label.setColor(Color.BLACK);label.drawString(leaf.getName(),(float)placement.x(),(float)placement.baseline());
+                    } finally {label.dispose();}
+                    continue;
+                }
                 Rectangle2D bounds=labelBounds(leaf,fm);double x=bounds.getX();
                 double y=bounds.getY()+fm.getAscent()/2.0;int width=fm.stringWidth(leaf.getName());
                 Color background=labelColors.get(leaf);
@@ -493,7 +511,14 @@ public final class YyTreeBridge {
                 g.setColor(Color.BLACK);g.drawString(leaf.getName(),(float)x,(float)(y+fm.getAscent()/2.0));
             }
         }
+        TipLabelGeometry circularLabelGeometry(GraphicsNode leaf,FontMetrics fm) {
+            return TipLabelGeometry.at(leaf.getAngleIfNeeded(),(int)Math.ceil(sizes.getOrDefault(leaf,0.0)),leaf.getName(),fm);
+        }
         Rectangle2D labelBounds(GraphicsNode leaf,FontMetrics fm) {
+            if(code==3||code==4) {
+                Point2D tip=tips.get(leaf);
+                return circularLabelGeometry(leaf,fm).boundsAt(tip.getX(),tip.getY()).getBounds2D();
+            }
             Point2D p=anchor(leaf,6);double x=p.getX();int width=fm.stringWidth(leaf.getName());
             double areaWidth=labelWidth-10;
             if(code>=3 && code<=6 && x<centerX) x-=areaWidth;

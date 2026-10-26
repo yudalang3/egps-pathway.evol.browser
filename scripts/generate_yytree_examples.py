@@ -272,6 +272,9 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
 # <<Show Crosshair and Snap To Point start on. Within 12 interface pixels, the crosshair snaps to the nearest node.|Show Crosshair 和 Snap To Point 默认开启，12 个界面像素内十字线吸附最近节点。>>
 # <<Turn snapping off: the crosshair follows the pointer, but node highlighting and tooltips remain.|关闭吸附后，十字线跟随鼠标，节点高亮和提示仍保留。>>
 # <<Mouse reports pointer coordinates; Snap reports the node's logical position. Each window keeps its own switches.|Mouse 显示鼠标坐标，Snap 显示节点逻辑坐标；各窗口的开关独立。>>
+# <<Fit frame resets panning and fits the current window again, keeping the two hover switches.|Fit frame 归零平移并重新适配当前窗口，保留两个悬停开关。>>
+# <<Width (%) and Height (%) are linked: enter 125.5 in either field and press Enter or leave it to apply uniform zoom.|Width (%) 与 Height (%) 联动，在任一框输入 125.5，按 Enter 或移开焦点即可等比缩放。>>
+# <<100% always means the first fitted display size. After resizing, Fit frame can show a different percentage.|100% 始终代表首次完整显示的尺寸；调整窗口后，Fit frame 的百分比可能不同。>>
 # <<Zoom in until scrollbars appear, then hold the left button and drag.|放大至出现滚动条后，按住鼠标左键拖动。>>
 # <<Content follows the pointer; release outside the canvas also ends the drag.|内容跟随鼠标移动；在画布外松开鼠标也会结束拖动。>>
 # <<Wheel over a branch: it stays under the pointer while zooming.|把鼠标放在枝条上滚动：缩放时该位置保持在鼠标下方。>>
@@ -483,8 +486,8 @@ The first preview installs the light FlatLaf theme from the eGPS installation.
 The white drawing canvas is surrounded by light grey chrome and a SwingX status
 bar showing zoom and coordinates. The native window title bar is retained.
 Canvas width and height are logical pixels. The preview initially fits the whole
-canvas without enlarging it, and follows window resizing until the first wheel
-zoom. Afterwards resizing keeps the manual zoom; scrollbars appear only when
+canvas without enlarging it, and follows window resizing until manual zoom
+using the wheel or percentage controls. Afterwards resizing keeps the manual zoom; scrollbars appear only when
 the drawing exceeds the viewport. Printing again starts a fresh fitted view.
 Hold the left button to pan; wheel zoom remains anchored at the pointer.
 Panning stops at the canvas edges; if the entire canvas fits, zoom in first.
@@ -496,10 +499,19 @@ Turning snapping off retains node highlighting and standard Swing tooltips;
 hiding the crosshair also retains inspection. Dragging hides hover overlays.
 The viewport image is cached in the background; pointer motion only draws the
 guides and glow. Exports contain no hover overlays, and printing resets switches.
+After Snap To Point, Fit frame restores full-canvas automatic fitting and clears
+panning without changing hover switches. Width (%) and Height (%) always change
+together: type a decimal and press Enter or leave the field, or use the 1-point
+spinner steps. Percentages and the bottom scale readout use the first fitted
+display as a fixed 100% baseline. Resizing does not change that reference:
+Fit frame may show another percentage, while entering 100 restores the original
+display scale. Numeric zoom preserves the visible centre; wheel zoom preserves
+the actual pointer. Invalid or out-of-range input keeps the last valid view.
+Controls wrap into additional rows in narrow windows. Printing creates a new baseline.
 
 首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
-保留原生标题栏。宽高指定逻辑画布像素；初始完整显示且不主动放大小图，首次滚轮前随窗口
-调整自动适配。滚轮后保留手动倍率，仅溢出时显示对应滚动条；重新打印恢复自动适配。
+保留原生标题栏。宽高指定逻辑画布像素；初始完整显示且不主动放大小图，手动缩放前随窗口
+调整自动适配。滚轮或百分比输入后保留手动倍率，仅溢出时显示对应滚动条；重新打印恢复自动适配。
 按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
 窗口时请先放大。交互仅改变视图，不修改 R 绘图定义或重新计算树布局。
 靠近叶节点、内部节点或根节点的 12 个界面像素内即可检查节点。Show Crosshair 和
@@ -507,6 +519,12 @@ Snap To Point 默认开启，十字线吸附最近节点，Mouse 与 Snap 两行
 关闭吸附仍保留节点高亮及标准 Swing 悬停提示；隐藏十字线也不影响节点检查。
 拖动期间隐藏悬停层。可见画面由后台缓存，鼠标移动只绘制辅助线和光晕。
 导出图不包含悬停效果，重新打印恢复默认开关；这些交互不接入 MTV 界面。
+Snap To Point 后的 Fit frame 重新完整适配当前窗口、归零平移并恢复自动适配，不改变悬停开关。
+Width (%) 与 Height (%) 始终联动；支持小数输入、Enter／失焦确认以及每次 1 个百分点的微调。
+两框和底部倍率固定以首次完整显示为 100%，调整窗口不改写基准；因此 Fit frame 后可能不是
+100%，输入 100 则恢复首次显示尺寸。数值输入锚定可见区域中心，滚轮锚定真实鼠标位置。
+无效或越界输入保留最近有效视图，控件提示中显示允许范围；窄窗口中工具栏自动换行。
+重新打印为新预览建立新的 100% 基准，不改变 R 对象或导出尺寸。
 
 Swing look-and-feel is shared within the JVM. Loading/configuring yytree and
 offscreen rendering do not install the theme. Opening the first preview changes
