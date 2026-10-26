@@ -110,7 +110,7 @@ Newick 名称中的空格、Unicode、引号及引号内的标点会保留；例
 
 ```r
 p <- yytree(tree) +
-  yytree::layout(code = 7, tree_width_ratio = 0.8, left_margin_ratio = 0.1) +
+  yytree::layout(code = 7, direction = "up", tree_width_ratio = 0.8, left_margin_ratio = 0.1) +
   leaf_labels(align = "left", gap_length = 3)
 circle <- yytree(tree) +
   yytree::layout(code = 3, start_angle = 330, angle_extent = 90) +
@@ -118,6 +118,19 @@ circle <- yytree(tree) +
 ```
 
 圆形角度使用整数度数：起始角为 0–360，展开角为 1–360，默认分别为 285 和 360。倾斜树宽度比例为 `(0, 1]`、留白比例为 `[0, 1)`，默认分别为 1 和 0.2；较大留白会缩窄树，再居中摆放，并非画布像素边距。后一次布局或标签设置会把省略的参数恢复为默认值。未知参数、不适用于当前布局的参数和无效值会给出实际输入、允许范围及修正示例。交互式 R 中已有运行中的 yytree JVM 时，还会显示非模态错误说明；批处理、`YYTREE_EXAMPLES_NO_GUI=1` 或 JVM 未启动时仅返回可捕获的 R 错误，不会为报错启动 Java。
+
+`direction` 仅适用于倾斜布局 7，表示从根到叶子的生长方向。省略或传 `NULL` 时向右，四方向按整树顺时针旋转，不为保持屏幕叶序而镜像：
+
+| direction | 生长方向 | 顺时针旋转 | 原第一片叶子的屏幕位置 |
+|---|---|---|---|
+| `"right"` | 向右 | 0° | 上侧 |
+| `"down"` | 向下 | 90° | 右侧 |
+| `"left"` | 向左 | 180° | 下侧 |
+| `"up"` | 向上 | 270° | 左侧 |
+
+原始叶序、拓扑和枝长不变。左右方向的标签保持水平；向下时文字顺时针旋转 90°、从上往下读，向上时逆时针旋转 90°、从下往上读，文字不会倒置。`align` 仍以最长标签为共同参照，但在旋转后的文字阅读轴上解释左／中／右，而不是按屏幕左右解释；`gap_length` 沿树的生长方向量取。向左时，右对齐让文字末端更靠近 tip。
+
+分类轨道、热图、高亮及节点注释随方向转动，轨道按叶名匹配，标题保持可读；图例仍在指定的画布角落，自由绘图也保留画布坐标。`tree_width_ratio` 和 `left_margin_ratio` 的名称保留，但朝上、朝下时作用于根到叶子的高度方向；画布宽高与四个像素边距的屏幕含义不变。后续 `layout(code = 7)` 会把方向恢复为向右。四向完整示例见 `examples/example25_all_layouts_zh.R`。
 
 ## 节点与多列注释
 

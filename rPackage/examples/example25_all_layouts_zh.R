@@ -19,6 +19,16 @@ plots <- lapply(seq_along(layout_names), function(code)
     leaf_annotation_rect(categories, width = 12) +
     leaf_annotation_heatmap(measurements, legend = "bottom_right", width = 12))
 names(plots) <- layout_names
+directions <- c("right", "down", "left", "up")
+for (direction in directions) {
+  plots[[paste0("slant_", direction)]] <- yytree(tree, width = 1200, height = 1000) +
+    yytree::layout(code = 7, direction = direction, tree_width_ratio = 0.9, left_margin_ratio = 0.1) +
+    leaf_labels(align = "left", gap_length = 6) +
+    inner2leaf_highlight("Human", "Mouse", fill = "#FFCC6655") +
+    leaf_annotation_rect(categories, legend = "top_right", width = 12)
+}
+# direction 将倾斜树整棵旋转；标签和轨道跟随方向，图例保留在画布角落。
+# 朝上或朝下时，tree_width_ratio 和 left_margin_ratio 作用于竖直的根到叶子轴。
 stopifnot(all(vapply(plots, function(plot) identical(plot$tree, plots[[1]]$tree), FALSE)))
 # 编号 1 至 7 依次对应这些名称；所有布局使用完全相同的输入树。
 

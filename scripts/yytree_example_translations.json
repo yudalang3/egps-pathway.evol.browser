@@ -93,6 +93,8 @@
   "Partial rows, NA cells and invalid annotation names": "部分行、NA 单元格与非法注释名称",
   "Missing leaf rows and NA cells stay blank. Errors below are deliberately caught.": "未提供的叶子行和 NA 单元格留空；下面故意触发并捕获错误。",
   "All seven layouts with both annotation types": "七种布局同时展示两类轨道",
+  "direction rotates the complete slanted tree; labels and tracks follow it, while legends stay in the canvas corner.": "direction 将倾斜树整棵旋转；标签和轨道跟随方向，图例保留在画布角落。",
+  "For up/down, tree_width_ratio and left_margin_ratio act along the vertical root-to-tip axis.": "朝上或朝下时，tree_width_ratio 和 left_margin_ratio 作用于竖直的根到叶子轴。",
   "Codes 1..7 correspond to these names; all layouts share the identical input tree.": "编号 1 至 7 依次对应这些名称；所有布局使用完全相同的输入树。",
   "Save and restore an ordinary R plot definition": "保存与恢复普通 R 绘图定义",
   "Use a permanent filename to keep the RDS. It stores data, never Java handles.": "要长期保存请改用固定文件名；RDS 保存数据，不保存 Java 句柄。",

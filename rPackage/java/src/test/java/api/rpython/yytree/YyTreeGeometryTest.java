@@ -85,6 +85,7 @@ public final class YyTreeGeometryTest {
         }
         testCircularLabels();
         testGapAndLayoutParameters();
+        testSlantDirections();
         for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
@@ -291,6 +292,89 @@ public final class YyTreeGeometryTest {
         single.getJSONArray("layers").getJSONObject(0).put("angle_extent",90);
         var panel=prepare(single);var leaf=panel.leaves.getFirst();var point=panel.anchor(leaf,panel.labelWidth+20);
         require(panel.band(leaf,leaf,panel.outer+panel.labelWidth+12,16).contains(point),"Single-leaf open-circle track disappeared");
+    }
+    private static void testSlantDirections() throws Exception {
+        for(String direction:new String[]{"right","down","left","up"}) {
+            for(int[] dimensions:new int[][]{{1000,800},{500,1400},{1400,500}})
+                for(double gap:new double[]{0,6,24})for(String align:new String[]{"left","center","right"}) {
+                    JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+                    JSONObject layout=scene.getJSONArray("layers").getJSONObject(0);layout.put("code",7);layout.put("direction",direction);
+                    scene.getJSONObject("canvas").put("width",dimensions[0]);scene.getJSONObject("canvas").put("height",dimensions[1]);
+                    scene.getJSONObject("canvas").put("margins",JSON.parseArray("[27,39,63,71]"));
+                    scene.getJSONObject("tree").getJSONArray("labels").set(1,"Longest leaf WWW");
+                    JSONObject labels=JSON.parseObject("{\"type\":\"leaf_labels\",\"show\":true,\"font_size\":18}");
+                    labels.put("align",align);labels.put("gap_length",gap);scene.getJSONArray("layers").add(labels);
+                    var panel=prepare(scene);var fm=panel.metricsHost.getFontMetrics(panel.labelFont);
+                    double previous=Double.NEGATIVE_INFINITY;
+                    for(GraphicsNode leaf:panel.leaves) {
+                        var tip=panel.tips.get(leaf);var area=panel.labelAreaBounds(leaf,fm);var bounds=panel.labelBounds(leaf,fm);
+                        require(bounds.getMinX()>=0 && bounds.getMaxX()<=dimensions[0] && bounds.getMinY()>=0 && bounds.getMaxY()<=dimensions[1],"Slant label clipped: "+direction);
+                        double clearance=projectedMinimum(area,panel.growthX,panel.growthY)-panel.along(tip.x,tip.y);
+                        require(Math.abs(clearance-6-gap)<1e-7,"Direction changed label clearance: "+direction);
+                        double position=panel.across(tip.x,tip.y);require(position>previous,"Rotation changed original leaf order");previous=position;
+                        var geometry=panel.slantLabelGeometry(leaf,fm);
+                        require(Math.abs(geometry.rotation())<=Math.PI/2,"Slant label is upside down");
+                        double rx=Math.cos(geometry.rotation()),ry=Math.sin(geometry.rotation());
+                        double fraction=align.equals("left")?0:align.equals("center")?.5:1;
+                        double offset=projectedMinimum(bounds,rx,ry)-projectedMinimum(area,rx,ry);
+                        require(Math.abs(offset-fraction*(panel.maxLabelWidth-fm.stringWidth(leaf.getName())))<1e-7,"Direction broke longest-label alignment: "+direction);
+                    }
+                    for(GraphicsNode node:panel.nodes.values())if(node!=panel.root) {
+                        var parent=(GraphicsNode)node.getParent();
+                        require(panel.along(node.getXSelf()-parent.getXSelf(),node.getYSelf()-parent.getYSelf())>=-1e-7,"A slant branch points backwards");
+                    }
+                    require(panel.named.get("A").getRealBranchLength()==0.12345678912345,"Rotation changed a stored length");
+                }
+            JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+            JSONObject layout=scene.getJSONArray("layers").getJSONObject(0);layout.put("code",7);layout.put("direction",direction);
+            var wide=prepare(scene);var tip=wide.tips.get(wide.leaves.getFirst());
+            double span=wide.along(tip.x-wide.root.getXSelf(),tip.y-wide.root.getYSelf());
+            layout.put("tree_width_ratio",.6);var narrow=prepare(scene);tip=narrow.tips.get(narrow.leaves.getFirst());
+            require(Math.abs(narrow.along(tip.x-narrow.root.getXSelf(),tip.y-narrow.root.getYSelf())-.6*span)<1e-7,"Width ratio does not follow growth axis");
+            layout.remove("tree_width_ratio");layout.put("left_margin_ratio",.4);narrow=prepare(scene);tip=narrow.tips.get(narrow.leaves.getFirst());
+            require(narrow.along(tip.x-narrow.root.getXSelf(),tip.y-narrow.root.getYSelf())<span,"Margin ratio does not follow growth axis");
+            layout.remove("left_margin_ratio");
+            scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"leaf_labels\",\"show\":true,\"align\":\"right\"}"));
+            scene.getJSONArray("layers").add(JSON.parseObject("""
+                {"type":"track","names":["C","A"],"width":20,"legend":"none",
+                 "columns":{"group":{"levels":["x","z"],"colors":["#FF0000FF","#0000FFFF"],"values":["z","x"]}}}
+                """,Feature.OrderedField));
+            var heat=JSON.parseObject("""
+                {"type":"heatmap","names":["B","A","C"],"width":20,"legend":"none","titles":["value"],
+                 "cells":[["#00FF00FF"],[null],["#FFD700FF"]],"limits":[0,1],"palette":[]}
+                """);
+            for(int i=0;i<256;i++)heat.getJSONArray("palette").add("#000000FF");scene.getJSONArray("layers").add(heat);
+            var panel=prepare(scene);var image=new BufferedImage(panel.logicalWidth,panel.logicalHeight,BufferedImage.TYPE_INT_RGB);
+            var graphics=image.createGraphics();graphics.setColor(java.awt.Color.WHITE);graphics.fillRect(0,0,image.getWidth(),image.getHeight());graphics.setFont(panel.labelFont);
+            panel.drawTracks(graphics);int index=0;int[] category={0xFF0000,0xFFFFFF,0x0000FF},numeric={0xFFFFFF,0x00FF00,0xFFD700};
+            for(GraphicsNode leaf:panel.leaves) {
+                var first=panel.anchor(leaf,panel.labelWidth+22);var second=panel.anchor(leaf,panel.labelWidth+46);
+                require((image.getRGB((int)first.x,(int)first.y)&0xFFFFFF)==category[index],"Rotated category rows mismatched");
+                require((image.getRGB((int)second.x,(int)second.y)&0xFFFFFF)==numeric[index],"Rotated heatmap rows mismatched");index++;
+                var bounds=panel.band(leaf,leaf,panel.labelWidth+12,44).getBounds2D();
+                require(bounds.getMinX()>=0 && bounds.getMaxX()<=image.getWidth() && bounds.getMinY()>=0 && bounds.getMaxY()<=image.getHeight(),"Rotated tracks clipped");
+            }
+            var highlight=JSON.parseObject("{\"type\":\"inner2leaf_highlight\",\"name1\":\"A\",\"name2\":\"C\",\"fill\":\"#00FF00FF\"}");
+            panel.highlight(graphics,highlight);
+            int cx=(int)((panel.root.getXSelf()+panel.tips.get(panel.leaves.getFirst()).x+panel.tips.get(panel.leaves.getLast()).x)/3);
+            int cy=(int)((panel.root.getYSelf()+panel.tips.get(panel.leaves.getFirst()).y+panel.tips.get(panel.leaves.getLast()).y)/3);
+            require(((image.getRGB(cx,cy)>>8)&255)>(image.getRGB(cx,cy)&255),"Rotated highlight missed its clade");graphics.dispose();
+            scene.getJSONArray("layers").add(highlight);
+            scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"inner_node_annotation\",\"name1\":\"A\",\"name2\":\"B\",\"shape\":\"triangle\",\"text\":\"AB\",\"size\":20,\"fill\":\"#FFB6C1FF\"}"));
+            scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"rectangle\",\"mode\":\"pixel\",\"x\":10,\"y\":10,\"width\":10,\"height\":10,\"fill_color\":\"#FF00FFFF\",\"line_color\":null,\"line_thickness\":0,\"line_type\":\"solid\"}"));
+            panel=prepare(scene);graphics=image.createGraphics();graphics.setColor(java.awt.Color.WHITE);graphics.fillRect(0,0,image.getWidth(),image.getHeight());
+            var transform=graphics.getTransform();panel.drawScene(graphics);require(transform.equals(graphics.getTransform()),"Rotation leaked into canvas graphics");graphics.dispose();
+            require((image.getRGB(15,15)&0xFFFFFF)==0xFF00FF,"Direction moved free canvas geometry");
+            new java.io.File("temp/yytree-directions").mkdirs();javax.imageio.ImageIO.write(image,"png",new java.io.File("temp/yytree-directions/java-"+direction+".png"));
+            scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"layout\",\"code\":7}"));
+            require(prepare(scene).slantRotation==0,"Last layout did not reset direction");
+        }
+    }
+    private static double projectedMinimum(java.awt.geom.Rectangle2D bounds,double x,double y) {
+        double minimum=Double.POSITIVE_INFINITY;
+        for(double px:new double[]{bounds.getMinX(),bounds.getMaxX()})for(double py:new double[]{bounds.getMinY(),bounds.getMaxY()})
+            minimum=Math.min(minimum,px*x+py*y);
+        return minimum;
     }
     private static void testCircularLabels() throws Exception {
         for(int code:new int[]{3,4}) {

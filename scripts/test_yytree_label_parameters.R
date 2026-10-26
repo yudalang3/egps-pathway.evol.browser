@@ -25,6 +25,36 @@ tryCatch({
   for (align in c("left", "center", "right"))
     render(exact + leaf_labels(align = align, gap_length = 6), paste0("align-", align))
   categories <- data.frame(name = exact$tree$labels, group = rep(c("one", "two", "three"), 3))
+  directions <- c("right", "down", "left", "up")
+  direction_plots <- list()
+  values <- matrix(seq_len(18), 9, dimnames = list(exact$tree$labels, c("control", "treated")))
+  for (direction in directions) {
+    plot <- exact + yytree::layout(code = 7, direction = direction)
+    direction_plots[[direction]] <- plot
+    name <- paste0("slant-", direction)
+    path <- render(plot, name)
+    tips <- do.call(rbind, results[[name]]$tips)[exact$tree$labels, , drop = FALSE]
+    ordered <- switch(direction, right = diff(tips[, 4]) > 0, down = diff(tips[, 3]) < 0,
+                      left = diff(tips[, 4]) < 0, up = diff(tips[, 3]) > 0)
+    stopifnot(all(ordered))
+    if (direction == "right") stopifnot(identical(unname(tools::md5sum(path)),
+      unname(tools::md5sum(file.path(out, "reported-tree-default-gap.png")))))
+    decorated <- yytree(tree, width = 1400, height = 1100, blank_top = 35, blank_left = 55,
+      blank_bottom = 80, blank_right = 45) +
+      yytree::layout(code = 7, direction = direction, tree_width_ratio = .85, left_margin_ratio = .1) +
+      leaf_labels(align = "right", font_size = 18, gap_length = 12) + leaf_render(size = 5.5) +
+      leaf_label_render(data.frame(name = "Arabidopsis", color = "gold")) +
+      leaf_annotation_rect(categories, legend = "top_right") +
+      leaf_annotation_heatmap(values, legend = "bottom_left") +
+      inner2leaf_highlight("Human", "Mouse", fill = "#FFCC6655") +
+      inner_node_annotation("Human", "Mouse", text = "Mammals", shape = "triangle", size = 14) +
+      free_rectangle(10, 10, 12, 12, mode = "pixel", fill_color = "magenta", line_color = NA)
+    render(decorated, paste0(name, "-decorated"))
+  }
+  reset_direction <- render(exact + yytree::layout(code = 7, direction = "up") +
+    yytree::layout(code = 7), "direction-reset")
+  stopifnot(identical(unname(tools::md5sum(reset_direction)),
+    unname(tools::md5sum(file.path(out, "reported-tree-default-gap.png")))))
   for (code in 1:7) for (gap in c(0, 6, 24)) {
     plot <- yytree(tree, width = 1400, height = 1100) + yytree::layout(code = code) +
       leaf_labels(align = "left", font_size = 18, gap_length = gap) + leaf_render(size = 5.5) +
@@ -46,7 +76,13 @@ tryCatch({
       file.path(out, "reported-tree-preview.png")))
     stopifnot(metadata$dragPassed)
     results$preview <- metadata
+    for (direction in directions) {
+      metadata <- jsonlite::fromJSON(yytree:::.runtime_request("testInteraction", yytree:::.scene_json(direction_plots[[direction]]),
+        file.path(out, paste0("slant-", direction, "-preview.png"))))
+      stopifnot(metadata$dragPassed, !metadata$desktopLaunched)
+      results[[paste0("preview-", direction)]] <- metadata
+    }
   }
   jsonlite::write_json(results, "logs/yytree-label-parameters.json", auto_unbox = TRUE, pretty = TRUE)
-  cat("Reported 800px tree, seven layouts, gap/align/markers/tracks, circular opening and layout reset passed.\n")
+  cat("Reported 800px tree, seven layouts, four slant directions, gap/align/markers/tracks, circular opening and layout reset passed.\n")
 }, finally = quit_yytree())

@@ -19,6 +19,16 @@ plots <- lapply(seq_along(layout_names), function(code)
     leaf_annotation_rect(categories, width = 12) +
     leaf_annotation_heatmap(measurements, legend = "bottom_right", width = 12))
 names(plots) <- layout_names
+directions <- c("right", "down", "left", "up")
+for (direction in directions) {
+  plots[[paste0("slant_", direction)]] <- yytree(tree, width = 1200, height = 1000) +
+    yytree::layout(code = 7, direction = direction, tree_width_ratio = 0.9, left_margin_ratio = 0.1) +
+    leaf_labels(align = "left", gap_length = 6) +
+    inner2leaf_highlight("Human", "Mouse", fill = "#FFCC6655") +
+    leaf_annotation_rect(categories, legend = "top_right", width = 12)
+}
+# direction rotates the complete slanted tree; labels and tracks follow it, while legends stay in the canvas corner.
+# For up/down, tree_width_ratio and left_margin_ratio act along the vertical root-to-tip axis.
 stopifnot(all(vapply(plots, function(plot) identical(plot$tree, plots[[1]]$tree), FALSE)))
 # Codes 1..7 correspond to these names; all layouts share the identical input tree.
 

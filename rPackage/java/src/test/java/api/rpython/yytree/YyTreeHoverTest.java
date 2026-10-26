@@ -45,8 +45,11 @@ public final class YyTreeHoverTest {
 
     public static void main(String[] args) throws Exception {
         SwingUtilities.invokeAndWait(YyTreePreview::initializeTheme);
-        for(int code=1;code<=7;code++) {
-            var preview=preview(scene(code));
+        for(int variant=1;variant<=10;variant++) {
+            int code=Math.min(variant,7);
+            JSONObject specification=scene(code);
+            if(variant>7)specification.getJSONArray("layers").getJSONObject(0).put("direction",new String[]{"down","left","up"}[variant-8]);
+            var preview=preview(specification);
             try {
                 SwingUtilities.invokeAndWait(() -> {
                     String original=preview.canvas.scene.toJSONString();
@@ -254,6 +257,22 @@ public final class YyTreeHoverTest {
                     && frame.getContentPane() instanceof YyTreePreview preview && preview!=shown.get())
                     require(preview.snap.isSelected() && preview.crosshair.isSelected() && preview.hovered==null,"Window interaction state leaked");
             });
+            for(String direction:new String[]{"right","down","left","up"}) {
+                JSONObject specification=scene(7);
+                specification.getJSONArray("layers").getJSONObject(0).put("direction",direction);
+                bridge.showPlot(specification.toJSONString(),false);
+                SwingUtilities.invokeAndWait(()->{
+                    for(Window window:Window.getWindows())if(window instanceof JFrame frame && frame.isDisplayable()
+                        && frame.getContentPane() instanceof YyTreePreview preview && preview.canvas.code==7) {
+                        for(var node:preview.nodePoints) {
+                            move(preview,node.x()*preview.canvas.zoom,node.y()*preview.canvas.zoom);
+                            require(preview.hovered!=null && preview.hovered.id()==node.id(),"Rotated window node hit failed: "+direction);
+                            require(preview.crosshairPoint().distance(node.x()*preview.canvas.zoom,node.y()*preview.canvas.zoom)<1e-7,"Rotated window snap missed");
+                        }
+                        assertCachePixels(preview);
+                    }
+                });
+            }
         } finally { bridge.closeAll(); }
     }
 

@@ -55,8 +55,9 @@ document("layout", "Select the tree layout for a yytree plot.",
     name = r"(One layout-name string from the table below. Default \code{NULL}: use \code{code} if supplied, otherwise \code{"rect"}. \code{"rectangle"} aliases \code{"rect"}; \code{"circular"} aliases \code{"circ"}.)",
     start_angle = r"(Circular layouts 3 and 4 only. One integer from 0 through 360, in degrees. Default \code{NULL} uses 285. Zero points right; increasing angles run counterclockwise. Sets the first leaf angle.)",
     angle_extent = r"(Circular layouts 3 and 4 only. One integer from 1 through 360, in degrees. Default \code{NULL} uses 360. Leaves occupy this angular span; values below 360 leave an opening. A full circle spaces leaves by extent divided by leaf count; an open circle includes both endpoints. For a single leaf, its track cell uses the chosen span centered on that leaf.)",
-    tree_width_ratio = r"(Slanted layout 7 only. One finite number greater than 0 and at most 1. Default \code{NULL} uses 1. Scales the entire slanted tree horizontally around the working-area center; smaller values narrow all branches consistently without changing topology.)",
-    left_margin_ratio = r"(Slanted layout 7 only. One finite number at least 0 and below 1. Default \code{NULL} uses 0.2. Reserves this fraction of the layout working width before the tree is fitted and centered; larger values narrow the tree. This is a layout ratio, not a canvas margin in pixels.)",
+    tree_width_ratio = r"(Slanted layout 7 only. One finite number greater than 0 and at most 1. Default \code{NULL} uses 1. Scales the whole tree along its root-to-tip axis around the working-area center, without changing topology. For right/left this controls width; for up/down it controls height. The parameter name remains the same for all directions.)",
+    left_margin_ratio = r"(Slanted layout 7 only. One finite number at least 0 and below 1. Default \code{NULL} uses 0.2. Reserves this fraction of the layout's root-to-tip working span before the tree is fitted and centered; larger values shorten that span. It applies to height for up/down. The historical name is retained; this is not a fixed left-side canvas margin in pixels.)",
+    direction = r"(Slanted layout 7 only. One of \code{"right"}, \code{"down"}, \code{"left"}, or \code{"up"}, indicating the direction from root to tips. Default \code{NULL} uses \code{"right"}. Directions correspond to clockwise rotations of 0, 90, 180 and 270 degrees. An explicit non-NULL value on another layout raises an explanatory error. See Details for leaf order, labels and annotations.)",
     "..." = r"(Reserved for detecting unknown arguments. No additional parameters are accepted; misspelled names raise an explanatory error.)"),
   r"(\subsection{Available layouts}{
 \tabular{rll}{
@@ -84,6 +85,23 @@ When several layout layers are added, the last one determines the display and re
 
 Circular layouts 3 and 4 use radial tip labels and ignore \code{leaf_labels(align = ...)}. Layout 3 places labels beyond real tips; layout 4 places them beyond extended tips.
 }
+\subsection{Slanted directions}{
+\tabular{llll}{
+Direction \tab Root to tips \tab Clockwise rotation \tab First leaf location\cr
+\code{right} \tab Rightward \tab 0 degrees \tab Top\cr
+\code{down} \tab Downward \tab 90 degrees \tab Right\cr
+\code{left} \tab Leftward \tab 180 degrees \tab Bottom\cr
+\code{up} \tab Upward \tab 270 degrees \tab Left
+}
+
+Directions rotate the complete tree, rather than mirroring it to preserve screen order. For example, leftward trees reverse the top-to-bottom screen order. The R tree's original leaf order, topology and branch lengths remain unchanged. A later \code{layout(code=7)} resets an earlier direction to right.
+
+Labels follow their own tips. Right/left labels remain horizontal and readable; down labels read top-to-bottom after a 90-degree clockwise rotation, and up labels read bottom-to-top after a 90-degree counterclockwise rotation. Text is never upside down. \code{leaf_labels(align=...)} still uses the longest-label region, with left/center/right interpreted in the text's reading direction. \code{gap_length} measures outward clearance along the root-to-tip direction, including node-symbol radius.
+
+Categorical tracks, heatmaps, clade highlights and node annotations follow the tree direction. Track rows still match leaf names, and titles remain readable. Legends stay in their chosen canvas corners. Free elements retain canvas coordinates and do not rotate with the tree. Canvas width, height and the four blank margins retain their screen-coordinate meanings. Layout reserves label and track space on the tip-facing side.
+
+For circular layouts, use \code{start_angle} and \code{angle_extent}, not \code{direction}; for example, \code{layout(code=3, start_angle=330, angle_extent=270)}.
+}
 \subsection{Name conflict}{
 This function masks \code{graphics::layout}, which arranges base-R plotting panels. Use \code{yytree::layout()} explicitly for tree layouts and \code{graphics::layout()} for base graphics.
 })",
@@ -91,7 +109,7 @@ This function masks \code{graphics::layout}, which arranges base-R plotting pane
 
 document("leaf_labels", "Show or hide leaf labels and set their alignment and font.",
   c(show = r"(One nonmissing logical value. Default \code{TRUE} shows labels; \code{FALSE} hides them. A plot with no \code{leaf_labels} layer initially hides labels.)",
-    align = r"(One of \code{"right"} (effective default), \code{"left"}, or \code{"center"}. The formal default lists the available choices; omitting it selects \code{"right"}. In layouts 1, 2, 5, 6 and 7, all leaf-label regions have the width of the longest label measured using the current font. This parameter aligns each label horizontally inside its region: \code{"left"} puts its left edge at the region's left edge, \code{"right"} puts its right edge at the region's right edge, and \code{"center"} centers it. It does not align tree tips or change branch lengths. Each region follows its own displayed tip, so unequal tips need not produce one straight text column. Circular layouts 3 and 4 ignore this argument and use readable radial labels; see Details.)",
+    align = r"(One of \code{"right"} (effective default), \code{"left"}, or \code{"center"}. The formal default lists the available choices; omitting it selects \code{"right"}. In layouts 1, 2, 5, 6 and 7, every leaf-label region has the same length along the text's reading axis: the longest label measured using the current font. This parameter aligns text left, center or right inside that region, as read by the viewer. In slanted up/down layouts, text and its region rotate 90 degrees together; left/right still mean the beginning/end of the reading axis, not the screen's left/right sides. It does not align tree tips or change branch lengths. Each region follows its own displayed tip, so unequal tips need not produce one straight text column. Circular layouts 3 and 4 ignore this argument and use readable radial labels; see Details.)",
     font_family = r"(One Java font-family string. Default \code{NULL} uses the eGPS font preference, falling back to Java SansSerif when unavailable. Java may substitute an unavailable family.)",
     font_size = r"(One finite positive number: font size in logical pixels. Default \code{NULL} retains the eGPS default label-font size.)",
     gap_length = r"(One finite nonnegative number in logical pixels; default 6. Controls the clearance from the displayed tip's node-symbol edge to the near edge of its equal-width label region, measured outward from the tree. Without a node symbol, clearance starts at the tip. Layouts 2, 4 and 6 use the end of the dashed extension. Circular layouts measure this clearance radially to the text instead. It is independent of branch-length units and scales together with the canvas when zooming.)",
@@ -103,6 +121,8 @@ document("leaf_labels", "Show or hide leaf labels and set their alignment and fo
 \strong{Alignment and gap are different:} On a right-facing rectangular or slanted tree with no node symbols, \code{gap_length=6} and \code{align="left"} place text 6 pixels after its tip. In the 100/40 example, \code{align="right"} puts the shorter text 66 pixels after its tip: 6 pixels of gap plus 60 pixels of unused label-region width. The extra 60 pixels come from alignment, not a larger gap. To bring the beginning of right-facing labels close to tips, use \code{align="left"} and adjust \code{gap_length}. Changing the font changes measured widths, so the extra alignment space may change too. On the left side of an arch, the region lies to the left of its tip; right-aligned text is therefore the nearer text edge. At the arch top, the region is placed above the tip. Label backgrounds follow the actual text box, not the whole equal-width region.
 
 \strong{Circular exception:} In layouts 3 and 4, labels run along the tip's radial direction and flip on the left half to remain upright. They use their own text width rather than equal-width horizontal regions, so \code{align} has no effect. \code{gap_length} still controls radial clearance beyond the node-symbol edge. Layout 3 follows real tips; layout 4 follows extended tips.
+
+\strong{Slanted directions:} \code{layout(code=7, direction="left")} places readable horizontal labels to the left of the tips; right alignment brings the text's end closer to its tip. With \code{direction="down"}, labels read top-to-bottom; with \code{direction="up"}, labels read bottom-to-top. The equal-length region rotates with the labels, and left/center/right keep the same longest-label reference along the reading axis. Gap is measured in the outward growth direction rather than always to the screen's right. Changing direction never reverses the characters of a label.
 
 Invalid parameters raise a catchable R error with the received value, requirement and corrected example. Interactive sessions with a running JVM also receive a nonmodal explanation dialog; batch sessions, \code{YYTREE_EXAMPLES_NO_GUI=1}, and sessions without a running JVM do not open dialogs.
 

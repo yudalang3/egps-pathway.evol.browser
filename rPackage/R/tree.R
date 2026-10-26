@@ -182,10 +182,10 @@ yytree <- function(tree, width = 1000, height = 800,
 }
 
 layout <- function(code = NULL, name = NULL, start_angle = NULL, angle_extent = NULL,
-                   tree_width_ratio = NULL, left_margin_ratio = NULL, ...) {
+                   tree_width_ratio = NULL, left_margin_ratio = NULL, direction = NULL, ...) {
   example <- "yytree::layout(code = 3, start_angle = 330, angle_extent = 90)"
   .parameter_dots("layout", list(...), c("code", "name", "start_angle", "angle_extent",
-    "tree_width_ratio", "left_margin_ratio"), example)
+    "tree_width_ratio", "left_margin_ratio", "direction"), example)
   names <- c("rect", "rect_align", "circ", "circ_align", "arch", "arch_align", "slant")
   if (!is.null(code) && (!is.numeric(code) || is.complex(code) || length(code) != 1L || !is.finite(code) || !code %in% seq_len(7)))
     .parameter_error("layout", "code", code, "One integer from 1 through 7.", "yytree::layout(code = 7)")
@@ -200,6 +200,15 @@ layout <- function(code = NULL, name = NULL, start_angle = NULL, angle_extent = 
     code <- matched
   }
   if (is.null(code)) code <- 1L
+  if (!is.null(direction)) {
+    direction_example <- "yytree::layout(code = 7, direction = 'up')"
+    if (code != 7L) .parameter_error("layout", "direction", direction,
+      "This parameter applies only to slanted layout 7.", direction_example)
+    if (!is.character(direction) || length(direction) != 1L || is.na(direction) ||
+        !direction %in% c("right", "down", "left", "up"))
+      .parameter_error("layout", "direction", direction,
+        "One of 'right', 'down', 'left', or 'up' (root-to-tip direction).", direction_example)
+  }
   values <- list(start_angle = start_angle, angle_extent = angle_extent,
                  tree_width_ratio = tree_width_ratio, left_margin_ratio = left_margin_ratio)
   for (key in names(values)) if (!is.null(values[[key]])) {
@@ -215,7 +224,7 @@ layout <- function(code = NULL, name = NULL, start_angle = NULL, angle_extent = 
       integer = circular, lower_open = key == "tree_width_ratio", upper_open = key == "left_margin_ratio")
   }
   .layer("layout", code = as.integer(code), start_angle = start_angle, angle_extent = angle_extent,
-         tree_width_ratio = tree_width_ratio, left_margin_ratio = left_margin_ratio)
+         tree_width_ratio = tree_width_ratio, left_margin_ratio = left_margin_ratio, direction = direction)
 }
 
 leaf_labels <- function(show = TRUE, align = c("right", "left", "center"),

@@ -277,6 +277,8 @@ public final class YyTreeBridge {
         String align = "right";
         double zoom = 1, trackWidth, labelWidth, outer, centerX, centerY;
         double gapLength = 6, maxLabelWidth, trackBaseX, slantWidthRatio = 1;
+        int slantRotation;
+        double growthX = 1, growthY;
         double archRadius, archSide, archTotal, archTop, archBottom;
         int legendReserve, leftLegendReserve;
         Font labelFont;
@@ -341,6 +343,14 @@ public final class YyTreeBridge {
                 properties.getCircularLayoutPropertiy().setGlobalExtendDegree((int)number(selectedLayout,"angle_extent",360));
                 slantWidthRatio=number(selectedLayout,"tree_width_ratio",1);
                 properties.getSlopeLayoutProperety().setBlankMarginRatio(number(selectedLayout,"left_margin_ratio",.2));
+                String direction=selectedLayout.getString("direction");
+                slantRotation=direction==null?0:switch(direction) {
+                    case "right"->0;case "down"->90;case "left"->180;case "up"->270;
+                    default->throw new IllegalArgumentException("layout(): direction must be right, down, left or up. Example: layout(code = 7, direction = 'up')");
+                };
+                properties.getSlopeLayoutProperety().setSlopeLayoutRotationDeg(slantRotation);
+                growthX=switch(slantRotation){case 0->1;case 180->-1;default->0;};
+                growthY=switch(slantRotation){case 90->1;case 270->-1;default->0;};
             }
             for(JSONObject layer:layers) applyStyle(layer);
             prepareLegends();
@@ -352,13 +362,23 @@ public final class YyTreeBridge {
             JSONArray m = scene.getJSONObject("canvas").getJSONArray("margins");
             boolean curved = code >= 3 && code <= 6;
             double requestedReserve=Math.ceil(labelWidth+trackWidth+12);
-            if (logicalWidth-m.getIntValue(1)-m.getIntValue(3)-leftLegendReserve-legendReserve-(curved?2:1)*requestedReserve < 30
-                    || logicalHeight-m.getIntValue(0)-m.getIntValue(2)-(curved?2*requestedReserve:35) < 30)
+            double[] margins={m.getIntValue(0),m.getIntValue(1)+leftLegendReserve,m.getIntValue(2),m.getIntValue(3)+legendReserve};
+            if(curved)for(int i=0;i<4;i++)margins[i]+=requestedReserve;
+            else if(code==7) {
+                margins[switch(slantRotation){case 90->2;case 180->1;case 270->0;default->3;}]+=requestedReserve;
+                double titleReserve=35;
+                FontMetrics titleMetrics=metricsHost.getFontMetrics(labelFont.deriveFont(10f));
+                for(JSONObject layer:layers) {
+                    Collection<String> titles=layer.getString("type").equals("track")?layer.getJSONObject("columns").keySet():
+                        layer.getString("type").equals("heatmap")?layer.getJSONArray("titles").toJavaList(String.class):List.of();
+                    for(String title:titles)titleReserve=Math.max(titleReserve,Math.ceil(titleMetrics.stringWidth(title)*Math.sin(Math.PI/3)+titleMetrics.getHeight()+10));
+                }
+                margins[switch(slantRotation){case 90->1;case 180->0;case 270->3;default->2;}]+=titleReserve;
+            } else { margins[2]+=35;margins[3]+=requestedReserve; }
+            if (logicalWidth-margins[1]-margins[3] < 30 || logicalHeight-margins[0]-margins[2] < 30)
                 throw new IllegalArgumentException("Cannot fit labels and tracks on this canvas.\nReceived: width="+logicalWidth+
                     ", height="+logicalHeight+", gap_length="+gapLength+".\nExpected: enough space for the tree, labels and tracks; increase width/height or reduce gap_length/font_size.\nExample: yytree(tree, width = 1600, height = 1200) + leaf_labels(gap_length = 6, font_size = 12)");
-            int reserve = (int)requestedReserve;
-            int top = m.getIntValue(0)+(curved?reserve:0), left=m.getIntValue(1)+(curved?reserve:0)+leftLegendReserve;
-            int bottom=m.getIntValue(2)+(curved?reserve:35), right=m.getIntValue(3)+reserve+legendReserve;
+            int top=(int)margins[0],left=(int)margins[1],bottom=(int)margins[2],right=(int)margins[3];
             if(code==5 || code==6) {
                 // MTV derives the arch radius from height alone (0.3 * height).
                 // Fit that layout into both dimensions before calculating any coordinates.
@@ -378,10 +398,11 @@ public final class YyTreeBridge {
             engine.calculateForPainting(logicalWidth,logicalHeight);
             treeBounds = new Rectangle2D.Double(left,top,logicalWidth-left-right,logicalHeight-top-bottom);
             if(code==7) {
-                double center=treeBounds.getCenterX();
                 walk(root,n->{
-                    n.setXSelf(center+(n.getXSelf()-center)*slantWidthRatio);
-                    n.setXParent(center+(n.getXParent()-center)*slantWidthRatio);
+                    double shift=(slantWidthRatio-1)*along(n.getXSelf()-treeBounds.getCenterX(),n.getYSelf()-treeBounds.getCenterY());
+                    n.setXSelf(n.getXSelf()+growthX*shift);n.setYSelf(n.getYSelf()+growthY*shift);
+                    shift=(slantWidthRatio-1)*along(n.getXParent()-treeBounds.getCenterX(),n.getYParent()-treeBounds.getCenterY());
+                    n.setXParent(n.getXParent()+growthX*shift);n.setYParent(n.getYParent()+growthY*shift);
                 });
             }
             centerX=treeBounds.getCenterX(); centerY=treeBounds.getCenterY();
@@ -401,7 +422,7 @@ public final class YyTreeBridge {
                 if(code==6) tip=arch(outer,n.getDoubleVariable());
                 tips.put(n,tip);
             }
-            trackBaseX=leaves.stream().mapToDouble(n->tips.get(n).x+sizes.getOrDefault(n,0.0)).max().orElse(treeBounds.getMaxX());
+            trackBaseX=leaves.stream().mapToDouble(n->(code==7?along(tips.get(n).x,tips.get(n).y):tips.get(n).x)+sizes.getOrDefault(n,0.0)).max().orElse(treeBounds.getMaxX());
             // Keep tracks on a common contour, outside the actual label boxes.
             labelWidth=0;
             for(GraphicsNode leaf:leaves) {
@@ -416,7 +437,7 @@ public final class YyTreeBridge {
                         Math.hypot(Math.max(Math.abs(bounds.getMinX()-centerX),Math.abs(bounds.getMaxX()-centerX)),archTop-bounds.getMinY()):
                         Math.max(Math.abs(bounds.getMinX()-centerX),Math.abs(bounds.getMaxX()-centerX));
                     labelWidth=Math.max(labelWidth,contourDistance-outer);
-                } else labelWidth=Math.max(labelWidth,bounds.getMaxX()-trackBaseX);
+                } else labelWidth=Math.max(labelWidth,(code==7?slantLocalBounds(bounds).getMaxX():bounds.getMaxX())-trackBaseX);
             }
             walk(root,n -> { if(n.getChildCount()>0) positions.put(n,meanChildren(n)); });
         }
@@ -474,7 +495,21 @@ public final class YyTreeBridge {
         Point2D.Double anchor(GraphicsNode n,double extra) {
             if(code==3||code==4) return radial(n,outer+extra);
             if(code==5||code==6) return arch(outer+extra,n.getDoubleVariable());
+            if(code==7)return slantPoint(trackBaseX+extra,across(n.getXSelf(),n.getYSelf()));
             return new Point2D.Double(trackBaseX+extra,n.getYSelf());
+        }
+        double along(double x,double y) { return growthX*x+growthY*y; }
+        double across(double x,double y) { return -growthY*x+growthX*y; }
+        AffineTransform slantFrame() { return new AffineTransform(growthX,growthY,-growthY,growthX,0,0); }
+        Point2D.Double slantPoint(double along,double across) {
+            return new Point2D.Double(growthX*along-growthY*across,growthY*along+growthX*across);
+        }
+        Rectangle2D slantTreeBounds() {
+            return slantLocalBounds(treeBounds);
+        }
+        Rectangle2D slantLocalBounds(Shape shape) {
+            // Orthogonal directions make the transpose the inverse, with no rounding.
+            return new AffineTransform(growthX,-growthY,growthY,growthX,0,0).createTransformedShape(shape).getBounds2D();
         }
         Path2D contour(double radius,double start,double end) {
             Path2D p=new Path2D.Double(); int steps=Math.max(2,(int)Math.ceil(Math.abs(end-start)/3));
@@ -501,6 +536,12 @@ public final class YyTreeBridge {
                 Path2D p=contour(inner+width,start,end);p.append(contour(inner,end,start),true);p.closePath();return p;
             }
             int a=positions.get(first).intValue(),b=positions.get(last).intValue();
+            if(code==7) {
+                Rectangle2D area=slantTreeBounds();
+                double top=a==0?area.getMinY():(across(leaves.get(a-1).getXSelf(),leaves.get(a-1).getYSelf())+across(first.getXSelf(),first.getYSelf()))/2;
+                double bottom=b==leaves.size()-1?area.getMaxY():(across(leaves.get(b+1).getXSelf(),leaves.get(b+1).getYSelf())+across(last.getXSelf(),last.getYSelf()))/2;
+                return slantFrame().createTransformedShape(new Rectangle2D.Double(trackBaseX+inner,top,width,bottom-top));
+            }
             double top=a==0?treeBounds.getMinY():(leaves.get(a-1).getYSelf()+first.getYSelf())/2;
             double bottom=b==leaves.size()-1?treeBounds.getMaxY():(leaves.get(b+1).getYSelf()+last.getYSelf())/2;
             return new Rectangle2D.Double(trackBaseX+inner,top,width,bottom-top);
@@ -560,8 +601,8 @@ public final class YyTreeBridge {
         void drawLabels(Graphics2D g) {
             FontMetrics fm=g.getFontMetrics();
             for(GraphicsNode leaf:leaves) {
-                if(code==3||code==4) {
-                    TipLabelGeometry placement=circularLabelGeometry(leaf,fm);
+                if(code==3||code==4||code==7) {
+                    TipLabelGeometry placement=code==7?slantLabelGeometry(leaf,fm):circularLabelGeometry(leaf,fm);
                     Point2D tip=tips.get(leaf);
                     Graphics2D label=(Graphics2D)g.create();
                     try {
@@ -586,8 +627,19 @@ public final class YyTreeBridge {
             double x=flip?-distance-width:distance,baseline=(fm.getAscent()-fm.getDescent())/2.0;
             return new TipLabelGeometry(x,baseline,Math.toRadians(angle),new Rectangle2D.Double(x,baseline-fm.getAscent(),width,fm.getHeight()));
         }
+        TipLabelGeometry slantLabelGeometry(GraphicsNode leaf,FontMetrics fm) {
+            double width=fm.stringWidth(leaf.getName()),distance=sizes.getOrDefault(leaf,0.0)+gapLength;
+            double offset=switch(align){case "right"->maxLabelWidth-width;case "center"->(maxLabelWidth-width)/2;default->0;};
+            double x=slantRotation==180?-distance-maxLabelWidth+offset:distance+offset;
+            double rotation=slantRotation==180?0:Math.toRadians(slantRotation==270?-90:slantRotation);
+            double baseline=fm.getAscent()-fm.getHeight()/2.0;
+            return new TipLabelGeometry(x,baseline,rotation,new Rectangle2D.Double(x,-fm.getHeight()/2.0,width,fm.getHeight()));
+        }
         Rectangle2D labelAreaBounds(GraphicsNode leaf,FontMetrics fm) {
             Point2D tip=tips.get(leaf);
+            if(code==7)return slantFrame().createTransformedShape(new Rectangle2D.Double(
+                along(tip.getX(),tip.getY())+sizes.getOrDefault(leaf,0.0)+gapLength,
+                across(tip.getX(),tip.getY())-fm.getHeight()/2.0,maxLabelWidth,fm.getHeight())).getBounds2D();
             double nx=1,ny=0;
             if(code==5||code==6) {
                 double p=leaf.getDoubleVariable();
@@ -602,9 +654,9 @@ public final class YyTreeBridge {
                 tip.getY()+ny*distance-height/2,maxLabelWidth,height);
         }
         Rectangle2D labelBounds(GraphicsNode leaf,FontMetrics fm) {
-            if(code==3||code==4) {
+            if(code==3||code==4||code==7) {
                 Point2D tip=tips.get(leaf);
-                return circularLabelGeometry(leaf,fm).boundsAt(tip.getX(),tip.getY()).getBounds2D();
+                return (code==7?slantLabelGeometry(leaf,fm):circularLabelGeometry(leaf,fm)).boundsAt(tip.getX(),tip.getY()).getBounds2D();
             }
             Rectangle2D area=labelAreaBounds(leaf,fm);int width=fm.stringWidth(leaf.getName());
             double offset=switch(align){case "right"->maxLabelWidth-width;case "center"->(maxLabelWidth-width)/2;default->0;};
@@ -622,7 +674,7 @@ public final class YyTreeBridge {
                 } else {
                     double end=d.stream().mapToDouble(leaf->tips.get(leaf).x).max().orElse(node.getXSelf());
                     if(code!=7)g.fill(new Rectangle2D.Double(node.getXSelf(),d.getFirst().getYSelf(),end-node.getXSelf(),d.getLast().getYSelf()-d.getFirst().getYSelf()));
-                    else {Path2D p=new Path2D.Double();p.moveTo(node.getXSelf(),node.getYSelf());p.lineTo(end,d.getFirst().getYSelf());p.lineTo(end,d.getLast().getYSelf());p.closePath();g.fill(p);}
+                    else {Path2D p=new Path2D.Double();p.moveTo(node.getXSelf(),node.getYSelf());p.lineTo(tips.get(d.getFirst()).x,tips.get(d.getFirst()).y);p.lineTo(tips.get(d.getLast()).x,tips.get(d.getLast()).y);p.closePath();g.fill(p);}
                 }
             }
         }
@@ -632,8 +684,11 @@ public final class YyTreeBridge {
         void nodeAnnotationRow(Graphics2D g,JSONObject layer) {
             GraphicsNode node=mrca(layer.getString("name1"),layer.getString("name2"));double size=number(layer,"size",20),x=node.getXSelf(),y=node.getYSelf();
             Shape shape=switch(layer.getString("shape")){case "ellipse"->new Ellipse2D.Double(x-size/2,y-size/2,size,size);case "triangle"->{Path2D p=new Path2D.Double();p.moveTo(x,y-size/2);p.lineTo(x-size/2,y+size/2);p.lineTo(x+size/2,y+size/2);p.closePath();yield p;}case "rect"->new Rectangle2D.Double(x-size/2,y-size/2,size,size);default->throw new IllegalArgumentException("Unknown annotation shape.");};
+            if(code==7)shape=AffineTransform.getRotateInstance(Math.toRadians(slantRotation),x,y).createTransformedShape(shape);
             Color c=color(layer.getString("fill"));if(c!=null){g.setColor(c);g.fill(shape);}
-            g.setColor(Color.BLACK);g.drawString(layer.getString("text"),(float)(x+size/2+5),(float)y);
+            g.setColor(Color.BLACK);
+            if(code==7)drawReadableText(g,layer.getString("text"),x+growthX*(size/2+5),y+growthY*(size/2+5),Math.toRadians(slantRotation));
+            else g.drawString(layer.getString("text"),(float)(x+size/2+5),(float)y);
         }
         void drawTracks(Graphics2D g) {
             double offset=labelWidth+12;
@@ -665,8 +720,22 @@ public final class YyTreeBridge {
             if(code>=3&&code<=6)return;
             Graphics2D title=(Graphics2D)g.create();
             title.setFont(labelFont.deriveFont(10f));title.setColor(Color.BLACK);
+            if(code==7) {
+                Point2D point=slantPoint(trackBaseX+offset,slantTreeBounds().getMaxY()+10);
+                drawReadableText(title,text,point.getX(),point.getY(),Math.toRadians(slantRotation)+Math.PI/3);
+                title.dispose();return;
+            }
             title.translate(trackBaseX+offset,treeBounds.getMaxY()+10);
             title.rotate(Math.PI/3);title.drawString(text,0,0);title.dispose();
+        }
+        void drawReadableText(Graphics2D g,String text,double x,double y,double angle) {
+            angle=Math.atan2(Math.sin(angle),Math.cos(angle));
+            boolean flip=angle>Math.PI/2+1e-10||angle< -Math.PI/2-1e-10;
+            Graphics2D label=(Graphics2D)g.create();
+            try {
+                label.translate(x,y);label.rotate(flip?angle+(angle>0?-Math.PI:Math.PI):angle);
+                label.drawString(text,flip?-label.getFontMetrics().stringWidth(text):0,0);
+            } finally {label.dispose();}
         }
         void cell(Graphics2D g,GraphicsNode leaf,double offset,double width,Color color) {if(color==null)return;g.setColor(color);g.fill(band(leaf,leaf,(code>=3&&code<=6?outer:0)+offset,width));}
         void prepareLegends() {

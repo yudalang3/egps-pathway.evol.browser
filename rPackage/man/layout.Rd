@@ -9,15 +9,17 @@ Select the tree layout for a yytree plot.
 }
 \usage{
 layout(code = NULL, name = NULL, start_angle = NULL, angle_extent = NULL,
-    tree_width_ratio = NULL, left_margin_ratio = NULL, ...)
+    tree_width_ratio = NULL, left_margin_ratio = NULL, direction = NULL,
+    ...)
 }
 \arguments{
 \item{code}{One numeric integer from 1 through 7. Default \code{NULL}: use \code{name} if supplied, otherwise code 1 (\code{"rect"}). See the layout table below.}
 \item{name}{One layout-name string from the table below. Default \code{NULL}: use \code{code} if supplied, otherwise \code{"rect"}. \code{"rectangle"} aliases \code{"rect"}; \code{"circular"} aliases \code{"circ"}.}
 \item{start_angle}{Circular layouts 3 and 4 only. One integer from 0 through 360, in degrees. Default \code{NULL} uses 285. Zero points right; increasing angles run counterclockwise. Sets the first leaf angle.}
 \item{angle_extent}{Circular layouts 3 and 4 only. One integer from 1 through 360, in degrees. Default \code{NULL} uses 360. Leaves occupy this angular span; values below 360 leave an opening. A full circle spaces leaves by extent divided by leaf count; an open circle includes both endpoints. For a single leaf, its track cell uses the chosen span centered on that leaf.}
-\item{tree_width_ratio}{Slanted layout 7 only. One finite number greater than 0 and at most 1. Default \code{NULL} uses 1. Scales the entire slanted tree horizontally around the working-area center; smaller values narrow all branches consistently without changing topology.}
-\item{left_margin_ratio}{Slanted layout 7 only. One finite number at least 0 and below 1. Default \code{NULL} uses 0.2. Reserves this fraction of the layout working width before the tree is fitted and centered; larger values narrow the tree. This is a layout ratio, not a canvas margin in pixels.}
+\item{tree_width_ratio}{Slanted layout 7 only. One finite number greater than 0 and at most 1. Default \code{NULL} uses 1. Scales the whole tree along its root-to-tip axis around the working-area center, without changing topology. For right/left this controls width; for up/down it controls height. The parameter name remains the same for all directions.}
+\item{left_margin_ratio}{Slanted layout 7 only. One finite number at least 0 and below 1. Default \code{NULL} uses 0.2. Reserves this fraction of the layout's root-to-tip working span before the tree is fitted and centered; larger values shorten that span. It applies to height for up/down. The historical name is retained; this is not a fixed left-side canvas margin in pixels.}
+\item{direction}{Slanted layout 7 only. One of \code{"right"}, \code{"down"}, \code{"left"}, or \code{"up"}, indicating the direction from root to tips. Default \code{NULL} uses \code{"right"}. Directions correspond to clockwise rotations of 0, 90, 180 and 270 degrees. An explicit non-NULL value on another layout raises an explanatory error. See Details for leaf order, labels and annotations.}
 \item{...}{Reserved for detecting unknown arguments. No additional parameters are accepted; misspelled names raise an explanatory error.}
 }
 \details{
@@ -46,6 +48,23 @@ Explicit layout-specific parameters must apply to the selected layout: for examp
 When several layout layers are added, the last one determines the display and resets omitted layout-specific parameters to their defaults. Layout selection does not modify the input tree or stored branch lengths. Aligned layouts add display extensions to a shared outer contour; the extensions are not evolutionary distances. \code{slant} retains stored lengths but draws topology rather than distances.
 
 Circular layouts 3 and 4 use radial tip labels and ignore \code{leaf_labels(align = ...)}. Layout 3 places labels beyond real tips; layout 4 places them beyond extended tips.
+}
+\subsection{Slanted directions}{
+\tabular{llll}{
+Direction \tab Root to tips \tab Clockwise rotation \tab First leaf location\cr
+\code{right} \tab Rightward \tab 0 degrees \tab Top\cr
+\code{down} \tab Downward \tab 90 degrees \tab Right\cr
+\code{left} \tab Leftward \tab 180 degrees \tab Bottom\cr
+\code{up} \tab Upward \tab 270 degrees \tab Left
+}
+
+Directions rotate the complete tree, rather than mirroring it to preserve screen order. For example, leftward trees reverse the top-to-bottom screen order. The R tree's original leaf order, topology and branch lengths remain unchanged. A later \code{layout(code=7)} resets an earlier direction to right.
+
+Labels follow their own tips. Right/left labels remain horizontal and readable; down labels read top-to-bottom after a 90-degree clockwise rotation, and up labels read bottom-to-top after a 90-degree counterclockwise rotation. Text is never upside down. \code{leaf_labels(align=...)} still uses the longest-label region, with left/center/right interpreted in the text's reading direction. \code{gap_length} measures outward clearance along the root-to-tip direction, including node-symbol radius.
+
+Categorical tracks, heatmaps, clade highlights and node annotations follow the tree direction. Track rows still match leaf names, and titles remain readable. Legends stay in their chosen canvas corners. Free elements retain canvas coordinates and do not rotate with the tree. Canvas width, height and the four blank margins retain their screen-coordinate meanings. Layout reserves label and track space on the tip-facing side.
+
+For circular layouts, use \code{start_angle} and \code{angle_extent}, not \code{direction}; for example, \code{layout(code=3, start_angle=330, angle_extent=270)}.
 }
 \subsection{Name conflict}{
 This function masks \code{graphics::layout}, which arranges base-R plotting panels. Use \code{yytree::layout()} explicitly for tree layouts and \code{graphics::layout()} for base graphics.

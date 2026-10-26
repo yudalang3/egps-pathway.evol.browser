@@ -85,6 +85,27 @@ test_that("parameter dialogs only use an existing interactive runtime", {
   state$.runtime_exchange <- function(...) stop("dialog unavailable")
   expect_silent(notify("original parameter error"))
 })
+
+test_that("slant direction is explicit, restricted and replaced with its layer", {
+  for (direction in c("right", "down", "left", "up")) {
+    expect_equal(yytree::layout(code = 7, direction = direction)$direction, direction)
+    expect_equal(yytree::layout(name = "slant", direction = direction)$direction, direction)
+  }
+  expect_identical(yytree::layout(code = 7), yytree::layout(code = 7, direction = NULL))
+  for (value in list("north", "UP", "", NA_character_, character(), c("left", "up"), 90, TRUE)) {
+    error <- tryCatch(yytree::layout(code = 7, direction = value), error = conditionMessage)
+    for (term in c("direction", "Received:", "Expected:", "Example:", "root-to-tip"))
+      expect_match(error, term, fixed = TRUE)
+  }
+  for (code in 1:6)
+    expect_error(yytree::layout(code = code, direction = "right"), "only to slanted layout 7")
+  original <- yytree("((A:1,B:2):1,C:3);")
+  plot <- original + yytree::layout(code = 7, direction = "down") + yytree::layout(code = 7)
+  expect_length(original$layers, 0)
+  expect_null(plot$layers[[2]]$direction)
+  expect_identical(plot$tree, original$tree)
+  expect_false(yytree:::.runtime_alive())
+})
 test_that("Newick and phylo preserve input branch lengths", {
   phy <- ape::read.tree(text = "((A:0.12345678912345,B:2):3,C:4);")
   expect_equal(yytree(phy)$tree$edges[,3], phy$edge.length)
