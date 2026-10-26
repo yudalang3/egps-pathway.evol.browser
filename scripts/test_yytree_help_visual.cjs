@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
     const page = await browser.newPage({ viewport: { width: 960, height: 900 } });
     // R includes optional math CDN resources; these pages use no mathematics.
     await page.route(/^https?:/, route => route.abort());
-    for (const topic of ['layout', 'runtime', 'free_shapes']) {
+    for (const topic of ['layout', 'leaf_labels', 'runtime', 'free_shapes']) {
       const file = path.resolve('temp', 'yytree-help', `${topic}.html`);
       await page.goto(pathToFileURL(file).href);
       await page.screenshot({ path: file.replace(/\.html$/, '.png'), fullPage: true });
@@ -36,5 +36,5 @@ const { chromium } = require('playwright');
     fs.writeFileSync(path.join('logs', 'yytree-help-visual.json'), JSON.stringify(report, null, 2));
     await browser.close();
   }
-  console.log('Visual layout checks passed for layout, runtime and free_shapes at 960px.');
+  console.log('Visual layout checks passed for layout, leaf_labels, runtime and free_shapes at 960px.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

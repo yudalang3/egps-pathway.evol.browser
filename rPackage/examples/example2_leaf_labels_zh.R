@@ -11,9 +11,15 @@ plots <- list(hidden = base + leaf_labels(show = FALSE),
   left = base + leaf_labels(align = "left", font_size = 15),
   center = base + leaf_labels(align = "center", font_size = 15),
   right = base + leaf_labels(align = "right", font_size = 15),
+  close_tips = base + yytree::layout(code = 7, tree_width_ratio = 0.8, left_margin_ratio = 0.1) +
+    leaf_labels(align = "left", gap_length = 3),
+  wider_gap = base + leaf_labels(align = "left", gap_length = 25),
   font = base + leaf_labels(font_family = "Serif", font_size = 20),
   hidden_again = base + leaf_labels() + leaf_labels(show = FALSE))
 # 最后一次标签设置生效；Serif 是跨平台 Java 逻辑字体。
+# 各标签区域的宽度均取当前字体下最长标签的实际宽度。
+# align 控制文字在区域内左对齐、居中或右对齐；gap_length 控制区域距各自 tip 的间距。
+# 最长标签宽 100、短标签宽 40 时，右对齐会在短文字前增加 60 像素空白，这与 gap_length 分开计算。
 
 # 列表中的每幅图单独打开；可继续在 y 上添加图层。
 y <- plots[[length(plots)]]

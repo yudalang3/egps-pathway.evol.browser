@@ -79,12 +79,16 @@ for (name in names(source_docs)) {
 layout_rd <- source_docs[["layout.Rd"]]
 stopifnot(identical(aliases(layout_rd), "layout"))
 layout_usage <- rd_text(tagged(layout_rd, "\\usage")[[1]])
-stopifnot(grepl("layout(code = NULL, name = NULL)", layout_usage, fixed = TRUE),
+stopifnot(grepl("layout(code = NULL, name = NULL, start_angle = NULL", layout_usage, fixed = TRUE),
           !grepl("yytree(tree", layout_usage, fixed = TRUE))
 layout_text <- paste(readLines(file.path(output, "layout.txt"), warn = FALSE), collapse = "\n")
 for (term in c("rect_align", "circ_align", "arch_align", "slant", "rectangle", "circular",
                "not mutually exclusive", "graphics::layout", "last one", "disagree"))
   stopifnot(grepl(term, layout_text, fixed = TRUE))
+
+label_text <- paste(readLines(file.path(output, "leaf_labels.txt"), warn = FALSE), collapse = "\n")
+for (term in c("gap_length", "longest label", "100", "40", "60", "66", "radial", "nonmodal"))
+  stopifnot(grepl(term, label_text, fixed = TRUE))
 
 cat("Help validation passed:", length(source_docs), "topics;",
     length(all_aliases), "unique aliases; deterministic generation; mappings,",

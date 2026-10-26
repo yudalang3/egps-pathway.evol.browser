@@ -8,11 +8,17 @@ Choose a tree layout
 Select the tree layout for a yytree plot.
 }
 \usage{
-layout(code = NULL, name = NULL)
+layout(code = NULL, name = NULL, start_angle = NULL, angle_extent = NULL,
+    tree_width_ratio = NULL, left_margin_ratio = NULL, ...)
 }
 \arguments{
 \item{code}{One numeric integer from 1 through 7. Default \code{NULL}: use \code{name} if supplied, otherwise code 1 (\code{"rect"}). See the layout table below.}
 \item{name}{One layout-name string from the table below. Default \code{NULL}: use \code{code} if supplied, otherwise \code{"rect"}. \code{"rectangle"} aliases \code{"rect"}; \code{"circular"} aliases \code{"circ"}.}
+\item{start_angle}{Circular layouts 3 and 4 only. One integer from 0 through 360, in degrees. Default \code{NULL} uses 285. Zero points right; increasing angles run counterclockwise. Sets the first leaf angle.}
+\item{angle_extent}{Circular layouts 3 and 4 only. One integer from 1 through 360, in degrees. Default \code{NULL} uses 360. Leaves occupy this angular span; values below 360 leave an opening. A full circle spaces leaves by extent divided by leaf count; an open circle includes both endpoints. For a single leaf, its track cell uses the chosen span centered on that leaf.}
+\item{tree_width_ratio}{Slanted layout 7 only. One finite number greater than 0 and at most 1. Default \code{NULL} uses 1. Scales the entire slanted tree horizontally around the working-area center; smaller values narrow all branches consistently without changing topology.}
+\item{left_margin_ratio}{Slanted layout 7 only. One finite number at least 0 and below 1. Default \code{NULL} uses 0.2. Reserves this fraction of the layout working width before the tree is fitted and centered; larger values narrow the tree. This is a layout ratio, not a canvas margin in pixels.}
+\item{...}{Reserved for detecting unknown arguments. No additional parameters are accepted; misspelled names raise an explanatory error.}
 }
 \details{
 \subsection{Available layouts}{
@@ -33,9 +39,11 @@ Layouts 1 through 6 draw real branch lengths. An arch has two straight sides joi
 \code{layout()} selects \code{code = 1}, equivalent to \code{name = "rect"}. The plot also uses this layout if no layout layer is added.
 
 \code{code} and \code{name} are not mutually exclusive. Supply either one, or supply both with matching meanings. For example, \code{code = 3, name = "circular"} is valid; \code{code = 1, name = "slant"} raises an error. Unknown names and codes outside 1 through 7 raise errors.
+
+Explicit layout-specific parameters must apply to the selected layout: for example, \code{layout(code = 7, start_angle = 90)} raises an error explaining that angles apply only to layouts 3 and 4. Parameter errors report the received value, allowed values and a corrected example. In interactive R with an already running yytree JVM, a nonmodal explanation dialog also appears unless \code{YYTREE_EXAMPLES_NO_GUI=1}. Batch sessions and sessions without a running JVM only raise the R error; an error never starts Java.
 }
 \subsection{Composition and interpretation}{
-When several layout layers are added, the last one determines the display. Layout selection does not modify the input tree or stored branch lengths. Aligned layouts add display extensions to a shared outer contour; the extensions are not evolutionary distances. \code{slant} retains stored lengths but draws topology rather than distances.
+When several layout layers are added, the last one determines the display and resets omitted layout-specific parameters to their defaults. Layout selection does not modify the input tree or stored branch lengths. Aligned layouts add display extensions to a shared outer contour; the extensions are not evolutionary distances. \code{slant} retains stored lengths but draws topology rather than distances.
 
 Circular layouts 3 and 4 use radial tip labels and ignore \code{leaf_labels(align = ...)}. Layout 3 places labels beyond real tips; layout 4 places them beyond extended tips.
 }

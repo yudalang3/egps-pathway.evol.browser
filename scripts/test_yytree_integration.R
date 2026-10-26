@@ -34,6 +34,9 @@ for (code in seq_len(7)) {
   cat("Layout", code, "passed\n")
 }
 if ("--gui" %in% args) {
+  yytree:::.runtime_request("showParameterError", "Invalid leaf_labels() parameter 'gap_length'.\nReceived: -1\nExpected: One finite nonnegative number.\nExample: leaf_labels(gap_length = 6)")
+  # An unclosed explanation must not block the next protocol request.
+  stopifnot(length(yytree:::.runtime_request("probeRuntime")) == 1L)
   cat(yytree:::.runtime_request("testInteraction", payload,
     file.path(normalizePath(out, winslash = "/"), "preview-flatlaf.png")), "\n")
   print(y)

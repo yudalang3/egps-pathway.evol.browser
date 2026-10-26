@@ -12,19 +12,29 @@ Leaf label visibility, fonts and background colors
 }
 \usage{
 leaf_labels(show = TRUE, align = c("right", "left", "center"),
-    font_family = NULL, font_size = NULL)
+    font_family = NULL, font_size = NULL, gap_length = 6, ...)
 leaf_label_render(df)
 }
 \arguments{
 \item{show}{\strong{\code{leaf_labels} only:} One nonmissing logical value. Default \code{TRUE} shows labels; \code{FALSE} hides them. A plot with no \code{leaf_labels} layer initially hides labels.}
-\item{align}{\strong{\code{leaf_labels} only:} One of \code{"right"} (effective default), \code{"left"}, or \code{"center"}; the formal default lists the choices for \code{match.arg}. Controls horizontal alignment within the label column. Circular layouts 3 and 4 ignore this argument and use radial labels.}
+\item{align}{\strong{\code{leaf_labels} only:} One of \code{"right"} (effective default), \code{"left"}, or \code{"center"}. The formal default lists the available choices; omitting it selects \code{"right"}. In layouts 1, 2, 5, 6 and 7, all leaf-label regions have the width of the longest label measured using the current font. This parameter aligns each label horizontally inside its region: \code{"left"} puts its left edge at the region's left edge, \code{"right"} puts its right edge at the region's right edge, and \code{"center"} centers it. It does not align tree tips or change branch lengths. Each region follows its own displayed tip, so unequal tips need not produce one straight text column. Circular layouts 3 and 4 ignore this argument and use readable radial labels; see Details.}
 \item{font_family}{\strong{\code{leaf_labels} only:} One Java font-family string. Default \code{NULL} uses the eGPS font preference, falling back to Java SansSerif when unavailable. Java may substitute an unavailable family.}
 \item{font_size}{\strong{\code{leaf_labels} only:} One finite positive number: font size in logical pixels. Default \code{NULL} retains the eGPS default label-font size.}
+\item{gap_length}{\strong{\code{leaf_labels} only:} One finite nonnegative number in logical pixels; default 6. Controls the clearance from the displayed tip's node-symbol edge to the near edge of its equal-width label region, measured outward from the tree. Without a node symbol, clearance starts at the tip. Layouts 2, 4 and 6 use the end of the dashed extension. Circular layouts measure this clearance radially to the text instead. It is independent of branch-length units and scales together with the canvas when zooming.}
+\item{...}{\strong{\code{leaf_labels} only:} Reserved for detecting unknown arguments. No additional parameters are accepted.}
 \item{df}{\strong{\code{leaf_label_render} only:} Required nonempty data frame with \code{name} (known leaf names) and \code{color} (label background colors). Names must be unique. \code{NA} color removes the background, not the text. An R color name, \code{#RRGGBB} or \code{#RRGGBBAA}; alpha is supported.}
 }
 \details{
 \subsection{leaf_labels}{
-The last \code{leaf_labels} layer replaces the label settings, including resetting unspecified font settings to their defaults. In circular layouts labels follow real tips (3) or extended tips (4), leave clearance for node radius, and flip on the left half to remain upright. Other layouts use the label column alignment.
+The last \code{leaf_labels} layer replaces all label settings, resetting omitted font settings and \code{gap_length} to their defaults. Labels follow their own real tips, or extended tips in aligned layouts. This also applies to existing scripts that omit \code{gap_length}.
+
+\strong{Alignment relative to the longest label:} Suppose the longest label is 100 logical pixels wide and a shorter label is 40 pixels wide. Every label region is 100 pixels wide. With \code{align="left"}, the shorter label starts at the region's left edge. With \code{align="center"}, it starts 30 pixels farther right. With \code{align="right"}, it starts 60 pixels farther right, and its right edge lines up with the longest label's right edge relative to their respective regions. The longest label itself has no unused horizontal space, so these three choices do not move it.
+
+\strong{Alignment and gap are different:} On a right-facing rectangular or slanted tree with no node symbols, \code{gap_length=6} and \code{align="left"} place text 6 pixels after its tip. In the 100/40 example, \code{align="right"} puts the shorter text 66 pixels after its tip: 6 pixels of gap plus 60 pixels of unused label-region width. The extra 60 pixels come from alignment, not a larger gap. To bring the beginning of right-facing labels close to tips, use \code{align="left"} and adjust \code{gap_length}. Changing the font changes measured widths, so the extra alignment space may change too. On the left side of an arch, the region lies to the left of its tip; right-aligned text is therefore the nearer text edge. At the arch top, the region is placed above the tip. Label backgrounds follow the actual text box, not the whole equal-width region.
+
+\strong{Circular exception:} In layouts 3 and 4, labels run along the tip's radial direction and flip on the left half to remain upright. They use their own text width rather than equal-width horizontal regions, so \code{align} has no effect. \code{gap_length} still controls radial clearance beyond the node-symbol edge. Layout 3 follows real tips; layout 4 follows extended tips.
+
+Invalid parameters raise a catchable R error with the received value, requirement and corrected example. Interactive sessions with a running JVM also receive a nonmodal explanation dialog; batch sessions, \code{YYTREE_EXAMPLES_NO_GUI=1}, and sessions without a running JVM do not open dialogs.
 
 Showing labels alone does not assign background colors.
 }

@@ -19,6 +19,10 @@ plots <- lapply(c("circular", "circ_align"), function(style)
     leaf_annotation_rect(categories, width = 12) +
     leaf_annotation_heatmap(measurements, legend = "bottom_right", width = 12))
 names(plots) <- c("circular", "circ_align")
+
+plots$open_sector <- plots[[1]] + yytree::layout(code = 3, start_angle = 330, angle_extent = 90) +
+  leaf_labels(gap_length = 10)
+# Circular labels follow their tips radially and ignore align; gap_length still applies.
 stopifnot(identical(plots[[1]]$tree, plots[[2]]$tree))
 # Tracks follow the outside contour; alignment preserves real branch lengths.
 

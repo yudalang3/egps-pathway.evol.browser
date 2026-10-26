@@ -90,7 +90,7 @@ basic and interaction scripts explicitly demonstrate preview reuse and new windo
 
 ## Preview appearance and navigation / 预览外观与操作
 
-The first preview installs the light FlatLaf theme from the eGPS installation.
+The first preview or parameter-error dialog installs the light FlatLaf theme from the eGPS installation.
 The white drawing canvas is surrounded by light grey chrome and a SwingX status
 bar showing zoom and coordinates. The native window title bar is retained.
 Canvas width and height are logical pixels. The preview initially fits the whole
@@ -117,7 +117,7 @@ display scale. Numeric zoom preserves the visible centre; wheel zoom preserves
 the actual pointer. Invalid or out-of-range input keeps the last valid view.
 Controls wrap into additional rows in narrow windows. Printing creates a new baseline.
 
-首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
+首次显示预览或参数错误说明时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
 保留原生标题栏。宽高指定逻辑画布像素；初始完整显示且不主动放大小图，手动缩放前随窗口
 调整自动适配。滚轮或百分比输入后保留手动倍率，仅溢出时显示对应滚动条；重新打印恢复自动适配。
 按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
@@ -135,11 +135,11 @@ Width (%) 与 Height (%) 始终联动；支持小数输入、Enter／失焦确�
 重新打印为新预览建立新的 100% 基准，不改变 R 对象或导出尺寸。
 
 Swing look-and-feel is shared within the JVM. Loading/configuring yytree and
-offscreen rendering do not install the theme. Opening the first preview changes
+offscreen rendering do not install the theme. Opening the first preview or error dialog changes
 the shared theme for subsequent Swing components, without actively refreshing
 other existing windows. It does not launch the eGPS desktop.
 
-Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设置主题；首次显示预览会影响
+Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设置主题；首次显示预览或错误说明会影响
 随后创建的 Swing 组件，但不会主动刷新其他已有窗口，也不会启动 eGPS 主框架。
 
 ## Validation / 验证

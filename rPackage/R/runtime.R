@@ -5,6 +5,13 @@
   exists("process", .runtime, inherits = FALSE) && .runtime$process$is_alive()
 }
 
+.notify_parameter_error <- function(message) {
+  if (interactive() && Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1" && .runtime_alive())
+    tryCatch(.runtime_exchange(.runtime$process, "showParameterError", list(message)),
+             error = function(e) invisible(NULL))
+  invisible(NULL)
+}
+
 .runtime_exchange <- function(process, command, arguments = list(), timeout = 30, runtime = .runtime) {
   if (!is.numeric(timeout) || length(timeout) != 1 || !is.finite(timeout) || timeout <= 0) stop("timeout must be positive and finite.")
   runtime$next_id <- runtime$next_id + 1
@@ -38,7 +45,11 @@
     try(process$kill(), silent = TRUE)
     stop(e)
   })
-  if (!isTRUE(response$ok)) stop("Java ", command, " failed: ", response$error, call. = FALSE)
+  if (!isTRUE(response$ok)) {
+    message <- paste0("Java ", command, " failed: ", response$error)
+    if (command == "showPlot") .notify_parameter_error(message)
+    stop(message, call. = FALSE)
+  }
   response$result
 }
 

@@ -52,7 +52,12 @@ The result is an ordinary serializable R value. Creating or saving it does not r
 
 document("layout", "Select the tree layout for a yytree plot.",
   c(code = r"(One numeric integer from 1 through 7. Default \code{NULL}: use \code{name} if supplied, otherwise code 1 (\code{"rect"}). See the layout table below.)",
-    name = r"(One layout-name string from the table below. Default \code{NULL}: use \code{code} if supplied, otherwise \code{"rect"}. \code{"rectangle"} aliases \code{"rect"}; \code{"circular"} aliases \code{"circ"}.)"),
+    name = r"(One layout-name string from the table below. Default \code{NULL}: use \code{code} if supplied, otherwise \code{"rect"}. \code{"rectangle"} aliases \code{"rect"}; \code{"circular"} aliases \code{"circ"}.)",
+    start_angle = r"(Circular layouts 3 and 4 only. One integer from 0 through 360, in degrees. Default \code{NULL} uses 285. Zero points right; increasing angles run counterclockwise. Sets the first leaf angle.)",
+    angle_extent = r"(Circular layouts 3 and 4 only. One integer from 1 through 360, in degrees. Default \code{NULL} uses 360. Leaves occupy this angular span; values below 360 leave an opening. A full circle spaces leaves by extent divided by leaf count; an open circle includes both endpoints. For a single leaf, its track cell uses the chosen span centered on that leaf.)",
+    tree_width_ratio = r"(Slanted layout 7 only. One finite number greater than 0 and at most 1. Default \code{NULL} uses 1. Scales the entire slanted tree horizontally around the working-area center; smaller values narrow all branches consistently without changing topology.)",
+    left_margin_ratio = r"(Slanted layout 7 only. One finite number at least 0 and below 1. Default \code{NULL} uses 0.2. Reserves this fraction of the layout working width before the tree is fitted and centered; larger values narrow the tree. This is a layout ratio, not a canvas margin in pixels.)",
+    "..." = r"(Reserved for detecting unknown arguments. No additional parameters are accepted; misspelled names raise an explanatory error.)"),
   r"(\subsection{Available layouts}{
 \tabular{rll}{
 Code \tab Name \tab Display\cr
@@ -71,9 +76,11 @@ Layouts 1 through 6 draw real branch lengths. An arch has two straight sides joi
 \code{layout()} selects \code{code = 1}, equivalent to \code{name = "rect"}. The plot also uses this layout if no layout layer is added.
 
 \code{code} and \code{name} are not mutually exclusive. Supply either one, or supply both with matching meanings. For example, \code{code = 3, name = "circular"} is valid; \code{code = 1, name = "slant"} raises an error. Unknown names and codes outside 1 through 7 raise errors.
+
+Explicit layout-specific parameters must apply to the selected layout: for example, \code{layout(code = 7, start_angle = 90)} raises an error explaining that angles apply only to layouts 3 and 4. Parameter errors report the received value, allowed values and a corrected example. In interactive R with an already running yytree JVM, a nonmodal explanation dialog also appears unless \code{YYTREE_EXAMPLES_NO_GUI=1}. Batch sessions and sessions without a running JVM only raise the R error; an error never starts Java.
 }
 \subsection{Composition and interpretation}{
-When several layout layers are added, the last one determines the display. Layout selection does not modify the input tree or stored branch lengths. Aligned layouts add display extensions to a shared outer contour; the extensions are not evolutionary distances. \code{slant} retains stored lengths but draws topology rather than distances.
+When several layout layers are added, the last one determines the display and resets omitted layout-specific parameters to their defaults. Layout selection does not modify the input tree or stored branch lengths. Aligned layouts add display extensions to a shared outer contour; the extensions are not evolutionary distances. \code{slant} retains stored lengths but draws topology rather than distances.
 
 Circular layouts 3 and 4 use radial tip labels and ignore \code{leaf_labels(align = ...)}. Layout 3 places labels beyond real tips; layout 4 places them beyond extended tips.
 }
@@ -84,10 +91,20 @@ This function masks \code{graphics::layout}, which arranges base-R plotting pane
 
 document("leaf_labels", "Show or hide leaf labels and set their alignment and font.",
   c(show = r"(One nonmissing logical value. Default \code{TRUE} shows labels; \code{FALSE} hides them. A plot with no \code{leaf_labels} layer initially hides labels.)",
-    align = r"(One of \code{"right"} (effective default), \code{"left"}, or \code{"center"}; the formal default lists the choices for \code{match.arg}. Controls horizontal alignment within the label column. Circular layouts 3 and 4 ignore this argument and use radial labels.)",
+    align = r"(One of \code{"right"} (effective default), \code{"left"}, or \code{"center"}. The formal default lists the available choices; omitting it selects \code{"right"}. In layouts 1, 2, 5, 6 and 7, all leaf-label regions have the width of the longest label measured using the current font. This parameter aligns each label horizontally inside its region: \code{"left"} puts its left edge at the region's left edge, \code{"right"} puts its right edge at the region's right edge, and \code{"center"} centers it. It does not align tree tips or change branch lengths. Each region follows its own displayed tip, so unequal tips need not produce one straight text column. Circular layouts 3 and 4 ignore this argument and use readable radial labels; see Details.)",
     font_family = r"(One Java font-family string. Default \code{NULL} uses the eGPS font preference, falling back to Java SansSerif when unavailable. Java may substitute an unavailable family.)",
-    font_size = r"(One finite positive number: font size in logical pixels. Default \code{NULL} retains the eGPS default label-font size.)"),
-  r"(The last \code{leaf_labels} layer replaces the label settings, including resetting unspecified font settings to their defaults. In circular layouts labels follow real tips (3) or extended tips (4), leave clearance for node radius, and flip on the left half to remain upright. Other layouts use the label column alignment.
+    font_size = r"(One finite positive number: font size in logical pixels. Default \code{NULL} retains the eGPS default label-font size.)",
+    gap_length = r"(One finite nonnegative number in logical pixels; default 6. Controls the clearance from the displayed tip's node-symbol edge to the near edge of its equal-width label region, measured outward from the tree. Without a node symbol, clearance starts at the tip. Layouts 2, 4 and 6 use the end of the dashed extension. Circular layouts measure this clearance radially to the text instead. It is independent of branch-length units and scales together with the canvas when zooming.)",
+    "..." = r"(Reserved for detecting unknown arguments. No additional parameters are accepted.)"),
+  r"(The last \code{leaf_labels} layer replaces all label settings, resetting omitted font settings and \code{gap_length} to their defaults. Labels follow their own real tips, or extended tips in aligned layouts. This also applies to existing scripts that omit \code{gap_length}.
+
+\strong{Alignment relative to the longest label:} Suppose the longest label is 100 logical pixels wide and a shorter label is 40 pixels wide. Every label region is 100 pixels wide. With \code{align="left"}, the shorter label starts at the region's left edge. With \code{align="center"}, it starts 30 pixels farther right. With \code{align="right"}, it starts 60 pixels farther right, and its right edge lines up with the longest label's right edge relative to their respective regions. The longest label itself has no unused horizontal space, so these three choices do not move it.
+
+\strong{Alignment and gap are different:} On a right-facing rectangular or slanted tree with no node symbols, \code{gap_length=6} and \code{align="left"} place text 6 pixels after its tip. In the 100/40 example, \code{align="right"} puts the shorter text 66 pixels after its tip: 6 pixels of gap plus 60 pixels of unused label-region width. The extra 60 pixels come from alignment, not a larger gap. To bring the beginning of right-facing labels close to tips, use \code{align="left"} and adjust \code{gap_length}. Changing the font changes measured widths, so the extra alignment space may change too. On the left side of an arch, the region lies to the left of its tip; right-aligned text is therefore the nearer text edge. At the arch top, the region is placed above the tip. Label backgrounds follow the actual text box, not the whole equal-width region.
+
+\strong{Circular exception:} In layouts 3 and 4, labels run along the tip's radial direction and flip on the left half to remain upright. They use their own text width rather than equal-width horizontal regions, so \code{align} has no effect. \code{gap_length} still controls radial clearance beyond the node-symbol edge. Layout 3 follows real tips; layout 4 follows extended tips.
+
+Invalid parameters raise a catchable R error with the received value, requirement and corrected example. Interactive sessions with a running JVM also receive a nonmodal explanation dialog; batch sessions, \code{YYTREE_EXAMPLES_NO_GUI=1}, and sessions without a running JVM do not open dialogs.
 
 Showing labels alone does not assign background colors.)",
   'p <- yytree("((A:1,B:2):1,C:3);") +\n  leaf_labels(align = "left", font_size = 14)\nhidden <- p + leaf_labels(show = FALSE)')

@@ -11,9 +11,15 @@ plots <- list(hidden = base + leaf_labels(show = FALSE),
   left = base + leaf_labels(align = "left", font_size = 15),
   center = base + leaf_labels(align = "center", font_size = 15),
   right = base + leaf_labels(align = "right", font_size = 15),
+  close_tips = base + yytree::layout(code = 7, tree_width_ratio = 0.8, left_margin_ratio = 0.1) +
+    leaf_labels(align = "left", gap_length = 3),
+  wider_gap = base + leaf_labels(align = "left", gap_length = 25),
   font = base + leaf_labels(font_family = "Serif", font_size = 20),
   hidden_again = base + leaf_labels() + leaf_labels(show = FALSE))
 # The last label setting wins. Serif is a portable Java logical font.
+# Each label region is as wide as the longest label measured in the current font.
+# align places text left/center/right inside that region; gap_length places the region beyond its own tip.
+# For widths 100 and 40, right alignment adds 60 pixels before the shorter text, independently of gap_length.
 
 # Each list entry opens independently; y remains available for further layers.
 y <- plots[[length(plots)]]

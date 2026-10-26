@@ -157,26 +157,82 @@ yytree <- function(tree, width = 1000, height = 800,
   structure(fields[!vapply(fields, is.null, FALSE)], class = "yytree_layer")
 }
 
-layout <- function(code = NULL, name = NULL) {
+.parameter_error <- function(fun, parameter, value, requirement, example) {
+  received <- paste(utils::head(utils::capture.output(utils::str(value, give.attr = FALSE, max.level = 1)), 4), collapse = " ")
+  message <- paste0("Invalid ", fun, "() parameter '", parameter, "'.\nReceived: ",
+                    substr(received, 1, 400), "\nExpected: ", requirement, "\nExample: ", example)
+  .notify_parameter_error(message)
+  stop(message, call. = FALSE)
+}
+
+.parameter_number <- function(fun, parameter, value, minimum, maximum, example,
+                              integer = FALSE, lower_open = FALSE, upper_open = FALSE) {
+  valid <- is.numeric(value) && !is.complex(value) && length(value) == 1L && is.finite(value)
+  if (valid) valid <- (if (lower_open) value > minimum else value >= minimum) &&
+    (if (upper_open) value < maximum else value <= maximum) && (!integer || value == floor(value))
+  if (!valid) .parameter_error(fun, parameter, value,
+    paste0("One finite ", if (integer) "integer" else "number", " in ",
+           if (lower_open) "(" else "[", minimum, ", ", maximum,
+           if (upper_open) ")." else "]."), example)
+}
+
+.parameter_dots <- function(fun, dots, supported, example) {
+  if (length(dots)) .parameter_error(fun, "...", dots,
+    paste0("Only these named parameters are supported: ", paste(supported, collapse = ", "), "."), example)
+}
+
+layout <- function(code = NULL, name = NULL, start_angle = NULL, angle_extent = NULL,
+                   tree_width_ratio = NULL, left_margin_ratio = NULL, ...) {
+  example <- "yytree::layout(code = 3, start_angle = 330, angle_extent = 90)"
+  .parameter_dots("layout", list(...), c("code", "name", "start_angle", "angle_extent",
+    "tree_width_ratio", "left_margin_ratio"), example)
   names <- c("rect", "rect_align", "circ", "circ_align", "arch", "arch_align", "slant")
+  if (!is.null(code) && (!is.numeric(code) || is.complex(code) || length(code) != 1L || !is.finite(code) || !code %in% seq_len(7)))
+    .parameter_error("layout", "code", code, "One integer from 1 through 7.", "yytree::layout(code = 7)")
   if (!is.null(name)) {
+    if (!is.character(name) || length(name) != 1L || is.na(name))
+      .parameter_error("layout", "name", name, paste(names, collapse = ", "), example)
     name <- switch(name, rectangle = "rect", circular = "circ", name)
     matched <- match(name, names)
-    if (is.na(matched)) stop("Unknown layout name.")
-    if (!is.null(code) && code != matched) stop("Layout code and name disagree.")
+    if (is.na(matched)) .parameter_error("layout", "name", name, paste(names, collapse = ", "), example)
+    if (!is.null(code) && code != matched) .parameter_error("layout", "code/name", list(code = code, name = name),
+      "Layout code and name must agree; the supplied values disagree.", "yytree::layout(code = 7, name = 'slant')")
     code <- matched
   }
   if (is.null(code)) code <- 1L
-  if (!is.numeric(code) || length(code) != 1 || is.na(code) || !code %in% seq_len(7)) stop("Layout code must be 1 through 7.")
-  .layer("layout", code = as.integer(code))
+  values <- list(start_angle = start_angle, angle_extent = angle_extent,
+                 tree_width_ratio = tree_width_ratio, left_margin_ratio = left_margin_ratio)
+  for (key in names(values)) if (!is.null(values[[key]])) {
+    circular <- key %in% c("start_angle", "angle_extent")
+    if ((circular && !code %in% c(3L, 4L)) || (!circular && code != 7L))
+      .parameter_error("layout", key, values[[key]],
+        if (circular) "This parameter applies only to circular layouts 3 and 4."
+        else "This parameter applies only to slanted layout 7.",
+        if (circular) example else "yytree::layout(code = 7, tree_width_ratio = 0.8, left_margin_ratio = 0.1)")
+    .parameter_number("layout", key, values[[key]],
+      if (key == "angle_extent") 1 else 0, if (circular) 360 else 1,
+      if (circular) example else "yytree::layout(code = 7, tree_width_ratio = 0.8, left_margin_ratio = 0.1)",
+      integer = circular, lower_open = key == "tree_width_ratio", upper_open = key == "left_margin_ratio")
+  }
+  .layer("layout", code = as.integer(code), start_angle = start_angle, angle_extent = angle_extent,
+         tree_width_ratio = tree_width_ratio, left_margin_ratio = left_margin_ratio)
 }
 
 leaf_labels <- function(show = TRUE, align = c("right", "left", "center"),
-                        font_family = NULL, font_size = NULL) {
-  if (!is.logical(show) || length(show) != 1 || is.na(show)) stop("show must be TRUE or FALSE.")
-  if (!is.null(font_family) && (!is.character(font_family) || length(font_family) != 1 || is.na(font_family))) stop("font_family must be a single font name.")
-  if (!is.null(font_size) && (!is.numeric(font_size) || length(font_size) != 1 || !is.finite(font_size) || font_size <= 0)) stop("font_size must be positive.")
-  .layer("leaf_labels", show = show, align = match.arg(align), font_family = font_family, font_size = font_size)
+                        font_family = NULL, font_size = NULL, gap_length = 6, ...) {
+  example <- "leaf_labels(align = 'left', gap_length = 6)"
+  .parameter_dots("leaf_labels", list(...), c("show", "align", "font_family", "font_size", "gap_length"), example)
+  if (!is.logical(show) || length(show) != 1 || is.na(show))
+    .parameter_error("leaf_labels", "show", show, "One TRUE or FALSE value.", example)
+  if (missing(align)) align <- "right"
+  if (!is.character(align) || length(align) != 1L || is.na(align) || !align %in% c("right", "left", "center"))
+    .parameter_error("leaf_labels", "align", align, "One of 'left', 'center', or 'right'.", example)
+  if (!is.null(font_family) && (!is.character(font_family) || length(font_family) != 1 || is.na(font_family)))
+    .parameter_error("leaf_labels", "font_family", font_family, "A single font name.", "leaf_labels(font_family = 'Serif')")
+  if (!is.null(font_size)) .parameter_number("leaf_labels", "font_size", font_size, 0, Inf,
+    "leaf_labels(font_size = 14)", lower_open = TRUE)
+  .parameter_number("leaf_labels", "gap_length", gap_length, 0, Inf, example)
+  .layer("leaf_labels", show = show, align = align, font_family = font_family, font_size = font_size, gap_length = gap_length)
 }
 
 leaf_label_render <- function(df) .layer("leaf_label_render", df = df)

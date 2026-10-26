@@ -34,4 +34,6 @@ if ($Test) {
     if ($LASTEXITCODE -ne 0) { throw 'yytree Java hover tests failed.' }
     & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeScaleControlTest
     if ($LASTEXITCODE -ne 0) { throw 'yytree Java scale control tests failed.' }
+    & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeParameterDialogTest
+    if ($LASTEXITCODE -ne 0) { throw 'yytree Java parameter dialog tests failed.' }
 }

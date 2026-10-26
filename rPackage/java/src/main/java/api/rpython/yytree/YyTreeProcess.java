@@ -45,6 +45,7 @@ public final class YyTreeProcess {
                             yield probe.toJSONString();
                         }
                         case "showPlot" -> bridge.showPlot(arguments.getString(0), arguments.getBooleanValue(1));
+                        case "showParameterError" -> bridge.showParameterError(arguments.getString(0));
                         case "renderPng" -> bridge.renderPng(arguments.getString(0), arguments.getString(1));
                         case "testInteraction" -> bridge.testInteraction(arguments.getString(0), arguments.size() > 1 ? arguments.getString(1) : null);
                         case "previewDiagnostics" -> previewDiagnostics();

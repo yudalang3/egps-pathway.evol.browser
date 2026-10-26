@@ -70,9 +70,15 @@ plots <- list(hidden = base + leaf_labels(show = FALSE),
   left = base + leaf_labels(align = "left", font_size = 15),
   center = base + leaf_labels(align = "center", font_size = 15),
   right = base + leaf_labels(align = "right", font_size = 15),
+  close_tips = base + yytree::layout(code = 7, tree_width_ratio = 0.8, left_margin_ratio = 0.1) +
+    leaf_labels(align = "left", gap_length = 3),
+  wider_gap = base + leaf_labels(align = "left", gap_length = 25),
   font = base + leaf_labels(font_family = "Serif", font_size = 20),
   hidden_again = base + leaf_labels() + leaf_labels(show = FALSE))
 # <<The last label setting wins. Serif is a portable Java logical font.|最后一次标签设置生效；Serif 是跨平台 Java 逻辑字体。>>
+# <<Each label region is as wide as the longest label measured in the current font.|各标签区域的宽度均取当前字体下最长标签的实际宽度。>>
+# <<align places text left/center/right inside that region; gap_length places the region beyond its own tip.|align 控制文字在区域内左对齐、居中或右对齐；gap_length 控制区域距各自 tip 的间距。>>
+# <<For widths 100 and 40, right alignment adds 60 pixels before the shorter text, independently of gap_length.|最长标签宽 100、短标签宽 40 时，右对齐会在短文字前增加 60 像素空白，这与 gap_length 分开计算。>>
 ''', TREE_CODE)
 
 add('leaf_label_colors', '<<Label backgrounds and the visibility prerequisite|标签背景色与显示前提>>', '''
@@ -142,6 +148,11 @@ for stem, title, styles in [
     ('circular_layouts', '<<Circular layouts with categorical and numeric rings|环形布局及分类、数值环带>>', ('circular', 'circ_align')),
     ('arch_layouts', '<<Arch layouts with outer annotation tracks|拱形布局与外轮廓注释轨道>>', ('arch', 'arch_align')),
 ]:
+    extra = '''
+plots$open_sector <- plots[[1]] + yytree::layout(code = 3, start_angle = 330, angle_extent = 90) +
+  leaf_labels(gap_length = 10)
+# <<Circular labels follow their tips radially and ignore align; gap_length still applies.|环形标签沿各自 tip 的径向排列，忽略 align；gap_length 仍然生效。>>
+''' if stem == 'circular_layouts' else ''
     add(stem, title, f'''
 plots <- lapply(c("{styles[0]}", "{styles[1]}"), function(style)
   yytree(tree, width = 1500, height = 1200) + yytree::layout(name = style) +
@@ -149,7 +160,7 @@ plots <- lapply(c("{styles[0]}", "{styles[1]}"), function(style)
     leaf_annotation_rect(categories, width = 12) +
     leaf_annotation_heatmap(measurements, legend = "bottom_right", width = 12))
 names(plots) <- c("{styles[0]}", "{styles[1]}")
-stopifnot(identical(plots[[1]]$tree, plots[[2]]$tree))
+{extra}stopifnot(identical(plots[[1]]$tree, plots[[2]]$tree))
 # <<Tracks follow the outside contour; alignment preserves real branch lengths.|轨道沿外侧轮廓排列；对齐不改变真实枝长。>>
 ''', TREE_CODE + NAMES + CATEGORIES + MEASUREMENTS)
 
@@ -482,7 +493,7 @@ readme += '''
 
 ## Preview appearance and navigation / 预览外观与操作
 
-The first preview installs the light FlatLaf theme from the eGPS installation.
+The first preview or parameter-error dialog installs the light FlatLaf theme from the eGPS installation.
 The white drawing canvas is surrounded by light grey chrome and a SwingX status
 bar showing zoom and coordinates. The native window title bar is retained.
 Canvas width and height are logical pixels. The preview initially fits the whole
@@ -509,7 +520,7 @@ display scale. Numeric zoom preserves the visible centre; wheel zoom preserves
 the actual pointer. Invalid or out-of-range input keeps the last valid view.
 Controls wrap into additional rows in narrow windows. Printing creates a new baseline.
 
-首次显示预览时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
+首次显示预览或参数错误说明时启用 eGPS 自带的浅色 FlatLaf：白色画布、浅灰外围及 SwingX 状态栏，
 保留原生标题栏。宽高指定逻辑画布像素；初始完整显示且不主动放大小图，手动缩放前随窗口
 调整自动适配。滚轮或百分比输入后保留手动倍率，仅溢出时显示对应滚动条；重新打印恢复自动适配。
 按住左键平移，滚轮围绕鼠标缩放；平移受画布边界限制，画布完全容纳于
@@ -527,11 +538,11 @@ Width (%) 与 Height (%) 始终联动；支持小数输入、Enter／失焦确�
 重新打印为新预览建立新的 100% 基准，不改变 R 对象或导出尺寸。
 
 Swing look-and-feel is shared within the JVM. Loading/configuring yytree and
-offscreen rendering do not install the theme. Opening the first preview changes
+offscreen rendering do not install the theme. Opening the first preview or error dialog changes
 the shared theme for subsequent Swing components, without actively refreshing
 other existing windows. It does not launch the eGPS desktop.
 
-Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设置主题；首次显示预览会影响
+Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设置主题；首次显示预览或错误说明会影响
 随后创建的 Swing 组件，但不会主动刷新其他已有窗口，也不会启动 eGPS 主框架。
 
 ## Validation / 验证

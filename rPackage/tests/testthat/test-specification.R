@@ -9,6 +9,82 @@ test_that("loading and building values does not start Java", {
   expect_equal(nrow(x$tree$edges), 2 * (nrow(tree$merge)))
   expect_equal(unserialize(serialize(y, NULL)), y)
 })
+
+test_that("label gap and layout parameters validate without starting Java", {
+  expect_equal(leaf_labels()$gap_length, 6)
+  expect_equal(leaf_labels(gap_length = 0)$gap_length, 0)
+  expect_equal(leaf_labels(gap_length = 2.5)$gap_length, 2.5)
+  expect_equal(leaf_labels()$align, "right")
+  for (value in list(NULL, numeric(), c(1, 2), NA_real_, NaN, Inf, -1, "6", TRUE, 1+1i)) {
+    error <- tryCatch(leaf_labels(gap_length = value), error = conditionMessage)
+    expect_type(error, "character")
+    for (term in c("leaf_labels", "gap_length", "Received:", "Expected:", "Example:"))
+      expect_match(error, term, fixed = TRUE)
+  }
+  for (value in list(NA_character_, character(), c("left", "right"), "middle", 1))
+    expect_error(leaf_labels(align = value), "align")
+  expect_error(leaf_labels(gap = 4, typo = TRUE), "Only these named parameters")
+  expect_error(yytree::layout(code = c(3, 4)), "1 through 7")
+  expect_error(yytree::layout(name = c("circ", "slant")), "name")
+  expect_error(yytree::layout(code = 3, angle_typo = 90), "Only these named parameters")
+  for (code in c(3, 4)) {
+    layer <- yytree::layout(code = code, start_angle = 330, angle_extent = 90)
+    expect_equal(layer$start_angle, 330)
+    expect_equal(layer$angle_extent, 90)
+    expect_error(yytree::layout(code = code, tree_width_ratio = .8), "only to slanted layout 7")
+    for (value in list(-1, 361, 1.5, NA, Inf, c(1, 2), "90"))
+      expect_error(yytree::layout(code = code, start_angle = value), "start_angle")
+    expect_error(yytree::layout(code = code, angle_extent = 0), "angle_extent")
+    expect_equal(yytree::layout(code = code, start_angle = 0, angle_extent = 1)$angle_extent, 1)
+    expect_equal(yytree::layout(code = code, start_angle = 360, angle_extent = 360)$start_angle, 360)
+  }
+  expect_equal(yytree::layout(code = 7, tree_width_ratio = .8, left_margin_ratio = 0)$left_margin_ratio, 0)
+  expect_error(yytree::layout(code = 7, start_angle = 90), "only to circular layouts 3 and 4")
+  for (code in c(1, 2, 5, 6)) {
+    expect_error(yytree::layout(code = code, angle_extent = 90), "only to circular")
+    expect_error(yytree::layout(code = code, left_margin_ratio = .2), "only to slanted")
+  }
+  for (value in list(0, -1, 1.1, NA, Inf, numeric(), "1"))
+    expect_error(yytree::layout(code = 7, tree_width_ratio = value), "tree_width_ratio")
+  for (value in list(-.1, 1, NA, Inf, c(0, .2)))
+    expect_error(yytree::layout(code = 7, left_margin_ratio = value), "left_margin_ratio")
+  x <- yytree("(A:1,B:2);")
+  y <- x + leaf_labels(gap_length = 30) + leaf_labels() +
+    yytree::layout(code = 3, start_angle = 0) + yytree::layout(code = 3)
+  expect_length(x$layers, 0)
+  expect_equal(y$layers[[2]]$gap_length, 6)
+  expect_null(y$layers[[4]]$start_angle)
+  expect_false(yytree:::.runtime_alive())
+})
+
+test_that("parameter dialogs only use an existing interactive runtime", {
+  notify <- yytree:::.notify_parameter_error
+  state <- new.env(parent = environment(notify))
+  environment(notify) <- state
+  state$interactive <- function() TRUE
+  state$.runtime_alive <- function() TRUE
+  state$Sys.getenv <- function(...) ""
+  state$.runtime <- list(process = "existing")
+  calls <- list()
+  state$.runtime_exchange <- function(process, command, arguments) {
+    calls[[length(calls) + 1L]] <<- list(process, command, arguments)
+  }
+  notify("Received: -1\nExpected: nonnegative\nExample: leaf_labels(gap_length = 6)")
+  expect_length(calls, 1)
+  expect_equal(calls[[1]][1:2], list("existing", "showParameterError"))
+  state$interactive <- function() FALSE
+  notify("batch error")
+  state$interactive <- function() TRUE
+  state$Sys.getenv <- function(...) "1"
+  notify("GUI disabled")
+  state$Sys.getenv <- function(...) ""
+  state$.runtime_alive <- function() FALSE
+  notify("runtime stopped")
+  expect_length(calls, 1)
+  state$.runtime_alive <- function() TRUE
+  state$.runtime_exchange <- function(...) stop("dialog unavailable")
+  expect_silent(notify("original parameter error"))
+})
 test_that("Newick and phylo preserve input branch lengths", {
   phy <- ape::read.tree(text = "((A:0.12345678912345,B:2):3,C:4);")
   expect_equal(yytree(phy)$tree$edges[,3], phy$edge.length)
