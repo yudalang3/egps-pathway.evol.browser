@@ -4,6 +4,22 @@
 
 基础示例同时展示 Newick 与 `hclust(dist(...))`，其余覆盖多轨注释、九种自由元件和千叶树。批量验证只执行英文版，中文版检查语法与逻辑一致性。
 
+## 查询函数帮助
+
+帮助正文为英文，每个函数或高度相关的小组各有一页。页面包含调用方式、参数类型与默认行为、使用约束、返回值、示例和相关函数链接。先查看 `help("yytree-package", package = "yytree")` 获取分类导航。
+
+```r
+help("layout", package = "yytree")       # Seven layouts, defaults and argument compatibility
+help("leaf_labels", package = "yytree")  # Label settings and background colors
+help("config_yytree", package = "yytree") # Configure and stop the shared Java runtime
+help("free_ellipse", package = "yytree")  # Ellipses and rectangles, including their different anchors
+help("print.yytree", package = "yytree") # Preview windows, fit, zoom and node inspection
+```
+
+加载包后可使用 `?layout`；若需要明确区分同名的基础绘图函数，使用 `help("layout", package = "yytree")` 或 `?yytree::layout`。树布局调用使用 `yytree::layout()`，基础绘图分面使用 `graphics::layout()`。更新安装包后，在新的 R 会话中加载本地开发版，避免仍使用旧帮助数据库。
+
+帮助源码统一维护在 `scripts/generate_yytree_help.R`。从仓库根目录运行 `Rscript scripts/generate_yytree_help.R` 重新生成页面；文档专项验收、打包和本地加载库更新使用 `scripts/validate_yytree_help.ps1`，无需重新编译 Java 桥接。
+
 ## 直接加载本地开发版
 
 项目提供固定加载目录 `rPackage/library`。完整验收脚本成功后，自动把已验证的最新版更新到这里；日常使用无需自己安装 ZIP。在新的 R 会话中运行：
