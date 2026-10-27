@@ -86,6 +86,7 @@ public final class YyTreeGeometryTest {
         testCircularLabels();
         testGapAndLayoutParameters();
         testSlantDirections();
+        testHiddenLabelTracks();
         for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
@@ -369,6 +370,54 @@ public final class YyTreeGeometryTest {
             scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"layout\",\"code\":7}"));
             require(prepare(scene).slantRotation==0,"Last layout did not reset direction");
         }
+    }
+    private static void testHiddenLabelTracks() throws Exception {
+        for(int code:new int[]{2,1,3,4,5,6,7})
+            for(String direction:code==7?new String[]{"right","down","left","up"}:new String[]{"right"})
+                for(int radius:new int[]{6,64})for(boolean hideExplicitly:new boolean[]{false,true})
+                    for(int tracks=1;tracks<=3;tracks++) {
+                        JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+                        JSONObject layout=scene.getJSONArray("layers").getJSONObject(0);
+                        layout.put("code",code);if(code==7)layout.put("direction",direction);
+                        scene.getJSONObject("canvas").put("margins",JSON.parseArray(radius==6?"[100,0,100,0]":"[100,40,100,40]"));
+                        // Retain the global radius of 6; the large marker is a local override on A.
+                        scene.getJSONArray("layers").getJSONObject(2).getJSONArray("df").getJSONObject(0).put("size",radius);
+                        if(hideExplicitly)scene.getJSONArray("layers").add(JSON.parseObject(
+                            "{\"type\":\"leaf_labels\",\"show\":false,\"align\":\"right\",\"gap_length\":1e100}"));
+                        if(tracks!=2)scene.getJSONArray("layers").add(JSON.parseObject("""
+                            {"type":"track","names":["C","A","B"],"width":20,"legend":"none",
+                             "columns":{"g":{"levels":["x","y","z"],"colors":["#FF0000FF","#00FF00FF","#0000FFFF"],"values":["z","x","y"]}}}
+                            """,Feature.OrderedField));
+                        if(tracks!=1) {
+                            var heat=JSON.parseObject("""
+                                {"type":"heatmap","names":["B","C","A"],"width":20,"legend":"none","titles":["v"],
+                                 "cells":[["#00FF00FF"],["#0000FFFF"],["#FF0000FF"]],"limits":[0,1],"palette":[]}
+                                """);
+                            for(int i=0;i<256;i++)heat.getJSONArray("palette").add("#000000FF");
+                            scene.getJSONArray("layers").add(heat);
+                        }
+                        var panel=prepare(scene);
+                        String context="layout="+code+", direction="+direction+", radius="+radius+", explicit="+hideExplicitly+", tracks="+tracks;
+                        require(!panel.labels,"Hidden labels became visible: "+context);
+                        var image=new BufferedImage(panel.logicalWidth,panel.logicalHeight,BufferedImage.TYPE_INT_RGB);
+                        var graphics=image.createGraphics();graphics.setColor(java.awt.Color.WHITE);
+                        graphics.fillRect(0,0,image.getWidth(),image.getHeight());graphics.setFont(panel.labelFont);
+                        panel.drawTracks(graphics);graphics.dispose();
+                        int[] colors={0xFF0000,0x00FF00,0x0000FF};
+                        for(int column=0;column<(tracks==3?2:1);column++)for(int i=0;i<panel.leaves.size();i++) {
+                            var leaf=panel.leaves.get(i);double offset=panel.labelWidth+12+column*24;
+                            var bounds=panel.band(leaf,leaf,(code>=3&&code<=6?panel.outer:0)+offset,20).getBounds2D();
+                            require(bounds.getMinX()>=0 && bounds.getMaxX()<=image.getWidth()
+                                && bounds.getMinY()>=0 && bounds.getMaxY()<=image.getHeight(),"Hidden-label track clipped: "+context+", bounds="+bounds);
+                            var point=trackSample(panel,leaf,offset+10);
+                            require((image.getRGB((int)point.getX(),(int)point.getY())&0xFFFFFF)==colors[i],
+                                "Hidden-label track lost leaf/color matching: "+context);
+                            if(code==1||code==2||code==7) {
+                                var local=code==7?panel.slantLocalBounds(bounds):bounds;
+                                require(Math.abs(local.getWidth()-20)<1e-7,"Hidden-label track width changed: "+context);
+                            }
+                        }
+                    }
     }
     private static double projectedMinimum(java.awt.geom.Rectangle2D bounds,double x,double y) {
         double minimum=Double.POSITIVE_INFINITY;

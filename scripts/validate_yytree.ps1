@@ -74,6 +74,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Windows ZIP installation smoke test failed.' }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/update_yytree_library.R (Join-Path $dist 'yytree_0.1.0.zip')
     if ($LASTEXITCODE -ne 0) { throw 'Stable local library update failed.' }
+    & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_hidden_label_tracks.R $Egps
+    if ($LASTEXITCODE -ne 0) { throw 'Hidden-label track regression failed.' }
     $labelParameters = @('--vanilla','scripts/test_yytree_label_parameters.R',$Egps)
     if ($Gui) { $labelParameters += '--gui' }
     & (Join-Path $R 'Rscript.exe') @labelParameters

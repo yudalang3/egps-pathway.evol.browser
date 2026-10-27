@@ -358,9 +358,11 @@ public final class YyTreeBridge {
             FontMetrics metrics = metricsHost.getFontMetrics(labelFont);
             maxLabelWidth = leaves.stream().mapToInt(n -> metrics.stringWidth(n.getName())).max().orElse(0);
             double markerRadius=leaves.stream().mapToDouble(n->sizes.getOrDefault(n,0.0)).max().orElse(0);
-            labelWidth = labels ? Math.hypot(maxLabelWidth,metrics.getHeight())+markerRadius+gapLength+4 : 0;
-            JSONArray m = scene.getJSONObject("canvas").getJSONArray("margins");
             boolean curved = code >= 3 && code <= 6;
+            // Hidden labels still leave marker bounds between the tips and tracks.
+            labelWidth = labels ? Math.hypot(maxLabelWidth,metrics.getHeight())+markerRadius+gapLength+4
+                : markerRadius*(curved?Math.sqrt(2):1);
+            JSONArray m = scene.getJSONObject("canvas").getJSONArray("margins");
             double requestedReserve=Math.ceil(labelWidth+trackWidth+12);
             double[] margins={m.getIntValue(0),m.getIntValue(1)+leftLegendReserve,m.getIntValue(2),m.getIntValue(3)+legendReserve};
             if(curved)for(int i=0;i<4;i++)margins[i]+=requestedReserve;
