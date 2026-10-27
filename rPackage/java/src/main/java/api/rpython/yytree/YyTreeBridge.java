@@ -392,7 +392,12 @@ public final class YyTreeBridge {
                 }
                 requestedReserve+=Math.ceil(Math.max(0,titleAlongReserve));
             }
-            if(curved)for(int i=0;i<4;i++)margins[i]+=requestedReserve;
+            if(code==3||code==4)for(int i=0;i<4;i++)margins[i]+=requestedReserve;
+            else if(code==5||code==6) {
+                // Arch tracks expand above and beside the tree, not below its open ends.
+                margins[0]+=requestedReserve;margins[1]+=requestedReserve;margins[3]+=requestedReserve;
+                margins[2]+=Math.ceil(Math.max(markerRadius,labels?metrics.getHeight()/2.0:0));
+            }
             else if(code==7) {
                 margins[switch(slantRotation){case 90->2;case 180->1;case 270->0;default->3;}]+=requestedReserve;
                 margins[switch(slantRotation){case 90->1;case 180->0;case 270->3;default->2;}]+=titleReserve;

@@ -90,6 +90,7 @@ public final class YyTreeGeometryTest {
         testAnnotationSpacingAndLegends();
         testAnnotationTitles();
         testContinuousHeatLegend();
+        testArchAnnotationSpace();
         for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
@@ -223,6 +224,61 @@ public final class YyTreeGeometryTest {
         var g=image.createGraphics();
         g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
         panel.drawTracks(g);g.dispose();return image;
+    }
+    private static void testArchAnnotationSpace() throws Exception {
+        for(int code:new int[]{5,6})for(int[] size:new int[][]{{1200,800},{1400,600},{1000,1400}})
+            for(boolean labels:new boolean[]{false,true})for(boolean annotations:new boolean[]{false,true}) {
+                JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+                scene.getJSONArray("layers").getJSONObject(0).put("code",code);
+                scene.getJSONObject("canvas").put("width",size[0]);scene.getJSONObject("canvas").put("height",size[1]);
+                scene.getJSONObject("tree").getJSONArray("labels").set(0,"Arabidopsis");
+                scene.getJSONArray("layers").getJSONObject(2).getJSONArray("df").getJSONObject(0).put("name","Arabidopsis");
+                JSONObject label=JSON.parseObject("{\"type\":\"leaf_labels\",\"align\":\"right\"}");label.put("show",labels);
+                scene.getJSONArray("layers").add(label);
+                if(annotations) {
+                    JSONObject first=categoryTrack("group",2,"top_right");first.put("width",24);
+                    first.getJSONArray("names").set(0,"Arabidopsis");
+                    first.getJSONObject("columns").put("habitat",categoryTrack("habitat",2,"none").getJSONObject("columns").getJSONObject("habitat"));
+                    JSONObject heat=gradientHeat("top_right",false,255);heat.put("width",24);
+                    heat.getJSONArray("names").set(0,"Arabidopsis");
+                    heat.put("titles",JSON.parseArray("[\"one\",\"two\",\"three\",\"four\"]"));
+                    heat.put("cells",JSON.parseArray("[[null,null,null,null],[null,null,null,null],[null,null,null,null]]"));
+                    scene.getJSONArray("layers").add(first);
+                    scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"annotation_gap\",\"width\":12}"));
+                    scene.getJSONArray("layers").add(heat);
+                    scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"annotation_gap\",\"width\":20}"));
+                    scene.getJSONArray("layers").add(JSON.parseObject(first.toJSONString(),Feature.OrderedField));
+                }
+                var panel=prepare(scene);
+                require(panel.leaves.getFirst().getName().equals("Arabidopsis") && panel.named.get("Arabidopsis").getRealBranchLength()==0.12345678912345,
+                    "Arch changed leaf order or stored branch length");
+                if(size[0]==1200 && size[1]==800 && annotations && labels) {
+                    require(panel.treeBounds.getHeight()>300,"Multi-annotation arch tree collapsed");
+                    require(panel.treeBounds.getMaxY()>700,"Annotation thickness was reserved below the arch");
+                    require(panel.trackWidth==228,"Arch changed annotation widths or gaps");
+                }
+                var metrics=panel.metricsHost.getFontMetrics(panel.labelFont);
+                for(GraphicsNode leaf:panel.leaves) {
+                    if(labels) {
+                        var bounds=panel.labelBounds(leaf,metrics);
+                        require(bounds.getMinX()>=40 && bounds.getMaxX()<=size[0]-40 && bounds.getMinY()>=20 && bounds.getMaxY()<=size[1]-80,
+                            "Arch label is clipped");
+                    }
+                    for(JSONObject layer:panel.layers)if(panel.trackOffsets.containsKey(layer)) {
+                        int count=layer.getString("type").equals("track")?layer.getJSONObject("columns").size():layer.getJSONArray("titles").size();
+                        var bounds=panel.band(leaf,leaf,panel.outer+panel.labelWidth+12+panel.trackOffsets.get(layer),count*layer.getDoubleValue("width")).getBounds2D();
+                        require(bounds.getMinX()>=40 && bounds.getMaxX()<=size[0]-40 && bounds.getMinY()>=20 && bounds.getMaxY()<=size[1]-80,
+                            "Arch annotation is clipped");
+                    }
+                }
+                if(annotations) {
+                    var image=annotationImage(panel);
+                    for(GraphicsNode leaf:panel.leaves) {
+                        Point2D sample=trackSample(panel,leaf,panel.labelWidth+24);
+                        require((image.getRGB((int)sample.getX(),(int)sample.getY())&0xFFFFFF)==0xFF0000,"Arch annotations no longer match leaves");
+                    }
+                }
+            }
     }
     private static JSONObject gradientHeat(String position,boolean constant,int alpha) {
         JSONObject heat=JSON.parseObject("""

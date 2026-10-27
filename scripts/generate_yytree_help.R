@@ -71,7 +71,7 @@ Code \tab Name \tab Display\cr
 7 \tab \code{slant} \tab Slanted cladogram (topology only)
 }
 
-Layouts 1 through 6 draw real branch lengths. An arch has two straight sides joined by a semicircular top. The aligned variants add dashed extensions to align tips on the layout's outer contour.
+Layouts 1 through 6 draw real branch lengths. An arch has two straight sides joined by a semicircular top and remains open at the bottom. Arch layouts reserve label and annotation thickness above and beside the tree; below the open ends they reserve only the required label and node-marker clearance. The core arch is fitted to the remaining width and height. The aligned variants add dashed extensions to align tips on the layout's outer contour.
 }
 \subsection{Defaults and parameter compatibility}{
 \code{layout()} selects \code{code = 1}, equivalent to \code{name = "rect"}. The plot also uses this layout if no layout layer is added.
