@@ -209,17 +209,21 @@ quit_yytree()
 
 legend_arg <- r"(One legend-position string: \code{"top_right"} (default), \code{"top_left"}, \code{"bottom_right"}, \code{"bottom_left"}, or \code{"none"}.)"
 track_width_arg <- "One finite positive number: width of each annotation column in logical pixels, default 16. This is not the entire track group's width or a relative canvas fraction."
+rotation_arg <- "One finite number from -90 to 90 degrees, default 60. Zero is horizontal and positive angles rotate clockwise. Each annotation call controls its own column labels. Rectangular and slanted layouts show these labels; circular and arch layouts do not. Horizontal or shallow labels may overlap when columns are narrow."
 document("leaf_annotation_rect", "Append categorical annotation columns matched to leaf names.",
   c(df = r"(Required data frame with a \code{name} column and at least one category column. Names must be nonmissing, unique known leaves. Each remaining column produces one track; \code{NA} categories and omitted leaves are left blank.)",
     legend = legend_arg,
     colors = paste(r"(Default \code{NULL} uses \code{hcl.colors(..., "Dark 3")} per column. Otherwise a category-named color vector shared by columns, or a list named by column containing category-named vectors. Every category must be named, including unused factor levels. \code{NA} mapped colors leave cells blank.)", color_rule),
-    width = track_width_arg),
+    width = track_width_arg, text_rotation = rotation_arg,
+    title = r"(Default \code{NULL} uses the original column names as legend headings. A character vector named by annotation column changes those legend headings; unspecified columns keep their original names. Names must be unique and known. For a single category column, one unnamed string is also accepted. Track labels and color mappings retain the original column names.)"),
   r"(Factor levels determine category and legend order, including unused levels; other columns use first-occurrence order among nonmissing values. Rows may be in any order. Layers append outward in addition order, with labels between tree and tracks. Track geometry follows the chosen tree layout. Each annotation call has its own legend block, with bold column headings and category entries. Blocks sharing a corner follow addition order, separated by gray dashed lines, and wrap into columns when needed. Repeated annotations retain separate legends. Use leaf_annotation_gap() between calls to set their spacing.)",
   'categories <- data.frame(name = c("C", "A"),\n                         group = factor(c("treated", "control")))\np <- yytree("((A:1,B:2):1,C:3);") + leaf_labels() +\n  leaf_annotation_rect(categories,\n    colors = c(control = "steelblue", treated = "orange"), width = 12)')
 
 document("leaf_annotation_heatmap", "Append numeric heatmap columns matched to leaf names.",
   c(x = r"(Required nonempty numeric matrix with unique known leaf names in \code{rownames(x)}. Infinite entries are rejected; \code{NA} entries are blank. Column names become track titles; absent column names are replaced by \code{V1}, \code{V2}, and so on. Omitted leaves are blank.)",
-    legend = legend_arg, colors = heat_colors_arg, limits = limits_arg, width = track_width_arg),
+    legend = legend_arg, colors = heat_colors_arg, limits = limits_arg, width = track_width_arg,
+    text_rotation = rotation_arg,
+    title = r"(Default \code{NULL} uses the joined column names as the legend heading. One character string replaces that heading without changing the track labels or color scale.)"),
   r"(Rows match leaf names, not row positions. All columns share a single continuous color scale computed from the whole matrix. Repeated layers append outward rather than replacing previous tracks. Each layer has its own scale and legend; use identical \code{colors} and \code{limits} when layers need a common scale.)",
   'values <- matrix(c(0, 5, NA, 10), nrow = 2,\n                 dimnames = list(c("C", "A"), c("control", "treated")))\np <- yytree("((A:1,B:2):1,C:3);") +\n  leaf_annotation_heatmap(values, limits = c(0, 10), legend = "bottom_right")')
 

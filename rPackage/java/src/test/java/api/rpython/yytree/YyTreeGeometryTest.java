@@ -88,6 +88,7 @@ public final class YyTreeGeometryTest {
         testSlantDirections();
         testHiddenLabelTracks();
         testAnnotationSpacingAndLegends();
+        testAnnotationTitles();
         for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
@@ -221,6 +222,51 @@ public final class YyTreeGeometryTest {
         var g=image.createGraphics();
         g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
         panel.drawTracks(g);g.dispose();return image;
+    }
+    private static void testAnnotationTitles() throws Exception {
+        for(int code:new int[]{1,2,7})for(String direction:code==7?new String[]{"right","down","left","up"}:new String[]{"right"})
+            for(double angle:new double[]{-90,-45,0,45,60,90}) {
+                JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+                JSONObject layout=scene.getJSONArray("layers").getJSONObject(0);layout.put("code",code);
+                if(code==7)layout.put("direction",direction);
+                String name="Long annotation column label";
+                JSONObject track=categoryTrack(name,1,"none");track.put("text_rotation",angle);
+                scene.getJSONArray("layers").add(track);
+                var panel=prepare(scene);
+                BufferedImage image=new BufferedImage(panel.logicalWidth,panel.logicalHeight,BufferedImage.TYPE_INT_ARGB);
+                var g=image.createGraphics();g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
+                panel.trackTitle(g,name,panel.labelWidth+12+panel.trackOffsets.get(track)+10,angle);g.dispose();
+                int count=0,minX=image.getWidth(),maxX=0,minY=image.getHeight(),maxY=0;
+                double sumX=0,sumY=0,sumXY=0;
+                double edge=code==7?panel.slantTreeBounds().getMaxY():panel.treeBounds.getMaxY();
+                for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)
+                    if((image.getRGB(x,y)&0xFFFFFF)!=0xFFFFFF) {
+                        count++;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+                        double along=code==7?panel.along(x,y):x,across=code==7?panel.across(x,y):y;
+                        require(across>=edge+3,"Rotated title overlaps annotation area: "+direction+" "+angle);
+                        sumX+=along;sumY+=across;sumXY+=along*across;
+                    }
+                require(count>0 && minX>0 && minY>0 && maxX<image.getWidth()-1 && maxY<image.getHeight()-1,
+                    "Rotated title is missing or clipped: "+direction+" "+angle);
+                double covariance=sumXY/count-(sumX/count)*(sumY/count);
+                if(angle==-45||angle==45)require(Math.signum(covariance)==Math.signum(angle),"Title tilts the wrong way: "+direction+" "+angle);
+            }
+        JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+        JSONObject track=categoryTrack("group",2,"top_right");
+        track.getJSONObject("columns").put("habitat",categoryTrack("habitat",2,"top_right").getJSONObject("columns").getJSONObject("habitat"));
+        track.put("legend_titles",JSON.parseObject("{\"group\":\"Species group\"}"));
+        scene.getJSONArray("layers").add(track);
+        JSONObject heat=JSON.parseObject("""
+            {"type":"heatmap","names":["A","B","C"],"titles":["score"],"width":20,
+             "legend":"top_right","legend_title":"Expression level","limits":[0,1]}
+            """);
+        scene.getJSONArray("layers").add(heat);
+        var panel=prepare(scene);
+        var rows=panel.legendColumns.getFirst().rows();
+        require(rows.stream().anyMatch(r->r.heading()&&r.text().equals("Species group")),"Custom category title missing");
+        require(rows.stream().anyMatch(r->r.heading()&&r.text().equals("habitat")),"Unspecified category title changed");
+        require(rows.stream().anyMatch(r->r.heading()&&r.text().equals("Expression level")),"Custom heatmap title missing");
+        require(rows.stream().filter(YyTreeBridge.YyTreePanel.LegendRow::separator).count()==1,"Custom titles changed legend grouping");
     }
     private static void testAnnotationSpacingAndLegends() throws Exception {
         for(int code=1;code<=7;code++)for(String direction:code==7?new String[]{"right","down","left","up"}:new String[]{"right"})

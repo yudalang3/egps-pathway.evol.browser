@@ -21,6 +21,11 @@ tryCatch({
   stopifnot(inherits(plot, "yytree"))
   gaps <- Filter(function(layer) layer$type == "annotation_gap", plot$layers)
   stopifnot(identical(vapply(gaps, `[[`, 0, "width"), c(12, 20)))
+  tracks <- Filter(function(layer) layer$type %in% c("track", "heatmap"), plot$layers)
+  stopifnot(identical(vapply(tracks, `[[`, 0, "text_rotation"), c(45, 90, -45)),
+            identical(tracks[[1]]$legend_titles$group, "Species group"),
+            identical(tracks[[2]]$legend_title, "Expression level"),
+            identical(tracks[[3]]$legend_titles$habitat, "Habitat (repeat)"))
   original <- serialize(plot, NULL)
   path <- file.path(out, "multiple-annotations.png")
   metadata <- jsonlite::fromJSON(yytree:::.runtime_request("renderPng", yytree:::.scene_json(plot), path))
@@ -41,5 +46,5 @@ tryCatch({
     }
   }
   jsonlite::write_json(results, "logs/yytree-annotation-spacing.json", auto_unbox = TRUE, pretty = TRUE)
-  cat("Installed package: example parses, 12/20px gaps, PNG and optional Swing preview passed.\n")
+  cat("Installed package: example parses, gaps, rotations, legend titles, PNG and optional Swing preview passed.\n")
 }, finally = quit_yytree())

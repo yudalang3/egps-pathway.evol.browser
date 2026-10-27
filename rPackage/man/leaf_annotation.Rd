@@ -11,9 +11,11 @@ Categorical and numeric leaf annotation tracks
 \strong{\code{leaf_annotation_heatmap()}:} Append numeric heatmap columns matched to leaf names.
 }
 \usage{
-leaf_annotation_rect(df, legend = "top_right", colors = NULL, width = 16)
+leaf_annotation_rect(df, legend = "top_right", colors = NULL, width = 16,
+    text_rotation = 60, title = NULL)
 leaf_annotation_heatmap(x, legend = "top_right", colors = c("#2166AC", "white",
-    "#B2182B"), limits = NULL, width = 16)
+    "#B2182B"), limits = NULL, width = 16, text_rotation = 60,
+    title = NULL)
 }
 \arguments{
 \item{df}{\strong{\code{leaf_annotation_rect} only:} Required data frame with a \code{name} column and at least one category column. Names must be nonmissing, unique known leaves. Each remaining column produces one track; \code{NA} categories and omitted leaves are left blank.}
@@ -22,6 +24,10 @@ leaf_annotation_heatmap(x, legend = "top_right", colors = c("#2166AC", "white",
 
 \strong{\code{leaf_annotation_heatmap}:} Vector of R colors interpolated into a continuous palette. Default \code{c("#2166AC", "white", "#B2182B")} (blue, white, red). An R color name, \code{#RRGGBB} or \code{#RRGGBBAA}; alpha is supported.}
 \item{width}{One finite positive number: width of each annotation column in logical pixels, default 16. This is not the entire track group's width or a relative canvas fraction.}
+\item{text_rotation}{One finite number from -90 to 90 degrees, default 60. Zero is horizontal and positive angles rotate clockwise. Each annotation call controls its own column labels. Rectangular and slanted layouts show these labels; circular and arch layouts do not. Horizontal or shallow labels may overlap when columns are narrow.}
+\item{title}{\strong{\code{leaf_annotation_rect}:} Default \code{NULL} uses the original column names as legend headings. A character vector named by annotation column changes those legend headings; unspecified columns keep their original names. Names must be unique and known. For a single category column, one unnamed string is also accepted. Track labels and color mappings retain the original column names.
+
+\strong{\code{leaf_annotation_heatmap}:} Default \code{NULL} uses the joined column names as the legend heading. One character string replaces that heading without changing the track labels or color scale.}
 \item{x}{\strong{\code{leaf_annotation_heatmap} only:} Required nonempty numeric matrix with unique known leaf names in \code{rownames(x)}. Infinite entries are rejected; \code{NA} entries are blank. Column names become track titles; absent column names are replaced by \code{V1}, \code{V2}, and so on. Omitted leaves are blank.}
 \item{limits}{\strong{\code{leaf_annotation_heatmap} only:} Two finite numbers in increasing or equal order. Default \code{NULL} uses the range of all nonmissing entries in the entire matrix, or \code{c(0, 1)} for an all-missing matrix. Values outside the limits are clipped; equal limits use the palette midpoint. No automatic standardization or Z-score is applied.}
 }

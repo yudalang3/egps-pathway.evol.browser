@@ -367,18 +367,33 @@ public final class YyTreeBridge {
             JSONArray m = scene.getJSONObject("canvas").getJSONArray("margins");
             double requestedReserve=Math.ceil(labelWidth+trackWidth+12);
             double[] margins={m.getIntValue(0),m.getIntValue(1)+leftLegendReserve,m.getIntValue(2),m.getIntValue(3)+legendReserve};
+            double titleReserve=35,titleAlongReserve=0;
+            if(!curved) {
+                for(JSONObject layer:layers) {
+                    String type=layer.getString("type");
+                    if(!type.equals("track")&&!type.equals("heatmap"))continue;
+                    double rotation=trackRotation(layer),width=number(layer,"width",16);
+                    Collection<String> titles=type.equals("track")?layer.getJSONObject("columns").keySet():layer.getJSONArray("titles").toJavaList(String.class);
+                    int index=0;
+                    for(String title:titles) {
+                        Rectangle2D bounds=trackTitleBounds(title,rotation);
+                        double shift=Math.max(0,-bounds.getMinY()-5);
+                        titleReserve=Math.max(titleReserve,Math.ceil(10+shift+bounds.getMaxY()));
+                        if(code==7 && rotation==60) {
+                            FontMetrics fm=metricsHost.getFontMetrics(labelFont.deriveFont(10f));
+                            titleReserve=Math.max(titleReserve,Math.ceil(fm.stringWidth(title)*Math.sin(Math.PI/3)+fm.getHeight()+10));
+                        }
+                        titleAlongReserve=Math.max(titleAlongReserve,trackOffsets.get(layer)+(index+.5)*width+bounds.getMaxX()-trackWidth);
+                        index++;
+                    }
+                }
+                requestedReserve+=Math.ceil(Math.max(0,titleAlongReserve));
+            }
             if(curved)for(int i=0;i<4;i++)margins[i]+=requestedReserve;
             else if(code==7) {
                 margins[switch(slantRotation){case 90->2;case 180->1;case 270->0;default->3;}]+=requestedReserve;
-                double titleReserve=35;
-                FontMetrics titleMetrics=metricsHost.getFontMetrics(labelFont.deriveFont(10f));
-                for(JSONObject layer:layers) {
-                    Collection<String> titles=layer.getString("type").equals("track")?layer.getJSONObject("columns").keySet():
-                        layer.getString("type").equals("heatmap")?layer.getJSONArray("titles").toJavaList(String.class):List.of();
-                    for(String title:titles)titleReserve=Math.max(titleReserve,Math.ceil(titleMetrics.stringWidth(title)*Math.sin(Math.PI/3)+titleMetrics.getHeight()+10));
-                }
                 margins[switch(slantRotation){case 90->1;case 180->0;case 270->3;default->2;}]+=titleReserve;
-            } else { margins[2]+=35;margins[3]+=requestedReserve; }
+            } else { margins[2]+=titleReserve;margins[3]+=requestedReserve; }
             if (logicalWidth-margins[1]-margins[3] < 30 || logicalHeight-margins[0]-margins[2] < 30)
                 throw new IllegalArgumentException("Cannot fit labels and tracks on this canvas.\nReceived: width="+logicalWidth+
                     ", height="+logicalHeight+", gap_length="+gapLength+".\nExpected: enough space for the tree, labels and tracks; increase width/height or reduce gap_length/font_size.\nExample: yytree(tree, width = 1600, height = 1200) + leaf_labels(gap_length = 6, font_size = 12)");
@@ -723,27 +738,44 @@ public final class YyTreeBridge {
                     for(String title:columns.keySet()) {
                         JSONObject column=columns.getJSONObject(title);JSONArray levels=column.getJSONArray("levels"),colors=column.getJSONArray("colors"),values=column.getJSONArray("values");
                         for(GraphicsNode leaf:leaves) {Integer row=indices.get(leaf.getName());if(row==null)continue;String value=values.getString(row);if(value==null)continue;int index=levels.indexOf(value);if(index>=0)cell(g,leaf,offset,width,color(colors.getString(index)));}
-                        trackTitle(g,title,offset+width/2);
+                        trackTitle(g,title,offset+width/2,trackRotation(layer));
                         offset+=width;
                     }
                 } else {
                     JSONArray titles=layer.getJSONArray("titles"),cells=layer.getJSONArray("cells");
-                    for(int j=0;j<titles.size();j++) {for(GraphicsNode leaf:leaves){Integer row=indices.get(leaf.getName());if(row!=null)cell(g,leaf,offset,width,color(cells.getJSONArray(row).getString(j)));}trackTitle(g,titles.getString(j),offset+width/2);offset+=width;}
+                    for(int j=0;j<titles.size();j++) {for(GraphicsNode leaf:leaves){Integer row=indices.get(leaf.getName());if(row!=null)cell(g,leaf,offset,width,color(cells.getJSONArray(row).getString(j)));}trackTitle(g,titles.getString(j),offset+width/2,trackRotation(layer));offset+=width;}
                 }
             }
             drawLegends(g);
         }
-        void trackTitle(Graphics2D g,String text,double offset) {
+        double trackRotation(JSONObject layer) {
+            double rotation=number(layer,"text_rotation",60);
+            if(!Double.isFinite(rotation)||rotation< -90||rotation>90)
+                throw new IllegalArgumentException("text_rotation must be finite and between -90 and 90 degrees.");
+            return rotation;
+        }
+        Rectangle2D trackTitleBounds(String text,double rotation) {
+            FontMetrics metrics=metricsHost.getFontMetrics(labelFont.deriveFont(10f));
+            double angle=Math.toRadians((code==7?slantRotation:0)+rotation);
+            angle=Math.atan2(Math.sin(angle),Math.cos(angle));
+            boolean flip=angle>Math.PI/2+1e-10||angle< -Math.PI/2-1e-10;
+            double local=Math.toRadians(rotation)+(flip?Math.PI:0);
+            int width=metrics.stringWidth(text);
+            Rectangle2D box=new Rectangle2D.Double(flip?-width:0,-metrics.getAscent(),width,metrics.getHeight());
+            return AffineTransform.getRotateInstance(local).createTransformedShape(box).getBounds2D();
+        }
+        void trackTitle(Graphics2D g,String text,double offset,double rotation) {
             if(code>=3&&code<=6)return;
             Graphics2D title=(Graphics2D)g.create();
             title.setFont(labelFont.deriveFont(10f));title.setColor(Color.BLACK);
+            double shift=Math.max(0,-trackTitleBounds(text,rotation).getMinY()-5);
             if(code==7) {
-                Point2D point=slantPoint(trackBaseX+offset,slantTreeBounds().getMaxY()+10);
-                drawReadableText(title,text,point.getX(),point.getY(),Math.toRadians(slantRotation)+Math.PI/3);
+                Point2D point=slantPoint(trackBaseX+offset,slantTreeBounds().getMaxY()+10+shift);
+                drawReadableText(title,text,point.getX(),point.getY(),Math.toRadians(slantRotation+rotation));
                 title.dispose();return;
             }
-            title.translate(trackBaseX+offset,treeBounds.getMaxY()+10);
-            title.rotate(Math.PI/3);title.drawString(text,0,0);title.dispose();
+            drawReadableText(title,text,trackBaseX+offset,treeBounds.getMaxY()+10+shift,Math.toRadians(rotation));
+            title.dispose();
         }
         void drawReadableText(Graphics2D g,String text,double x,double y,double angle) {
             angle=Math.atan2(Math.sin(angle),Math.cos(angle));
@@ -763,13 +795,15 @@ public final class YyTreeBridge {
                 if(layer.getString("type").equals("track")) {
                     JSONObject columns=layer.getJSONObject("columns");
                     for(String title:columns.keySet()) {
-                        rows.add(new LegendRow(title,null,true,false));
+                        JSONObject titles=layer.getJSONObject("legend_titles");
+                        rows.add(new LegendRow(titles!=null&&titles.containsKey(title)?titles.getString(title):title,null,true,false));
                         JSONObject column=columns.getJSONObject(title);
                         JSONArray levels=column.getJSONArray("levels"),colors=column.getJSONArray("colors");
                         for(int i=0;i<levels.size();i++)rows.add(new LegendRow(levels.getString(i),color(colors.getString(i)),false,false));
                     }
                 } else if(layer.getString("type").equals("heatmap")) {
-                    rows.add(new LegendRow(String.join(", ",layer.getJSONArray("titles").toJavaList(String.class)),null,true,false));
+                    String customTitle=layer.getString("legend_title");
+                    rows.add(new LegendRow(customTitle==null?String.join(", ",layer.getJSONArray("titles").toJavaList(String.class)):customTitle,null,true,false));
                     JSONArray palette=layer.getJSONArray("palette");
                     for(int i=0;i<5;i++)rows.add(new LegendRow(heatLegendLabel(layer.getJSONArray("limits"),i),
                         palette==null?null:color(palette.getString(i*255/4)),false,false));

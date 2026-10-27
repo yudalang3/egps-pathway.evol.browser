@@ -11,9 +11,22 @@ leaf_annotation_gap <- function(width = 12) {
                     "leaf_annotation_gap(width = 12)")
   .layer("annotation_gap", width = width)
 }
-leaf_annotation_rect <- function(df, legend = "top_right", colors = NULL, width = 16) {
+leaf_annotation_rect <- function(df, legend = "top_right", colors = NULL, width = 16,
+                                 text_rotation = 60, title = NULL) {
   if (!is.data.frame(df) || !"name" %in% names(df) || ncol(df) < 2) stop("df needs name and category columns.")
   columns <- setdiff(names(df), "name")
+  .parameter_number("leaf_annotation_rect", "text_rotation", text_rotation, -90, 90,
+                    "leaf_annotation_rect(df, text_rotation = 45)")
+  if (!is.null(title)) {
+    if (is.character(title) && length(title) == 1L && is.null(names(title)) && length(columns) == 1L)
+      names(title) <- columns
+    if (!is.character(title) || !length(title) || anyNA(title) || is.null(names(title)) ||
+        anyNA(names(title)) || any(!nzchar(names(title))) || anyDuplicated(names(title)) ||
+        any(!names(title) %in% columns))
+      .parameter_error("leaf_annotation_rect", "title", title,
+        "A named character vector using unique annotation column names; for one column, a single string is also allowed.",
+        "leaf_annotation_rect(df, title = c(group = 'Species'))")
+  }
   values <- stats::setNames(lapply(columns, function(column) {
     x <- df[[column]]
     lev <- if (is.factor(x)) levels(x) else unique(as.character(x[!is.na(x)]))
@@ -24,7 +37,8 @@ leaf_annotation_rect <- function(df, legend = "top_right", colors = NULL, width 
     }
     list(values = as.character(x), levels = lev, colors = .color(palette))
   }), columns)
-  .layer("track", names = as.character(df$name), columns = values, legend = .legend(legend), width = width)
+  .layer("track", names = as.character(df$name), columns = values, legend = .legend(legend),
+         width = width, text_rotation = text_rotation, legend_titles = if (is.null(title)) NULL else as.list(title))
 }
 .heat_colors <- function(x, colors, limits) {
   if (!is.matrix(x) || !is.numeric(x) || !all(dim(x) > 0) || any(is.infinite(x))) stop("Expected a nonempty finite numeric matrix (NA allowed).")
@@ -44,13 +58,20 @@ leaf_annotation_rect <- function(df, legend = "top_right", colors = NULL, width 
   cells[is.na(x)] <- NA_character_
   list(cells = cells, limits = limits, palette = .color(palette))
 }
-leaf_annotation_heatmap <- function(x, legend = "top_right", colors = c("#2166AC", "white", "#B2182B"), limits = NULL, width = 16) {
+leaf_annotation_heatmap <- function(x, legend = "top_right", colors = c("#2166AC", "white", "#B2182B"), limits = NULL, width = 16,
+                                    text_rotation = 60, title = NULL) {
   if (is.null(rownames(x))) stop("Heatmap needs leaf names in rownames.")
+  .parameter_number("leaf_annotation_heatmap", "text_rotation", text_rotation, -90, 90,
+                    "leaf_annotation_heatmap(x, text_rotation = 45)")
+  if (!is.null(title) && (!is.character(title) || length(title) != 1L || is.na(title)))
+    .parameter_error("leaf_annotation_heatmap", "title", title, "One character string or NULL.",
+                     "leaf_annotation_heatmap(x, title = 'Expression')")
   mapped <- .heat_colors(x, colors, limits)
   titles <- colnames(x)
   if (is.null(titles)) titles <- paste0("V", seq_len(ncol(x)))
   .layer("heatmap", names = rownames(x), cells = mapped$cells, titles = titles,
-         limits = mapped$limits, palette = mapped$palette, legend = .legend(legend), width = width)
+         limits = mapped$limits, palette = mapped$palette, legend = .legend(legend), width = width,
+         text_rotation = text_rotation, legend_title = if (is.null(title)) NULL else unname(title))
 }
 .free <- function(type, mode, fill_color, line_color, line_thickness, line_type, ...) {
   if (length(line_thickness) != 1 || !is.finite(line_thickness) || line_thickness < 0) stop("Invalid line thickness.")
