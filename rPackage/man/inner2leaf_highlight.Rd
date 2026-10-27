@@ -8,16 +8,19 @@ Highlight a descendant clade
 Shade the clade descending from an MRCA.
 }
 \usage{
-inner2leaf_highlight(name1 = NULL, name2 = NULL, fill = "green", df = NULL)
+inner2leaf_highlight(name1 = NULL, name2 = NULL, fill = "green", df = NULL,
+    text = NULL, text_position = "left")
 }
 \arguments{
 \item{name1}{One leaf-name string, default \code{NULL}. To select a single node without \code{df}, supply both \code{name1} and \code{name2}: they must be distinct known leaves and identify their most recent common ancestor (MRCA). With \code{df}, each row supplies both selector columns.}
 \item{name2}{One leaf-name string, default \code{NULL}. To select a single node without \code{df}, supply both \code{name1} and \code{name2}: they must be distinct known leaves and identify their most recent common ancestor (MRCA). With \code{df}, each row supplies both selector columns.}
 \item{fill}{Clade background color, default \code{"green"}. \code{NA} disables the fill. Display alpha is capped at 40/255 so branches remain readable; more transparent input stays transparent. An R color name, \code{#RRGGBB} or \code{#RRGGBBAA}; alpha is supported.}
-\item{df}{Default \code{NULL}: select one clade with both leaf-name arguments. Otherwise a nonempty data frame with \code{name1} and \code{name2}, plus optional \code{fill}. Row values override function-level values; duplicate selector pairs are rejected.}
+\item{df}{Default \code{NULL}: select one clade with both leaf-name arguments. Otherwise a nonempty data frame with \code{name1} and \code{name2}, plus optional \code{fill}, \code{text} and \code{text_position}. Row values override function-level values; duplicate selector pairs are rejected.}
+\item{text}{One nonmissing string, default \code{NULL} for no label. A supplied \code{df$text} overrides it per row. An empty string omits the label.}
+\item{text_position}{Default \code{"left"}. One of \code{"left"}, \code{"right"}, \code{"top"}, \code{"bottom"}, \code{"topleft"}, \code{"topright"}, \code{"bottomleft"}, or \code{"bottomright"}, in fixed screen coordinates. Text remains horizontal in every layout. Left/right text is vertically centered; top/bottom text is horizontally centered, using actual glyph bounds and a 5-logical-pixel edge gap. At corners, opposite text and reference corners face each other with a 5-pixel gap on each axis: for example, topleft puts the text's bottom-right corner above and left of the reference's top-left corner. A supplied \code{df$text_position} overrides the setting per row.}
 }
 \details{
-The selected ancestor and all descendant leaves define the shaded region. Geometry follows the current rectangular, circular, arch or slanted layout. Highlights are drawn behind branches and do not recolor nodes or branches. Multiple layers add highlight regions; overlapping fills are composited in addition order. Annotation rows are matched by leaf names, never by row position. Unknown names and duplicate selector rows are rejected when adding the layer.
+The selected ancestor and all descendant leaves define the shaded region. Geometry follows the current rectangular, circular, arch or slanted layout. Highlights are drawn behind branches and do not recolor nodes or branches. Optional black text is drawn after the tree, even when the fill is transparent or NA. All eight text positions use the selected internal node's center as the reference point, independent of node-symbol radius, tree direction, or shaded-region bounds. Multiple layers add highlight regions; overlapping fills are composited in addition order. Annotation rows are matched by leaf names, never by row position. Unknown names and duplicate selector rows are rejected when adding the layer.
 }
 \value{
 A \code{yytree_layer} value; add it to a plot with \code{+}.

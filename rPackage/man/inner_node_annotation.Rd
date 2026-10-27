@@ -9,7 +9,7 @@ Place a shape and text beside a selected internal node.
 }
 \usage{
 inner_node_annotation(name1 = NULL, name2 = NULL, text = NULL, shape = "rect",
-    size = 20, fill = "pink", df = NULL)
+    size = 20, fill = "pink", df = NULL, text_position = "right")
 }
 \arguments{
 \item{name1}{One leaf-name string, default \code{NULL}. To select a single node without \code{df}, supply both \code{name1} and \code{name2}: they must be distinct known leaves and identify their most recent common ancestor (MRCA). With \code{df}, each row supplies both selector columns.}
@@ -18,10 +18,11 @@ inner_node_annotation(name1 = NULL, name2 = NULL, text = NULL, shape = "rect",
 \item{shape}{One of \code{"rect"} (default), \code{"ellipse"}, or \code{"triangle"}. A supplied \code{df$shape} overrides it per row.}
 \item{size}{Finite nonnegative annotation-box width in logical pixels, default 20. Height is the same as width; this is not a node radius. A supplied \code{df$size} overrides it per row.}
 \item{fill}{Shape fill color, default \code{"pink"}; \code{NA} leaves the shape unfilled. A supplied \code{df$fill} overrides it per row. An R color name, \code{#RRGGBB} or \code{#RRGGBBAA}; alpha is supported.}
-\item{df}{Default \code{NULL}: annotate one MRCA using the two leaf-name arguments. Otherwise a nonempty data frame with \code{name1}, \code{name2} and any of \code{text}, \code{shape}, \code{size}, \code{fill}. Omitted style columns use function-level values. Text must be provided at one of these levels.}
+\item{df}{Default \code{NULL}: annotate one MRCA using the two leaf-name arguments. Otherwise a nonempty data frame with \code{name1}, \code{name2} and any of \code{text}, \code{shape}, \code{size}, \code{fill}, \code{text_position}. Omitted style columns use function-level values. Text must be provided at one of these levels.}
+\item{text_position}{Default \code{"right"}. One of \code{"left"}, \code{"right"}, \code{"top"}, \code{"bottom"}, \code{"topleft"}, \code{"topright"}, \code{"bottomleft"}, or \code{"bottomright"}, in fixed screen coordinates. Text remains horizontal in every layout. Left/right text is vertically centered; top/bottom text is horizontally centered, using actual glyph bounds and a 5-logical-pixel edge gap. At corners, opposite text and reference corners face each other with a 5-pixel gap on each axis: for example, topleft puts the text's bottom-right corner above and left of the reference's top-left corner. A supplied \code{df$text_position} overrides the setting per row.}
 }
 \details{
-The shape is centered on the MRCA. Black text is placed five logical pixels beyond the shape's right edge. The shape has a fill but no separate outline parameter. Row selectors override function-level selectors when \code{df} is present. Multiple annotation layers append; they do not replace earlier annotations. Annotation rows are matched by leaf names, never by row position. Unknown names and duplicate selector rows are rejected when adding the layer.
+The shape is centered on the MRCA. Black text is positioned outside the shape's screen bounds. The shape has a fill but no separate outline parameter. An empty string omits text while keeping the shape. Row selectors override function-level selectors when \code{df} is present. Multiple annotation layers append; they do not replace earlier annotations. Annotation rows are matched by leaf names, never by row position. Unknown names and duplicate selector rows are rejected when adding the layer.
 }
 \value{
 A \code{yytree_layer} value; add it to a plot with \code{+}.

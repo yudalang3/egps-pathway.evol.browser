@@ -160,6 +160,7 @@ print(y)
 - 叶名必须非空且唯一；整组叶名缺失时生成编号。未知选择器、重复数据行或无效 MRCA 会报错。
 - `leaf_label_render()` 设置文字背景色，必须在 `leaf_labels(show = TRUE)` 后添加。
 - 节点 `size` 是像素半径，`fill` 同时设置节点与入边颜色。内节点通过两个不同叶子的最近共同祖先定位。
+- `inner_node_annotation(text_position = "right")` 支持八方向：`left/right/top/bottom/topleft/topright/bottomleft/bottomright`。文字固定水平，左右垂直居中、上下水平居中；角位置以文字相反角对着形状包围框的对应角，横纵各间隔 5 个逻辑像素（如 `topleft` 为文字右下角对形状左上角）。`inner2leaf_highlight(text = "Clade", text_position = "left")` 的八个方向均直接相对内节点中心，不再按根方向或节点半径偏移；背景透明时仍显示文字。两者均支持 `df$text` 和 `df$text_position` 逐行覆盖。
 - 分类注释的数据框需要 `name` 列，其他列各形成一条轨道；因子按 levels 配色。`colors` 可为命名向量，或按列命名的颜色映射列表。
 - 数值热图需要叶名行名，列名作为轨道标题；全矩阵共享色阶，支持 `colors` 和 `limits`，不自动执行 Z-score。`NA` 和缺失叶子的注释留空。
 - 热图图例使用 12×80 逻辑像素的连续渐变矩形，最大值在顶部、最小值在底部，右侧有五个数值刻度。色条与热图使用同一调色板和透明度；相等的 `limits` 显示中点纯色及一个刻度。标题与色条整体换列。

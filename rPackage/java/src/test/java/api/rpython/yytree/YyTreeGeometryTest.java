@@ -91,6 +91,7 @@ public final class YyTreeGeometryTest {
         testAnnotationTitles();
         testContinuousHeatLegend();
         testArchAnnotationSpace();
+        testCladeTextPlacement();
         for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
@@ -224,6 +225,72 @@ public final class YyTreeGeometryTest {
         var g=image.createGraphics();
         g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
         panel.drawTracks(g);g.dispose();return image;
+    }
+    private static void testCladeTextPlacement() throws Exception {
+        for(int code=1;code<=7;code++)for(String direction:code==7?new String[]{"right","down","left","up"}:new String[]{"right"}) {
+            JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+            JSONObject layout=scene.getJSONArray("layers").getJSONObject(0);layout.put("code",code);
+            if(code==7)layout.put("direction",direction);
+            scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"inner_node_render\",\"size\":8}"));
+            var panel=prepare(scene);var node=panel.mrca("A","B");
+            var image=new BufferedImage(panel.logicalWidth,panel.logicalHeight,BufferedImage.TYPE_INT_ARGB);
+            var g=image.createGraphics();g.setFont(panel.labelFont);
+            for(String shape:new String[]{"rect","ellipse","triangle"})for(String position:new String[]{"left","right","top","bottom","topleft","topright","bottomleft","bottomright"}) {
+                JSONObject annotation=JSON.parseObject("{\"shape\":\"rect\",\"size\":30}");annotation.put("shape",shape);
+                var reference=panel.nodeAnnotationShape(node,annotation).getBounds2D();
+                var placed=panel.placeAnnotationText(g,"Mammal 哺乳动物",reference,position);var bounds=placed.bounds();
+                if(position.equals("left")||position.equals("right")) {
+                    require(Math.abs(bounds.getCenterY()-reference.getCenterY())<1e-7,"Side annotation text is not vertically centered");
+                    double gap=position.equals("left")?reference.getMinX()-bounds.getMaxX():bounds.getMinX()-reference.getMaxX();
+                    require(Math.abs(gap-5)<1e-7,"Side annotation gap changed");
+                } else if(position.equals("top")||position.equals("bottom")) {
+                    require(Math.abs(bounds.getCenterX()-reference.getCenterX())<1e-7,"Top/bottom annotation text is not horizontally centered");
+                    double gap=position.equals("top")?reference.getMinY()-bounds.getMaxY():bounds.getMinY()-reference.getMaxY();
+                    require(Math.abs(gap-5)<1e-7,"Top/bottom annotation gap changed");
+                } else {
+                    double horizontal=position.endsWith("left")?reference.getMinX()-bounds.getMaxX():bounds.getMinX()-reference.getMaxX();
+                    double vertical=position.startsWith("top")?reference.getMinY()-bounds.getMaxY():bounds.getMinY()-reference.getMaxY();
+                    require(Math.abs(horizontal-5)<1e-7 && Math.abs(vertical-5)<1e-7,"Annotation corners do not face each other with a 5px gap");
+                }
+                g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
+                panel.drawAnnotationText(g,"Mammal",reference,position);
+                int minX=image.getWidth(),minY=image.getHeight(),maxX=-1,maxY=-1;
+                for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++)if((image.getRGB(x,y)&0xFFFFFF)!=0xFFFFFF) {
+                    minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+                }
+                require(maxX>minX && maxX-minX>maxY-minY,"Annotation text is missing or rotated with the tree");
+            }
+            var anchor=panel.highlightTextAnchor(node);
+            require(anchor.distance(node.getXSelf(),node.getYSelf())==0,"Marked highlight anchor is not at the node center");
+            for(String position:new String[]{"left","right","top","bottom","topleft","topright","bottomleft","bottomright"}) {
+                var reference=new java.awt.geom.Rectangle2D.Double(anchor.x,anchor.y,0,0);
+                var bounds=panel.placeAnnotationText(g,"Clade",reference,position).bounds();
+                if(position.contains("left"))require(Math.abs(anchor.x-bounds.getMaxX()-5)<1e-7,"Highlight left anchor shifted");
+                if(position.contains("right"))require(Math.abs(bounds.getMinX()-anchor.x-5)<1e-7,"Highlight right anchor shifted");
+                if(position.startsWith("top"))require(Math.abs(anchor.y-bounds.getMaxY()-5)<1e-7,"Highlight top anchor shifted");
+                if(position.startsWith("bottom"))require(Math.abs(bounds.getMinY()-anchor.y-5)<1e-7,"Highlight bottom anchor shifted");
+            }
+            panel.sizes.put(node,0.0);anchor=panel.highlightTextAnchor(node);
+            require(anchor.distance(node.getXSelf(),node.getYSelf())==0,"Unmarked highlight anchor moved from the node");
+            JSONObject highlight=JSON.parseObject("{\"type\":\"inner2leaf_highlight\",\"name1\":\"A\",\"name2\":\"B\",\"fill\":null}");
+            g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());panel.highlightText(g,highlight);
+            require(image.getRGB((int)node.getXSelf(),(int)node.getYSelf())==java.awt.Color.WHITE.getRGB(),"An unlabelled highlight drew text");
+            highlight.put("text","Clade");highlight.put("text_position","top");panel.highlightText(g,highlight);
+            var placed=panel.placeAnnotationText(g,"Clade",new java.awt.geom.Rectangle2D.Double(anchor.x,anchor.y,0,0),"top");
+            int ink=0;var box=placed.bounds();
+            for(int y=(int)Math.floor(box.getMinY())-1;y<=Math.ceil(box.getMaxY())+1;y++)
+                for(int x=(int)Math.floor(box.getMinX())-1;x<=Math.ceil(box.getMaxX())+1;x++)
+                    if(x>=0&&y>=0&&x<image.getWidth()&&y<image.getHeight()&&(image.getRGB(x,y)&0xFFFFFF)!=0xFFFFFF)ink++;
+            require(ink>0,"Transparent highlight suppressed its text");
+            JSONObject rows=JSON.parseObject("""
+                {"type":"inner2leaf_highlight","text":"Fallback","text_position":"left","df":[
+                  {"name1":"A","name2":"B","text":"Local","text_position":"top"},{"name1":"A","name2":"C"}]}
+                """);
+            var expanded=panel.rows(rows);
+            require(expanded.get(0).getString("text_position").equals("top")&&expanded.get(1).getString("text_position").equals("left"),"Row text positions leaked");
+            require(expanded.get(1).getString("text").equals("Fallback"),"Row text fallback lost");
+            panel.highlightText(g,rows);g.dispose();
+        }
     }
     private static void testArchAnnotationSpace() throws Exception {
         for(int code:new int[]{5,6})for(int[] size:new int[][]{{1200,800},{1400,600},{1000,1400}})

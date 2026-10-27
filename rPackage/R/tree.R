@@ -247,8 +247,38 @@ leaf_labels <- function(show = TRUE, align = c("right", "left", "center"),
 leaf_label_render <- function(df) .layer("leaf_label_render", df = df)
 leaf_render <- function(size = NULL, fill = NULL, df = NULL) .layer("leaf_render", size = size, fill = fill, df = df)
 inner_node_render <- function(size = NULL, fill = NULL, df = NULL, name1 = NULL, name2 = NULL) .layer("inner_node_render", size = size, fill = fill, df = df, name1 = name1, name2 = name2)
-inner2leaf_highlight <- function(name1 = NULL, name2 = NULL, fill = "green", df = NULL) .layer("inner2leaf_highlight", name1 = name1, name2 = name2, fill = fill, df = df)
-inner_node_annotation <- function(name1 = NULL, name2 = NULL, text = NULL, shape = "rect", size = 20, fill = "pink", df = NULL) .layer("inner_node_annotation", name1 = name1, name2 = name2, text = text, shape = shape, size = size, fill = fill, df = df)
+.annotation_text_parameters <- function(fun, text, text_position, df) {
+  example <- paste0(fun, "('A', 'B', text = 'Clade', text_position = 'top')")
+  positions <- c("left", "right", "top", "bottom", "topleft", "topright", "bottomleft", "bottomright")
+  position_requirement <- paste0("One of ", paste(shQuote(positions), collapse = ", "), ".")
+  if (!is.null(text) && (!is.character(text) || length(text) != 1L || is.na(text)))
+    .parameter_error(fun, "text", text, "One nonmissing string or NULL.", example)
+  if (!is.character(text_position) || length(text_position) != 1L || is.na(text_position) || !text_position %in% positions)
+    .parameter_error(fun, "text_position", text_position, position_requirement, example)
+  if (is.data.frame(df)) {
+    if ("text" %in% names(df) && (!is.character(df$text) || anyNA(df$text)))
+      .parameter_error(fun, "df$text", df$text, "Nonmissing character strings.", example)
+    if ("text_position" %in% names(df) && (!is.character(df$text_position) || anyNA(df$text_position) || any(!df$text_position %in% positions)))
+      .parameter_error(fun, "df$text_position", df$text_position, position_requirement, example)
+  }
+}
+inner2leaf_highlight <- function(name1 = NULL, name2 = NULL, fill = "green", df = NULL,
+                                 text = NULL, text_position = "left") {
+  .annotation_text_parameters("inner2leaf_highlight", text, text_position, df)
+  layer <- .layer("inner2leaf_highlight", name1 = name1, name2 = name2, fill = fill, df = df,
+                  text = text, text_position = text_position)
+  # Keep NULL explicit so R's $text cannot partially match text_position.
+  layer["text"] <- list(text)
+  layer
+}
+inner_node_annotation <- function(name1 = NULL, name2 = NULL, text = NULL, shape = "rect", size = 20, fill = "pink", df = NULL,
+                                   text_position = "right") {
+  .annotation_text_parameters("inner_node_annotation", text, text_position, df)
+  layer <- .layer("inner_node_annotation", name1 = name1, name2 = name2, text = text, shape = shape,
+                  size = size, fill = fill, df = df, text_position = text_position)
+  layer["text"] <- list(text)
+  layer
+}
 
 `+.yytree` <- function(e1, e2) {
   if (!inherits(e2, "yytree_layer")) stop("Only yytree layers can be added.")
@@ -281,8 +311,8 @@ inner_node_annotation <- function(name1 = NULL, name2 = NULL, text = NULL, shape
   if (e2$type == "inner_node_annotation") {
     shapes <- if (!is.null(e2$df$shape)) e2$df$shape else e2$shape
     if (any(!shapes %in% c("rect", "ellipse", "triangle"))) stop("Unknown annotation shape.")
-    texts <- if (!is.null(e2$df$text)) e2$df$text else e2$text
-    if (is.null(texts) || anyNA(texts) || (!is.null(e2$text) && length(e2$text) != 1)) stop("Supply text, or a text column in df.")
+    texts <- if (!is.null(e2$df[["text"]])) e2$df[["text"]] else e2[["text"]]
+    if (is.null(texts) || anyNA(texts) || (!is.null(e2[["text"]]) && length(e2[["text"]]) != 1)) stop("Supply text, or a text column in df.")
   }
   if (!is.null(e2$fill)) .color(e2$fill)
   e1$layers <- c(e1$layers, list(e2))

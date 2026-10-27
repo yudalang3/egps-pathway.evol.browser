@@ -18,6 +18,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
@@ -590,6 +591,7 @@ public final class YyTreeBridge {
                 drawTree(g);
                 if(labels) drawLabels(g);
                 for(JSONObject layer:layers) if(layer.getString("type").equals("inner_node_annotation")) nodeAnnotation(g,layer);
+                for(JSONObject layer:layers) if(layer.getString("type").equals("inner2leaf_highlight")) highlightText(g,layer);
                 drawTracks(g);
                 for(JSONObject layer:layers) if(layer.containsKey("mode")) drawFree(g,layer);
         }
@@ -709,13 +711,51 @@ public final class YyTreeBridge {
             for(JSONObject row:rows(layer)) nodeAnnotationRow(g,row);
         }
         void nodeAnnotationRow(Graphics2D g,JSONObject layer) {
-            GraphicsNode node=mrca(layer.getString("name1"),layer.getString("name2"));double size=number(layer,"size",20),x=node.getXSelf(),y=node.getYSelf();
+            GraphicsNode node=mrca(layer.getString("name1"),layer.getString("name2"));
+            Shape shape=nodeAnnotationShape(node,layer);
+            Color c=color(layer.getString("fill"));if(c!=null){g.setColor(c);g.fill(shape);}
+            drawAnnotationText(g,layer.getString("text"),shape.getBounds2D(),layer.getString("text_position")==null?"right":layer.getString("text_position"));
+        }
+        Shape nodeAnnotationShape(GraphicsNode node,JSONObject layer) {
+            double size=number(layer,"size",20),x=node.getXSelf(),y=node.getYSelf();
             Shape shape=switch(layer.getString("shape")){case "ellipse"->new Ellipse2D.Double(x-size/2,y-size/2,size,size);case "triangle"->{Path2D p=new Path2D.Double();p.moveTo(x,y-size/2);p.lineTo(x-size/2,y+size/2);p.lineTo(x+size/2,y+size/2);p.closePath();yield p;}case "rect"->new Rectangle2D.Double(x-size/2,y-size/2,size,size);default->throw new IllegalArgumentException("Unknown annotation shape.");};
             if(code==7)shape=AffineTransform.getRotateInstance(Math.toRadians(slantRotation),x,y).createTransformedShape(shape);
-            Color c=color(layer.getString("fill"));if(c!=null){g.setColor(c);g.fill(shape);}
-            g.setColor(Color.BLACK);
-            if(code==7)drawReadableText(g,layer.getString("text"),x+growthX*(size/2+5),y+growthY*(size/2+5),Math.toRadians(slantRotation));
-            else g.drawString(layer.getString("text"),(float)(x+size/2+5),(float)y);
+            return shape;
+        }
+        Point2D.Double highlightTextAnchor(GraphicsNode node) {
+            return new Point2D.Double(node.getXSelf(),node.getYSelf());
+        }
+        void highlightText(Graphics2D g,JSONObject layer) {
+            for(JSONObject row:rows(layer)) {
+                String text=row.getString("text");if(text==null||text.isEmpty())continue;
+                Point2D anchor=highlightTextAnchor(mrca(row.getString("name1"),row.getString("name2")));
+                drawAnnotationText(g,text,new Rectangle2D.Double(anchor.getX(),anchor.getY(),0,0),
+                    row.getString("text_position")==null?"left":row.getString("text_position"));
+            }
+        }
+        record AnnotationText(TextLayout layout,float x,float baseline,Rectangle2D bounds) {}
+        AnnotationText placeAnnotationText(Graphics2D g,String text,Rectangle2D reference,String position) {
+            if(text==null||text.isEmpty())return null;
+            TextLayout layout=new TextLayout(text,g.getFont(),g.getFontRenderContext());
+            Rectangle2D ink=layout.getBounds();
+            double x=reference.getCenterX()-ink.getWidth()/2,y=reference.getCenterY()-ink.getHeight()/2;
+            switch(position) {
+                case "left"->x=reference.getMinX()-5-ink.getWidth();
+                case "right"->x=reference.getMaxX()+5;
+                case "top"->y=reference.getMinY()-5-ink.getHeight();
+                case "bottom"->y=reference.getMaxY()+5;
+                case "topleft"->{x=reference.getMinX()-5-ink.getWidth();y=reference.getMinY()-5-ink.getHeight();}
+                case "topright"->{x=reference.getMaxX()+5;y=reference.getMinY()-5-ink.getHeight();}
+                case "bottomleft"->{x=reference.getMinX()-5-ink.getWidth();y=reference.getMaxY()+5;}
+                case "bottomright"->{x=reference.getMaxX()+5;y=reference.getMaxY()+5;}
+                default->throw new IllegalArgumentException("text_position must be left, right, top, bottom, topleft, topright, bottomleft or bottomright.");
+            }
+            return new AnnotationText(layout,(float)(x-ink.getX()),(float)(y-ink.getY()),
+                new Rectangle2D.Double(x,y,ink.getWidth(),ink.getHeight()));
+        }
+        void drawAnnotationText(Graphics2D g,String text,Rectangle2D reference,String position) {
+            AnnotationText placed=placeAnnotationText(g,text,reference,position);
+            if(placed!=null){g.setColor(Color.BLACK);placed.layout().draw(g,placed.x(),placed.baseline());}
         }
         void prepareTrackOffsets() {
             double end=0,gap=4;
