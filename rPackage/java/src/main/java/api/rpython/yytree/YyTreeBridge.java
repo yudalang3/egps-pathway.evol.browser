@@ -258,7 +258,10 @@ public final class YyTreeBridge {
         final Map<GraphicsNode, Double> sizes = new IdentityHashMap<>();
         final Map<String,Integer> legendWidths = new HashMap<>();
         final Map<JSONObject,Double> trackOffsets = new IdentityHashMap<>();
-        record LegendRow(String text, Color color, boolean heading, boolean separator) {}
+        record LegendRow(String text, Color color, boolean heading, boolean separator, JSONObject gradient) {
+            LegendRow(String text,Color color,boolean heading,boolean separator) {this(text,color,heading,separator,null);}
+            int units() {return gradient==null?1:6;}
+        }
         record LegendColumn(List<LegendRow> rows, int x, int top, int width) {}
         final List<LegendColumn> legendColumns = new ArrayList<>();
         final Container metricsHost = new Container() {
@@ -804,9 +807,7 @@ public final class YyTreeBridge {
                 } else if(layer.getString("type").equals("heatmap")) {
                     String customTitle=layer.getString("legend_title");
                     rows.add(new LegendRow(customTitle==null?String.join(", ",layer.getJSONArray("titles").toJavaList(String.class)):customTitle,null,true,false));
-                    JSONArray palette=layer.getJSONArray("palette");
-                    for(int i=0;i<5;i++)rows.add(new LegendRow(heatLegendLabel(layer.getJSONArray("limits"),i),
-                        palette==null?null:color(palette.getString(i*255/4)),false,false));
+                    rows.add(new LegendRow("",null,false,false,layer));
                 }
                 if(!rows.isEmpty())blocks.computeIfAbsent(position,k->new ArrayList<>()).add(rows);
             }
@@ -816,23 +817,30 @@ public final class YyTreeBridge {
                 String position=entry.getKey(),opposite=position.startsWith("top")?position.replace("top","bottom"):position.replace("bottom","top");
                 int height=blocks.containsKey(opposite)?logicalHeight/2:logicalHeight;
                 int cap=Math.max(2,(height-30)/15);
-                int width=entry.getValue().stream().flatMap(List::stream)
-                    .mapToInt(row->(row.heading()?headings:metrics).stringWidth(row.text())).max().orElse(0)+28;
+                int width=entry.getValue().stream().flatMap(List::stream).mapToInt(row->{
+                    if(row.gradient()==null)return (row.heading()?headings:metrics).stringWidth(row.text());
+                    JSONArray limits=row.gradient().getJSONArray("limits");
+                    int widest=0;for(int i=0;i<5;i++)widest=Math.max(widest,metrics.stringWidth(heatLegendLabel(limits,i)));
+                    return widest;
+                }).max().orElse(0)+28;
                 legendWidths.put(position,width);
                 List<List<LegendRow>> columns=new ArrayList<>();
                 List<LegendRow> column=new ArrayList<>();
                 for(List<LegendRow> block:entry.getValue()) {
+                    int blockUnits=legendUnits(block),used=legendUnits(column);
+                    if(block.stream().anyMatch(row->row.gradient()!=null) && blockUnits>cap)
+                        throw new IllegalArgumentException("Cannot fit the continuous heatmap legend on this canvas; increase height.");
                     // Keep a complete annotation together whenever it fits in one column.
-                    if(!column.isEmpty() && (block.size()<=cap && column.size()+1+block.size()>cap ||
-                        cap-column.size()<Math.min(3,block.size()+1))) {
+                    if(!column.isEmpty() && (blockUnits<=cap && used+1+blockUnits>cap ||
+                        cap-used<Math.min(3,blockUnits+1))) {
                         columns.add(column);column=new ArrayList<>();
                     }
                     if(!column.isEmpty())column.add(new LegendRow("",null,false,true));
                     LegendRow heading=null;
                     for(int i=0;i<block.size();i++) {
                         LegendRow row=block.get(i);
-                        int needed=row.heading()?Math.min(2,block.size()-i):1;
-                        if(cap-column.size()<needed) {
+                        int needed=row.units()+(row.heading()&&i+1<block.size()?block.get(i+1).units():0);
+                        if(cap-legendUnits(column)<needed) {
                             columns.add(column);column=new ArrayList<>();
                             if(!row.heading() && heading!=null)column.add(heading);
                         }
@@ -844,13 +852,14 @@ public final class YyTreeBridge {
                 for(int i=0;i<columns.size();i++) {
                     List<LegendRow> rows=columns.get(i);
                     int x=position.endsWith("right")?logicalWidth-(i+1)*width:8+i*width;
-                    int top=position.startsWith("bottom")?logicalHeight-12-(rows.size()-1)*15:15;
+                    int top=position.startsWith("bottom")?logicalHeight-12-(legendUnits(rows)-1)*15:15;
                     legendColumns.add(new LegendColumn(rows,x,top,width));
                 }
                 int reserve=width*columns.size()+8;
                 if(position.endsWith("right"))legendReserve=Math.max(legendReserve,reserve);else leftLegendReserve=Math.max(leftLegendReserve,reserve);
             }
         }
+        int legendUnits(List<LegendRow> rows) {return rows.stream().mapToInt(LegendRow::units).sum();}
         String heatLegendLabel(JSONArray limits,int index) {
             double fraction=index/4.0;
             return String.format(Locale.ROOT,"%.3g",limits.getDoubleValue(0)*(1-fraction)+limits.getDoubleValue(1)*fraction);
@@ -861,21 +870,42 @@ public final class YyTreeBridge {
                 for(LegendColumn column:legendColumns) {
                     int x=column.x(),y=column.top();
                     g.setColor(new Color(255,255,255,230));
-                    g.fillRect(x-2,y-12,column.width(),column.rows().size()*15);
+                    g.fillRect(x-2,y-12,column.width(),legendUnits(column.rows())*15);
                     for(LegendRow row:column.rows()) {
                         if(row.separator()) {
                             g.setColor(new Color(150,150,150));
                             g.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER,10,new float[]{4,3},0));
                             g.drawLine(x,y-5,x+column.width()-12,y-5);
+                        } else if(row.gradient()!=null) {
+                            drawHeatLegend(g,row.gradient(),x,y-9);
                         } else {
                             g.setFont(labelFont.deriveFont(row.heading()?Font.BOLD:Font.PLAIN,10f));
                             if(row.color()!=null){g.setColor(row.color());g.fillRect(x,y-9,10,10);}
                             g.setColor(Color.BLACK);g.drawString(row.text(),row.heading()?x:x+15,y);
                         }
-                        y+=15;
+                        y+=row.units()*15;
                     }
                 }
             } finally {g.dispose();}
+        }
+        void drawHeatLegend(Graphics2D g,JSONObject layer,int x,int top) {
+            JSONArray palette=layer.getJSONArray("palette"),limits=layer.getJSONArray("limits");
+            boolean constant=limits.getDoubleValue(0)==limits.getDoubleValue(1);
+            for(int row=0;row<80;row++) {
+                int index=constant?127:(int)Math.round(255*(1-row/79.0));
+                Color c=color(palette.getString(index));
+                if(c!=null){g.setColor(c);g.fillRect(x,top+row,12,1);}
+            }
+            g.setStroke(new BasicStroke(1));g.setColor(new Color(150,150,150));
+            g.drawRect(x-1,top-1,13,81);
+            g.setFont(labelFont.deriveFont(10f));g.setColor(Color.BLACK);
+            int shift=(g.getFontMetrics().getAscent()-g.getFontMetrics().getDescent())/2;
+            for(int i=0;i<5;i++) {
+                if(constant && i!=2)continue;
+                int y=top+(int)Math.round(i*79/4.0);
+                g.drawLine(x+12,y,x+15,y);
+                g.drawString(heatLegendLabel(limits,4-i),x+19,y+shift);
+            }
         }
         double coordinate(JSONObject layer,String key,boolean x) {double value=number(layer,key,0);return switch(layer.getString("mode")){case "relative"->value*(x?logicalWidth:logicalHeight);case "percent"->value*(x?logicalWidth:logicalHeight)/100;default->value;};}
         Point2D point(JSONObject layer,JSONArray p) {JSONObject value=new JSONObject();value.put("mode",layer.getString("mode"));value.put("x",p.getDoubleValue(0));value.put("y",p.getDoubleValue(1));return new Point2D.Double(coordinate(value,"x",true),coordinate(value,"y",false));}

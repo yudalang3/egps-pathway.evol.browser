@@ -36,7 +36,7 @@ leaf_annotation_heatmap(x, legend = "top_right", colors = c("#2166AC", "white",
 Factor levels determine category and legend order, including unused levels; other columns use first-occurrence order among nonmissing values. Rows may be in any order. Layers append outward in addition order, with labels between tree and tracks. Track geometry follows the chosen tree layout. Each annotation call has its own legend block, with bold column headings and category entries. Blocks sharing a corner follow addition order, separated by gray dashed lines, and wrap into columns when needed. Repeated annotations retain separate legends. Use leaf_annotation_gap() between calls to set their spacing.
 }
 \subsection{leaf_annotation_heatmap}{
-Rows match leaf names, not row positions. All columns share a single continuous color scale computed from the whole matrix. Repeated layers append outward rather than replacing previous tracks. Each layer has its own scale and legend; use identical \code{colors} and \code{limits} when layers need a common scale.
+Rows match leaf names, not row positions. All columns share a single continuous color scale computed from the whole matrix. The legend is a vertical continuous gradient rectangle, 12 by 80 logical pixels, with the maximum at the top and minimum at the bottom. Five numeric ticks use the same scale and palette as the heatmap, including alpha. Equal limits produce a solid midpoint color and a single tick. The title and color bar stay together when legends wrap into columns. Repeated layers append outward rather than replacing previous tracks. Each layer has its own scale and legend; use identical \code{colors} and \code{limits} when layers need a common scale.
 }
 }
 \section{Similarities and differences}{

@@ -224,7 +224,7 @@ document("leaf_annotation_heatmap", "Append numeric heatmap columns matched to l
     legend = legend_arg, colors = heat_colors_arg, limits = limits_arg, width = track_width_arg,
     text_rotation = rotation_arg,
     title = r"(Default \code{NULL} uses the joined column names as the legend heading. One character string replaces that heading without changing the track labels or color scale.)"),
-  r"(Rows match leaf names, not row positions. All columns share a single continuous color scale computed from the whole matrix. Repeated layers append outward rather than replacing previous tracks. Each layer has its own scale and legend; use identical \code{colors} and \code{limits} when layers need a common scale.)",
+  r"(Rows match leaf names, not row positions. All columns share a single continuous color scale computed from the whole matrix. The legend is a vertical continuous gradient rectangle, 12 by 80 logical pixels, with the maximum at the top and minimum at the bottom. Five numeric ticks use the same scale and palette as the heatmap, including alpha. Equal limits produce a solid midpoint color and a single tick. The title and color bar stay together when legends wrap into columns. Repeated layers append outward rather than replacing previous tracks. Each layer has its own scale and legend; use identical \code{colors} and \code{limits} when layers need a common scale.)",
   'values <- matrix(c(0, 5, NA, 10), nrow = 2,\n                 dimnames = list(c("C", "A"), c("control", "treated")))\np <- yytree("((A:1,B:2):1,C:3);") +\n  leaf_annotation_heatmap(values, limits = c(0, 10), legend = "bottom_right")')
 
 document("leaf_annotation_gap", "Set the spacing between two adjacent leaf annotation groups.",

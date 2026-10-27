@@ -89,6 +89,7 @@ public final class YyTreeGeometryTest {
         testHiddenLabelTracks();
         testAnnotationSpacingAndLegends();
         testAnnotationTitles();
+        testContinuousHeatLegend();
         for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
@@ -222,6 +223,59 @@ public final class YyTreeGeometryTest {
         var g=image.createGraphics();
         g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
         panel.drawTracks(g);g.dispose();return image;
+    }
+    private static JSONObject gradientHeat(String position,boolean constant,int alpha) {
+        JSONObject heat=JSON.parseObject("""
+            {"type":"heatmap","names":["A","B","C"],"titles":["signal"],"width":20,
+             "legend_title":"Signal","limits":[-2,2],"cells":[[null],[null],[null]],"palette":[]}
+            """);
+        heat.put("legend",position);
+        if(constant)heat.getJSONArray("limits").set(0,2);
+        for(int i=0;i<256;i++)heat.getJSONArray("palette").add(String.format(java.util.Locale.ROOT,"#%02X00%02X%02X",i,255-i,alpha));
+        return heat;
+    }
+    private static int colorOnWhite(String color) {
+        BufferedImage image=new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
+        var g=image.createGraphics();g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,1,1);
+        g.setColor(YyTreeBridge.color(color));g.fillRect(0,0,1,1);g.dispose();return image.getRGB(0,0);
+    }
+    private static void testContinuousHeatLegend() throws Exception {
+        for(String position:new String[]{"top_left","top_right","bottom_left","bottom_right"})
+            for(boolean constant:new boolean[]{false,true})for(int alpha:new int[]{255,128}) {
+                JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+                scene.getJSONArray("layers").add(categoryTrack("before",2,position));
+                JSONObject heat=gradientHeat(position,constant,alpha);scene.getJSONArray("layers").add(heat);
+                scene.getJSONArray("layers").add(categoryTrack("after",2,position));
+                var panel=prepare(scene);var column=panel.legendColumns.getFirst();
+                require(panel.legendColumns.size()==1,"Small mixed legend should stay together");
+                require(column.rows().stream().filter(YyTreeBridge.YyTreePanel.LegendRow::separator).count()==2,"Gradient lost group separators");
+                int top=column.top();
+                for(var row:column.rows()) {if(row.gradient()!=null)break;top+=row.units()*15;}
+                top-=9;int x=column.x();
+                BufferedImage image=annotationImage(panel);
+                java.util.Set<Integer> colors=new java.util.HashSet<>();
+                for(int y=0;y<80;y++) {
+                    int actual=image.getRGB(x+6,top+y);colors.add(actual);
+                    int index=constant?127:(int)Math.round(255*(1-y/79.0));
+                    require(actual==colorOnWhite(heat.getJSONArray("palette").getString(index)),"Gradient differs from heatmap palette or alpha");
+                }
+                require(constant?colors.size()==1:colors.size()>60,"Heatmap legend is discrete instead of continuous");
+                require((image.getRGB(x+14,top+40)&0xFFFFFF)==0,"Middle tick missing");
+                require((image.getRGB(x+14,top)&0xFFFFFF)==(constant?0xFFFFFF:0),"Top tick should appear only for a nonconstant scale");
+                require((image.getRGB(x+14,top+79)&0xFFFFFF)==(constant?0xFFFFFF:0),"Bottom tick should appear only for a nonconstant scale");
+                require(top>=0 && top+80<panel.logicalHeight,"Gradient is clipped");
+            }
+        JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+        scene.getJSONObject("canvas").put("height",300);
+        scene.getJSONArray("layers").add(categoryTrack("first",13,"top_right"));
+        scene.getJSONArray("layers").add(gradientHeat("top_right",false,255));
+        var panel=prepare(scene);
+        require(panel.legendColumns.size()==2,"Gradient block should move to the next column");
+        var rows=panel.legendColumns.get(1).rows();
+        require(rows.size()==2 && rows.getFirst().heading() && rows.getLast().gradient()!=null,"Gradient and title were split");
+        scene=JSON.parseObject(SCENE,Feature.OrderedField);
+        scene.getJSONArray("layers").add(gradientHeat("none",false,255));
+        require(prepare(scene).legendColumns.isEmpty(),"Hidden gradient legend was created");
     }
     private static void testAnnotationTitles() throws Exception {
         for(int code:new int[]{1,2,7})for(String direction:code==7?new String[]{"right","down","left","up"}:new String[]{"right"})
