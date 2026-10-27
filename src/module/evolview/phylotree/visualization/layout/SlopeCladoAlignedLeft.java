@@ -410,6 +410,17 @@ public class SlopeCladoAlignedLeft extends RectangularLayout {
 	}
 
 	@Override
+	protected void drawBranchLengthLabel(Graphics2D labelGraphics, GraphicsNode node) {
+		String text = String.valueOf(node.getRealBranchLength());
+		FontMetrics metrics = labelGraphics.getFontMetrics();
+		// Both coordinates belong to the final, rotated branch midpoint.
+		labelGraphics.translate((node.getXParent() + node.getXSelf()) / 2,
+				(node.getYParent() + node.getYSelf()) / 2);
+		labelGraphics.rotate(-Math.toRadians(node.getAngleIfNeeded()));
+		labelGraphics.drawString(text, -metrics.stringWidth(text) / 2f, -metrics.getAscent() / 2f);
+	}
+
+	@Override
 	protected void specificTreeDrawingProcess(Graphics2D g2d) {
 	}
 

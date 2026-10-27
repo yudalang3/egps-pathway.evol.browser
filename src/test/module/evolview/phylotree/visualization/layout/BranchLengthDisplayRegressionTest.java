@@ -10,6 +10,8 @@ import module.evolview.phylotree.visualization.graphics.struct.TreeLayout;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,13 +40,17 @@ public class BranchLengthDisplayRegressionTest {
     }
 
     private static BufferedImage render(BaseLayout layout) {
-        BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        return render(layout, WIDTH, HEIGHT);
+    }
+
+    private static BufferedImage render(BaseLayout layout, int width, int height) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = image.createGraphics();
         try {
             graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, 0, WIDTH, HEIGHT);
+            graphics.fillRect(0, 0, width, height);
             layout.paintGraphics(graphics);
-            layout.drawFixedTitle(graphics, WIDTH, HEIGHT);
+            layout.drawFixedTitle(graphics, width, height);
         } finally {
             graphics.dispose();
         }
@@ -134,6 +140,75 @@ public class BranchLengthDisplayRegressionTest {
         require(beforeSettings.equals(otherSettings(tree)), "Round trip preserves settings: " + name);
     }
 
+    private static void testSlopeLabelPositions() throws Exception {
+        MTVImportInforBean input = new MTVImportInforBean();
+        input.setInput_nwk_string(Files.readString(Path.of(
+                "src/module/evolview/moderntreeviewer/examples/07-ladder.nwk")));
+        GraphicsNode root = new TreeParser4MTV().parseTree(input).orElseThrow();
+        List<GraphicsNode> nodes = PhylogeneticTreePanel.subtreeNodes(root);
+        nodes.forEach(node -> node.getDrawUnit().setLineColor(Color.RED));
+        TreeLayoutProperties properties = new TreeLayoutProperties(root);
+        properties.setGlobalFont(new Font("Dialog", Font.PLAIN, 14));
+        properties.setShowTitle(false);
+        properties.setShowAxisBar(false);
+        LeafLabelStateInitializer.applyInitialLeafLabelState(properties, true);
+        PhylogeneticTreePanel host = new PhylogeneticTreePanel(properties);
+        SlopeCladoAlignedLeft layout = new SlopeCladoAlignedLeft(properties, root, host);
+        for (int rotation : new int[] {0, 90, 180, 270}) {
+            properties.getSlopeLayoutProperety().setSlopeLayoutRotationDeg(rotation);
+            for (Dimension canvas : new Dimension[] {new Dimension(1000, 740), new Dimension(740, 1000)}) {
+                int width = canvas.width, height = canvas.height;
+                String name = "ladder-" + rotation + "-" + width + "x" + height;
+                properties.setShowNodeBranchLength(false);
+                layout.calculateForPainting(width, height);
+                List<NodeState> before = nodes.stream().map(NodeState::capture).toList();
+                BufferedImage hidden = render(layout, width, height);
+                properties.setShowNodeBranchLength(true);
+                layout.calculateForPainting(width, height);
+                ImageIO.write(render(layout, width, height), "png", OUTPUT.resolve(name + ".png").toFile());
+                for (GraphicsNode node : nodes) {
+                    if (node == root) continue;
+                    BufferedImage isolated = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                    Graphics2D graphics = isolated.createGraphics();
+                    FontMetrics metrics = graphics.getFontMetrics(properties.getGlobalFont());
+                    try {
+                        graphics.setColor(Color.WHITE);
+                        graphics.fillRect(0, 0, width, height);
+                        graphics.setFont(new Font("Monospaced", Font.BOLD, 19));
+                        Font font = graphics.getFont();
+                        AffineTransform transform = graphics.getTransform();
+                        layout.commonDrawEachUnit(graphics, node, true);
+                        require(graphics.getTransform().equals(transform), "Slope preserves pen transform: " + name);
+                        require(graphics.getFont().equals(font), "Slope preserves pen font: " + name);
+                        require(graphics.getColor().equals(Color.RED), "Slope preserves branch color: " + name);
+                    } finally { graphics.dispose(); }
+                    // Inspect actual black text pixels, separately from the red branch and leaf names.
+                    AffineTransform local = AffineTransform.getRotateInstance(-Math.toRadians(rotation));
+                    double midpointX = (node.getXSelf() + node.getXParent()) / 2;
+                    double midpointY = (node.getYSelf() + node.getYParent()) / 2;
+                    double halfWidth = metrics.stringWidth(String.valueOf(node.getRealBranchLength())) / 2.0;
+                    int pixels = 0;
+                    for (int y = 0; y < height; y++) for (int x = 0; x < width; x++) {
+                        if (isolated.getRGB(x, y) != Color.BLACK.getRGB()) continue;
+                        Point2D point = local.transform(new Point2D.Double(x - midpointX, y - midpointY), null);
+                        require(Math.abs(point.getX()) <= halfWidth + 2
+                                        && point.getY() >= -1.5 * metrics.getAscent() - 2
+                                        && point.getY() <= -.5 * metrics.getAscent() + metrics.getDescent() + 2,
+                                "Branch label stays near edge midpoint: " + name + " " + node.getName());
+                        pixels++;
+                    }
+                    require(pixels > 0, "Branch label is visible: " + name + " " + node.getName());
+                }
+                require(before.equals(nodes.stream().map(NodeState::capture).toList()), "Slope preserves tree: " + name);
+                properties.setShowNodeBranchLength(false);
+                layout.calculateForPainting(width, height);
+                BufferedImage restored = render(layout, width, height);
+                require(Arrays.equals(hidden.getRGB(0, 0, width, height, null, 0, width),
+                        restored.getRGB(0, 0, width, height, null, 0, width)), "Slope toggle restores pixels: " + name);
+            }
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         Files.createDirectories(OUTPUT);
         SwingUtilities.invokeAndWait(() -> {
@@ -143,6 +218,8 @@ public class BranchLengthDisplayRegressionTest {
                 testLayout(TreeLayout.OUTER_CIR_PHYLO, 0);
                 testLayout(TreeLayout.SPRIAL_ALPHA_PHYLO, 0);
                 testLayout(TreeLayout.SPRIAL_BETA_PHYLO, 0);
+                testLayout(TreeLayout.SLOPE_CLADO_ALIGNED_LEFT, 0);
+                testSlopeLabelPositions();
             } catch (Exception error) {
                 throw new RuntimeException(error);
             }

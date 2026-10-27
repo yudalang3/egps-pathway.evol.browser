@@ -551,27 +551,33 @@ public abstract class BaseLayout implements ITreeLayout {
             try {
                 labelGraphics.setColor(Color.black);
                 labelGraphics.setFont(treeLayoutProperties.getGlobalFont());
-
-                FontMetrics fontMetrics = labelGraphics.getFontMetrics();
-                int height = fontMetrics.getAscent();
-                double angleIfNeeded = node.getAngleIfNeeded();
-                String drawString = String.valueOf(node.getRealBranchLength());
-                int stringWidth = fontMetrics.stringWidth(drawString);
-
-                double x_parent = node.getXParent();
-                int xx = (int) (0.5 * (x2 + x_parent - stringWidth));
-                int yy = (int) (y2 - 0.5 * height);
-
-                if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
-                    double radians = Math.toRadians(angleIfNeeded);
-                    labelGraphics.rotate(-radians, x2, y2);
-                }
-                labelGraphics.drawString(drawString, xx, yy);
+                drawBranchLengthLabel(labelGraphics, node);
             } finally {
                 labelGraphics.dispose();
             }
         }
 
+    }
+
+    /** Draws in an isolated graphics context configured with the branch-label font and color. */
+    protected void drawBranchLengthLabel(Graphics2D labelGraphics, GraphicsNode node) {
+        FontMetrics fontMetrics = labelGraphics.getFontMetrics();
+        int height = fontMetrics.getAscent();
+        double angleIfNeeded = node.getAngleIfNeeded();
+        String drawString = String.valueOf(node.getRealBranchLength());
+        int stringWidth = fontMetrics.stringWidth(drawString);
+        double x2 = node.getXSelf();
+        double y2 = node.getYSelf();
+
+        double x_parent = node.getXParent();
+        int xx = (int) (0.5 * (x2 + x_parent - stringWidth));
+        int yy = (int) (y2 - 0.5 * height);
+
+        if (angleIfNeeded != 0) {
+            double radians = Math.toRadians(angleIfNeeded);
+            labelGraphics.rotate(-radians, x2, y2);
+        }
+        labelGraphics.drawString(drawString, xx, yy);
     }
 
     /**
