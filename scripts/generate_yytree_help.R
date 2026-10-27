@@ -214,7 +214,7 @@ document("leaf_annotation_rect", "Append categorical annotation columns matched 
     legend = legend_arg,
     colors = paste(r"(Default \code{NULL} uses \code{hcl.colors(..., "Dark 3")} per column. Otherwise a category-named color vector shared by columns, or a list named by column containing category-named vectors. Every category must be named, including unused factor levels. \code{NA} mapped colors leave cells blank.)", color_rule),
     width = track_width_arg),
-  r"(Factor levels determine category and legend order, including unused levels; other columns use first-occurrence order among nonmissing values. Rows may be in any order. Layers append outward in addition order, with labels between tree and tracks. Track geometry follows the chosen tree layout. Legends sharing a corner are arranged in order and may wrap into columns.)",
+  r"(Factor levels determine category and legend order, including unused levels; other columns use first-occurrence order among nonmissing values. Rows may be in any order. Layers append outward in addition order, with labels between tree and tracks. Track geometry follows the chosen tree layout. Each annotation call has its own legend block, with bold column headings and category entries. Blocks sharing a corner follow addition order, separated by gray dashed lines, and wrap into columns when needed. Repeated annotations retain separate legends. Use leaf_annotation_gap() between calls to set their spacing.)",
   'categories <- data.frame(name = c("C", "A"),\n                         group = factor(c("treated", "control")))\np <- yytree("((A:1,B:2):1,C:3);") + leaf_labels() +\n  leaf_annotation_rect(categories,\n    colors = c(control = "steelblue", treated = "orange"), width = 12)')
 
 document("leaf_annotation_heatmap", "Append numeric heatmap columns matched to leaf names.",
@@ -222,6 +222,11 @@ document("leaf_annotation_heatmap", "Append numeric heatmap columns matched to l
     legend = legend_arg, colors = heat_colors_arg, limits = limits_arg, width = track_width_arg),
   r"(Rows match leaf names, not row positions. All columns share a single continuous color scale computed from the whole matrix. Repeated layers append outward rather than replacing previous tracks. Each layer has its own scale and legend; use identical \code{colors} and \code{limits} when layers need a common scale.)",
   'values <- matrix(c(0, 5, NA, 10), nrow = 2,\n                 dimnames = list(c("C", "A"), c("control", "treated")))\np <- yytree("((A:1,B:2):1,C:3);") +\n  leaf_annotation_heatmap(values, limits = c(0, 10), legend = "bottom_right")')
+
+document("leaf_annotation_gap", "Set the spacing between two adjacent leaf annotation groups.",
+  c(width = "One finite nonnegative number in logical pixels, default 12. Zero makes the two annotation groups touch; fractional widths are supported."),
+  r"(Insert this layer between leaf_annotation_rect() or leaf_annotation_heatmap() calls. It replaces the default 4-pixel spacing only at that boundary, without changing spacing between columns in an annotation. Other layer types do not consume the gap. Consecutive gap layers use the last width. Gaps before the first annotation or after the last annotation have no effect. All seven tree layouts are supported, including every slanted direction. This layer has no legend and does not start Java.)",
+  'categories <- data.frame(name = c("A", "B"), group = c("one", "two"))\nvalues <- matrix(c(1, 2), dimnames = list(c("A", "B"), "score"))\np <- yytree("(A:1,B:1);") + leaf_annotation_rect(categories) +\n  leaf_annotation_gap(width = 12) + leaf_annotation_heatmap(values)')
 
 document("free_text", "Place text at a freely chosen canvas coordinate.",
   c(x = "Required finite numeric horizontal anchor coordinate, in the unit selected by mode.",
@@ -346,7 +351,8 @@ topics <- list(
   runtime = list(title = "Configure and stop the yytree Java runtime", functions = c("config_yytree", "quit_yytree"),
     comparison = "config_yytree starts or reuses one shared Java subprocess; quit_yytree stops it and clears configuration. Closing a window only closes that preview. To change heap, stack or installation settings, call config_yytree with restart = TRUE; to resume after quit_yytree, configure again explicitly.", links = c("print.yytree", "yytree")),
   leaf_annotation = list(title = "Categorical and numeric leaf annotation tracks", functions = c("leaf_annotation_rect", "leaf_annotation_heatmap"),
-    comparison = "Both functions match by leaf name and append one track per data column. leaf_annotation_rect uses a data-frame name column and category-to-color mappings. leaf_annotation_heatmap uses matrix row names and one continuous numeric scale. Width is per column in logical pixels. Missing leaves or values are blank. Use free_heatmap for a matrix placed independently of the tree.", links = c("layout", "leaf_labels", "free_heatmap")),
+    comparison = "Both functions match by leaf name and append one track per data column. leaf_annotation_rect uses a data-frame name column and category-to-color mappings. leaf_annotation_heatmap uses matrix row names and one continuous numeric scale. Width is per column in logical pixels. Missing leaves or values are blank. Legends are grouped by annotation call, with headings and dashed separators. Use leaf_annotation_gap between calls to set their spacing, or free_heatmap for a matrix placed independently of the tree.", links = c("leaf_annotation_gap", "layout", "leaf_labels", "free_heatmap")),
+  leaf_annotation_gap = list(title = "Spacing between leaf annotation groups", functions = "leaf_annotation_gap", links = c("leaf_annotation_rect", "leaf_annotation_heatmap", "leaf_labels")),
   free_text = list(title = "Place free text on the canvas", functions = "free_text", links = c("free_ellipse", "inner_node_annotation", "yytree")),
   free_shapes = list(title = "Draw free ellipses and rectangles", functions = c("free_ellipse", "free_rectangle"),
     comparison = "Both functions use full width and height and share fill and stroke settings. Their anchors differ: ellipse coordinates identify the center; rectangle coordinates identify the upper-left corner. For an identical bounding box, subtract half the width and height from the ellipse center to obtain the rectangle anchor.", links = c("free_text", "free_polygon", "yytree")),
@@ -423,7 +429,7 @@ writeLines(c("% Generated by scripts/generate_yytree_help.R; edit that source in
   "\\item{Runtime}{\\code{\\link{config_yytree}}, \\code{\\link{quit_yytree}}.}",
   "\\item{Labels and nodes}{\\code{\\link{leaf_labels}}, \\code{\\link{leaf_label_render}}, \\code{\\link{leaf_render}}, \\code{\\link{inner_node_render}}.}",
   "\\item{Clade annotations}{\\code{\\link{inner2leaf_highlight}}, \\code{\\link{inner_node_annotation}}.}",
-  "\\item{Leaf tracks}{\\code{\\link{leaf_annotation_rect}}, \\code{\\link{leaf_annotation_heatmap}}.}",
+  "\\item{Leaf tracks}{\\code{\\link{leaf_annotation_rect}}, \\code{\\link{leaf_annotation_heatmap}}, \\code{\\link{leaf_annotation_gap}}.}",
   "\\item{Free drawing}{\\code{\\link{free_text}}, \\code{\\link{free_ellipse}}, \\code{\\link{free_rectangle}}, \\code{\\link{free_line}}, \\code{\\link{free_arrow}}, \\code{\\link{free_polygon}}, \\code{\\link{free_bezier}}, \\code{\\link{free_bezier_ring}}, \\code{\\link{free_heatmap}}.}",
   "}", "}",
   section("examples", 'p <- yytree("((A:1,B:2):1,C:3);") +\n  yytree::layout(name = "rect_align") + leaf_labels()\nstopifnot(inherits(p, "yytree"))\n\\dontrun{\negps_home <- Sys.getenv("EGPS_HOME")\nstopifnot(nzchar(egps_home), dir.exists(egps_home))\nconfig_yytree(egps_home)\nprint(p)\nquit_yytree()\n}')),

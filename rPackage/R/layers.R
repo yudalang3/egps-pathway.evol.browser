@@ -6,6 +6,11 @@
   }, "", USE.NAMES = FALSE)
 }
 .legend <- function(x) match.arg(x, c("top_right", "top_left", "bottom_right", "bottom_left", "none"))
+leaf_annotation_gap <- function(width = 12) {
+  .parameter_number("leaf_annotation_gap", "width", width, 0, Inf,
+                    "leaf_annotation_gap(width = 12)")
+  .layer("annotation_gap", width = width)
+}
 leaf_annotation_rect <- function(df, legend = "top_right", colors = NULL, width = 16) {
   if (!is.data.frame(df) || !"name" %in% names(df) || ncol(df) < 2) stop("df needs name and category columns.")
   columns <- setdiff(names(df), "name")

@@ -27,14 +27,14 @@ leaf_annotation_heatmap(x, legend = "top_right", colors = c("#2166AC", "white",
 }
 \details{
 \subsection{leaf_annotation_rect}{
-Factor levels determine category and legend order, including unused levels; other columns use first-occurrence order among nonmissing values. Rows may be in any order. Layers append outward in addition order, with labels between tree and tracks. Track geometry follows the chosen tree layout. Legends sharing a corner are arranged in order and may wrap into columns.
+Factor levels determine category and legend order, including unused levels; other columns use first-occurrence order among nonmissing values. Rows may be in any order. Layers append outward in addition order, with labels between tree and tracks. Track geometry follows the chosen tree layout. Each annotation call has its own legend block, with bold column headings and category entries. Blocks sharing a corner follow addition order, separated by gray dashed lines, and wrap into columns when needed. Repeated annotations retain separate legends. Use leaf_annotation_gap() between calls to set their spacing.
 }
 \subsection{leaf_annotation_heatmap}{
 Rows match leaf names, not row positions. All columns share a single continuous color scale computed from the whole matrix. Repeated layers append outward rather than replacing previous tracks. Each layer has its own scale and legend; use identical \code{colors} and \code{limits} when layers need a common scale.
 }
 }
 \section{Similarities and differences}{
-Both functions match by leaf name and append one track per data column. leaf_annotation_rect uses a data-frame name column and category-to-color mappings. leaf_annotation_heatmap uses matrix row names and one continuous numeric scale. Width is per column in logical pixels. Missing leaves or values are blank. Use free_heatmap for a matrix placed independently of the tree.
+Both functions match by leaf name and append one track per data column. leaf_annotation_rect uses a data-frame name column and category-to-color mappings. leaf_annotation_heatmap uses matrix row names and one continuous numeric scale. Width is per column in logical pixels. Missing leaves or values are blank. Legends are grouped by annotation call, with headings and dashed separators. Use leaf_annotation_gap between calls to set their spacing, or free_heatmap for a matrix placed independently of the tree.
 }
 \value{
 \describe{
@@ -43,7 +43,7 @@ Both functions match by leaf name and append one track per data column. leaf_ann
 }
 }
 \seealso{
-\code{\link{layout}}, \code{\link{leaf_labels}}, \code{\link{free_heatmap}}
+\code{\link{leaf_annotation_gap}}, \code{\link{layout}}, \code{\link{leaf_labels}}, \code{\link{free_heatmap}}
 }
 \examples{
 # leaf_annotation_rect()

@@ -87,6 +87,7 @@ public final class YyTreeGeometryTest {
         testGapAndLayoutParameters();
         testSlantDirections();
         testHiddenLabelTracks();
+        testAnnotationSpacingAndLegends();
         for(int code=5;code<=6;code++) {
             JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
             scene.getJSONArray("layers").getJSONObject(0).put("code",code);
@@ -201,6 +202,127 @@ public final class YyTreeGeometryTest {
         AtomicReference<YyTreeBridge.YyTreePanel> reference=new AtomicReference<>();
         SwingUtilities.invokeAndWait(()->reference.set(new YyTreeBridge.YyTreePanel(scene)));
         reference.get().prepare();return reference.get();
+    }
+    private static JSONObject categoryTrack(String title,int count,String position) {
+        JSONObject track=JSON.parseObject("""
+            {"type":"track","names":["A","B","C"],"width":20,"columns":{}}
+            """,Feature.OrderedField);
+        track.put("legend",position);
+        JSONObject column=JSON.parseObject("{\"levels\":[],\"colors\":[],\"values\":[\"category 0\",\"category 0\",\"category 0\"]}");
+        for(int i=0;i<count;i++) {
+            column.getJSONArray("levels").add("category "+i);
+            column.getJSONArray("colors").add("#FF0000FF");
+        }
+        track.getJSONObject("columns").put(title,column);
+        return track;
+    }
+    private static BufferedImage annotationImage(YyTreeBridge.YyTreePanel panel) {
+        BufferedImage image=new BufferedImage(panel.logicalWidth,panel.logicalHeight,BufferedImage.TYPE_INT_ARGB);
+        var g=image.createGraphics();
+        g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
+        panel.drawTracks(g);g.dispose();return image;
+    }
+    private static void testAnnotationSpacingAndLegends() throws Exception {
+        for(int code=1;code<=7;code++)for(String direction:code==7?new String[]{"right","down","left","up"}:new String[]{"right"})
+            for(double gap:new double[]{0,2.5,12}) {
+                JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+                JSONObject layout=scene.getJSONArray("layers").getJSONObject(0);layout.put("code",code);
+                if(code==7)layout.put("direction",direction);
+                var layers=scene.getJSONArray("layers");
+                layers.add(JSON.parseObject("{\"type\":\"annotation_gap\",\"width\":99}"));
+                JSONObject first=categoryTrack("first",1,"none"),second=categoryTrack("second",1,"none"),third=categoryTrack("third",1,"none");
+                layers.add(first);
+                layers.add(JSON.parseObject("{\"type\":\"annotation_gap\",\"width\":99}"));
+                layers.add(JSON.parseObject("{\"type\":\"leaf_render\",\"size\":0}"));
+                JSONObject spacing=JSON.parseObject("{\"type\":\"annotation_gap\"}");spacing.put("width",gap);layers.add(spacing);
+                layers.add(second);
+                layers.add(JSON.parseObject("{\"type\":\"annotation_gap\",\"width\":20}"));layers.add(third);
+                layers.add(JSON.parseObject("{\"type\":\"annotation_gap\",\"width\":99}"));
+                var panel=prepare(scene);
+                require(panel.trackOffsets.get(first)==0,"Leading gap added space");
+                require(panel.trackOffsets.get(second)==20+gap,"Gap did not replace default spacing");
+                require(panel.trackOffsets.get(third)==60+gap,"Second explicit gap changed");
+                require(panel.trackWidth==84+gap,"Trailing gap changed reserved width");
+                BufferedImage image=annotationImage(panel);
+                for(GraphicsNode leaf:panel.leaves) {
+                    Point2D sample=trackSample(panel,leaf,panel.labelWidth+12+20+gap+10);
+                    require((image.getRGB((int)sample.getX(),(int)sample.getY())&0xFFFFFF)==0xFF0000,"Track offset was not used for painting");
+                    if(gap>=12) {
+                        sample=trackSample(panel,leaf,panel.labelWidth+12+20+gap/2);
+                        require((image.getRGB((int)sample.getX(),(int)sample.getY())&0xFFFFFF)==0xFFFFFF,"Gap was painted instead of left blank");
+                    }
+                }
+            }
+        JSONObject scene=JSON.parseObject(SCENE,Feature.OrderedField);
+        JSONObject first=categoryTrack("first",1,"none"),second=categoryTrack("second",1,"none");
+        scene.getJSONArray("layers").add(first);scene.getJSONArray("layers").add(second);
+        var panel=prepare(scene);
+        require(panel.trackOffsets.get(second)==24 && panel.trackWidth==48,"Default spacing changed");
+        scene=JSON.parseObject(SCENE,Feature.OrderedField);
+        scene.getJSONArray("layers").add(JSON.parseObject("{\"type\":\"annotation_gap\",\"width\":100}"));
+        require(prepare(scene).trackWidth==0,"A gap without annotations reserves space");
+        for(String position:new String[]{"top_left","top_right","bottom_left","bottom_right"}) {
+            scene=JSON.parseObject(SCENE,Feature.OrderedField);
+            first=categoryTrack("group",3,position);
+            first.getJSONObject("columns").put("habitat",categoryTrack("habitat",2,position).getJSONObject("columns").getJSONObject("habitat"));
+            scene.getJSONArray("layers").add(first);
+            JSONObject heat=JSON.parseObject("""
+                {"type":"heatmap","names":["A","B","C"],"titles":["control","treated","score","expression"],
+                 "cells":[[null,null,null,null],[null,null,null,null],[null,null,null,null]],"width":20,"limits":[-1e200,1e200],"palette":[]}
+                """);
+            heat.put("legend",position);
+            for(int i=0;i<256;i++)heat.getJSONArray("palette").add("#0000FFFF");
+            scene.getJSONArray("layers").add(heat);
+            scene.getJSONArray("layers").add(JSON.parseObject(first.toJSONString(),Feature.OrderedField));
+            panel=prepare(scene);
+            require(panel.legendColumns.size()==1,"Small annotation blocks should stay in one column");
+            var column=panel.legendColumns.getFirst();var rows=column.rows();
+            require(rows.stream().filter(YyTreeBridge.YyTreePanel.LegendRow::separator).count()==2,"Expected one separator per annotation boundary");
+            require(rows.stream().filter(r->r.heading()&&r.text().equals("group")).count()==2,"Repeated legend was merged");
+            require(rows.getFirst().heading()&&rows.getFirst().text().equals("group"),"Column title missing or reordered");
+            require(rows.get(1).text().equals("category 0"),"Category text still contains column prefix");
+            require(column.top()>=15 && column.top()+(rows.size()-1)*15<=panel.logicalHeight-12,"Legend outside canvas");
+            BufferedImage image=annotationImage(panel);
+            int separator=0;while(!rows.get(separator).separator())separator++;
+            int y=column.top()+separator*15-5,ink=0,blank=0;
+            for(int x=column.x();x<column.x()+column.width()-12;x++) {
+                int rgb=image.getRGB(x,y)&0xFFFFFF;
+                if(rgb==0x969696)ink++;
+                if(rgb==0xFFFFFF)blank++;
+            }
+            require(ink>0&&blank>0,"Legend separator is not dashed");
+            int required=panel.metricsHost.getFontMetrics(panel.labelFont.deriveFont(10f)).stringWidth("-1.00e+200")+28;
+            require(column.width()>=required,"Scientific labels clipped");
+        }
+        scene=JSON.parseObject(SCENE,Feature.OrderedField);scene.getJSONObject("canvas").put("width",1800);
+        scene.getJSONObject("canvas").put("height",300);
+        scene.getJSONArray("layers").add(categoryTrack("first",9,"top_right"));
+        scene.getJSONArray("layers").add(categoryTrack("second",9,"top_right"));
+        panel=prepare(scene);
+        require(panel.legendColumns.size()==2,"A complete block should move to the next column");
+        require(panel.legendColumns.get(1).rows().getFirst().text().equals("second"),"Block was split unnecessarily");
+        scene.getJSONArray("layers").add(categoryTrack("long classification heading",40,"bottom_left"));
+        panel=prepare(scene);
+        int middle=panel.logicalWidth/2;
+        var bottom=panel.legendColumns.stream().filter(c->c.x()<middle).toList();
+        require(bottom.size()>1,"Oversized block did not wrap");
+        for(var column:bottom) {
+            require(column.rows().getFirst().heading()&&column.rows().getFirst().text().equals("long classification heading"),"Continuation heading missing");
+            require(!column.rows().getLast().heading()&&!column.rows().getFirst().separator(),"Orphan legend heading or separator");
+        }
+        scene=JSON.parseObject(SCENE,Feature.OrderedField);
+        scene.getJSONArray("layers").add(categoryTrack("top",30,"top_right"));
+        scene.getJSONArray("layers").add(categoryTrack("bottom",30,"bottom_right"));
+        panel=prepare(scene);
+        for(var column:panel.legendColumns) {
+            boolean top=column.rows().getFirst().text().equals("top");
+            require(top?column.top()+column.rows().size()*15<=panel.logicalHeight/2:column.top()-12>=panel.logicalHeight/2,
+                "Top and bottom legends overlap");
+        }
+        scene=JSON.parseObject(SCENE,Feature.OrderedField);
+        scene.getJSONArray("layers").add(categoryTrack("hidden",3,"none"));
+        panel=prepare(scene);
+        require(panel.legendColumns.isEmpty()&&panel.legendReserve==0&&panel.leftLegendReserve==0,"Hidden legend reserved space");
     }
     private static void testGapAndLayoutParameters() throws Exception {
         for(int code=1;code<=7;code++) for(double gap:new double[]{0,6,28.5}) {

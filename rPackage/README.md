@@ -150,6 +150,7 @@ y <- yytree(tree, width = 1400, height = 1000) +
   inner2leaf_highlight("C", "E", fill = "#22AA2266") +
   inner_node_annotation("D", "E", text = "MRCA", fill = "pink") +
   leaf_annotation_rect(categories, colors = c(x = "#D95F02", y = "#1B9E77")) +
+  leaf_annotation_gap(width = 12) +
   leaf_annotation_heatmap(values, legend = "bottom_right")
 print(y)
 ```
@@ -160,7 +161,8 @@ print(y)
 - 分类注释的数据框需要 `name` 列，其他列各形成一条轨道；因子按 levels 配色。`colors` 可为命名向量，或按列命名的颜色映射列表。
 - 数值热图需要叶名行名，列名作为轨道标题；全矩阵共享色阶，支持 `colors` 和 `limits`，不自动执行 Z-score。`NA` 和缺失叶子的注释留空。
 - 所有注释按叶名匹配，行顺序可以不同。多次调用追加轨道，标签位于树与轨道之间。
-- `legend` 支持 `top_right`、`top_left`、`bottom_right`、`bottom_left`、`none`。同位置图例按顺序排放，必要时换列。
+- `leaf_annotation_gap(width = 12)` 插在两个注释调用之间，将这一处间距设为 12 个逻辑像素；未指定的位置仍为 4。支持零和小数，连续 gap 取最后一个；首尾 gap 不增加空白，其他类型图层不消耗 gap。
+- `legend` 支持 `top_right`、`top_left`、`bottom_right`、`bottom_left`、`none`。每次注释调用保留独立图例组，分类列名作为加粗标题，组间加灰色虚线。同位置按调用顺序排放，必要时整组换列；超高组分列时重复当前标题。底部图例内部仍从上向下阅读。
 - 布局与标签配置后一次生效；节点样式只覆盖明确给出的字段。图层组合不会改变旧的 R 对象。
 
 ## 自由绘图和坐标

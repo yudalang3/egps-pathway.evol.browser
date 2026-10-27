@@ -257,7 +257,10 @@ public final class YyTreeBridge {
         final Map<GraphicsNode, Color> fills = new IdentityHashMap<>();
         final Map<GraphicsNode, Double> sizes = new IdentityHashMap<>();
         final Map<String,Integer> legendWidths = new HashMap<>();
-        final Map<String,Integer> legendCaps = new HashMap<>();
+        final Map<JSONObject,Double> trackOffsets = new IdentityHashMap<>();
+        record LegendRow(String text, Color color, boolean heading, boolean separator) {}
+        record LegendColumn(List<LegendRow> rows, int x, int top, int width) {}
+        final List<LegendColumn> legendColumns = new ArrayList<>();
         final Container metricsHost = new Container() {
             @Override public FontMetrics getFontMetrics(Font font) {
                 BufferedImage image=new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
@@ -335,9 +338,8 @@ public final class YyTreeBridge {
                     if(layer.get("font_family")!=null)labelFont=new Font(layer.getString("font_family"),Font.PLAIN,labelFont.getSize());
                     if(layer.get("font_size")!=null)labelFont=labelFont.deriveFont(layer.getFloatValue("font_size"));
                 }
-                if (type.equals("track")) trackWidth += layer.getJSONObject("columns").size() * number(layer,"width",16) + 4;
-                if (type.equals("heatmap")) trackWidth += layer.getJSONArray("titles").size() * number(layer,"width",16) + 4;
             }
+            prepareTrackOffsets();
             if(selectedLayout != null) {
                 properties.getCircularLayoutPropertiy().setGlobalStartDegree((int)number(selectedLayout,"start_angle",285));
                 properties.getCircularLayoutPropertiy().setGlobalExtendDegree((int)number(selectedLayout,"angle_extent",360));
@@ -692,11 +694,28 @@ public final class YyTreeBridge {
             if(code==7)drawReadableText(g,layer.getString("text"),x+growthX*(size/2+5),y+growthY*(size/2+5),Math.toRadians(slantRotation));
             else g.drawString(layer.getString("text"),(float)(x+size/2+5),(float)y);
         }
+        void prepareTrackOffsets() {
+            double end=0,gap=4;
+            boolean previous=false;
+            for(JSONObject layer:layers) {
+                String type=layer.getString("type");
+                if(type.equals("annotation_gap")) {
+                    gap=number(layer,"width",12);
+                    if(!Double.isFinite(gap)||gap<0)throw new IllegalArgumentException("leaf_annotation_gap(): width must be one finite nonnegative number. Example: leaf_annotation_gap(width = 12)");
+                } else if(type.equals("track")||type.equals("heatmap")) {
+                    if(previous)end+=gap;
+                    trackOffsets.put(layer,end);
+                    int count=type.equals("track")?layer.getJSONObject("columns").size():layer.getJSONArray("titles").size();
+                    end+=count*number(layer,"width",16);
+                    previous=true;gap=4;
+                }
+            }
+            trackWidth=previous?end+4:0;
+        }
         void drawTracks(Graphics2D g) {
-            double offset=labelWidth+12;
-            Map<String,Integer> legendRows=new HashMap<>();
             for(JSONObject layer:layers) {
                 String type=layer.getString("type");if(!type.equals("track")&&!type.equals("heatmap"))continue;
+                double offset=labelWidth+12+trackOffsets.get(layer);
                 JSONArray names=layer.getJSONArray("names");Map<String,Integer> indices=new HashMap<>();for(int i=0;i<names.size();i++)indices.put(names.getString(i),i);
                 double width=number(layer,"width",16);
                 if(type.equals("track")) {
@@ -704,19 +723,15 @@ public final class YyTreeBridge {
                     for(String title:columns.keySet()) {
                         JSONObject column=columns.getJSONObject(title);JSONArray levels=column.getJSONArray("levels"),colors=column.getJSONArray("colors"),values=column.getJSONArray("values");
                         for(GraphicsNode leaf:leaves) {Integer row=indices.get(leaf.getName());if(row==null)continue;String value=values.getString(row);if(value==null)continue;int index=levels.indexOf(value);if(index>=0)cell(g,leaf,offset,width,color(colors.getString(index)));}
-                        for(int j=0;j<levels.size();j++) legend(g,layer.getString("legend"),title+": "+levels.getString(j),color(colors.getString(j)),legendRows);
                         trackTitle(g,title,offset+width/2);
                         offset+=width;
                     }
                 } else {
                     JSONArray titles=layer.getJSONArray("titles"),cells=layer.getJSONArray("cells");
                     for(int j=0;j<titles.size();j++) {for(GraphicsNode leaf:leaves){Integer row=indices.get(leaf.getName());if(row!=null)cell(g,leaf,offset,width,color(cells.getJSONArray(row).getString(j)));}trackTitle(g,titles.getString(j),offset+width/2);offset+=width;}
-                    legend(g,layer.getString("legend"),String.join(", ",titles.toJavaList(String.class)),null,legendRows);
-                    JSONArray palette=layer.getJSONArray("palette"),limits=layer.getJSONArray("limits");
-                    for(int j=0;j<5;j++)legend(g,layer.getString("legend"),heatLegendLabel(limits,j),color(palette.getString(j*255/4)),legendRows);
                 }
-                offset+=4;
             }
+            drawLegends(g);
         }
         void trackTitle(Graphics2D g,String text,double offset) {
             if(code>=3&&code<=6)return;
@@ -741,26 +756,64 @@ public final class YyTreeBridge {
         }
         void cell(Graphics2D g,GraphicsNode leaf,double offset,double width,Color color) {if(color==null)return;g.setColor(color);g.fill(band(leaf,leaf,(code>=3&&code<=6?outer:0)+offset,width));}
         void prepareLegends() {
-            Map<String,List<String>> entries=new HashMap<>();
+            Map<String,List<List<LegendRow>>> blocks=new LinkedHashMap<>();
             for(JSONObject layer:layers) {
                 String position=layer.getString("legend");if(position==null||position.equals("none"))continue;
-                List<String> texts=entries.computeIfAbsent(position,k->new ArrayList<>());
+                List<LegendRow> rows=new ArrayList<>();
                 if(layer.getString("type").equals("track")) {
                     JSONObject columns=layer.getJSONObject("columns");
-                    for(String title:columns.keySet()) for(Object value:columns.getJSONObject(title).getJSONArray("levels"))texts.add(title+": "+value);
+                    for(String title:columns.keySet()) {
+                        rows.add(new LegendRow(title,null,true,false));
+                        JSONObject column=columns.getJSONObject(title);
+                        JSONArray levels=column.getJSONArray("levels"),colors=column.getJSONArray("colors");
+                        for(int i=0;i<levels.size();i++)rows.add(new LegendRow(levels.getString(i),color(colors.getString(i)),false,false));
+                    }
                 } else if(layer.getString("type").equals("heatmap")) {
-                    texts.add(String.join(", ",layer.getJSONArray("titles").toJavaList(String.class)));
-                    for(int i=0;i<5;i++)texts.add(heatLegendLabel(layer.getJSONArray("limits"),i));
+                    rows.add(new LegendRow(String.join(", ",layer.getJSONArray("titles").toJavaList(String.class)),null,true,false));
+                    JSONArray palette=layer.getJSONArray("palette");
+                    for(int i=0;i<5;i++)rows.add(new LegendRow(heatLegendLabel(layer.getJSONArray("limits"),i),
+                        palette==null?null:color(palette.getString(i*255/4)),false,false));
                 }
+                if(!rows.isEmpty())blocks.computeIfAbsent(position,k->new ArrayList<>()).add(rows);
             }
             FontMetrics metrics=metricsHost.getFontMetrics(labelFont.deriveFont(10f));
-            for(var entry:entries.entrySet()) {
+            FontMetrics headings=metricsHost.getFontMetrics(labelFont.deriveFont(Font.BOLD,10f));
+            for(var entry:blocks.entrySet()) {
                 String position=entry.getKey(),opposite=position.startsWith("top")?position.replace("top","bottom"):position.replace("bottom","top");
-                int height=entries.containsKey(opposite)?logicalHeight/2:logicalHeight;
-                int cap=Math.max(1,(height-30)/15);
-                int width=entry.getValue().stream().mapToInt(metrics::stringWidth).max().orElse(0)+28;
-                legendWidths.put(position,width);legendCaps.put(position,cap);
-                int reserve=width*((entry.getValue().size()+cap-1)/cap)+8;
+                int height=blocks.containsKey(opposite)?logicalHeight/2:logicalHeight;
+                int cap=Math.max(2,(height-30)/15);
+                int width=entry.getValue().stream().flatMap(List::stream)
+                    .mapToInt(row->(row.heading()?headings:metrics).stringWidth(row.text())).max().orElse(0)+28;
+                legendWidths.put(position,width);
+                List<List<LegendRow>> columns=new ArrayList<>();
+                List<LegendRow> column=new ArrayList<>();
+                for(List<LegendRow> block:entry.getValue()) {
+                    // Keep a complete annotation together whenever it fits in one column.
+                    if(!column.isEmpty() && (block.size()<=cap && column.size()+1+block.size()>cap ||
+                        cap-column.size()<Math.min(3,block.size()+1))) {
+                        columns.add(column);column=new ArrayList<>();
+                    }
+                    if(!column.isEmpty())column.add(new LegendRow("",null,false,true));
+                    LegendRow heading=null;
+                    for(int i=0;i<block.size();i++) {
+                        LegendRow row=block.get(i);
+                        int needed=row.heading()?Math.min(2,block.size()-i):1;
+                        if(cap-column.size()<needed) {
+                            columns.add(column);column=new ArrayList<>();
+                            if(!row.heading() && heading!=null)column.add(heading);
+                        }
+                        column.add(row);
+                        if(row.heading())heading=row;
+                    }
+                }
+                if(!column.isEmpty())columns.add(column);
+                for(int i=0;i<columns.size();i++) {
+                    List<LegendRow> rows=columns.get(i);
+                    int x=position.endsWith("right")?logicalWidth-(i+1)*width:8+i*width;
+                    int top=position.startsWith("bottom")?logicalHeight-12-(rows.size()-1)*15:15;
+                    legendColumns.add(new LegendColumn(rows,x,top,width));
+                }
+                int reserve=width*columns.size()+8;
                 if(position.endsWith("right"))legendReserve=Math.max(legendReserve,reserve);else leftLegendReserve=Math.max(leftLegendReserve,reserve);
             }
         }
@@ -768,16 +821,27 @@ public final class YyTreeBridge {
             double fraction=index/4.0;
             return String.format(Locale.ROOT,"%.3g",limits.getDoubleValue(0)*(1-fraction)+limits.getDoubleValue(1)*fraction);
         }
-        void legend(Graphics2D g,String position,String text,Color color,Map<String,Integer> rows) {
-            if("none".equals(position))return;int row=rows.getOrDefault(position,0);rows.put(position,row+1);
-            Font previous=g.getFont();g.setFont(labelFont.deriveFont(10f));int w=g.getFontMetrics().stringWidth(text)+24;
-            int cap=legendCaps.getOrDefault(position,Math.max(1,(logicalHeight-30)/15));
-            int column=row/cap;row%=cap;
-            int columnWidth=legendWidths.getOrDefault(position,w);
-            int x=position.endsWith("right")?logicalWidth-(column+1)*columnWidth:8+column*columnWidth;
-            int y=position.startsWith("bottom")?logicalHeight-12-row*15:15+row*15;
-            g.setColor(new Color(255,255,255,230));g.fillRect(x-2,y-12,w+4,15);
-            if(color!=null){g.setColor(color);g.fillRect(x,y-9,10,10);}g.setColor(Color.BLACK);g.drawString(text,x+15,y);g.setFont(previous);
+        void drawLegends(Graphics2D graphics) {
+            Graphics2D g=(Graphics2D)graphics.create();
+            try {
+                for(LegendColumn column:legendColumns) {
+                    int x=column.x(),y=column.top();
+                    g.setColor(new Color(255,255,255,230));
+                    g.fillRect(x-2,y-12,column.width(),column.rows().size()*15);
+                    for(LegendRow row:column.rows()) {
+                        if(row.separator()) {
+                            g.setColor(new Color(150,150,150));
+                            g.setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER,10,new float[]{4,3},0));
+                            g.drawLine(x,y-5,x+column.width()-12,y-5);
+                        } else {
+                            g.setFont(labelFont.deriveFont(row.heading()?Font.BOLD:Font.PLAIN,10f));
+                            if(row.color()!=null){g.setColor(row.color());g.fillRect(x,y-9,10,10);}
+                            g.setColor(Color.BLACK);g.drawString(row.text(),row.heading()?x:x+15,y);
+                        }
+                        y+=15;
+                    }
+                }
+            } finally {g.dispose();}
         }
         double coordinate(JSONObject layer,String key,boolean x) {double value=number(layer,key,0);return switch(layer.getString("mode")){case "relative"->value*(x?logicalWidth:logicalHeight);case "percent"->value*(x?logicalWidth:logicalHeight)/100;default->value;};}
         Point2D point(JSONObject layer,JSONArray p) {JSONObject value=new JSONObject();value.put("mode",layer.getString("mode"));value.put("x",p.getDoubleValue(0));value.put("y",p.getDoubleValue(1));return new Point2D.Double(coordinate(value,"x",true),coordinate(value,"y",false));}

@@ -18,7 +18,7 @@ Constructing a plot needs no Java process. To display it, first configure an eGP
 \item{Runtime}{\code{\link{config_yytree}}, \code{\link{quit_yytree}}.}
 \item{Labels and nodes}{\code{\link{leaf_labels}}, \code{\link{leaf_label_render}}, \code{\link{leaf_render}}, \code{\link{inner_node_render}}.}
 \item{Clade annotations}{\code{\link{inner2leaf_highlight}}, \code{\link{inner_node_annotation}}.}
-\item{Leaf tracks}{\code{\link{leaf_annotation_rect}}, \code{\link{leaf_annotation_heatmap}}.}
+\item{Leaf tracks}{\code{\link{leaf_annotation_rect}}, \code{\link{leaf_annotation_heatmap}}, \code{\link{leaf_annotation_gap}}.}
 \item{Free drawing}{\code{\link{free_text}}, \code{\link{free_ellipse}}, \code{\link{free_rectangle}}, \code{\link{free_line}}, \code{\link{free_arrow}}, \code{\link{free_polygon}}, \code{\link{free_bezier}}, \code{\link{free_bezier_ring}}, \code{\link{free_heatmap}}.}
 }
 }
