@@ -31,10 +31,12 @@ final class YyTreePreview extends JPanel {
     final JCheckBox crosshair = new JCheckBox("Show Crosshair", true);
     final JCheckBox snap = new JCheckBox("Snap To Point", true);
     final JButton fitFrame = new JButton("Fit frame");
+    final JButton addFreeShapes = new JButton("Add free shapes");
     final JSpinner widthPercent = new JSpinner(new SpinnerNumberModel(100.0, 0.0, null, 1.0));
     final JSpinner heightPercent = new JSpinner(new SpinnerNumberModel(100.0, 0.0, null, 1.0));
     final JLabel hint = new JLabel("Left drag to pan  ·  Wheel to zoom");
     final Navigation navigation;
+    final FreeShapeEditor editor;
     final ViewCache cache = new ViewCache();
     final java.util.List<NodePoint> nodePoints;
     NodePoint hovered;
@@ -118,6 +120,9 @@ final class YyTreePreview extends JPanel {
         toolbar.add(fitFrame);
         toolbar.add(scaleControl("Width (%)", widthPercent, font));
         toolbar.add(scaleControl("Height (%)", heightPercent, font));
+        if (font != null) addFreeShapes.setFont(font);
+        addFreeShapes.setToolTipText("<html>Add, select, move and resize free shapes on the canvas.<br>Copy the generated R code to replace your old free_* block.<br>Closing the editor keeps the preview changes.</html>");
+        toolbar.add(addFreeShapes);
         toolbar.addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { toolbar.revalidate(); }
         });
@@ -157,6 +162,8 @@ final class YyTreePreview extends JPanel {
         statusBar.add(hint);
         statusBar.setPreferredSize(new Dimension(0, readouts.getPreferredSize().height + 16));
         add(statusBar, BorderLayout.SOUTH);
+        editor = new FreeShapeEditor(this);
+        addFreeShapes.addActionListener(e -> editor.open());
         navigation = new Navigation();
         canvas.addPropertyChangeListener("graphicsConfiguration", displayListener);
         addComponentListener(new ComponentAdapter() {
@@ -165,6 +172,7 @@ final class YyTreePreview extends JPanel {
     }
 
     void disposeInteraction() {
+        editor.dispose();
         navigation.dispose();
         clearHover();
         cache.dispose();
@@ -255,6 +263,7 @@ final class YyTreePreview extends JPanel {
 
     void refreshHover() {
         navigation.updateStatus();
+        if (editor.active) { clearHover(); return; }
         NodePoint previous = hovered;
         hovered = null;
         if (hoverPointer != null && !navigation.isDragging() && (!cache.active || cache.isCurrent())) {
@@ -379,7 +388,7 @@ final class YyTreePreview extends JPanel {
                         g.scale(target.scaleX(), target.scaleY());
                         g.translate(-rect.x, -rect.y);
                         g.scale(target.zoom(), target.zoom());
-                        canvas.drawScene(g);
+                        canvas.drawBaseScene(g);
                     } catch (RuntimeException | Error error) {
                         buffer.flush();
                         throw error;
@@ -478,6 +487,7 @@ final class YyTreePreview extends JPanel {
         }
 
         void fitFrame() {
+            editor.cancelForViewChange();
             captureInitialScale();
             endDrag();
             hoverPointer = null;
@@ -538,6 +548,7 @@ final class YyTreePreview extends JPanel {
         @Override public void mouseMoved(MouseEvent e) {
             lastPointer = pointer(e);
             hoverPointer = new Point(lastPointer);
+            if (editor.mouseMoved(e)) { updateStatus(); return; }
             refreshHover();
         }
 
@@ -546,10 +557,12 @@ final class YyTreePreview extends JPanel {
             lastPointer = null;
             clearHover();
             updateStatus();
+            editor.pointerExited();
         }
 
         @Override public void mousePressed(MouseEvent e) {
-            if (!SwingUtilities.isLeftMouseButton(e)) return;
+            if (editor.mousePressed(e)) return;
+            if (!SwingUtilities.isLeftMouseButton(e) && !(editor.active && SwingUtilities.isMiddleMouseButton(e))) return;
             endDrag();
             pressPointer = pointer(e);
             lastPointer = new Point(pressPointer);
@@ -563,8 +576,9 @@ final class YyTreePreview extends JPanel {
         }
 
         @Override public void mouseDragged(MouseEvent e) {
+            if (editor.mouseDragged(e)) { lastPointer = pointer(e); updateStatus(); return; }
             if (!isDragging()) return;
-            if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) == 0) { endDrag(); return; }
+            if ((e.getModifiersEx() & (InputEvent.BUTTON1_DOWN_MASK | InputEvent.BUTTON2_DOWN_MASK)) == 0) { endDrag(); return; }
             lastPointer = pointer(e);
             hoverPointer = new Point(lastPointer);
             scroll.getViewport().setViewPosition(bounded(new Point(
@@ -575,12 +589,13 @@ final class YyTreePreview extends JPanel {
         }
 
         @Override public void mouseReleased(MouseEvent e) {
-            if (SwingUtilities.isLeftMouseButton(e)) endDrag();
+            if (editor.mouseReleased(e)) return;
+            if (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e)) endDrag();
         }
 
         @Override public void eventDispatched(AWTEvent event) {
             if (event instanceof MouseEvent e && e.getID() == MouseEvent.MOUSE_RELEASED
-                && SwingUtilities.isLeftMouseButton(e)) endDrag();
+                && (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e))) endDrag();
         }
 
         void endDrag() {
@@ -603,6 +618,7 @@ final class YyTreePreview extends JPanel {
         }
 
         private void setZoom(double targetZoom, Point2D anchor, boolean centreAnchor) {
+            editor.cancelForViewChange();
             endDrag();
             double oldZoom = canvas.zoom;
             Point view = scroll.getViewport().getViewPosition();

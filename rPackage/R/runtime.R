@@ -166,6 +166,7 @@ print.yytree <- function(x, ..., new_window = FALSE) {
   })
   arrays <- c("labels", "margins", "names", "levels", "colors", "values", "titles", "limits", "palette", "order")
   normalize <- function(value, key = "") {
+    if (is.null(value)) return(NULL)
     if (is.data.frame(value) || is.matrix(value)) return(value)
     if (is.list(value)) return(lapply(seq_along(value), function(i) normalize(value[[i]], if (is.null(names(value))) "" else names(value)[i])) |> stats::setNames(names(value)))
     if (key %in% arrays) I(value) else value

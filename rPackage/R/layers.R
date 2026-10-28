@@ -91,7 +91,17 @@ free_text <- function(x, y, text, mode = "relative", locator = "left", gap = 10,
 free_ellipse <- function(x, y, width, height, mode = "relative", fill_color = NA, line_color = "black", line_thickness = 1, line_type = "solid") .free("ellipse", mode, fill_color, line_color, line_thickness, line_type, x = x, y = y, width = width, height = height)
 free_rectangle <- function(x, y, width, height, mode = "relative", fill_color = NA, line_color = "black", line_thickness = 1, line_type = "solid") .free("rectangle", mode, fill_color, line_color, line_thickness, line_type, x = x, y = y, width = width, height = height)
 free_line <- function(x1, y1, x2, y2, mode = "relative", line_color = "black", line_thickness = 1, line_type = "solid") .free("line", mode, NA, line_color, line_thickness, line_type, x1 = x1, y1 = y1, x2 = x2, y2 = y2)
-free_arrow <- function(x1, y1, x2, y2, mode = "relative", line_color = "black", line_thickness = 1, line_type = "solid") .free("arrow", mode, NA, line_color, line_thickness, line_type, x1 = x1, y1 = y1, x2 = x2, y2 = y2)
+free_arrow <- function(x1, y1, x2, y2, mode = "relative", line_color = "black", line_thickness = 1, line_type = "solid",
+                       head_style = "open", head_length = NULL, head_width = NULL) {
+  for (key in c("head_length", "head_width")) {
+    value <- get(key)
+    if (!is.null(value) && (!is.numeric(value) || is.complex(value) || length(value) != 1L || !is.finite(value) || value <= 0))
+      stop(key, " must be NULL or one finite positive number.")
+  }
+  .free("arrow", mode, NA, line_color, line_thickness, line_type,
+        x1 = x1, y1 = y1, x2 = x2, y2 = y2,
+        head_style = match.arg(head_style, c("open", "filled")), head_length = head_length, head_width = head_width)
+}
 .points <- function(x, count = NULL) {
   if (!is.matrix(x) || !is.numeric(x) || ncol(x) != 2 || nrow(x) < 2 || any(!is.finite(x)) || (!is.null(count) && nrow(x) != count)) stop("Invalid two-column point matrix.")
   x
@@ -104,5 +114,7 @@ free_polygon <- function(points, mode = "relative", fill_color = NA, line_color 
 free_bezier <- function(points, mode = "relative", line_color = "black", line_thickness = 1, line_type = "solid") .free("bezier", mode, NA, line_color, line_thickness, line_type, points = .points(points, 4))
 free_bezier_ring <- function(points1, points2, mode = "relative", fill_color = "grey", line_color = NA, line_thickness = 1, line_type = "solid") .free("bezier_ring", mode, fill_color, line_color, line_thickness, line_type, points = .points(points1, 4), points2 = .points(points2, 4))
 free_heatmap <- function(x, y, width, height, matrix, mode = "relative", colors = c("#2166AC", "white", "#B2182B"), limits = NULL) {
-  .free("free_heatmap", mode, NA, NA, 0, "solid", x = x, y = y, width = width, height = height, cells = .heat_colors(matrix, colors, limits)$cells)
+  .free("free_heatmap", mode, NA, NA, 0, "solid", x = x, y = y, width = width, height = height,
+        cells = .heat_colors(matrix, colors, limits)$cells,
+        source = list(matrix = matrix, colors = .color(colors), limits = limits))
 }

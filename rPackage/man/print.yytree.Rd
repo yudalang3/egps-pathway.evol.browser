@@ -26,6 +26,8 @@ After manual zoom, resizing preserves its scale; scrollbars appear only on overf
 }
 \subsection{Node inspection}{
 Show Crosshair and Snap To Point default to on in each independent preview. Within 12 interface pixels, a node glows and the crosshair snaps to it. Tooltips show identity, node type, incoming branch length and logical position; the root has no incoming branch. Mouse and Snap status fields distinguish pointer and node coordinates. Turning either switch off retains node inspection. Dragging hides hover overlays; exports omit them. Switches reset when printing again. Hover reuses background-rendered viewport images.
+
+Add free shapes opens a modeless editor for all nine free drawing functions. Select tools on the left, then create or edit objects on the canvas. Curves start as draggable templates; polygons finish with double-click or Enter. Object handles change geometry and the Properties panel changes styles. New objects use percent coordinates; changing mode preserves placement. While editing, middle drag or Space plus left drag pans, the wheel zooms, Escape cancels, Delete removes, and Ctrl+Z / Ctrl+Y undo and redo. Closing the editor keeps preview changes; printing again resets them. Copy code generates the complete free drawing block: replace the old block after your base plot object rather than appending duplicates. Changes do not update R objects or exported images until you copy and execute the code. Heatmaps accept pasted numeric matrices and retain their source data for code generation; older heatmaps without source data require the original matrix before code can be copied.
 }
 }
 \value{

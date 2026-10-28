@@ -20,8 +20,10 @@ try {
     & (Join-Path $PSScriptRoot 'build_yytree_bridge.ps1') -Egps $Egps -Jdk $Jdk -Test
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/generate_yytree_help.R
     if ($LASTEXITCODE -ne 0) { throw 'Help generation failed.' }
-    & (Join-Path $R 'Rscript.exe') --vanilla -e 'testthat::test_local("rPackage", reporter="summary")' | Tee-Object -FilePath (Join-Path $logs 'yytree-unit.log')
+    & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_unit.R | Tee-Object -FilePath (Join-Path $logs 'yytree-unit.log')
     if ($LASTEXITCODE -ne 0) { throw 'R unit tests failed.' }
+    & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_free_shapes.R | Tee-Object -FilePath (Join-Path $logs 'yytree-free-shapes.log')
+    if ($LASTEXITCODE -ne 0) { throw 'Free shape R round-trip tests failed.' }
     & (Join-Path $R 'R.exe') CMD INSTALL "--library=$library" rPackage
     if ($LASTEXITCODE -ne 0) { throw 'Package installation failed.' }
     $lifecycle = @('--vanilla','scripts/test_yytree_lifecycle.R',$Egps)
@@ -42,6 +44,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Bilingual example validation failed.' }
     if ($Gui) {
         foreach ($scale in @('1','2')) {
+            & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.FreeShapeEditorTest
+            if ($LASTEXITCODE -ne 0) { throw "Free shape editor GUI test failed at display scale $scale." }
             & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreePreviewFitTest
             if ($LASTEXITCODE -ne 0) { throw "Preview fit GUI test failed at display scale $scale." }
             & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" "-Dsun.java2d.uiScale=$scale" -cp "temp\yytree-build\tests;temp\yytree-build\classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeHoverTest

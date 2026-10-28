@@ -12,7 +12,7 @@ plots <- list(lines = base +
   free_line(.1, .8, .4, .8, line_color = "blue", line_thickness = 3) +
   free_line(.1, .86, .4, .86, line_type = "dashed") +
   free_line(.1, .92, .4, .92, line_type = "dotted") +
-  free_arrow(.6, .8, .85, .8, line_color = "red", line_thickness = 3) +
+  free_arrow(.6, .8, .85, .8, line_color = "red", line_thickness = 5, head_style = "filled") +
   free_arrow(60, 92, 85, 86, mode = "percent", line_type = "dashed"))
 # The arrowhead is at the second endpoint; line thickness is in logical pixels.
 

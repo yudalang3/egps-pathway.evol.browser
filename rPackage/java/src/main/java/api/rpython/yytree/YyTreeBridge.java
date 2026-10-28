@@ -249,6 +249,7 @@ public final class YyTreeBridge {
         final java.util.concurrent.atomic.AtomicInteger sceneDrawCount = new java.util.concurrent.atomic.AtomicInteger();
         final JSONObject scene;
         final List<JSONObject> layers = new ArrayList<>();
+        final FreeShapes freeShapes = new FreeShapes(this);
         final Map<Integer, GraphicsNode> nodes = new LinkedHashMap<>();
         final Map<String, GraphicsNode> named = new HashMap<>();
         final List<GraphicsNode> leaves = new ArrayList<>();
@@ -304,6 +305,7 @@ public final class YyTreeBridge {
         }
 
         void prepare() throws Exception {
+            for (JSONObject layer : layers) freeShapes.prepareHeatmap(layer);
             JSONObject tree = scene.getJSONObject("tree");
             JSONArray names = tree.getJSONArray("labels"), edges = tree.getJSONArray("edges");
             for (Object value : edges) {
@@ -579,10 +581,20 @@ public final class YyTreeBridge {
             super.paintComponent(graphics); Graphics2D g=(Graphics2D)graphics.create();
             try {
                 if (preview == null) { g.scale(zoom,zoom);drawScene(g); }
-                else { preview.cache.paint(g); preview.paintHover(g); }
+                else {
+                    preview.cache.paint(g);
+                    Graphics2D content=(Graphics2D)g.create();
+                    try {content.scale(zoom,zoom);preview.editor.paintContents(content);}finally{content.dispose();}
+                    preview.paintHover(g);
+                    preview.editor.paintOverlay(g);
+                }
             } finally {g.dispose();}
         }
         void drawScene(Graphics2D g) {
+                drawBaseScene(g);
+                for(JSONObject layer:layers) if(layer.containsKey("mode")) drawFree(g,layer);
+        }
+        void drawBaseScene(Graphics2D g) {
                 sceneDrawCount.incrementAndGet();
                 EGPSMainGuiUtil.setupHighQualityRendering(g);
                 g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -593,7 +605,6 @@ public final class YyTreeBridge {
                 for(JSONObject layer:layers) if(layer.getString("type").equals("inner_node_annotation")) nodeAnnotation(g,layer);
                 for(JSONObject layer:layers) if(layer.getString("type").equals("inner2leaf_highlight")) highlightText(g,layer);
                 drawTracks(g);
-                for(JSONObject layer:layers) if(layer.containsKey("mode")) drawFree(g,layer);
         }
         void drawTree(Graphics2D g) {
             for(GraphicsNode node:nodes.values()) {
@@ -952,29 +963,9 @@ public final class YyTreeBridge {
                 g.drawString(heatLegendLabel(limits,4-i),x+19,y+shift);
             }
         }
-        double coordinate(JSONObject layer,String key,boolean x) {double value=number(layer,key,0);return switch(layer.getString("mode")){case "relative"->value*(x?logicalWidth:logicalHeight);case "percent"->value*(x?logicalWidth:logicalHeight)/100;default->value;};}
-        Point2D point(JSONObject layer,JSONArray p) {JSONObject value=new JSONObject();value.put("mode",layer.getString("mode"));value.put("x",p.getDoubleValue(0));value.put("y",p.getDoubleValue(1));return new Point2D.Double(coordinate(value,"x",true),coordinate(value,"y",false));}
-        Path2D curve(JSONObject layer,String key) {
-            JSONArray points=layer.getJSONArray(key);Point2D a=point(layer,points.getJSONArray(0)),b=point(layer,points.getJSONArray(1)),c=point(layer,points.getJSONArray(2)),d=point(layer,points.getJSONArray(3));
-            Path2D p=new Path2D.Double();p.moveTo(a.getX(),a.getY());p.curveTo(b.getX(),b.getY(),c.getX(),c.getY(),d.getX(),d.getY());return p;
-        }
+        double coordinate(JSONObject layer,String key,boolean x) {return freeShapes.value(layer,key,x);}
         void drawFree(Graphics2D g,JSONObject layer) {
-            String type=layer.getString("type");double x=coordinate(layer,"x",true),y=coordinate(layer,"y",false),w=coordinate(layer,"width",true),h=coordinate(layer,"height",false);
-            Color fill=color(layer.getString("fill_color")),line=color(layer.getString("line_color"));float thickness=(float)number(layer,"line_thickness",1);
-            String lineType=layer.getString("line_type");g.setStroke(new BasicStroke(Math.max(.01f,thickness),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,10,"dashed".equals(lineType)?new float[]{6,4}:"dotted".equals(lineType)?new float[]{1,3}:null,0));
-            if(type.equals("text")){if(fill==null)return;Font previous=g.getFont();g.setFont(labelFont.deriveFont((float)number(layer,"size",12)));String text=layer.getString("text");double width=g.getFontMetrics().stringWidth(text),gap=number(layer,"gap",10);x+=switch(layer.getString("locator")){case "right"->-width-gap;case "center"->-width/2;default->gap;};g.setColor(fill);g.drawString(text,(float)x,(float)y);g.setFont(previous);return;}
-            if(type.equals("free_heatmap")){JSONArray cells=layer.getJSONArray("cells");int nr=cells.size(),nc=cells.getJSONArray(0).size();for(int i=0;i<nr;i++)for(int j=0;j<nc;j++){Color c=color(cells.getJSONArray(i).getString(j));if(c!=null){g.setColor(c);g.fill(new Rectangle2D.Double(x+j*w/nc,y+i*h/nr,w/nc,h/nr));}}return;}
-            Shape shape;
-            switch(type) {
-                case "ellipse" -> shape=new Ellipse2D.Double(x-w/2,y-h/2,w,h);
-                case "rectangle" -> shape=new Rectangle2D.Double(x,y,w,h);
-                case "line","arrow" -> {double x1=coordinate(layer,"x1",true),y1=coordinate(layer,"y1",false),x2=coordinate(layer,"x2",true),y2=coordinate(layer,"y2",false);Path2D p=new Path2D.Double();p.moveTo(x1,y1);p.lineTo(x2,y2);if(type.equals("arrow")){double a=Math.atan2(y2-y1,x2-x1);for(double sign:new double[]{-1,1}){p.moveTo(x2,y2);p.lineTo(x2-9*Math.cos(a+sign*.4),y2-9*Math.sin(a+sign*.4));}}shape=p;}
-                case "bezier" -> shape=curve(layer,"points");
-                case "bezier_ring" -> {Path2D p=curve(layer,"points");JSONArray ps=layer.getJSONArray("points2");Point2D d=point(layer,ps.getJSONArray(3)),c=point(layer,ps.getJSONArray(2)),b=point(layer,ps.getJSONArray(1)),a=point(layer,ps.getJSONArray(0));p.lineTo(d.getX(),d.getY());p.curveTo(c.getX(),c.getY(),b.getX(),b.getY(),a.getX(),a.getY());p.closePath();shape=p;}
-                case "polygon" -> {Path2D p=new Path2D.Double();JSONArray ps=layer.getJSONArray("points");for(int i=0;i<ps.size();i++){Point2D pt=point(layer,ps.getJSONArray(i));if(i==0)p.moveTo(pt.getX(),pt.getY());else p.lineTo(pt.getX(),pt.getY());}p.closePath();shape=p;}
-                default -> throw new IllegalArgumentException("Unknown free element: "+type);
-            }
-            if(fill!=null){g.setColor(fill);g.fill(shape);}if(line!=null&&thickness>0){g.setColor(line);g.draw(shape);}
+            freeShapes.draw(g,layer);
         }
         @Override public ScaleBarProperty getScaleBarProperty(){return scale;}
         @Override public AnnotationsProperties getMainAnnotationsProperties(){return annotations;}

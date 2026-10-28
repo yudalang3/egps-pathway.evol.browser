@@ -14,7 +14,8 @@ Draw free lines and arrows
 free_line(x1, y1, x2, y2, mode = "relative", line_color = "black",
     line_thickness = 1, line_type = "solid")
 free_arrow(x1, y1, x2, y2, mode = "relative", line_color = "black",
-    line_thickness = 1, line_type = "solid")
+    line_thickness = 1, line_type = "solid", head_style = "open",
+    head_length = NULL, head_width = NULL)
 }
 \arguments{
 \item{x1}{Required finite numeric start x coordinate, in the selected mode.}
@@ -25,17 +26,20 @@ free_arrow(x1, y1, x2, y2, mode = "relative", line_color = "black",
 \item{line_color}{Stroke color. Default \code{"black"}; \code{NA} disables the stroke. An R color name, \code{#RRGGBB} or \code{#RRGGBBAA}; alpha is supported.}
 \item{line_thickness}{One finite nonnegative stroke width in logical pixels. Default 1; 0 hides the stroke.}
 \item{line_type}{One string: \code{"solid"} (default), \code{"dashed"}, or \code{"dotted"}.}
+\item{head_style}{\strong{\code{free_arrow} only:} One of open (default, outlined V) or filled (solid triangle). Dashes apply only to the shaft.}
+\item{head_length}{\strong{\code{free_arrow} only:} NULL (automatic) or one finite positive arrowhead length in logical pixels. Automatic length is max(9, 4 * line_thickness).}
+\item{head_width}{\strong{\code{free_arrow} only:} NULL (automatic) or one finite positive total arrowhead width in logical pixels. Automatic width is max(7, 2.5 * line_thickness).}
 }
 \details{
 \subsection{free_line}{
 The line has no fill or arrowhead; its end points determine its direction and length. Coordinates refer to the entire logical canvas, including margins, not to tree or branch coordinates. The origin is the upper-left corner; x increases rightwards and y downwards. Values outside the canvas are not clamped.
 }
 \subsection{free_arrow}{
-The arrowhead is at (x2, y2); reversing the end points reverses the arrow. Its arms have a fixed length of 9 logical pixels, independent of mode. Coordinates refer to the entire logical canvas, including margins, not to tree or branch coordinates. The origin is the upper-left corner; x increases rightwards and y downwards. Values outside the canvas are not clamped.
+The arrowhead is at (x2, y2); reversing the end points reverses the arrow. Head dimensions are independent of mode, and shrink together when the segment is too short. A zero-length arrow is not drawn. Coordinates refer to the entire logical canvas, including margins, not to tree or branch coordinates. The origin is the upper-left corner; x increases rightwards and y downwards. Values outside the canvas are not clamped.
 }
 }
 \section{Similarities and differences}{
-The arguments have identical meanings. free_line draws a segment; free_arrow adds an arrowhead at the second end point. Both use the same stroke controls, logical-pixel stroke width and selected coordinate mode.
+free_line draws a segment; free_arrow adds an open or filled arrowhead at the second end point, with optional independent head_length and head_width. Both use the same stroke controls, logical-pixel stroke width and selected coordinate mode.
 }
 \value{
 \describe{

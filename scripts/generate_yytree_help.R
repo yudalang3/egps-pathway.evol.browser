@@ -268,8 +268,11 @@ for (name in c("free_line", "free_arrow")) {
       y1 = "Required finite numeric start y coordinate, in the selected mode.",
       x2 = "Required finite numeric end x coordinate, in the selected mode.",
       y2 = "Required finite numeric end y coordinate, in the selected mode.",
-      mode = mode_arg, stroke_args),
-    paste(if (name == "free_arrow") "The arrowhead is at (x2, y2); reversing the end points reverses the arrow. Its arms have a fixed length of 9 logical pixels, independent of mode."
+      mode = mode_arg, stroke_args,
+      if (name == "free_arrow") c(head_style = "One of open (default, outlined V) or filled (solid triangle). Dashes apply only to the shaft.",
+        head_length = "NULL (automatic) or one finite positive arrowhead length in logical pixels. Automatic length is max(9, 4 * line_thickness).",
+        head_width = "NULL (automatic) or one finite positive total arrowhead width in logical pixels. Automatic width is max(7, 2.5 * line_thickness).")),
+    paste(if (name == "free_arrow") "The arrowhead is at (x2, y2); reversing the end points reverses the arrow. Head dimensions are independent of mode, and shrink together when the segment is too short. A zero-length arrow is not drawn."
       else "The line has no fill or arrowhead; its end points determine its direction and length.", coordinate_rule),
     paste0('p <- yytree("(A:1,B:2);") +\n  ', name, '(.65, .9, .8, .9, line_color = "red", line_thickness = 2)'))
 }
@@ -320,6 +323,8 @@ After manual zoom, resizing preserves its scale; scrollbars appear only on overf
 }
 \subsection{Node inspection}{
 Show Crosshair and Snap To Point default to on in each independent preview. Within 12 interface pixels, a node glows and the crosshair snaps to it. Tooltips show identity, node type, incoming branch length and logical position; the root has no incoming branch. Mouse and Snap status fields distinguish pointer and node coordinates. Turning either switch off retains node inspection. Dragging hides hover overlays; exports omit them. Switches reset when printing again. Hover reuses background-rendered viewport images.
+
+Add free shapes opens a modeless editor for all nine free drawing functions. Select tools on the left, then create or edit objects on the canvas. Curves start as draggable templates; polygons finish with double-click or Enter. Object handles change geometry and the Properties panel changes styles. New objects use percent coordinates; changing mode preserves placement. While editing, middle drag or Space plus left drag pans, the wheel zooms, Escape cancels, Delete removes, and Ctrl+Z / Ctrl+Y undo and redo. Closing the editor keeps preview changes; printing again resets them. Copy code generates the complete free drawing block: replace the old block after your base plot object rather than appending duplicates. Changes do not update R objects or exported images until you copy and execute the code. Heatmaps accept pasted numeric matrices and retain their source data for code generation; older heatmaps without source data require the original matrix before code can be copied.
 })",
   r"(\dontrun{
 egps_home <- Sys.getenv("EGPS_HOME")
@@ -365,7 +370,7 @@ topics <- list(
   free_shapes = list(title = "Draw free ellipses and rectangles", functions = c("free_ellipse", "free_rectangle"),
     comparison = "Both functions use full width and height and share fill and stroke settings. Their anchors differ: ellipse coordinates identify the center; rectangle coordinates identify the upper-left corner. For an identical bounding box, subtract half the width and height from the ellipse center to obtain the rectangle anchor.", links = c("free_text", "free_polygon", "yytree")),
   free_lines = list(title = "Draw free lines and arrows", functions = c("free_line", "free_arrow"),
-    comparison = "The arguments have identical meanings. free_line draws a segment; free_arrow adds an arrowhead at the second end point. Both use the same stroke controls, logical-pixel stroke width and selected coordinate mode.", links = c("free_bezier", "free_text", "yytree")),
+    comparison = "free_line draws a segment; free_arrow adds an open or filled arrowhead at the second end point, with optional independent head_length and head_width. Both use the same stroke controls, logical-pixel stroke width and selected coordinate mode.", links = c("free_bezier", "free_text", "yytree")),
   free_polygon = list(title = "Draw a free polygon", functions = "free_polygon", links = c("free_rectangle", "free_bezier_ring", "yytree")),
   free_bezier = list(title = "Draw cubic Bezier curves and ribbons", functions = c("free_bezier", "free_bezier_ring"),
     comparison = "free_bezier draws one open stroked curve through four control points. free_bezier_ring closes the region between two such boundaries, each ordered in the same direction. The ribbon defaults to grey fill without an outline; the open curve defaults to a black stroke without a fill parameter.", links = c("free_line", "free_polygon", "yytree")),
