@@ -1,5 +1,9 @@
 # yytree
 
+使用 `export(plot = p, file = "plot.pdf")` 导出完整画布，支持 PDF、SVG 和 PPTX。
+先调用 `config_yytree()`，无需打开预览窗口。文件尺寸沿用 R 对象的宽高；已有文件直接覆盖。
+GUI 中的缩放、滚动及尚未复制回 R 的编辑不进入导出。PPTX 沿用现有 eGPS 导出器及其限制。
+
 按功能编号的完整教学示例见 [examples/README.md](examples/README.md)：28 个主题各有英文 `.R` 和中文 `_zh.R`，共 56 份独立脚本。
 
 基础示例同时展示 Newick 与 `hclust(dist(...))`，其余覆盖多轨注释、九种自由元件和千叶树。批量验证只执行英文版，中文版检查语法与逻辑一致性。

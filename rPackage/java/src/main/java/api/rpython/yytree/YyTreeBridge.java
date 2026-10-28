@@ -210,6 +210,38 @@ public final class YyTreeBridge {
                 return metadata.toJSONString();
     }
 
+    public String exportPlot(String json, String path) throws Exception {
+        String format = path.substring(path.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+        if (!List.of("pdf", "svg", "pptx").contains(format))
+            throw new IllegalArgumentException("Unsupported export format: " + format);
+        YyTreePanel panel = preparePanel(JSON.parseObject(json, Feature.OrderedField));
+        AtomicReference<JComponent> drawing = new AtomicReference<>();
+        onEdt(() -> drawing.set(new JComponent() {
+            @Override public int getWidth() { return panel.logicalWidth; }
+            @Override public int getHeight() { return panel.logicalHeight; }
+            @Override public Dimension getSize() { return new Dimension(getWidth(), getHeight()); }
+            @Override public void print(Graphics g) { paint(g); }
+            @Override public void paint(Graphics graphics) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                try {
+                    g.setColor(Color.WHITE); g.fillRect(0, 0, getWidth(), getHeight());
+                    panel.drawScene(g);
+                } finally { g.dispose(); }
+            }
+        }));
+        try {
+            switch (format) {
+                case "pdf" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsPDF(drawing.get(), new File(path));
+                case "pptx" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsPptx(drawing.get(), new File(path));
+                case "svg" -> egps2.frame.gui.VectorGraphicsEncoder.saveVectorGraphic(drawing.get(), path,
+                    egps2.frame.gui.VectorGraphicsEncoder.VectorGraphicsFormat.SVG);
+            }
+        } catch (LinkageError error) {
+            throw new IllegalStateException("Export dependency failed: " + error, error);
+        }
+        return path;
+    }
+
     private static YyTreePanel preparePanel(JSONObject scene) throws Exception {
         AtomicReference<YyTreePanel> panel=new AtomicReference<>();
         onEdt(()->panel.set(new YyTreePanel(scene)));

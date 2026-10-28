@@ -352,7 +352,13 @@ Add \code{leaf_labels(show = TRUE)} before \code{leaf_label_render()}; the most 
   r"(\method{+}{yytree}(e1, e2))")
 
 # Each topic owns exactly its listed functions; links supply broader context.
+document("export", "Export a complete plot without opening a preview window.",
+  c(plot = "A yytree plot object.", file = "One output path ending in .pdf, .svg or .pptx; existing files are overwritten."),
+  "Configure Java first with config_yytree(). Output uses the logical canvas dimensions and the R plot definition. Preview navigation and edits not copied back to R are excluded. PPTX uses the existing eGPS exporter and retains its limitations.",
+  '\\dontrun{\np <- yytree("(A:1,B:2);") + leaf_labels()\nexport(p, "plot.pdf")\nexport(p, "plot.svg")\n}',
+  "The absolute output path, invisibly.")
 topics <- list(
+  export = list(title = "Export a tree figure", functions = "export", links = c("yytree", "config_yytree")),
   yytree = list(title = "Create a tree plot specification", functions = "yytree", links = c("layout", "leaf_labels", "+.yytree", "print.yytree", "yytree-package")),
   layout = list(title = "Choose a tree layout", functions = "layout", links = c("yytree", "leaf_labels", "+.yytree")),
   leaf_labels = list(title = "Leaf label visibility, fonts and background colors", functions = c("leaf_labels", "leaf_label_render"),
