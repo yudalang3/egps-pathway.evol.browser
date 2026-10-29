@@ -16,7 +16,9 @@ measurements <- matrix(rnorm(length(leaf_names) * 4), length(leaf_names), 4,
 base <- yytree(tree, width = 1500, height = 1000) +
   yytree::layout(name = "rect_align") + leaf_labels()
 combined <- base + leaf_annotation_rect(categories, legend = "top_right") +
+  leaf_annotation_gap(width = 12) +
   leaf_annotation_heatmap(measurements, legend = "top_right") +
+  leaf_annotation_gap(width = 20) +
   leaf_annotation_rect(categories[c("name", "habitat")], legend = "bottom_left", width = 10)
 plots <- list(combined = combined)
 for (position in c("top_left", "top_right", "bottom_left", "bottom_right", "none")) {

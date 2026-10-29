@@ -13,6 +13,10 @@ restored <- readRDS(path)
 stopifnot(identical(y, restored))
 unlink(path)
 plots <- list(restored = restored)
+figure <- tempfile(fileext = ".pdf")
+export(restored, figure)
+stopifnot(file.info(figure)$size > 0)
+unlink(figure)
 # Use a permanent filename to keep the RDS. It stores data, never Java handles.
 # In a fresh R session, load yytree and configure Java before printing the restored object.
 

@@ -227,3 +227,9 @@ print(y)
 功能回归审核另见 `scripts/test_yytree_audit.R`，完整验收会自动执行。它检查画布比例、零枝长、标签设置替换、科学计数法图例，以及九种自由元件在三种坐标模式下的像素一致性。
 
 完全无名的树自动按叶节点顺序编号；部分缺名仍报错。`leaf_labels()` 后一次调用替换此前的标签设置，未指定字体时恢复 eGPS 默认字体。环形布局 3、4 的标签与 MTV 一致，沿叶端径向旋转，左半圆自动翻转以保持正向可读；布局 3 紧跟真实叶端，布局 4 紧跟延长线末端，间距考虑节点大小。`align` 保留在接口中，但不影响环形标签。拱形标签仍在树外的水平区域内按 `left`、`center`、`right` 对齐；拱形布局根据扣除标签和轨道后的可用宽高适配，窄高画布会在垂直方向留出空白。Swing 预览与 PNG 导出共用 MTV 高质量渲染设置，并开启图形及文字抗锯齿。
+
+## 0.1.0 export limitations / 导出限制
+
+The default eGPS exporters are retained. Successful file creation does not guarantee complete graphical content. PDF embeds mapped Unicode fonts when available; SVG free heatmaps may fail; PPTX may omit free heatmaps or misplace circular labels. Confirmed dependency defects are documented rather than repaired or bypassed.
+
+沿用默认 eGPS 导出器。文件生成成功不代表图形完整：PDF 已增加可用 Unicode 字体映射与嵌入；SVG 自由热图可能报错，PPTX 可能缺失自由热图或出现圆形标签错位。确认属于依赖的问题只记录，不修复或绕过。复现与处理原则见仓库 docs/current/yytree-0.1.0-review.md。

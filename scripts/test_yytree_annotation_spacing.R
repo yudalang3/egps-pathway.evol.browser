@@ -5,7 +5,7 @@ config_yytree(args[1])
 out <- file.path(getwd(), "temp", "yytree-annotation-spacing")
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 dir.create("logs", showWarnings = FALSE)
-example <- "rPackage/human_test/run1_example2_multiple_annotation_with_leaf.R"
+example <- "rPackage/human_test/run2_multiple_annotation_with_leaf.R"
 expressions <- parse(file = example, encoding = "UTF-8")
 context <- new.env(parent = globalenv())
 keep <- c("tree", "newick_plot", "leaf_names", "df_anno", "df_anno2", "palette", "measurements", "shuffled")

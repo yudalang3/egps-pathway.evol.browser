@@ -13,6 +13,10 @@ restored <- readRDS(path)
 stopifnot(identical(y, restored))
 unlink(path)
 plots <- list(restored = restored)
+figure <- tempfile(fileext = ".pdf")
+export(restored, figure)
+stopifnot(file.info(figure)$size > 0)
+unlink(figure)
 # 要长期保存请改用固定文件名；RDS 保存数据，不保存 Java 句柄。
 # 在新的 R 会话中，先加载 yytree 并配置 Java，再打印恢复的对象。
 

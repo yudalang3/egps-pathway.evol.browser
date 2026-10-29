@@ -188,7 +188,9 @@ add('combined_tracks', '<<Appending tracks and positioning legends|追加轨道�
 base <- yytree(tree, width = 1500, height = 1000) +
   yytree::layout(name = "rect_align") + leaf_labels()
 combined <- base + leaf_annotation_rect(categories, legend = "top_right") +
+  leaf_annotation_gap(width = 12) +
   leaf_annotation_heatmap(measurements, legend = "top_right") +
+  leaf_annotation_gap(width = 20) +
   leaf_annotation_rect(categories[c("name", "habitat")], legend = "bottom_left", width = 10)
 plots <- list(combined = combined)
 for (position in c("top_left", "top_right", "bottom_left", "bottom_right", "none")) {
@@ -381,6 +383,10 @@ restored <- readRDS(path)
 stopifnot(identical(y, restored))
 unlink(path)
 plots <- list(restored = restored)
+figure <- tempfile(fileext = ".pdf")
+export(restored, figure)
+stopifnot(file.info(figure)$size > 0)
+unlink(figure)
 # <<Use a permanent filename to keep the RDS. It stores data, never Java handles.|要长期保存请改用固定文件名；RDS 保存数据，不保存 Java 句柄。>>
 # <<In a fresh R session, load yytree and configure Java before printing the restored object.|在新的 R 会话中，先加载 yytree 并配置 Java，再打印恢复的对象。>>
 ''', TREE_CODE)

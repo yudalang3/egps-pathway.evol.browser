@@ -231,7 +231,7 @@ public final class YyTreeBridge {
         }));
         try {
             switch (format) {
-                case "pdf" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsPDF(drawing.get(), new File(path));
+                case "pdf" -> PdfExport.save(drawing.get(), new File(path));
                 case "pptx" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsPptx(drawing.get(), new File(path));
                 case "svg" -> egps2.frame.gui.VectorGraphicsEncoder.saveVectorGraphic(drawing.get(), path,
                     egps2.frame.gui.VectorGraphicsEncoder.VectorGraphicsFormat.SVG);
