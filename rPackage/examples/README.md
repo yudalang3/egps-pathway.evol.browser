@@ -1,10 +1,10 @@
 # yytree examples / 中英文功能示例
 
-28 topics, 56 standalone scripts. Files without a suffix are fully English;
+29 topics, 58 standalone scripts. Files without a suffix are fully English;
 `*_zh.R` files contain Chinese teaching comments and explanatory figure text.
 The paired scripts use identical data, APIs and drawing parameters.
 
-28 个主题共 56 份独立脚本。英文版无后缀，中文版以 `_zh.R` 结尾。
+29 个主题共 58 份独立脚本。英文版无后缀，中文版以 `_zh.R` 结尾。
 物种名、数据键和 API 参数值保持一致，便于对照。
 
 ## Start / 开始使用
@@ -61,6 +61,7 @@ basic and interaction scripts explicitly demonstrate preview reuse and new windo
 | [example26_save_plot_definition.R](example26_save_plot_definition.R) | [example26_save_plot_definition_zh.R](example26_save_plot_definition_zh.R) | Save and restore an ordinary R plot definition / 保存与恢复普通 R 绘图定义 |
 | [example27_large_tree.R](example27_large_tree.R) | [example27_large_tree_zh.R](example27_large_tree_zh.R) | One thousand tips and twenty numeric tracks / 千叶树与二十列数值轨道 |
 | [example28_complete_biological_figure.R](example28_complete_biological_figure.R) | [example28_complete_biological_figure_zh.R](example28_complete_biological_figure_zh.R) | A complete biological annotation figure / 完整的生物学注释图 |
+| [example29_extract_subtree.R](example29_extract_subtree.R) | [example29_extract_subtree_zh.R](example29_extract_subtree_zh.R) | Extract a subtree with ape / 使用 ape 提取子树 |
 
 ## What to inspect / 观察要点
 
@@ -87,6 +88,11 @@ basic and interaction scripts explicitly demonstrate preview reuse and new windo
 - **22–28:** branch lengths/merge heights, numbered/quoted names, immutable layers,
   partial annotations, caught validation errors, RDS restoration, large data and a complete figure.
   枝长与合并高度、编号和引号叶名、不可变图层、缺失注释、错误捕获、RDS、大树及综合图。
+
+## Subtrees / 子树
+
+Use example29 to find an MRCA with ape and pass its complete descendant clade to yytree.
+示例 29 使用 ape 定位 MRCA，提取全部后代，再传给 yytree 绘图。
 
 ## Preview appearance and navigation / 预览外观与操作
 
@@ -148,12 +154,12 @@ Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设�
 & 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_examples.R
 ```
 
-Only the 28 English scripts execute. Chinese scripts are parsed and compared as R
+Only the 29 English scripts execute. Chinese scripts are parsed and compared as R
 syntax trees after normalizing the declared display-text translations; they are
 never sourced. Every result in `plots` renders to `temp/yytree-examples`.
 The report is `logs/yytree-examples.json`. GUI checks run separately:
 
-只执行 28 份英文版；中文版仅做语法解析，并在归一化已声明的说明文字翻译后比较语法树，
+只执行 29 份英文版；中文版仅做语法解析，并在归一化已声明的说明文字翻译后比较语法树，
 不重复执行。全部绘图输出至 `temp/yytree-examples`，报告放在 `logs/yytree-examples.json`。
 GUI 交互另行检查：
 

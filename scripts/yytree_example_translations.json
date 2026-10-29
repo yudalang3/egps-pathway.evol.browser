@@ -103,5 +103,7 @@
   "Labels stay hidden at this density. Wheel zoom reveals individual tips and rows.": "此密度下隐藏标签，使用滚轮缩放查看单个叶子和注释行。",
   "A complete biological annotation figure": "完整的生物学注释图",
   "Tree with clade and sample annotations": "带分支与样本注释的进化树",
-  "Read from tree to labels to tracks; free elements are painted last.": "从树向外依次是标签和轨道；自由绘图元件最后绘制。"
+  "Read from tree to labels to tracks; free elements are painted last.": "从树向外依次是标签和轨道；自由绘图元件最后绘制。",
+  "Extract a subtree with ape": "使用 ape 提取子树",
+  "Keep every descendant of the MRCA, including Mouse.": "保留最近共同祖先的全部后代，包括 Mouse。"
 }

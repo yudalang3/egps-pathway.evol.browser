@@ -9,7 +9,7 @@ chinese_files <- files[grepl("_zh\\.R$", files)]
 files <- files[!grepl("_zh\\.R$", files)]
 numbers <- as.integer(sub("^example([0-9]+)_.*", "\\1", basename(files)))
 files <- files[order(numbers)]
-stopifnot(length(files) == 28L, length(chinese_files) == 28L)
+stopifnot(length(files) == 29L, length(chinese_files) == 29L)
 # Parse both languages, but execute only English. Normalize only exact string
 # literals in the explicit teaching-text dictionary before comparing syntax.
 translations <- unlist(jsonlite::fromJSON("scripts/yytree_example_translations.json"), use.names = TRUE)
@@ -32,7 +32,7 @@ for (file in files) {
   symbols <- union(symbols, all.names(english))
 }
 stopifnot(all(getNamespaceExports("yytree") %in% symbols))
-cat("All 28 bilingual pairs parsed and matched; all public functions covered.\n")
+cat("All 29 bilingual pairs parsed and matched; all public functions covered.\n")
 output <- file.path(getwd(), "temp", "yytree-examples")
 dir.create(output, recursive = TRUE, showWarnings = FALSE)
 results <- list()
@@ -56,8 +56,8 @@ for (file in files) {
     chinese_syntax_and_logic_matched = TRUE, chinese_executed = FALSE)
   cat(basename(file), ":", length(plots), "plot(s) passed\n")
 }
-stopifnot(length(files) == 28L)
+stopifnot(length(files) == 29L)
 dir.create("logs", showWarnings = FALSE)
 jsonlite::write_json(results, "logs/yytree-examples.json", auto_unbox = TRUE, pretty = TRUE)
-cat("All 28 English examples passed;", sum(vapply(results, function(x) x$plots, 0L)), "plots rendered.\n")
+cat("All 29 English examples passed;", sum(vapply(results, function(x) x$plots, 0L)), "plots rendered.\n")
 

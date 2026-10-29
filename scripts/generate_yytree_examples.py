@@ -419,6 +419,21 @@ plots <- list(complete = y)
 ''', TREE_CODE + NAMES + CATEGORIES + MEASUREMENTS)
 
 
+add('extract_subtree', '<<Extract a subtree with ape|使用 ape 提取子树>>', '''
+# <<Keep every descendant of the MRCA, including Mouse.|保留最近共同祖先的全部后代，包括 Mouse。>>
+phy <- ape::read.tree(text = tree)
+original_phy <- phy
+node <- ape::getMRCA(phy, c("Frog", "Human"))
+sub_phy <- ape::extract.clade(phy, node)
+subtree_plot <- yytree(sub_phy) + leaf_labels()
+stopifnot(inherits(sub_phy, "phylo"),
+          setequal(sub_phy$tip.label, c("Frog", "Human", "Mouse")),
+          identical(phy, original_phy),
+          identical(unname(subtree_plot$tree$edges[, 3]), unname(sub_phy$edge.length)))
+plots <- list(full = yytree(phy) + leaf_labels(), subtree = subtree_plot)
+''', TREE_CODE)
+
+
 translations = {}
 
 
@@ -442,11 +457,11 @@ for stem, title, source in examples:
 
 readme = '''# yytree examples / 中英文功能示例
 
-28 topics, 56 standalone scripts. Files without a suffix are fully English;
+29 topics, 58 standalone scripts. Files without a suffix are fully English;
 `*_zh.R` files contain Chinese teaching comments and explanatory figure text.
 The paired scripts use identical data, APIs and drawing parameters.
 
-28 个主题共 56 份独立脚本。英文版无后缀，中文版以 `_zh.R` 结尾。
+29 个主题共 58 份独立脚本。英文版无后缀，中文版以 `_zh.R` 结尾。
 物种名、数据键和 API 参数值保持一致，便于对照。
 
 ## Start / 开始使用
@@ -506,6 +521,11 @@ readme += '''
 - **22–28:** branch lengths/merge heights, numbered/quoted names, immutable layers,
   partial annotations, caught validation errors, RDS restoration, large data and a complete figure.
   枝长与合并高度、编号和引号叶名、不可变图层、缺失注释、错误捕获、RDS、大树及综合图。
+
+## Subtrees / 子树
+
+Use example29 to find an MRCA with ape and pass its complete descendant clade to yytree.
+示例 29 使用 ape 定位 MRCA，提取全部后代，再传给 yytree 绘图。
 
 ## Preview appearance and navigation / 预览外观与操作
 
@@ -567,12 +587,12 @@ Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设�
 & 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_examples.R
 ```
 
-Only the 28 English scripts execute. Chinese scripts are parsed and compared as R
+Only the 29 English scripts execute. Chinese scripts are parsed and compared as R
 syntax trees after normalizing the declared display-text translations; they are
 never sourced. Every result in `plots` renders to `temp/yytree-examples`.
 The report is `logs/yytree-examples.json`. GUI checks run separately:
 
-只执行 28 份英文版；中文版仅做语法解析，并在归一化已声明的说明文字翻译后比较语法树，
+只执行 29 份英文版；中文版仅做语法解析，并在归一化已声明的说明文字翻译后比较语法树，
 不重复执行。全部绘图输出至 `temp/yytree-examples`，报告放在 `logs/yytree-examples.json`。
 GUI 交互另行检查：
 

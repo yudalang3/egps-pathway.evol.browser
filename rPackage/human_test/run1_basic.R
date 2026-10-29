@@ -33,6 +33,19 @@ p <- yytree("((A:1,B:2):1,C:3);") + leaf_labels() +
                                color = c("gold", "#66CCFF80")))
 print(p)
 
+#### Extract a subtree through phylo
+# Keep every descendant of the MRCA, including Mouse.
+phy <- ape::read.tree(text = tree)
+original_phy <- phy
+node <- ape::getMRCA(phy, c("Frog", "Human"))
+sub_phy <- ape::extract.clade(phy, node)
+subtree_plot <- yytree(sub_phy) + leaf_labels()
+stopifnot(inherits(sub_phy, "phylo"),
+          setequal(sub_phy$tip.label, c("Frog", "Human", "Mouse")),
+          identical(phy, original_phy),
+          identical(unname(subtree_plot$tree$edges[, 3]), unname(sub_phy$edge.length)))
+print(subtree_plot, new_window = TRUE)
+
 #### B. Numeric data: compute distances, then perform hierarchical clustering.
 #### Pass the clustering result from R directly to yytree.
 distances <- dist(USArrests)
