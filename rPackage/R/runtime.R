@@ -71,12 +71,14 @@
 }
 
 quit_yytree <- function() {
+  was_running <- .runtime_alive()
   runtime <- .runtime
   on.exit({
     fields <- intersect(c("config", "launch"), ls(runtime))
     if (length(fields)) rm(list = fields, envir = runtime)
   }, add = TRUE)
   .runtime_stop(runtime)
+  message(if (was_running) "yytree has shut down." else "yytree is not running (already stopped or not started).")
   invisible(NULL)
 }
 
@@ -86,7 +88,7 @@ quit_yytree <- function() {
 
 reg.finalizer(.runtime, .runtime_finalize, onexit = TRUE)
 
-.onUnload <- function(libpath) quit_yytree()
+.onUnload <- function(libpath) suppressMessages(quit_yytree())
 
 config_yytree <- function(path2egps, max_memory_heap = "4g", max_memory_stack = "8m", restart = FALSE) {
   if (!is.character(path2egps) || length(path2egps) != 1 || is.na(path2egps)) stop("path2egps must be one installation directory.")
@@ -144,7 +146,7 @@ config_yytree <- function(path2egps, max_memory_heap = "4g", max_memory_stack = 
 }
 
 .runtime_request <- function(command, ..., timeout = 30) {
-  if (!exists("config", .runtime, inherits = FALSE)) stop("Call config_yytree(path2egps) first.")
+  if (!exists("config", .runtime, inherits = FALSE)) stop('yytree is not configured or has been shut down.\nRun config_yytree(path2egps = "path/to/eGPS") before displaying or exporting a plot.\npath2egps should point to your eGPS installation folder.', call. = FALSE)
   if (!.runtime_alive()) {
     .runtime_start(.runtime$config, .runtime$launch)
     warning("Java restarted; previous windows and their zoom/scroll state were lost.", call. = FALSE)

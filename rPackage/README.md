@@ -1,3 +1,7 @@
+工具栏 Export 可将当前窗口的完整图形保存为 PDF、SVG 或 PPTX，包含已完成的自由形状编辑，忽略缩放和平移。保存对话框记忆目录并在覆盖前确认。
+
+quit_yytree() 会提示已退出或尚未运行；退出后需重新 config_yytree()。
+
 # yytree
 
 使用 `export(plot = p, file = "plot.pdf")` 导出完整画布，支持 PDF、SVG 和 PPTX。
@@ -249,3 +253,4 @@ SVG verification: scripts/check_yytree_svg_vector.cjs accepts an optional browse
 SVG 验证：check_yytree_svg_vector.cjs 可传浏览器路径，check_yytree_svg_pixels.py 对照 PNG；当前会因上述依赖变换问题失败，不能当作验收通过。
 
 PPTX 本地适配：保留现有 POI/JAR，修正绘图状态隔离与文字变换，标签、图例、自由文字及节点/分支注释使用可编辑文本框；自由热图逐格输出矢量。字体不嵌入，跨机器可能替换。PDF 仍是优先格式，SVG 限制保持不变。验收脚本：test_yytree_pdf_vector.R、render_yytree_pptx.ps1（本机PowerPoint）、check_yytree_pptx.py。原PPTX限制以通过本机实际渲染的案例为准，不保证任意字体/平台。
+

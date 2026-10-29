@@ -32,6 +32,7 @@ final class YyTreePreview extends JPanel {
     final JCheckBox snap = new JCheckBox("Snap To Point", true);
     final JButton fitFrame = new JButton("Fit frame");
     final JButton addFreeShapes = new JButton("Add free shapes");
+    final JButton export = new JButton("Export");
     final JSpinner widthPercent = new JSpinner(new SpinnerNumberModel(100.0, 0.0, null, 1.0));
     final JSpinner heightPercent = new JSpinner(new SpinnerNumberModel(100.0, 0.0, null, 1.0));
     final JLabel hint = new JLabel("Left drag to pan  ·  Wheel to zoom");
@@ -123,6 +124,10 @@ final class YyTreePreview extends JPanel {
         if (font != null) addFreeShapes.setFont(font);
         addFreeShapes.setToolTipText("<html>Add, select, move and resize free shapes on the canvas.<br>Copy the generated R code to replace your old free_* block.<br>Closing the editor keeps the preview changes.</html>");
         toolbar.add(addFreeShapes);
+        if (font != null) export.setFont(font);
+        export.setToolTipText("<html>Export the complete canvas including completed free shape edits.<br>Save as PDF, SVG or PPTX at the original canvas size.</html>");
+        toolbar.add(export);
+        export.addActionListener(e -> exportFile());
         toolbar.addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { toolbar.revalidate(); }
         });
@@ -169,6 +174,52 @@ final class YyTreePreview extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { hint.setVisible(getWidth() >= 1120); }
         });
+    }
+
+    String exportSnapshot() {
+        com.alibaba.fastjson.JSONObject scene = new com.alibaba.fastjson.JSONObject(true);
+        scene.putAll(canvas.scene);
+        com.alibaba.fastjson.JSONArray layers = new com.alibaba.fastjson.JSONArray();
+        for (var layer : canvas.layers) if (!layer.containsKey("mode")) layers.add(layer);
+        layers.addAll(editor.layers);
+        scene.put("layers", layers);
+        return scene.toJSONString();
+    }
+
+    private void exportFile() {
+        var chooser = new egps2.panels.dialog.EGPSFileChooser(YyTreePreview.class);
+        chooser.setAcceptAllFileFilterUsed(false);
+        for (String format : new String[]{"pdf", "svg", "pptx"})
+            chooser.addChoosableFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(format.toUpperCase(Locale.ROOT), format));
+        chooser.setSelectedFile(new java.io.File("plot.pdf"));
+        while (chooser.showSaveDialog((JFrame)SwingUtilities.getWindowAncestor(this)) == JFileChooser.APPROVE_OPTION) {
+            java.io.File file = chooser.getSelectedFile();
+            String name = file.getName();
+            int dot = name.lastIndexOf('.');
+            String format = dot < 0 ? ((javax.swing.filechooser.FileNameExtensionFilter)chooser.getFileFilter()).getExtensions()[0] : name.substring(dot + 1).toLowerCase(Locale.ROOT);
+            if (!java.util.List.of("pdf", "svg", "pptx").contains(format)) {
+                JOptionPane.showMessageDialog(this, "Choose a .pdf, .svg or .pptx file.");
+                continue;
+            }
+            if (dot < 0) file = new java.io.File(file.getParentFile(), name + "." + format);
+            if (file.exists() && JOptionPane.showConfirmDialog(this, "Replace " + file.getName() + "?", "Export", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) continue;
+            final String path = file.getAbsolutePath();
+            final String snapshot = exportSnapshot();
+            export.setEnabled(false); export.setText("Exporting…");
+            new SwingWorker<String, Void>() {
+                @Override protected String doInBackground() throws Exception { return new YyTreeBridge().exportPlot(snapshot, path); }
+                @Override protected void done() {
+                    export.setEnabled(true); export.setText("Export");
+                    try { JOptionPane.showMessageDialog(YyTreePreview.this, "Exported to " + get()); }
+                    catch (Exception error) {
+                        Throwable cause = error.getCause() == null ? error : error.getCause();
+                        LoggerFactory.getLogger(YyTreePreview.class).error("Export failed", cause);
+                        JOptionPane.showMessageDialog(YyTreePreview.this, "Export failed: " + cause.getMessage(), "Export", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }.execute();
+            return;
+        }
     }
 
     void disposeInteraction() {

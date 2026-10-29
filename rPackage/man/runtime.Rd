@@ -30,7 +30,7 @@ Heap and stack are separate resources: increasing heap does not fix stack overfl
 After an unexpected Java exit, the next print attempts to start a fresh subprocess from the last successful configuration and warns that old window state was lost. Communication failures, timeouts and user interrupts terminate the subprocess without replaying the in-flight request. Normal startup and requests have a 30-second timeout. Explicit quit clears the configuration and disables automatic recovery until configured again. R exit or package unload attempts to shut down Java. Logs are written below \file{tempdir()/yytree/logs}; the returned configuration gives the actual log path.
 }
 \subsection{quit_yytree}{
-This function has no parameters. Calling it when Java is not running is safe, including repeated calls. Plot specifications already stored in R remain unchanged. After quitting, call \code{config_yytree()} again before printing; explicit quit does not trigger automatic recovery.
+This function has no parameters. Calling it when Java is not running is safe, including repeated calls. A message reports whether Java was shut down or was already stopped. Plot specifications already stored in R remain unchanged. After quitting, call \code{config_yytree()} again before printing; explicit quit does not trigger automatic recovery.
 
 Closing a preview window only disposes that window and keeps Java available. \code{quit_yytree()} instead terminates the subprocess and all of its windows.
 }

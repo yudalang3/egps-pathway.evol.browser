@@ -63,6 +63,14 @@ public final class FreeShapeEditorTest {
         require(p.canvas.sceneDrawCount.get()==paints,"Shape editing redrew the tree");require(original.equals(p.canvas.scene.toJSONString()),"Editing changed original scene");
         String code=FreeShapes.code(e.layers);require(code.startsWith("+ free_")&&code.contains("matrix(c(")&&code.contains("\\\"title\\\""),"R serialization missed content");
         int count=e.layers.size();e.close();require(!e.active&&e.layers.size()==count,"Closing editor lost contents");
+        String snapshot=p.exportSnapshot();
+        JSONObject exported=JSON.parseObject(snapshot);
+        require(exported.getJSONArray("layers").size()==count,"Export lost edited shapes");
+        require(exported.getJSONObject("canvas").getIntValue("width")==1000,"Export changed logical size");
+        JSONObject saved=FreeShapes.copy(e.layers.getFirst());
+        e.layers.getFirst().put("x",99999);
+        require(!exported.getJSONArray("layers").getJSONObject(0).equals(e.layers.getFirst()),"Export snapshot changed after editing");
+        e.layers.set(0,saved);
         p.canvas.zoom=2;Point2D view=new Point2D.Double(300,350);MouseEvent mouse=event(p,MouseEvent.MOUSE_MOVED,view.getX(),view.getY(),1);near(e.logical(mouse).getX(),300,"Zoomed logical x");
     }
     static void arrowSheet(YyTreePreview p,Path directory) throws Exception {
