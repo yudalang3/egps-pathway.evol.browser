@@ -103,6 +103,7 @@ public final class YyTreeHoverTest {
         }
         testOverlap();
         testScrolledHover();
+        testNavigationFrames();
         testLargeTree();
         if(!GraphicsEnvironment.isHeadless()) testWindow();
         require(!egps2.UnifiedAccessPoint.isGULaunched(),"Hover launched the eGPS desktop");
@@ -129,7 +130,11 @@ public final class YyTreeHoverTest {
     }
 
     private static JSONObject largeScene() {
-        int n=10000,next=n;
+        return largeScene(10000);
+    }
+
+    private static JSONObject largeScene(int n) {
+        int next=n;
         JSONObject scene=scene(1),tree=scene.getJSONObject("tree");
         JSONArray labels=new JSONArray(),edges=new JSONArray(),names=new JSONArray(),values=new JSONArray();
         ArrayDeque<Integer> queue=new ArrayDeque<>();
@@ -190,6 +195,50 @@ public final class YyTreeHoverTest {
         }
     }
 
+    private static void testNavigationFrames() throws Exception {
+        JSONArray reports=new JSONArray();
+        for(int leaves:new int[]{9,1000,10000}) {
+            JSONObject fixture=largeScene(leaves);
+            if(leaves==9) fixture.getJSONArray("layers").getJSONObject(1).put("show",true);
+            var preview=preview(fixture);
+            long[] times=new long[240];
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    preview.setSize(1600,1000);layout(preview);preview.fitToViewport();
+                });
+                YyTreeBridge.awaitRendering(preview);
+                SwingUtilities.invokeAndWait(() -> {
+                    var image=new BufferedImage(1600,1000,BufferedImage.TYPE_INT_RGB);
+                    Graphics2D g=image.createGraphics();
+                    try {
+                        // Keep the EDT occupied: no background completion can install a new image.
+                        int before=preview.canvas.sceneDrawCount.get();
+                        for(int i=0;i<times.length;i++) {
+                            long started=System.nanoTime();
+                            if(i%3==0) wheel(preview,i%2==0?-1:1);
+                            else {
+                                var viewport=preview.scroll.getViewport();
+                                viewport.setViewPosition(new Point(i%40,i%25));
+                            }
+                            preview.printAll(g);
+                            times[i]=System.nanoTime()-started;
+                        }
+                        require(before==preview.canvas.sceneDrawCount.get(),"Gesture rebuilt scene on EDT");
+                    } finally {g.dispose();}
+                });
+                YyTreeBridge.awaitRendering(preview);
+                SwingUtilities.invokeAndWait(() -> require(preview.cache.isCurrent(),"Gesture did not settle"));
+                Arrays.sort(times);
+                double p95=times[(int)(times.length*.95)]/1e6;
+                JSONObject report=new JSONObject();report.put("leaves",leaves);report.put("tracks",20);report.put("offscreen_event_paint_p95_ms",p95);report.put("p99_ms",times[(int)(times.length*.99)]/1e6);report.put("max_ms",times[times.length-1]/1e6);reports.add(report);
+                System.out.printf(Locale.ROOT,"Offscreen event + paint %d leaves: p95 %.2f ms%n",leaves,p95);
+                require(p95<100,"Offscreen event and paint exceeded 100 ms: "+p95);
+            } finally {SwingUtilities.invokeAndWait(preview::disposeInteraction);}
+        }
+        Files.createDirectories(Path.of("logs"));
+        Files.writeString(Path.of("logs/yytree-navigation-"+System.getProperty("sun.java2d.uiScale","headless")+".json"),reports.toJSONString());
+    }
+
     private static void testLargeTree() throws Exception {
         var preview=preview(largeScene());
         try {
@@ -208,7 +257,19 @@ public final class YyTreeHoverTest {
                 } finally { graphics.dispose(); }
                 require(preview.canvas.sceneDrawCount.get()==count,"Steady hover rebuilt the static tree");
                 // Rapid changes, including returning to a cached view, must settle on the latest view.
-                for(int i=0;i<30;i++) wheel(preview,i%2==0?-1:1);
+                int beforeGesture = preview.canvas.sceneDrawCount.get();
+                for(int i=0;i<30;i++) {
+                    wheel(preview,i%2==0?-1:1);
+                    BufferedImage moving = new BufferedImage(600,400,BufferedImage.TYPE_INT_RGB);
+                    Graphics2D frame = moving.createGraphics();
+                    try {
+                        frame.setColor(Color.MAGENTA); frame.fillRect(0,0,600,400);
+                        frame.translate(-preview.scroll.getViewport().getViewPosition().x,-preview.scroll.getViewport().getViewPosition().y);
+                        preview.cache.paint(frame);
+                    } finally { frame.dispose(); }
+                    require(moving.getRGB(300,200)!=Color.MAGENTA.getRGB(),"Navigation lost cached scene while rendering was pending");
+                }
+                require(preview.canvas.sceneDrawCount.get()==beforeGesture,"Continuous wheel synchronously rebuilt scene");
             });
             YyTreeBridge.awaitRendering(preview);
             SwingUtilities.invokeAndWait(() -> require(preview.cache.isCurrent(),"Latest viewport render was not installed"));

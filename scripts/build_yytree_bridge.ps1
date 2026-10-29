@@ -26,6 +26,8 @@ if ($Test) {
     if ($LASTEXITCODE -ne 0) { throw 'yytree Java test compilation failed.' }
     & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeGeometryTest
     if ($LASTEXITCODE -ne 0) { throw 'yytree Java geometry tests failed.' }
+    & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeCacheSchedulingTest
+    if ($LASTEXITCODE -ne 0) { throw 'Cache scheduling regression failed.' }
     & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreeInteractionTest
     if ($LASTEXITCODE -ne 0) { throw 'yytree Java navigation tests failed.' }
     & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.YyTreePreviewFitTest

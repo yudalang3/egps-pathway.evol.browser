@@ -396,11 +396,15 @@ final class YyTreePreview extends JPanel {
         } finally { g.dispose(); }
     }
 
-    /** One device-resolution viewport image; a single worker coalesces newer views. */
+    /** Bounded overview and latest device-resolution viewport, rendered by one worker. */
     final class ViewCache {
         record Key(Rectangle visible, double zoom, GraphicsConfiguration configuration, double scaleX, double scaleY) { }
         private Key desired, rendered, failed;
-        private BufferedImage image;
+        private Throwable failedCause;
+        private BufferedImage image, overview;
+        private double overviewScale;
+        private Key observed;
+        private final javax.swing.Timer settle = new javax.swing.Timer(120, e -> render());
         private SwingWorker<BufferedImage, Void> worker;
         private boolean active, disposed;
         CompletableFuture<Void> ready = new CompletableFuture<>();
@@ -414,21 +418,46 @@ final class YyTreePreview extends JPanel {
 
         boolean isCurrent() { return image != null && Objects.equals(rendered, key()); }
 
-        void start() { active = true; request(); }
+        void start() { active = true; settle.setRepeats(false); render(); }
 
         void request() {
             if (!active || disposed) return;
             Key latest = key();
+            if (!Objects.equals(observed, latest)) {
+                observed = latest;
+                if (ready.isDone()) ready = new CompletableFuture<>();
+                if (isCurrent()) ready.complete(null);
+                else if (latest.equals(failed)) ready.completeExceptionally(failedCause);
+                else if (!navigation.isDragging()) settle.restart();
+                canvas.repaint();
+            }
+        }
+
+        void renderNow() { settle.stop(); render(); }
+
+        void render() {
+            if (!active || disposed || navigation.isDragging()) return;
+            observed = key();
+            Key latest = observed;
             if (latest.visible().isEmpty()) return;
-            if (isCurrent()) { desired = latest; if (worker == null) ready.complete(null); return; }
-            if (latest.equals(failed)) return;
+            if (isCurrent()) { desired = latest; ready.complete(null); return; }
+            if (latest.equals(failed)) { ready.completeExceptionally(failedCause); return; }
             desired = latest;
             if (hovered != null) clearHover();
             if (ready.isDone()) ready = new CompletableFuture<>();
             if (worker != null) return;
             Key target = desired;
+            boolean needsOverview = overview == null;
             worker = new SwingWorker<>() {
                 @Override protected BufferedImage doInBackground() {
+                    if (needsOverview) {
+                        double scale = Math.min(1, Math.min(4096.0 / Math.max(canvas.logicalWidth, canvas.logicalHeight), Math.sqrt(4000000.0 / ((double)canvas.logicalWidth * canvas.logicalHeight))));
+                        BufferedImage full = new BufferedImage(Math.max(1,(int)(canvas.logicalWidth*scale)), Math.max(1,(int)(canvas.logicalHeight*scale)), BufferedImage.TYPE_INT_RGB);
+                        Graphics2D fg = full.createGraphics();
+                        try { fg.setColor(Color.WHITE); fg.fillRect(0,0,full.getWidth(),full.getHeight()); fg.scale(scale,scale); canvas.drawBaseScene(fg); }
+                        finally { fg.dispose(); }
+                        SwingUtilities.invokeLater(() -> { if(disposed) full.flush(); else { overview=full; overviewScale=scale; canvas.repaint(); } });
+                    }
                     Rectangle rect = target.visible();
                     BufferedImage buffer = new BufferedImage(Math.max(1, (int)Math.ceil(rect.width * target.scaleX())),
                         Math.max(1, (int)Math.ceil(rect.height * target.scaleY())), BufferedImage.TYPE_INT_RGB);
@@ -451,11 +480,11 @@ final class YyTreePreview extends JPanel {
                     worker = null;
                     try {
                         BufferedImage buffer = get();
-                        if (!disposed && target.equals(key())) {
+                        if (!disposed && (!isCurrent() || target.equals(key()))) {
                             if (image != null) image.flush();
                             image = buffer;
                             rendered = target;
-                            ready.complete(null);
+                            if (target.equals(key())) ready.complete(null);
                             refreshHover();
                         } else buffer.flush();
                     } catch (CancellationException ignored) {
@@ -463,12 +492,13 @@ final class YyTreePreview extends JPanel {
                     } catch (Exception error) {
                         if (!disposed) {
                             failed = target;
-                            ready.completeExceptionally(error);
+                            failedCause = error.getCause() == null ? error : error.getCause();
+                            if (target.equals(key())) ready.completeExceptionally(failedCause);
                             LoggerFactory.getLogger(YyTreePreview.class).error("Cannot render yytree preview", error);
                         }
                     }
                     if (!disposed) {
-                        request();
+                        if (!navigation.isDragging() && !settle.isRunning() && !isCurrent()) render();
                         canvas.repaint();
                     }
                 }
@@ -478,11 +508,16 @@ final class YyTreePreview extends JPanel {
 
         void paint(Graphics2D g) {
             request();
-            if (isCurrent()) {
-                AffineTransform placement = AffineTransform.getTranslateInstance(rendered.visible().x, rendered.visible().y);
-                placement.scale(1 / rendered.scaleX(), 1 / rendered.scaleY());
+            if (overview != null && !isCurrent()) {
+                AffineTransform full = AffineTransform.getScaleInstance(canvas.zoom / overviewScale, canvas.zoom / overviewScale);
+                g.drawImage(overview, full, null);
+            }
+            if (image != null) {
+                double ratio = canvas.zoom / rendered.zoom();
+                AffineTransform placement = AffineTransform.getTranslateInstance(rendered.visible().x * ratio, rendered.visible().y * ratio);
+                placement.scale(ratio / rendered.scaleX(), ratio / rendered.scaleY());
                 g.drawImage(image, placement, null);
-            } else {
+            } else if (overview == null) {
                 Rectangle rect = scroll.getViewport().getViewRect();
                 g.setColor(new Color(65, 73, 85));
                 g.drawString(Objects.equals(failed, key()) ? "Unable to render tree preview." : "Rendering tree...", rect.x + 12, rect.y + 24);
@@ -491,6 +526,9 @@ final class YyTreePreview extends JPanel {
 
         void dispose() {
             disposed = true;
+            settle.stop();
+            if (overview != null) overview.flush();
+            overview = null;
             if (worker != null) worker.cancel(true);
             if (image != null) image.flush();
             image = null;
@@ -549,6 +587,7 @@ final class YyTreePreview extends JPanel {
             scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             if (scroll.getWidth() > 0 && scroll.getHeight() > 0) scroll.doLayout();
             fitToViewport();
+            cache.renderNow();
         }
 
         void fitToViewport() {
@@ -615,6 +654,7 @@ final class YyTreePreview extends JPanel {
             if (editor.mousePressed(e)) return;
             if (!SwingUtilities.isLeftMouseButton(e) && !(editor.active && SwingUtilities.isMiddleMouseButton(e))) return;
             endDrag();
+            cache.settle.stop();
             pressPointer = pointer(e);
             lastPointer = new Point(pressPointer);
             pressView = scroll.getViewport().getViewPosition();
@@ -629,7 +669,7 @@ final class YyTreePreview extends JPanel {
         @Override public void mouseDragged(MouseEvent e) {
             if (editor.mouseDragged(e)) { lastPointer = pointer(e); updateStatus(); return; }
             if (!isDragging()) return;
-            if ((e.getModifiersEx() & (InputEvent.BUTTON1_DOWN_MASK | InputEvent.BUTTON2_DOWN_MASK)) == 0) { endDrag(); return; }
+            if ((e.getModifiersEx() & (InputEvent.BUTTON1_DOWN_MASK | InputEvent.BUTTON2_DOWN_MASK)) == 0) { endDrag(); cache.renderNow(); return; }
             lastPointer = pointer(e);
             hoverPointer = new Point(lastPointer);
             scroll.getViewport().setViewPosition(bounded(new Point(
@@ -641,12 +681,12 @@ final class YyTreePreview extends JPanel {
 
         @Override public void mouseReleased(MouseEvent e) {
             if (editor.mouseReleased(e)) return;
-            if (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e)) endDrag();
+            if ((SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e)) && isDragging()) { endDrag(); cache.renderNow(); }
         }
 
         @Override public void eventDispatched(AWTEvent event) {
             if (event instanceof MouseEvent e && e.getID() == MouseEvent.MOUSE_RELEASED
-                && (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e))) endDrag();
+                && (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e)) && isDragging()) { endDrag(); cache.renderNow(); }
         }
 
         void endDrag() {

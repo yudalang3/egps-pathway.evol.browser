@@ -1,0 +1,11 @@
+log_path <- 'C:/Users/yudal/Documents/project/eGPS2/jars/egps2_collections/egps-pathway.evol.browser/logs/rscript_computeruse_probe.txt'
+sink(log_path, split = TRUE)
+cat('Rscript probe: ', format(Sys.time()), '\n')
+cat('Executable arguments: ', commandArgs(), '\n')
+cat('R home: ', R.home(), '\n')
+cat('Working directory: ', getwd(), '\n')
+cat('R bin exists: ', dir.exists(file.path(R.home(), 'bin')), '\n')
+tryCatch({setwd(file.path(R.home(), 'bin')); cat('setwd R bin: OK\n')}, error=function(e) cat('setwd R bin ERROR: ', conditionMessage(e), '\n'))
+cat('Calculation: ', sum(1:100), '\n')
+cat('PROBE COMPLETE\n')
+sink()
