@@ -2,7 +2,8 @@ param(
     [string]$Egps = 'C:\Users\yudal\Documents\project\eGPS2\eGPS_v2_windows_x64_selfTest',
     [string]$Jdk = 'C:\Users\yudal\Documents\project\eGPS2\RunningEnvPackages\jdk-25.0.4.1+1',
     [string]$R = 'C:\R_envs\R-4.5.2\bin',
-    [switch]$Gui
+    [switch]$Gui,
+    [string]$PdfPython = "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
 )
 $ErrorActionPreference = 'Stop'
 $project = Split-Path -Parent $PSScriptRoot
@@ -78,6 +79,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Windows ZIP installation smoke test failed.' }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/update_yytree_library.R (Join-Path $dist 'yytree_0.1.0.zip')
     if ($LASTEXITCODE -ne 0) { throw 'Stable local library update failed.' }
+    & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_pdf_vector.R $Egps
+    if ($LASTEXITCODE -ne 0) { throw 'PDF vector fixture generation failed.' }
+    & $PdfPython scripts/check_yytree_pdf_vector.py
+    if ($LASTEXITCODE -ne 0) { throw 'PDF vector/font content verification failed.' }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_hidden_label_tracks.R $Egps
     if ($LASTEXITCODE -ne 0) { throw 'Hidden-label track regression failed.' }
     $labelParameters = @('--vanilla','scripts/test_yytree_label_parameters.R',$Egps)

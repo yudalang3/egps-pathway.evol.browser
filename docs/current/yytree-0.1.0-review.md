@@ -32,3 +32,7 @@
 PDF 字体映射修复（用户授权的单项例外）：保留 iText JAR，在本包增加 Unicode 字体映射及嵌入。Windows 当前安装字体下，中文叶标签及 test 中文混排已渲染验证通过，文字未转轮廓。其他平台取决于可用字体，未完成跨平台验证。SVG/PPTX 限制保持不变。当前源码和本地安装 bridge 已更新，dist 历史归档尚未重新发布。
 
 最终复验：在正常本机权限下重新构建与安装成功，源码包及 Windows ZIP 已同步到 rPackage/dist，本地安装已更新。完整 R CMD check --no-manual --no-build-vignettes 结果 Status: OK；此前依赖识别及目录访问失败属于受限执行环境。PDF 中文文本提取断言通过（含中文叶标签及 test 中文），渲染检查通过。完整检查日志：logs/yytree-pdf-fonts-check.log。此结果取代前述未完成检查与归档未更新的阶段状态。
+
+全矢量 PDF 收尾：保持 iText 5.1.3 及现有 API。仅 PDF 的自由热图改为逐格矢量矩形，预览/PNG/SVG/PPTX 沿用原路径。10 个综合场景覆盖七布局、四个斜向方向、九类自由图形、中英文、12/20间距、渐变/分组图例及透明填充；递归结构检查未发现图片或内联图片，文字Unicode提取、字体嵌入及映射通过。已视觉检查矩形/圆形PDF渲染与PNG。测试工具：scripts/test_yytree_pdf_vector.R 和 scripts/check_yytree_pdf_vector.py（pypdf）。大型矢量热图可增大文件体积，其他系统字体仍需单独验证。
+
+全矢量最终验收：10份PDF递归零图片对象/零内联图片，10份PDF/PNG自动视觉差异及热图/透明填充采样通过；Java回归、R单元测试、完整 R CMD check 均通过（Status: OK）。日志 logs/yytree-pdf-vector-check.log。

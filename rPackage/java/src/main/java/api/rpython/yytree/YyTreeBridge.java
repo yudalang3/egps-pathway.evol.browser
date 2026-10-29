@@ -225,7 +225,7 @@ public final class YyTreeBridge {
                 Graphics2D g = (Graphics2D) graphics.create();
                 try {
                     g.setColor(Color.WHITE); g.fillRect(0, 0, getWidth(), getHeight());
-                    panel.drawScene(g);
+                    panel.drawScene(g, format.equals("pdf"));
                 } finally { g.dispose(); }
             }
         }));
@@ -623,8 +623,11 @@ public final class YyTreeBridge {
             } finally {g.dispose();}
         }
         void drawScene(Graphics2D g) {
+                drawScene(g, false);
+        }
+        void drawScene(Graphics2D g, boolean vectorHeatmaps) {
                 drawBaseScene(g);
-                for(JSONObject layer:layers) if(layer.containsKey("mode")) drawFree(g,layer);
+                for(JSONObject layer:layers) if(layer.containsKey("mode")) freeShapes.draw(g,layer,vectorHeatmaps);
         }
         void drawBaseScene(Graphics2D g) {
                 sceneDrawCount.incrementAndGet();

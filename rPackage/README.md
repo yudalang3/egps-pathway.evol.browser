@@ -233,3 +233,11 @@ print(y)
 The default eGPS exporters are retained. Successful file creation does not guarantee complete graphical content. PDF embeds mapped Unicode fonts when available; SVG free heatmaps may fail; PPTX may omit free heatmaps or misplace circular labels. Confirmed dependency defects are documented rather than repaired or bypassed.
 
 沿用默认 eGPS 导出器。文件生成成功不代表图形完整：PDF 已增加可用 Unicode 字体映射与嵌入；SVG 自由热图可能报错，PPTX 可能缺失自由热图或出现圆形标签错位。确认属于依赖的问题只记录，不修复或绕过。复现与处理原则见仓库 docs/current/yytree-0.1.0-review.md。
+
+PDF is the priority vector format in 0.1.0. All current drawing layers, including free_heatmap cells, are exported as vectors; mapped text fonts are embedded. Large vector heatmaps can produce larger files. This is verified on the current Windows font environment; other platforms require separate font verification. SVG/PPTX limitations remain unchanged.
+
+PDF 是 0.1.0 优先验收的矢量格式。现有绘图图层（包括自由热图单元格）均输出为矢量，映射的文字字体会嵌入。大型全矢量热图可能增加文件体积。目前在本机 Windows 字体环境验证，其他平台须单独验证字体；SVG/PPTX 限制不变。
+
+PDF regression: run scripts/test_yytree_pdf_vector.R with the eGPS installation path, then scripts/check_yytree_pdf_vector.py using Python with pypdf. validate_yytree.ps1 includes both checks; override -PdfPython for another Python interpreter.
+
+验证方式：先以 eGPS 安装路径运行 scripts/test_yytree_pdf_vector.R，再使用带 pypdf、Pillow 的 Python 运行 scripts/check_yytree_pdf_vector.py，并确保 Poppler 的 pdftoppm 在 PATH 中。统一验证脚本已接入两项检查，可通过 -PdfPython 指定解释器。

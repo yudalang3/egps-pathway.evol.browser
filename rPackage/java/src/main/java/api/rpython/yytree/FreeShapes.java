@@ -114,6 +114,9 @@ final class FreeShapes {
     void cacheHeatmap(JSONArray cells,BufferedImage image) { heatmaps.put(cells,image); }
     void clear() { heatmaps.values().forEach(BufferedImage::flush);heatmaps.clear(); }
     void draw(Graphics2D original,JSONObject l) {
+        draw(original,l,false);
+    }
+    void draw(Graphics2D original,JSONObject l,boolean vectorHeatmaps) {
         Graphics2D g=(Graphics2D)original.create();
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
@@ -122,6 +125,17 @@ final class FreeShapes {
             String type=l.getString("type");g.setStroke(stroke(l));
             if(type.equals("text")){if(fill!=null){g.setFont(font(l));g.setColor(fill);g.drawString(l.getString("text"),(float)textBounds(l).getX(),(float)value(l,"y",false));}return;}
             if(type.equals("free_heatmap")){
+                if(vectorHeatmaps) {
+                    JSONArray cells=l.getJSONArray("cells");
+                    int rows=cells.size(),columns=cells.getJSONArray(0).size();
+                    double x=value(l,"x",true),y=value(l,"y",false);
+                    double w=value(l,"width",true)/columns,h=value(l,"height",false)/rows;
+                    for(int row=0;row<rows;row++)for(int col=0;col<columns;col++) {
+                        Color cell=YyTreeBridge.color(cells.getJSONArray(row).getString(col));
+                        if(cell!=null){g.setColor(cell);g.fill(new Rectangle2D.Double(x+col*w,y+row*h,w,h));}
+                    }
+                    return;
+                }
                 prepareHeatmap(l);BufferedImage image=heatmaps.get(l.getJSONArray("cells"));
                 g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
                 AffineTransform transform=AffineTransform.getTranslateInstance(value(l,"x",true),value(l,"y",false));
