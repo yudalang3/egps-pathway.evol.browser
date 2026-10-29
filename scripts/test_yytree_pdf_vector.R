@@ -24,8 +24,11 @@ tryCatch({
       free_polygon(rbind(c(.7,.1),c(.8,.1),c(.75,.2)),fill_color="cyan") +
       free_bezier(points) + free_bezier_ring(points, points + .03) +
       free_heatmap(.1,.85,.3,.1,matrix(c(0,NA,1,2),2))
+    for (position in c("left","right","top","bottom","topleft","topright","bottomleft","bottomright"))
+      p <- p + inner_node_annotation("中文","English", text = paste0("Node-",position), text_position = position)
     export(p, file.path(out,paste0(i,".pdf")))
     export(p, file.path(out,paste0(i,".svg")))
+    export(p, file.path(out,paste0(i,".pptx")))
     yytree:::.runtime_request("renderPng",yytree:::.scene_json(p),file.path(out,paste0(i,".png")))
   }
 }, finally = quit_yytree())

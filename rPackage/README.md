@@ -247,3 +247,5 @@ SVG 热图现复用矢量单元格绘制，消除了图片插值接口异常。�
 SVG verification: scripts/check_yytree_svg_vector.cjs accepts an optional browser executable; scripts/check_yytree_svg_pixels.py compares screenshots with PNG references and currently fails on the documented dependency transform issue.
 
 SVG 验证：check_yytree_svg_vector.cjs 可传浏览器路径，check_yytree_svg_pixels.py 对照 PNG；当前会因上述依赖变换问题失败，不能当作验收通过。
+
+PPTX 本地适配：保留现有 POI/JAR，修正绘图状态隔离与文字变换，标签、图例、自由文字及节点/分支注释使用可编辑文本框；自由热图逐格输出矢量。字体不嵌入，跨机器可能替换。PDF 仍是优先格式，SVG 限制保持不变。验收脚本：test_yytree_pdf_vector.R、render_yytree_pptx.ps1（本机PowerPoint）、check_yytree_pptx.py。原PPTX限制以通过本机实际渲染的案例为准，不保证任意字体/平台。

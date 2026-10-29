@@ -38,3 +38,7 @@ PDF 字体映射修复（用户授权的单项例外）：保留 iText JAR，在
 全矢量最终验收：10份PDF递归零图片对象/零内联图片，10份PDF/PNG自动视觉差异及热图/透明填充采样通过；Java回归、R单元测试、完整 R CMD check 均通过（Status: OK）。日志 logs/yytree-pdf-vector-check.log。
 
 SVG 单项适配：仅让 SVG 与 PDF 共用 vectorHeatmaps，未修改依赖或PPTX。10份综合SVG可解析，含预期文字且无image/foreignObject。浏览器视觉检查失败：1.svg 第37行开启的旋转标题变换组一直延续至第159行，后续图例及自由形状被错误分组。1-svg.png 显示错位/缺失；PNG参考正常。check_yytree_svg_pixels.py 的1号案例差异0.03265超出0.03，未放宽阈值，按约定停止依赖问题修复。PDF的10项结构/视觉回归、Java回归及R单元测试通过。浏览器测试需正常本机权限及Playwright/Edge；当前SVG仅修复热图异常，整体仍属有限支持。
+
+PPTX适配：用户授权局部适配例外；没有修改依赖源码或更换JAR。本项目新增PptxExport及Drawing子类，修复create可变状态共享、文字平移旋转、浮点字号及热图缺失。节点注释保留字符串写入原生文本框，字体未嵌入。10场景首轮PowerPoint原生渲染与PNG差异0.28%–0.48%，热图/透明采样通过；XML无图片且文字可编辑。SVG既有依赖问题仍保留。
+
+PPTX最终结果：补充八方向可编辑节点注释后，10场景PowerPoint/PNG差异0.34%–0.54%（阈值3%），热图及透明采样通过；原生文本含所有预期注释，无图片。Java状态隔离/旋转坐标/12.5pt字号测试、全部Java回归、R单元测试、PDF10项回归及完整R CMD check通过（Status: OK）。当前Windows/PowerPoint案例通过；字体未嵌入，其他平台仍须单独验收。发布包及本地安装已更新，日志logs/yytree-pptx-check.log。

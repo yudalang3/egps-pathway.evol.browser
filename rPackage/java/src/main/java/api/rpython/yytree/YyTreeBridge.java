@@ -225,14 +225,14 @@ public final class YyTreeBridge {
                 Graphics2D g = (Graphics2D) graphics.create();
                 try {
                     g.setColor(Color.WHITE); g.fillRect(0, 0, getWidth(), getHeight());
-                    panel.drawScene(g, format.equals("pdf") || format.equals("svg"));
+                    panel.drawScene(g, true);
                 } finally { g.dispose(); }
             }
         }));
         try {
             switch (format) {
                 case "pdf" -> PdfExport.save(drawing.get(), new File(path));
-                case "pptx" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsPptx(drawing.get(), new File(path));
+                case "pptx" -> PptxExport.save(drawing.get(), new File(path));
                 case "svg" -> egps2.frame.gui.VectorGraphicsEncoder.saveVectorGraphic(drawing.get(), path,
                     egps2.frame.gui.VectorGraphicsEncoder.VectorGraphicsFormat.SVG);
             }
@@ -801,7 +801,7 @@ public final class YyTreeBridge {
         }
         void drawAnnotationText(Graphics2D g,String text,Rectangle2D reference,String position) {
             AnnotationText placed=placeAnnotationText(g,text,reference,position);
-            if(placed!=null){g.setColor(Color.BLACK);placed.layout().draw(g,placed.x(),placed.baseline());}
+            if(placed!=null){g.setColor(Color.BLACK);if(g instanceof PptxExport.Drawing)g.drawString(text,placed.x(),placed.baseline());else placed.layout().draw(g,placed.x(),placed.baseline());}
         }
         void prepareTrackOffsets() {
             double end=0,gap=4;

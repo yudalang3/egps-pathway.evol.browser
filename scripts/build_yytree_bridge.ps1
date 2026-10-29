@@ -38,4 +38,6 @@ if ($Test) {
     if ($LASTEXITCODE -ne 0) { throw 'yytree Java parameter dialog tests failed.' }
     & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.FreeShapeEditorTest
     if ($LASTEXITCODE -ne 0) { throw 'yytree free shape editor tests failed.' }
+    & (Join-Path $Jdk 'bin\java.exe') "@$Egps\eGPS2.args" '-Djava.awt.headless=true' -cp "$testClasses;$classes;$Egps\dependency-egps\*" api.rpython.yytree.PptxExportTest
+    if ($LASTEXITCODE -ne 0) { throw 'yytree PPTX adaptation tests failed.' }
 }
