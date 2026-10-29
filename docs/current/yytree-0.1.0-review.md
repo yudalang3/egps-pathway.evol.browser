@@ -36,3 +36,5 @@ PDF 字体映射修复（用户授权的单项例外）：保留 iText JAR，在
 全矢量 PDF 收尾：保持 iText 5.1.3 及现有 API。仅 PDF 的自由热图改为逐格矢量矩形，预览/PNG/SVG/PPTX 沿用原路径。10 个综合场景覆盖七布局、四个斜向方向、九类自由图形、中英文、12/20间距、渐变/分组图例及透明填充；递归结构检查未发现图片或内联图片，文字Unicode提取、字体嵌入及映射通过。已视觉检查矩形/圆形PDF渲染与PNG。测试工具：scripts/test_yytree_pdf_vector.R 和 scripts/check_yytree_pdf_vector.py（pypdf）。大型矢量热图可增大文件体积，其他系统字体仍需单独验证。
 
 全矢量最终验收：10份PDF递归零图片对象/零内联图片，10份PDF/PNG自动视觉差异及热图/透明填充采样通过；Java回归、R单元测试、完整 R CMD check 均通过（Status: OK）。日志 logs/yytree-pdf-vector-check.log。
+
+SVG 单项适配：仅让 SVG 与 PDF 共用 vectorHeatmaps，未修改依赖或PPTX。10份综合SVG可解析，含预期文字且无image/foreignObject。浏览器视觉检查失败：1.svg 第37行开启的旋转标题变换组一直延续至第159行，后续图例及自由形状被错误分组。1-svg.png 显示错位/缺失；PNG参考正常。check_yytree_svg_pixels.py 的1号案例差异0.03265超出0.03，未放宽阈值，按约定停止依赖问题修复。PDF的10项结构/视觉回归、Java回归及R单元测试通过。浏览器测试需正常本机权限及Playwright/Edge；当前SVG仅修复热图异常，整体仍属有限支持。

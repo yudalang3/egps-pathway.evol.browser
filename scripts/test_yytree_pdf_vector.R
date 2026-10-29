@@ -25,6 +25,7 @@ tryCatch({
       free_bezier(points) + free_bezier_ring(points, points + .03) +
       free_heatmap(.1,.85,.3,.1,matrix(c(0,NA,1,2),2))
     export(p, file.path(out,paste0(i,".pdf")))
+    export(p, file.path(out,paste0(i,".svg")))
     yytree:::.runtime_request("renderPng",yytree:::.scene_json(p),file.path(out,paste0(i,".png")))
   }
 }, finally = quit_yytree())

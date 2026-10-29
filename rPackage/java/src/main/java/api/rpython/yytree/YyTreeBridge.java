@@ -225,7 +225,7 @@ public final class YyTreeBridge {
                 Graphics2D g = (Graphics2D) graphics.create();
                 try {
                     g.setColor(Color.WHITE); g.fillRect(0, 0, getWidth(), getHeight());
-                    panel.drawScene(g, format.equals("pdf"));
+                    panel.drawScene(g, format.equals("pdf") || format.equals("svg"));
                 } finally { g.dispose(); }
             }
         }));

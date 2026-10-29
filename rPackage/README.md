@@ -241,3 +241,9 @@ PDF 是 0.1.0 优先验收的矢量格式。现有绘图图层（包括自由热
 PDF regression: run scripts/test_yytree_pdf_vector.R with the eGPS installation path, then scripts/check_yytree_pdf_vector.py using Python with pypdf. validate_yytree.ps1 includes both checks; override -PdfPython for another Python interpreter.
 
 验证方式：先以 eGPS 安装路径运行 scripts/test_yytree_pdf_vector.R，再使用带 pypdf、Pillow 的 Python 运行 scripts/check_yytree_pdf_vector.py，并确保 Poppler 的 pdftoppm 在 PATH 中。统一验证脚本已接入两项检查，可通过 -PdfPython 指定解释器。
+
+SVG 热图现复用矢量单元格绘制，消除了图片插值接口异常。但综合 SVG 的视觉验收未通过：依赖序列化器可能使旋转标题后的图例及自由图形继续处于错误变换组中，造成错位或超出画布。按依赖问题停止修复原则，本轮不继续适配。PDF 仍为优先输出；PPTX 的图像接口及文字变换限制保持不变。
+
+SVG verification: scripts/check_yytree_svg_vector.cjs accepts an optional browser executable; scripts/check_yytree_svg_pixels.py compares screenshots with PNG references and currently fails on the documented dependency transform issue.
+
+SVG 验证：check_yytree_svg_vector.cjs 可传浏览器路径，check_yytree_svg_pixels.py 对照 PNG；当前会因上述依赖变换问题失败，不能当作验收通过。
