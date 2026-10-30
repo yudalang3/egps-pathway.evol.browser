@@ -23,3 +23,5 @@ export(free_polygon)
 export(free_bezier)
 export(free_bezier_ring)
 export(free_heatmap)
+
+export(interact)

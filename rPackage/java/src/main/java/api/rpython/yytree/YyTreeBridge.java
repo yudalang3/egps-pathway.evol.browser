@@ -356,6 +356,12 @@ public final class YyTreeBridge {
                 if (leaf == null) throw new IllegalArgumentException("Missing leaf " + (i+1));
                 leaf.setName(names.getString(i)); named.put(leaf.getName(), leaf);
             }
+            JSONArray internal = tree.getJSONArray("node_labels");
+            if (internal != null) for (Object value : internal) {
+                JSONObject label = (JSONObject)value;
+                GraphicsNode node = nodes.get(label.getIntValue("id"));
+                if (node != null && label.getString("name") != null) node.setName(label.getString("name"));
+            }
             walk(root, node -> { if (node.getChildCount() == 0) leaves.add(node); });
             onEdt(()->properties = new TreeLayoutProperties(root));
             properties.setShowAxisBar(false); properties.setShowScaleBar(false); properties.setShowTitle(false);

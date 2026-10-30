@@ -30,7 +30,9 @@ yytree <- function(tree, width = 1000, height = 800,
     if (is.null(lengths)) lengths <- rep(1, nrow(tree$edge))
     labels <- tree$tip.label
     if (is.null(labels)) labels <- as.character(seq_along(setdiff(tree$edge[, 2], tree$edge[, 1])))
+    node_labels <- tree$node.label
     tree <- list(labels = labels,
+                 node_labels = if (is.null(node_labels)) NULL else data.frame(id = length(labels) + seq_along(node_labels), name = node_labels),
                  edges = cbind(tree$edge, lengths),
                  root = setdiff(tree$edge[, 1], tree$edge[, 2]))
   } else {
@@ -287,6 +289,15 @@ inner_node_annotation <- function(name1 = NULL, name2 = NULL, text = NULL, shape
     for (layer in e1$layers) if (layer$type == "leaf_labels") visible <- layer$show
     if (!visible) stop("Add leaf_labels(show = TRUE) before leaf_label_render().")
   }
+  if (e2$type == "interact") {
+    known <- c(e1$tree$labels, e1$tree$node_labels$name)
+    for (key in e2$data$name) {
+      count <- sum(!is.na(known) & known == key)
+      if (count == 0) stop("Unknown node name: ", key)
+      if (count > 1) stop("Ambiguous duplicate node name: ", key)
+    }
+    e1$layers <- Filter(function(x) x$type != "interact", e1$layers)
+  }
   if (!is.null(e2$df)) {
     if (!is.data.frame(e2$df) || !nrow(e2$df)) stop("df must be a nonempty data frame.")
     required <- if (e2$type %in% c("inner_node_render", "inner2leaf_highlight", "inner_node_annotation")) c("name1", "name2") else "name"
@@ -317,4 +328,19 @@ inner_node_annotation <- function(name1 = NULL, name2 = NULL, text = NULL, shape
   if (!is.null(e2$fill)) .color(e2$fill)
   e1$layers <- c(e1$layers, list(e2))
   e1
+}
+
+interact <- function(df) {
+  if (!is.data.frame(df) || !nrow(df) || !"name" %in% names(df)) stop("df must be a nonempty data frame with a name column.")
+  if (anyNA(names(df)) || any(!nzchar(names(df))) || anyDuplicated(names(df))) stop("Column names must be nonempty and unique.")
+  if (!is.character(df$name) && !is.factor(df$name)) stop("name must be character or factor.")
+  if (anyNA(df$name) || any(!nzchar(as.character(df$name))) || anyDuplicated(df$name)) stop("Node names must be nonempty and unique.")
+  for (key in names(df)) {
+    x <- df[[key]]
+    if (is.list(x) || !is.null(dim(x)) || !(is.character(x) || is.numeric(x) || is.logical(x) || is.factor(x) || inherits(x, "Date") || inherits(x, "POSIXt"))) stop("Unsupported tooltip column: ", key)
+    missing <- is.na(x)
+    df[[key]] <- as.character(x)
+    df[[key]][missing] <- "\u2014"
+  }
+  .layer("interact", data = df)
 }

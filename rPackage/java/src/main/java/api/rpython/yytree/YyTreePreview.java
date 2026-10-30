@@ -296,7 +296,7 @@ final class YyTreePreview extends JPanel {
     }
 
     static String html(String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("\r\n", "\n").replace("\n", "<br>");
     }
 
     private String nodeName(NodePoint point) {
@@ -340,10 +340,22 @@ final class YyTreePreview extends JPanel {
             if (hovered != null) {
                 GraphicsNode node = hovered.node();
                 String type = node == canvas.root ? "Root" : node.getChildCount() == 0 ? "Leaf" : "Internal";
-                tooltip = String.format(Locale.ROOT,
-                    "<html><table width='360'><tr><td><b>%s</b><br>Node #%d · %s<br>Incoming branch length: %s<br>Logical position: (%.3f, %.3f)</td></tr></table></html>",
-                    html(nodeName(hovered)), hovered.id(), type,
-                    node == canvas.root ? "N/A (root)" : Double.toString(node.getRealBranchLength()), hovered.x(), hovered.y());
+                StringBuilder card = new StringBuilder("<html><table width='360' cellpadding='4'><tr><td colspan='2'><font size='+1'><b>")
+                    .append(html(nodeName(hovered))).append("</b></font><br>").append(type).append("</td></tr>");
+                for (Object value : canvas.scene.getJSONArray("layers")) {
+                    var layer = (com.alibaba.fastjson.JSONObject)value;
+                    if (!"interact".equals(layer.getString("type"))) continue;
+                    for (Object rowValue : layer.getJSONArray("data")) {
+                        var row = (com.alibaba.fastjson.JSONObject)rowValue;
+                        if (!Objects.equals(row.getString("name"), node.getName())) continue;
+                        for (String key : row.keySet()) if (!key.equals("name")) card.append("<tr><td width='110' valign='top'><b>")
+                            .append(html(key)).append("</b></td><td valign='top'>").append(html(row.getString(key))).append("</td></tr>");
+                    }
+                }
+                card.append(String.format(Locale.ROOT,
+                    "<tr><td colspan='2'><hr>Node #%d · %s<br>Incoming branch length: %s<br>Logical position: (%.3f, %.3f)</td></tr></table></html>",
+                    hovered.id(), type, node == canvas.root ? "N/A (root)" : Double.toString(node.getRealBranchLength()), hovered.x(), hovered.y()));
+                tooltip = card.toString();
             }
             canvas.setToolTipText(tooltip);
         }

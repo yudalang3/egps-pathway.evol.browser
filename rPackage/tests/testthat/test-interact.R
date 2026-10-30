@@ -1,0 +1,12 @@
+test_that("interaction matches named nodes and survives serialization", {
+  p <- yytree("((Human:1,Mouse:1)N1:1,Chicken:2)Root;")
+  info <- data.frame(name = c("Human", "N1", "Root"), color = c("text", "plain", NA), size = c("large", "small", "unknown"))
+  q <- p + interact(info)
+  expect_equal(q$layers[[1]]$data$color, c("text", "plain", "\u2014"))
+  expect_equal(names(q$layers[[1]]$data), names(info))
+  expect_equal(unserialize(serialize(q, NULL)), q)
+  expect_length((q + interact(info))$layers, 1)
+  expect_error(p + interact(data.frame(name = "absent")), "Unknown")
+  expect_error(interact(data.frame(name = c("Human", "Human"))), "unique")
+  expect_error(yytree("((A,B)A,C);") + interact(data.frame(name = "A")), "Ambiguous")
+})
