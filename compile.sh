@@ -49,6 +49,8 @@ find src/module -type f \( \
     -name "*.fa" -o \
     -name "*.nwk" -o \
     -name "*.tpv" -o \
+    -name "*.pptx" -o \
+    -name "*.xlsx" -o \
     -name "*.tsv" \
 \) | while read file; do
     # 构建目标路径

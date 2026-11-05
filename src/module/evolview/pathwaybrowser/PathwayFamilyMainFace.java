@@ -254,8 +254,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		// 5. Load persistent UI state (divider positions)
 		PathwayBrowserMainFaceBean bean = loadPersistentBean();
 		double savedPerOfTreeAndBrowser = bean.getSavedPerOfTreeAndBrowser();
-		int location = (int) (getHeight() * savedPerOfTreeAndBrowser);
-		rightSplitPanel.setDividerLocation(location);
+		SwingUtilities.invokeLater(() -> rightSplitPanel.setDividerLocation(savedPerOfTreeAndBrowser));
 		mainSplitPane.setDividerLocation(bean.getSavedLocationOfMainSplitPanel());
 
 		// 6. Create top-right tabbed pane for tree visualization

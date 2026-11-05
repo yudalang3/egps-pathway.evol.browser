@@ -1,0 +1,10 @@
+Pathway Browser examples
+Snapshot retrieved: 2026-11-02
+WikiPathways pathway images: CC0; https://www.wikipathways.org/terms.html
+All trees, branch lengths, counts and traits are deterministic teaching data, not research measurements.
+Generator: scripts/GeneratePathwayExamples.java
+PPTX conversion: original PNG fitted proportionally on one slide; source caption added.
+WP428 https://www.wikipathways.org/wikipathways-assets/pathways/WP428/WP428.png
+SHA256: 349bb98f400470d42593555e80a74babb059ec84133564e77e3f561188c20e9d
+WP534 https://www.wikipathways.org/wikipathways-assets/pathways/WP534/WP534.png
+SHA256: 4f63d30ad00a217abe6dc2b8f5aae6b6d77e634cfdfd6bd794a0988b19fd190a

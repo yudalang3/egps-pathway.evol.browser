@@ -2,7 +2,7 @@ package module.evolview.pathwaybrowser.gui.analysis.panel;
 
 import egps2.frame.gui.EGPSMainGuiUtil;
 import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.util.poi.pptx.Decoder4pptx;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,6 @@ public class SubSingleSlidePanel extends JPanel {
     private static final Logger log = LoggerFactory.getLogger(SubSingleSlidePanel.class);
 
     private final String pptxFilePath;
-    private XSLFSlide firstSlide;
     private Dimension pageSize;
     private BufferedImage cachedSlideImage;
     private boolean isRendering = false;
@@ -50,11 +49,10 @@ public class SubSingleSlidePanel extends JPanel {
             @Override
             protected BufferedImage doInBackground() throws Exception {
                 // Load PPTX and render in background thread
-                Decoder4pptx decoder4pptx = new Decoder4pptx();
-                decoder4pptx.decodeFile(pptxFilePath);
-
-                firstSlide = decoder4pptx.getFirstSlide();
-                pageSize = decoder4pptx.getPageSize();
+                try (var input = java.nio.file.Files.newInputStream(java.nio.file.Path.of(pptxFilePath));
+                     var presentation = new XMLSlideShow(input)) {
+                XSLFSlide firstSlide = presentation.getSlides().isEmpty() ? null : presentation.getSlides().getFirst();
+                pageSize = presentation.getPageSize();
 
                 if (firstSlide == null || pageSize == null) {
                     return null;
@@ -72,6 +70,7 @@ public class SubSingleSlidePanel extends JPanel {
                 g2d.dispose();
 
                 return image;
+                }
             }
 
             @Override
@@ -81,6 +80,7 @@ public class SubSingleSlidePanel extends JPanel {
                     if (image != null && pageSize != null) {
                         cachedSlideImage = image;
                         setPreferredSize(pageSize);
+                        revalidate();
                         repaint();
                     }
                 } catch (Exception e) {

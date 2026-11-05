@@ -1,84 +1,24 @@
 package module.evolview.pathwaybrowser.io;
 
-import egps2.UnifiedAccessPoint;
-import egps2.EGPSProperties;
-import egps2.builtin.modules.voice.bean.VoiceValueParameterBean;
 import egps2.builtin.modules.voice.fastmodvoice.OrganizedParameterGetter;
-import module.evoltreio.NewickFormatConfig;
 import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAndParser4ModernTreeView {
 
 	public ParamsAssignerAndParser4pathwayFamBrowser() {
-		// 去掉一些输入方式
-		requiredParams.remove("input.nwk.string");
-		requiredParams.remove("input.tableLike.path");
-
-		// 需要重新排列Entries的顺序
-		List<Entry<String, VoiceValueParameterBean>> alreadyMapBean = new LinkedList<>(requiredParams.entrySet());
-
-		requiredParams.clear();
-		String propertiesDir = resolvePropertiesDir(
-				UnifiedAccessPoint.getLaunchProperty().getTestDataDir(), EGPSProperties.PROPERTIES_DIR);
-		addKeyValueEntryBean("@", "The Pathway Family Browser", "");
-
-		addKeyValueEntryBean("input.nwk.path",
-				propertiesDir + "/bioData/example/9_model_species_evolution.nwk",
-				"Input the Tree nwk file path.");
-		addKeyValueEntryBean("nwk.format", String.valueOf(NewickFormatConfig.DEFAULT_FORMAT),
-				"Newick format type (0-9). Format 0: support:dist for internal. Format 1: name:dist for internal. See help for all formats.");
-
-		StringBuilder sBuilder = new StringBuilder();
-		sBuilder.append("\n");
-		sBuilder.append(propertiesDir).append("/bioData/pathwayBrowser/wnt_pathway2.pptx");
-		sBuilder.append("\n");
-		sBuilder.append(propertiesDir).append("/bioData/pathwayBrowser/pathway_counts.pptx");
-
-		addKeyValueEntryBean("pathway.gallery.figure.paths",
-				sBuilder.toString(),
-				"Input the file path of the pathway details, format is the pptx and multi-files are allowed.  F/False or annotated for none");
-
-		addKeyValueEntryBean("pathway.species.info.path",
-				"False",
-				"Input the species information file (TSV or XLSX). Must have a 'Name' column. F/False to disable.");
-
-		sBuilder.setLength(0);
-		sBuilder.append("Input the pathway component counts file (TSV or XLSX). Must have a 'Name' column. F/False to disable.");
-		sBuilder.append("\n## Species for rows and gene for columns. For examples:");
-		sBuilder.append("\n## Name    AXIN2    WNT3A    DVL3");
-		sBuilder.append("\n## human    2    18    3");
-		addKeyValueEntryBean("pathway.component.counts.path",
-				"False", sBuilder.toString());
-		addKeyValueEntryBean("species.traits.path",
-				"False", "Input the species traits file (TSV or XLSX). Must have a 'Name' column. F/False to disable.");
-
-
-		addKeyValueEntryBean("^", "", "");
-		addKeyValueEntryBean("%1", "The species tree", "");
-		addKeyValueEntryBean("blank.space", "20,20,100,20",
-				"The blank area of top,left,bottom,right. Note: right will take effects if divider = 0");
-		addKeyValueEntryBean("need.reverse.axis.bar", "T",
-				"Whether reverse the axis bar. In some cases, the time is years ago.");
-		addKeyValueEntryBean("bottom.title.string", "The phylogenetic tree with {0} high-quality sequenced samples.",
-				"The statement that displayed in the bottom of the tree view. {0} will be replaced with number of leaf.");
-
-		for (Entry<String, VoiceValueParameterBean> entry : alreadyMapBean) {
-			if (requiredParams.get(entry.getKey()) != null) {
-				// 这一句一定要有，否则被覆盖
-				continue;
-			}
-			requiredParams.put(entry.getKey(), entry.getValue());
-		}
-
-	}
+        super();
+        addKeyValueEntryBean("%pathway", "Pathway data (optional)", "");
+        addKeyValueEntryBean("pathway.gallery.figure.paths", "False", "PPTX paths, one per continuation line; first slide only. False to disable.");
+        addKeyValueEntryBean("pathway.species.info.path", "False", "Species information TSV/XLSX with a Name column.");
+        addKeyValueEntryBean("pathway.component.counts.path", "False", "Component counts TSV/XLSX: Name column identifies tree nodes.");
+        addKeyValueEntryBean("species.traits.path", "False", "Species traits TSV/XLSX with a Name column.");
+    }
 
 	static String resolvePropertiesDir(String configuredDir, String fallbackDir) {
 		String directory = configuredDir == null ? null : configuredDir.trim();
