@@ -36,13 +36,18 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
         tabbedPane.setTabShape(JideTabbedPane.SHAPE_OFFICE2003);
         tabbedPane.setTabPlacement(JideTabbedPane.LEFT);  // Vertical split layout
 
-        tabbedPane.setTabResizeMode(JideTabbedPane.RESIZE_MODE_FIT);
+        tabbedPane.setTabResizeMode(JideTabbedPane.RESIZE_MODE_NONE);
 
         tabbedPane.setShowTabArea(true);
         tabbedPane.setShowTabContent(true);
 
         tabbedPane.setTabEditingAllowed(true);
         tabbedPane.setShowCloseButtonOnTab(true);
+        Font tabFont = controller != null ? controller.getGlobalFont() : null;
+        if (tabFont != null) {
+            tabbedPane.setFont(tabFont);
+            tabbedPane.setSelectedTabFont(tabFont.deriveFont(Font.BOLD));
+        }
         tabbedPane.setBoldActiveTab(true);
 
         add(tabbedPane, BorderLayout.CENTER);
@@ -94,7 +99,6 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
 
             // Add as a new tab
             tabbedPane.addTab(tabTitle, scrollPane);
-            tabbedPane.setFont(controller.getGlobalFont());
 
             log.debug("Added tab {} for file: {}", i + 1, tabTitle);
         }

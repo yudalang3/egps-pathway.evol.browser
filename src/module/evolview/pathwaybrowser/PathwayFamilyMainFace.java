@@ -506,10 +506,11 @@ public class PathwayFamilyMainFace extends ModuleFace {
 			tabbedAnalysisPanel.setTabColorProvider(tabColorProvider);
 			tabbedAnalysisPanel.setTabEditingAllowed(true);
 
-			tabbedAnalysisPanel.setTabResizeMode(JideTabbedPane.RESIZE_MODE_FIT);
+			tabbedAnalysisPanel.setTabResizeMode(JideTabbedPane.RESIZE_MODE_NONE);
 
 			Font defaultTitleFont = UnifiedAccessPoint.getLaunchProperty().getDefaultTitleFont();
 			tabbedAnalysisPanel.setFont(defaultTitleFont);
+			tabbedAnalysisPanel.setSelectedTabFont(defaultTitleFont);
 			tabbedAnalysisPanel.setBoldActiveTab(true);
 		}
 		return tabbedAnalysisPanel;
