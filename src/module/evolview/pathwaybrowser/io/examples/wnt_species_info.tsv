@@ -1,0 +1,10 @@
+Name	Common name	Clade	Symmetry	Wnt subfamilies
+Homo sapiens	Human	Mammalia	Bilateria	12
+Mus musculus	Mouse	Mammalia	Bilateria	12
+Xenopus	Western clawed frog	Amphibia	Bilateria	12
+Danio rerio	Zebrafish	Teleostei	Bilateria	12
+Drosophila melanogaster	Fruit fly	Insecta	Bilateria	7
+Caenorhabditis elegans	Roundworm	Nematoda	Bilateria	5
+Saccharomyces cerevisiae	Budding yeast	Fungi	Unicellular	0
+Arabidopsis thaliana	Thale cress	eudicots	Plantae	0
+Oryza sativa	Rice	monocots	Plantae	0

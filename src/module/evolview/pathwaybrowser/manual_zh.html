@@ -2,33 +2,113 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>通路浏览器</title>
+<title>通路浏览器 (Pathway Family Browser)</title>
 </head>
 <body>
 <blockquote>
 
-<h1><font color="#2c3e50">通路浏览器</font></h1>
-<p>生物学通路的可视化浏览和交互式分析。</p>
+<h1><font color="#2c3e50">通路浏览器 (Pathway Family Browser)</font></h1>
+<p>生物学通路演化与多物种基因家族拷贝数的可视化浏览和交互式分析工具。</p>
 
 <hr>
 
 <!-- ==================== 第1节 ==================== -->
 <h2><font color="#16a085">1. 快速开始</font></h2>
 <ol>
-	<li>点击 <b>示例</b> 查看输入数据</li>
-	<li>点击 <b>执行</b> 查看结果</li>
+	<li>点击 <b>示例 (Example)</b> 切换或查看预设示例参数（Example-1 至 Example-6）。</li>
+	<li>点击 <b>执行 (Execute)</b> 加载系统发生树与下方通路分析面板。</li>
+	<li>使用鼠标左键<b>点击系统树上的物种叶节点</b>（或在物种信息表中选中某一行），下方通路图（Pathway Gallery）、物种信息、基因拷贝计数与性状表将实时联动更新。</li>
 </ol>
 
 <hr>
 
 <!-- ==================== 第2节 ==================== -->
-<h2><font color="#2c3e50">2. 功能概述</font></h2>
-<p>上方显示系统树，下方显示静态通路图、物种信息、组分计数和性状。点击树节点查看对应数据；通路图不会随物种选择自动着色。</p>
-<h2>导入与六个示例</h2>
-<p>在导入窗口选择 Example-1 至 Example-6，编辑参数后执行。依次为 Wnt 完整流程、糖酵解（Newick 文本）、Excel、多图画廊（表格树）、数据不完整、64 叶环形树。重新打开窗口时示例编号保持一致。</p>
-<p>树支持 Newick 文件、Newick 文本与表格树。文本优先于文件；规范参数名优先于旧别名。物种表使用 UTF-8 TSV 或 Excel 首个工作表，必须包含 Name 列，与树节点名称对应。False 可禁用可选面板。PPTX 每个文件仅显示第一页。</p>
-<p>示例自带且可离线使用，安装到用户 config/bioData/pathwayBrowser/examples 目录；已有文件不会覆盖，删除后下次打开导入窗口会补齐。树、枝长、计数与性状均为教学数据，不是科研结果。</p>
-<p>真实通路图来自 WikiPathways：WP428（Wnt）、WP534（糖酵解与糖异生），采用 CC0。SOURCES.txt 记录原始地址、下载日期、校验值和转换过程。原图为人类通路，仅作静态参考。</p>
+<h2><font color="#2c3e50">2. 核心功能与交互联动</font></h2>
+<p>上方区域展示物种系统发生树，下方区域包含四个分析标签页：</p>
+<ul>
+	<li><b>Pathway Gallery（通路画廊）</b>：支持导入多个通路图文件（<code>.pptx</code>、<code>.svg</code>、<code>.png</code>、<code>.jpg</code>）。当配置了 <code>$pathway.component.counts.path</code> 基因计数表并点击系统树上的物种节点时，通路图会根据形状 ID 与基因名称自动匹配：
+		<ul>
+			<li><b>存在基因（Count &ge; 1）</b>：保持清晰高亮显示，并在组件右上角叠加<b>基因拷贝数角标</b>（单拷贝显示蓝底角标，多拷贝扩张显示橙红高亮角标与外框）。</li>
+			<li><b>缺失基因（Count = 0）</b>：该基因对应的形状与文字自动半透明淡化（Ghosting），直观呈现通路组分在特定物种中的丢失。</li>
+			<li><b>通路阶段汇总（Category Counts）</b>：若计数表包含 <code>category</code> 列（如 <code>cat1</code>..<code>cat9</code>），画布中对应 ID 的汇总框会自动更新该物种在该阶段的拷贝总数（<code>Count: X</code>）。</li>
+		</ul>
+	</li>
+	<li><b>Species Information（物种信息）</b>：展示物种分类、基因组与统计信息，支持搜索过滤及与系统树双向点击联动。</li>
+	<li><b>Pathway Components（通路组分计数）</b>：展示当前选中物种在各个通路基因上的拷贝数。同时支持“物种为行（<code>Name</code> 列）”与“基因为行（<code>name</code> + <code>category</code> + 物种列，如 <code>components.info.tsv</code>）”两种表格格式。</li>
+	<li><b>Species Traits（物种性状）</b>：展示当前选中物种的表型或生物学性状数据。</li>
+</ul>
+
+<hr>
+
+<!-- ==================== 第3节 ==================== -->
+<h2><font color="#16a085">3. 如何在 PPTX 与 SVG 通路图中设置匹配 ID</font></h2>
+
+<h3>3.1 PowerPoint (<code>.pptx</code>) 形状 ID 设置规范</h3>
+<p>本模块读取每个 <code>.pptx</code> 文件的第一页幻灯片。为了使通路图中的基因组件随物种点击动态显示拷贝数或阶段汇总，请在 PowerPoint 中打开 <b>开始 (Home) &rarr; 选择 (Select) &rarr; 选择窗格 (Selection Pane)</b>（快捷键 <code>Alt + F10</code>），按以下规则设置形状名称（Shape Name）：</p>
+
+<table border="1" cellpadding="5" cellspacing="0" width="95%">
+	<tr bgcolor="#eaf2f8">
+		<th align="left">元素类型</th>
+		<th align="left">选择窗格命名规则 (Shape Name)</th>
+		<th align="left">示例</th>
+		<th align="left">交互效果说明</th>
+	</tr>
+	<tr>
+		<td><b>基因图形/背景框</b></td>
+		<td><code>&lt;GeneID&gt;_comp</code> 或 <code>&lt;GeneID&gt;_comp&lt;N&gt;</code><br>（或直接命名为 <code>&lt;GeneID&gt;</code>）</td>
+		<td><code>APC_comp</code>, <code>CTNNB1_comp</code>, <code>WNT_comp1</code>, <code>DVL_comp1</code></td>
+		<td>匹配基因 <code>APC</code> / <code>CTNNB1</code> / <code>WNT</code> / <code>DVL</code>；拷贝数为 0 时淡化，&ge; 1 时在组件右上角绘制拷贝数角标。</td>
+	</tr>
+	<tr>
+		<td><b>基因名称文本框</b></td>
+		<td><code>&lt;GeneID&gt;_name</code> 或 <code>&lt;GeneID&gt;_name&lt;N&gt;</code></td>
+		<td><code>APC_name</code>, <code>CDC42_name</code>, <code>WNT_name1</code></td>
+		<td>与对应 <code>&lt;GeneID&gt;_comp</code> 同步高亮或淡化，确保基因名称始终清晰可读。</td>
+	</tr>
+	<tr>
+		<td><b>阶段/类别计数框</b></td>
+		<td><code>&lt;CategoryID&gt;</code></td>
+		<td><code>cat1</code>, <code>cat2</code>, ..., <code>cat9</code></td>
+		<td>匹配 <code>components.info.tsv</code> 中 <code>category</code> 列的分组名称，动态替换为当前物种在该分组下的基因总拷贝数（如 <code>Count: 25</code>）。</td>
+	</tr>
+	<tr>
+		<td><b>背景与连接箭头</b></td>
+		<td>保留默认名称（如 <code>椭圆 1</code>、<code>直线 2</code>）</td>
+		<td><code>Rectangle 5</code>, <code>Arrow 12</code></td>
+		<td>作为静态通路骨架底图缓存，物种切换时无需重复解析，保证毫秒级流畅响应。</td>
+	</tr>
+</table>
+<p><font color="#555555">提示：程序按名称前缀（首个下划线 <code>_</code> 之前的部分，不区分大小写）与计数表中的基因名匹配；若形状未在“选择窗格”重命名，但文本框内容恰好等于基因名，程序也会自动识别其及紧邻的外框形状。</font></p>
+
+<h3>3.2 SVG 矢量图 (<code>.svg</code>) 属性设置规范</h3>
+<p>除 <code>.pptx</code> 外，<code>$pathway.gallery.figure.paths</code> 还支持直接导入 <code>.svg</code> 矢量通路图。在 SVG 的 XML 标签（如 <code>&lt;g&gt;</code>、<code>&lt;rect&gt;</code>、<code>&lt;circle&gt;</code>、<code>&lt;ellipse&gt;</code>、<code>&lt;path&gt;</code>、<code>&lt;text&gt;</code>）上设置 <code>id</code> 或 <code>data-gene</code> 属性即可参与物种联动：</p>
+<pre>
+&lt;!-- 方式 1：使用 id="&lt;GeneID&gt;" 或 id="&lt;GeneID&gt;_&lt;suffix&gt;" --&gt;
+&lt;g id="APC_comp"&gt;
+    &lt;rect x="120" y="80" width="60" height="28" fill="#89C65B"/&gt;
+    &lt;text id="APC_name" x="150" y="98" text-anchor="middle"&gt;APC&lt;/text&gt;
+&lt;/g&gt;
+
+&lt;!-- 方式 2：使用自定义属性 data-gene="&lt;GeneID&gt;" --&gt;
+&lt;g data-gene="CTNNB1"&gt;
+    &lt;ellipse cx="240" cy="160" rx="35" ry="18" fill="#5DADE2"/&gt;
+    &lt;text x="240" y="165" text-anchor="middle"&gt;CTNNB1&lt;/text&gt;
+&lt;/g&gt;
+
+&lt;!-- 阶段汇总槽位：使用 id="cat1" 或 data-category="cat1" --&gt;
+&lt;rect id="cat1" x="40" y="30" width="110" height="26" fill="#3498DB"/&gt;
+</pre>
+
+<hr>
+
+<!-- ==================== 第4节 ==================== -->
+<h2><font color="#2c3e50">4. 基因计数表格式与内置示例</font></h2>
+<p><code>$pathway.component.counts.path</code> 支持 UTF-8 TSV 或 Excel (<code>.xlsx</code>/<code>.xls</code>) 首个工作表，兼容以下两种排布方式：</p>
+<ol>
+	<li><b>基因为行、物种为列（推荐，如 Example-1 的 <code>components.info.tsv</code>）</b>：首列为 <code>name</code>（基因名，如 <code>WNT1</code>、<code>APC</code>、<code>CTNNB1</code>），可选第二列为 <code>category</code>（阶段分类，如 <code>cat1</code>..<code>cat9</code>），其余各列为物种名称（与系统树叶节点名称对应，如 <code>Homo sapiens</code>、<code>Danio rerio</code>）。</li>
+	<li><b>物种为行、基因为列（如 <code>counts.tsv</code>）</b>：包含 <code>Name</code> 列（对应系统树节点名），其余各列为基因名，单元格为拷贝数。</li>
+</ol>
+<p>在导入窗口可选择 <b>Example-1 至 Example-6</b>，依次为：Wnt 通路完整交互流程（包含 <code>9_model_species_evolution.nwk</code>、<code>components.info.tsv</code> 以及 <code>wnt_pathway2.pptx</code>、<code>pathway_counts.pptx</code>、<code>demo_selection.pptx</code>）、糖酵解（Newick 文本）、Excel 表格、多图画廊（表格树）、部分覆盖与零计数、64 叶环形树。示例文件在首次运行时自动生成到 <code>config/bioData/pathwayBrowser/examples</code> 目录；用户已修改的同名文件不会被覆盖，缺失文件会在打开导入窗口时自动补齐。</p>
 
 </blockquote>
 </body>

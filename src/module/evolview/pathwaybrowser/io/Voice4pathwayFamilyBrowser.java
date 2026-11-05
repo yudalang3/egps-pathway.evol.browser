@@ -75,10 +75,7 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 		if (importBeanInfo.getPathwayGalleryPaths() != null) for (String path : importBeanInfo.getPathwayGalleryPaths()) validatePath(path);
 		for (String path : java.util.List.of(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getPathwayComponentCountPath(), importBeanInfo.getSpeciesTraitPath())) validateTable(path);
 		if (importBeanInfo.getPathwayGalleryPaths() != null) for (String path : importBeanInfo.getPathwayGalleryPaths()) {
-			if (disabled(path)) continue;
-			try (var stream = java.nio.file.Files.newInputStream(java.nio.file.Path.of(path)); var slides = new org.apache.poi.xslf.usermodel.XMLSlideShow(stream)) {
-				if (slides.getSlides().isEmpty()) throw new IllegalArgumentException("No slides: " + path);
-			}
+			module.evolview.pathwaybrowser.gui.analysis.panel.PptxSlideRenderer.validateGalleryFile(path);
 		}
 
 		Optional<GraphicsNode> optRoot = new TreeParser4MTV().parseTree(importBeanInfo);
@@ -131,6 +128,7 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 			var lines = java.nio.file.Files.readAllLines(java.nio.file.Path.of(path), java.nio.charset.StandardCharsets.UTF_8);
 			if (!lines.isEmpty()) headers.addAll(java.util.Arrays.asList(lines.getFirst().replaceFirst("^\uFEFF", "").split("\t", -1)));
 		}
-		if (!headers.contains("Name")) throw new IllegalArgumentException("Missing Name column: " + path);
+		boolean hasNameColumn = headers.contains("Name") || headers.contains("name");
+		if (!hasNameColumn) throw new IllegalArgumentException("Missing Name column: " + path);
 	}
 }

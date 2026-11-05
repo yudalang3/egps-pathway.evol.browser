@@ -497,16 +497,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	}
 
 	private void highlightRowByName(String nodeName) {
-		Integer modelRow = name2ModelRowIndex.get(nodeName);
-		if (modelRow == null) {
-			// fall back to case-insensitive match
-			for (Map.Entry<String, Integer> e : name2ModelRowIndex.entrySet()) {
-				if (e.getKey() != null && e.getKey().equalsIgnoreCase(nodeName)) {
-					modelRow = e.getValue();
-					break;
-				}
-			}
-		}
+		Integer modelRow = module.evolview.pathwaybrowser.io.PathwayComponentCountData.lookupBySpeciesName(name2ModelRowIndex, nodeName);
 		if (modelRow == null) return;
 
 		int viewRow = table.convertRowIndexToView(modelRow);

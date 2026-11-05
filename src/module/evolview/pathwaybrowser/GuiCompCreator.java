@@ -123,7 +123,11 @@ public class GuiCompCreator {
 			return Optional.empty();
 		}
 
-		PathwayGalleryPanel pathwayGalleryPanel = new PathwayGalleryPanel(controller, validPaths);
+		PathwayGalleryPanel pathwayGalleryPanel = new PathwayGalleryPanel(
+				controller,
+				validPaths,
+				geneData.getPathwayComponentCountPath()
+		);
 		return Optional.of(pathwayGalleryPanel);
 	}
 

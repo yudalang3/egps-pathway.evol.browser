@@ -2,34 +2,57 @@ package module.evolview.pathwaybrowser.gui.analysis.panel;
 
 import egps2.frame.gui.EGPSMainGuiUtil;
 import egps2.panels.dialog.SwingDialog;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
+import module.evolview.pathwaybrowser.io.PathwayComponentCountData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.function.Supplier;
 
 /**
- * Panel for displaying a single slide from a PPTX file.
- * This panel loads and renders the first slide of a PowerPoint presentation.
+ * Panel for displaying a single pathway diagram from a PPTX, SVG, PNG, or JPG file.
+ * Pre-renders the static skeleton and dynamic component sprites in a background worker,
+ * and overlays copy counts and highlights in &lt; 1 ms when a species node is selected on the tree.
  */
 public class SubSingleSlidePanel extends JPanel {
     private static final Logger log = LoggerFactory.getLogger(SubSingleSlidePanel.class);
 
-    private final String pptxFilePath;
+    private final String filePath;
+    private final Supplier<PathwayComponentCountData> countDataSupplier;
     private Dimension pageSize;
+    private PptxSlideRenderer.PreparedSlide preparedSlide;
+    private PathwayComponentCountData countData;
     private BufferedImage cachedSlideImage;
+    private String selectedNodeName;
     private boolean isRendering = false;
     private volatile boolean cancelled = false;
 
-    public SubSingleSlidePanel(String pptxFilePath) {
-        this.pptxFilePath = pptxFilePath;
+    public SubSingleSlidePanel(String filePath) {
+        this(filePath, PathwayComponentCountData::empty);
+    }
+
+    public SubSingleSlidePanel(String filePath, Supplier<PathwayComponentCountData> countDataSupplier) {
+        this.filePath = filePath;
+        this.countDataSupplier = countDataSupplier != null ? countDataSupplier : PathwayComponentCountData::empty;
+        setBackground(Color.WHITE);
     }
 
     void cancelLoad() {
         cancelled = true;
+    }
+
+    boolean isLoaded() {
+        return preparedSlide != null;
+    }
+
+    void setSelectedNodeName(String nodeName) {
+        this.selectedNodeName = nodeName;
+        if (preparedSlide != null) {
+            cachedSlideImage = PptxSlideRenderer.renderForSpecies(preparedSlide, countData, selectedNodeName);
+            repaint();
+        }
     }
 
     @Override
@@ -44,6 +67,11 @@ public class SubSingleSlidePanel extends JPanel {
     }
 
     void loadSlideAsync() {
+        if (preparedSlide != null) {
+            cachedSlideImage = PptxSlideRenderer.renderForSpecies(preparedSlide, countData, selectedNodeName);
+            repaint();
+            return;
+        }
         if (isRendering) {
             return;
         }
@@ -51,35 +79,19 @@ public class SubSingleSlidePanel extends JPanel {
         cancelled = false;
         isRendering = true;
 
-        new SwingWorker<BufferedImage, Void>() {
+        new SwingWorker<PptxSlideRenderer.PreparedSlide, Void>() {
+            private PathwayComponentCountData loadedCountData;
+
             @Override
-            protected BufferedImage doInBackground() throws Exception {
+            protected PptxSlideRenderer.PreparedSlide doInBackground() throws Exception {
                 if (cancelled) {
                     return null;
                 }
-                // Load PPTX and render in background thread
-                try (var input = java.nio.file.Files.newInputStream(java.nio.file.Path.of(pptxFilePath));
-                     var presentation = new XMLSlideShow(input)) {
-                XSLFSlide firstSlide = presentation.getSlides().isEmpty() ? null : presentation.getSlides().getFirst();
-                pageSize = presentation.getPageSize();
-
-                if (firstSlide == null || pageSize == null || cancelled) {
+                loadedCountData = countDataSupplier.get();
+                if (cancelled) {
                     return null;
                 }
-
-                // Render slide to image in the same background thread
-                BufferedImage image = new BufferedImage(
-                        pageSize.width,
-                        pageSize.height,
-                        BufferedImage.TYPE_INT_ARGB
-                );
-                Graphics2D g2d = image.createGraphics();
-                EGPSMainGuiUtil.setupHighQualityRendering(g2d);
-                firstSlide.draw(g2d);
-                g2d.dispose();
-
-                return image;
-                }
+                return PptxSlideRenderer.prepareSlide(filePath, loadedCountData, () -> cancelled);
             }
 
             @Override
@@ -89,17 +101,20 @@ public class SubSingleSlidePanel extends JPanel {
                     return;
                 }
                 try {
-                    BufferedImage image = get();
-                    if (image != null && pageSize != null) {
-                        cachedSlideImage = image;
+                    PptxSlideRenderer.PreparedSlide slide = get();
+                    if (slide != null && slide.pageSize() != null) {
+                        preparedSlide = slide;
+                        countData = loadedCountData;
+                        pageSize = slide.pageSize();
+                        cachedSlideImage = PptxSlideRenderer.renderForSpecies(preparedSlide, countData, selectedNodeName);
                         setPreferredSize(pageSize);
                         revalidate();
                         repaint();
                     }
                 } catch (Exception e) {
                     if (!cancelled) {
-                        log.error("Failed to load and render PPTX file: {}", e.getMessage(), e);
-                        SwingDialog.showErrorMSGDialog("Input error", "Please check the pptx file: " + pptxFilePath);
+                        log.error("Failed to load and render pathway gallery file: {}", e.getMessage(), e);
+                        SwingDialog.showErrorMSGDialog("Input error", "Please check the pathway gallery file: " + filePath);
                     }
                 } finally {
                     isRendering = false;

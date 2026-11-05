@@ -135,18 +135,8 @@ public class SpeciesTraitPanel extends AbstractTsvBasedAnalysisPanel {
         if (headerNames == null || nameColumnIndex < 0) {
             return;
         }
-        // Find the row data for this node
-        List<String> rowData = name2RowData.get(nodeName);
-
-        // Try case-insensitive match if not found
-        if (rowData == null) {
-            for (Map.Entry<String, List<String>> entry : name2RowData.entrySet()) {
-                if (entry.getKey() != null && entry.getKey().equalsIgnoreCase(nodeName)) {
-                    rowData = entry.getValue();
-                    break;
-                }
-            }
-        }
+        // Find the row data for this node (with case-insensitive and common/scientific species alias fallback)
+        List<String> rowData = module.evolview.pathwaybrowser.io.PathwayComponentCountData.lookupBySpeciesName(name2RowData, nodeName);
 
         if (rowData == null) {
             removeAll();

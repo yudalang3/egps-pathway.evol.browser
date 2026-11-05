@@ -14,9 +14,9 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 	public ParamsAssignerAndParser4pathwayFamBrowser() {
         super();
         addKeyValueEntryBean("%pathway", "Pathway data (optional)", "");
-        addKeyValueEntryBean("pathway.gallery.figure.paths", "False", "PPTX paths, one per continuation line; first slide only. False to disable.");
+        addKeyValueEntryBean("pathway.gallery.figure.paths", "False", "PPTX/SVG/PNG/JPG paths, one per continuation line (PPTX renders slide 1 with shape ID matching). False to disable.");
         addKeyValueEntryBean("pathway.species.info.path", "False", "Species information TSV/XLSX with a Name column.");
-        addKeyValueEntryBean("pathway.component.counts.path", "False", "Component counts TSV/XLSX: Name column identifies tree nodes.");
+        addKeyValueEntryBean("pathway.component.counts.path", "False", "Component counts TSV/XLSX: either genes-as-rows (name + category + species columns) or species-as-rows (Name column).");
         addKeyValueEntryBean("species.traits.path", "False", "Species traits TSV/XLSX with a Name column.");
     }
 

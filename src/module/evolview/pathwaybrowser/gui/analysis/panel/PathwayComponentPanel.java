@@ -45,13 +45,24 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
         return inputFile;
     }
 
+    private PreparedNameRows prepareComponentRows(ParsedTsv parsed) {
+        if (parsed != null && parsed.headers() != null && !parsed.headers().contains("Name")) {
+            module.evolview.pathwaybrowser.io.PathwayComponentCountData countData =
+                    module.evolview.pathwaybrowser.io.PathwayComponentCountData.fromRawTable(parsed.headers(), parsed.rows());
+            if (!countData.getNormalizedHeaders().isEmpty()) {
+                return prepareNameRows(new ParsedTsv(countData.getNormalizedHeaders(), countData.getNormalizedRows()));
+            }
+        }
+        return prepareNameRows(parsed);
+    }
+
     @Override
     public void reInitializeGUI() {
         preparePanelForLoading();
 
         PreparedNameRows prepared;
         try {
-            prepared = prepareNameRows(readSpreadsheet(new File(inputFile)));
+            prepared = prepareComponentRows(readSpreadsheet(new File(inputFile)));
         } catch (MalformedInputException e) {
             log.error("Data file encoding error: {}", inputFile, e);
             showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
@@ -72,7 +83,7 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
 
     @Override
     protected PreparedNameRows doPrepareDataInBackground() throws Exception {
-        return prepareNameRows(readSpreadsheet(new File(inputFile)));
+        return prepareComponentRows(readSpreadsheet(new File(inputFile)));
     }
 
     @Override
@@ -135,18 +146,8 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
         if (headerNames == null || nameColumnIndex < 0) {
             return;
         }
-        // Find the row data for this node
-        List<String> rowData = name2RowData.get(nodeName);
-
-        // Try case-insensitive match if not found
-        if (rowData == null) {
-            for (Map.Entry<String, List<String>> entry : name2RowData.entrySet()) {
-                if (entry.getKey() != null && entry.getKey().equalsIgnoreCase(nodeName)) {
-                    rowData = entry.getValue();
-                    break;
-                }
-            }
-        }
+        // Find the row data for this node (with case-insensitive and common/scientific species alias fallback)
+        List<String> rowData = module.evolview.pathwaybrowser.io.PathwayComponentCountData.lookupBySpeciesName(name2RowData, nodeName);
 
         if (rowData == null) {
             removeAll();
