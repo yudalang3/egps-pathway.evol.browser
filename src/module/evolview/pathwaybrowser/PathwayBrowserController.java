@@ -197,43 +197,69 @@ public class PathwayBrowserController {
         }
     }
 
-    public void changeColorForSelectedNodesInTreePanel() {
-        if (treeLayoutProperties == null) return;
-
-        List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-        GraphicsNode selectedNode = null;
-        if (selectedNodes.size() > 0) {
-            selectedNode = selectedNodes.get(0);
-        } else {
-            selectedNode = treeLayoutProperties.getOriginalRootNode();
+    /**
+     * Resolve target nodes for visual style operations (color, line thickness, node size).
+     * Priority:
+     * 1. Manually selected branch/clade nodes ({@link TreeLayoutProperties#getSelectedNodes()})
+     * 2. Search-highlighted nodes ({@code node.getDrawUnit().isNodeSelected()})
+     * 3. The root of the active tree (whole tree)
+     */
+    public List<GraphicsNode> resolveTargetNodesForStyleOperation() {
+        if (treeLayoutProperties == null) {
+            return List.of();
         }
+        List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
+        if (!selectedNodes.isEmpty()) {
+            return List.copyOf(selectedNodes);
+        }
+        PhylogeneticTreePanel activePanel = getSelectedPhylogeneticTreePanel();
+        GraphicsNode root = (activePanel != null && activePanel.getRootNode() != null)
+                ? activePanel.getRootNode()
+                : treeLayoutProperties.getOriginalRootNode();
+        if (root == null) {
+            return List.of();
+        }
+        List<GraphicsNode> searchHighlighted = new LinkedList<>();
+        TreeOperationUtil.recursiveIterateTreeIF(root, node -> {
+            if (node.getDrawUnit().isNodeSelected()) {
+                searchHighlighted.add(node);
+            }
+        });
+        if (!searchHighlighted.isEmpty()) {
+            return searchHighlighted;
+        }
+        return List.of(root);
+    }
 
-        Color lineColor = selectedNode.getDrawUnit().getLineColor();
+    public void applyColorToNodes(List<GraphicsNode> targetNodes, Color color) {
+        if (targetNodes == null || color == null) {
+            return;
+        }
+        for (GraphicsNode root : targetNodes) {
+            TreeOperationUtil.recursiveIterateTreeIF(root, node -> {
+                node.getDrawUnit().setLineColor(color);
+            });
+        }
+        refreshPhylogeneticTree();
+    }
+
+    public void changeColorForSelectedNodesInTreePanel() {
+        List<GraphicsNode> targetNodes = resolveTargetNodesForStyleOperation();
+        if (targetNodes.isEmpty()) return;
+
+        Color lineColor = targetNodes.get(0).getDrawUnit().getLineColor();
         Color color = JColorChooser.showDialog(instanceFrame, "Recolor", lineColor);
 
         if (color == null) {
             return;
         }
 
-        TreeOperationUtil.recursiveIterateTreeIF(selectedNode, node -> {
-            node.getDrawUnit().setLineColor(color);
-        });
-
-        refreshPhylogeneticTree();
+        applyColorToNodes(targetNodes, color);
     }
 
     public void increaseLineThinknessForSelectedNodesInTreePanel(boolean onlyLeaf) {
-        if (treeLayoutProperties == null) return;
-
-        List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-        List<GraphicsNode> node2operate = new LinkedList<>();
-
-        if (selectedNodes.size() > 0) {
-            node2operate.addAll(selectedNodes);
-        } else {
-            GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
-            node2operate.add(root);
-        }
+        List<GraphicsNode> node2operate = resolveTargetNodesForStyleOperation();
+        if (node2operate.isEmpty()) return;
 
         for (GraphicsNode graphicsNode : node2operate) {
             GraphicsNode determinedNode = onlyLeaf ? (GraphicsNode) EvolNodeUtil.getFirstLeaf(graphicsNode) : graphicsNode;
@@ -252,17 +278,8 @@ public class PathwayBrowserController {
     }
 
     public void decreaseLineThinknessForSelectedNodesInTreePanel(boolean onlyLeaf) {
-        if (treeLayoutProperties == null) return;
-
-        List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-        List<GraphicsNode> node2operate = new LinkedList<>();
-
-        if (selectedNodes.size() > 0) {
-            node2operate.addAll(selectedNodes);
-        } else {
-            GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
-            node2operate.add(root);
-        }
+        List<GraphicsNode> node2operate = resolveTargetNodesForStyleOperation();
+        if (node2operate.isEmpty()) return;
 
         for (GraphicsNode graphicsNode : node2operate) {
             GraphicsNode determinedNode = onlyLeaf ? (GraphicsNode) EvolNodeUtil.getFirstLeaf(graphicsNode) : graphicsNode;
@@ -284,17 +301,8 @@ public class PathwayBrowserController {
     }
 
     public void increaseSizeForSelectedNodesInTreePanel(boolean onlyLeaf) {
-        if (treeLayoutProperties == null) return;
-
-        List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-        List<GraphicsNode> node2operate = new LinkedList<>();
-
-        if (selectedNodes.size() > 0) {
-            node2operate.addAll(selectedNodes);
-        } else {
-            GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
-            node2operate.add(root);
-        }
+        List<GraphicsNode> node2operate = resolveTargetNodesForStyleOperation();
+        if (node2operate.isEmpty()) return;
 
         for (GraphicsNode graphicsNode : node2operate) {
             GraphicsNode determinedNode = onlyLeaf ? (GraphicsNode) EvolNodeUtil.getFirstLeaf(graphicsNode) : graphicsNode;
@@ -316,17 +324,8 @@ public class PathwayBrowserController {
     }
 
     public void decreaseSizeForSelectedNodesInTreePanel(boolean onlyLeaf) {
-        if (treeLayoutProperties == null) return;
-
-        List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
-        List<GraphicsNode> node2operate = new LinkedList<>();
-
-        if (selectedNodes.size() > 0) {
-            node2operate.addAll(selectedNodes);
-        } else {
-            GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
-            node2operate.add(root);
-        }
+        List<GraphicsNode> node2operate = resolveTargetNodesForStyleOperation();
+        if (node2operate.isEmpty()) return;
 
         for (GraphicsNode graphicsNode : node2operate) {
             GraphicsNode determinedNode = onlyLeaf ? (GraphicsNode) EvolNodeUtil.getFirstLeaf(graphicsNode) : graphicsNode;
@@ -538,6 +537,10 @@ public class PathwayBrowserController {
      * @param nodeName the name of the node to select
      */
     public void selectNodeInTree(String nodeName) {
+        selectNodeInTree(nodeName, null);
+    }
+
+    public void selectNodeInTree(String nodeName, Component sourcePanel) {
         if (nodeName == null || nodeName.isEmpty() || treeLayoutProperties == null) {
             return;
         }
@@ -566,22 +569,33 @@ public class PathwayBrowserController {
             selectedNodes.add(node);
 
             // Show info in status bar
-            StringBuilder sb = new StringBuilder();
-            sb.append("Node \"").append(node.getName()).append("\" selected");
-            sb.append(", child count: ").append(node.getChildCount());
-            sb.append(", branch length: ").append(node.getLength());
-            instanceFrame.showTipsOnBottomStatusBar(sb.toString());
+            if (instanceFrame != null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Node \"").append(node.getName()).append("\" selected");
+                sb.append(", child count: ").append(node.getChildCount());
+                sb.append(", branch length: ").append(node.getLength());
+                instanceFrame.showTipsOnBottomStatusBar(sb.toString());
+            }
 
             // Scroll to center the node
             if (globalPhylogeneticTreePanel != null) {
                 globalPhylogeneticTreePanel.scrollNodeToCenter(node);
             }
 
+            if (main != null) {
+                main.notifyAnalysisPanelsNodeSelected(node.getName(), sourcePanel);
+            }
+
             refreshPhylogeneticTree();
         } else {
             // Node not found - show message in status bar
-            instanceFrame.showTipsOnBottomStatusBar(
-                    "Node \"" + nodeName + "\" not found in the tree.");
+            if (instanceFrame != null) {
+                instanceFrame.showTipsOnBottomStatusBar(
+                        "Node \"" + nodeName + "\" not found in the tree.");
+            }
+            if (main != null) {
+                main.notifyAnalysisPanelsNodeSelected(nodeName, sourcePanel);
+            }
         }
     }
 }

@@ -56,6 +56,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 
 	/** Flag to prevent circular notification when tree updates the table selection */
 	private boolean isUpdatingFromTree = false;
+	private String lastSelectedNodeName;
 
     public SpeciesInfoPanel(PathwayBrowserController controller, File tsvFile) {
         super(controller);
@@ -144,6 +145,13 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		}
 	}
 
+	@Override
+	public void cancelPendingLoad() {
+		super.cancelPendingLoad();
+		filterDebouncer.stop();
+		runOnEdt(this::cancelLoadingMessage);
+	}
+
 	private void preparePanelForLoading() {
 		removeAll();
 		setLayout(new BorderLayout());
@@ -190,6 +198,15 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		updateStatusLabel();
 		registerKeyBindings();
 
+		if (lastSelectedNodeName != null && !lastSelectedNodeName.isEmpty()) {
+			isUpdatingFromTree = true;
+			try {
+				highlightRowByName(lastSelectedNodeName);
+			} finally {
+				isUpdatingFromTree = false;
+			}
+		}
+
 		revalidate();
 		repaint();
 	}
@@ -214,10 +231,17 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
     @Override
     public void treeNodeClicked(String nodeName) {
 		// highlight the table row which Name column is nodeName
-		if (nodeName == null || nodeName.isEmpty() || table == null || tableModel == null) {
+		if (nodeName == null || nodeName.isEmpty()) {
+			return;
+		}
+		lastSelectedNodeName = nodeName;
+		if (table == null || tableModel == null) {
 			return;
 		}
 		SwingUtilities.invokeLater(() -> {
+			if (table == null || tableModel == null) {
+				return;
+			}
 			isUpdatingFromTree = true;
 			try {
 				highlightRowByName(nodeName);

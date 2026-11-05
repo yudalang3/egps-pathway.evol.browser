@@ -122,10 +122,12 @@ public class PathwayFamilyMainFace extends ModuleFace {
 			if (tabCount > 0) {
 				// Export the selected analysis panel (PathwayDetailsPanel, etc.)
 				Component selectedComponent = tabbedAnalysisPanel.getSelectedComponent();
-				if (selectedComponent != null) {
+				if (selectedComponent instanceof JPanel panel) {
 					SaveUtil saveUtil = new SaveUtil();
-//                    saveUtil.saveData(selectedComponent, getClass());
+					saveUtil.saveData(panel, getClass());
 				}
+			} else {
+				new SaveUtil().saveData(selectedPhylogeneticTreePanel, getClass());
 			}
 		}
 	}
@@ -309,7 +311,8 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 		// Clear existing tabs if any
 		int tabCount = existedPhylogeneticTreePanels.size();
-		if (tabCount > 0) {
+		if (tabCount > 0 || tabbedAnalysisPanel.getTabCount() > 0) {
+			cancelAnalysisPanelLoads();
 			getTabbedPhylogeneticTreePane().removeAll();
 			tabbedAnalysisPanel.removeAll();
 		}
@@ -396,7 +399,37 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		for (AbstractAnalysisPanel analysisPanel : analysisPanels){
 			analysisPanel.reInitializeGUIAsync();
 		}
-		SwingUtilities.invokeLater(() -> phylogeneticTreePanel.initializeLeftPanel());
+		SwingUtilities.invokeLater(() -> {
+			phylogeneticTreePanel.initializeLeftPanel();
+			module.evolview.moderntreeviewer.para.TreeSettings.initializeView(phylogeneticTreePanel);
+			controller.syncTreeControlsFromModel();
+		});
+	}
+
+	public void notifyAnalysisPanelsNodeSelected(String nodeName, Component sourcePanel) {
+		if (nodeName == null || nodeName.isEmpty() || tabbedAnalysisPanel == null) {
+			return;
+		}
+		int tabCount = tabbedAnalysisPanel.getTabCount();
+		for (int i = 0; i < tabCount; i++) {
+			Component comp = tabbedAnalysisPanel.getComponentAt(i);
+			if (comp != sourcePanel && comp instanceof AbstractAnalysisPanel panel) {
+				panel.treeNodeClicked(nodeName);
+			}
+		}
+	}
+
+	private void cancelAnalysisPanelLoads() {
+		if (tabbedAnalysisPanel == null) {
+			return;
+		}
+		int tabCount = tabbedAnalysisPanel.getTabCount();
+		for (int i = 0; i < tabCount; i++) {
+			Component comp = tabbedAnalysisPanel.getComponentAt(i);
+			if (comp instanceof AbstractAnalysisPanel panel) {
+				panel.cancelPendingLoad();
+			}
+		}
 	}
 
 	@Override
@@ -416,6 +449,9 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 	@Override
 	public boolean closeTab() {
+		voiceDataHandler.cancelPendingImport();
+		cancelAnalysisPanelLoads();
+
 		// Save control panel state
 		if (controlPanelContainer != null) {
 			controlPanelContainer.actionForSaveFile();
@@ -452,7 +488,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		if (jsonFile.exists()) {
 			try {
 				bean = EGPSObjectsUtil.obtainJavaBeanByFastaJSON(PathwayBrowserMainFaceBean.class, jsonFile);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				log.error("Error loading persistent state", e);
 			}
 		}

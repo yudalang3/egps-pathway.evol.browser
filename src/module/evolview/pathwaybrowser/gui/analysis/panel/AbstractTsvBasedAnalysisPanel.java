@@ -126,7 +126,7 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
             if (row != null && nameColumnIndex < row.size()) {
                 String name = row.get(nameColumnIndex);
                 if (name != null && !name.isEmpty()) {
-                    tmpMap.put(name, row);
+                    tmpMap.putIfAbsent(name, row);
                 }
             }
         }
@@ -433,6 +433,12 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
             loadingMessageTimer.stop();
             loadingMessageTimer = null;
         }
+    }
+
+    @Override
+    public void cancelPendingLoad() {
+        super.cancelPendingLoad();
+        runOnEdt(this::cancelLoadingMessage);
     }
 
     /**

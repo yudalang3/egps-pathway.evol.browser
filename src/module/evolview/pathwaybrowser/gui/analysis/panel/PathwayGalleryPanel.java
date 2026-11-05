@@ -69,6 +69,14 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
         // Handle tree node click if needed
     }
 
+    @Override
+    public void cancelPendingLoad() {
+        super.cancelPendingLoad();
+        for (SubSingleSlidePanel slidePanel : slidesPanel) {
+            slidePanel.cancelLoad();
+        }
+    }
+
     /**
      * Load all PPTX files and add them as tabs
      */

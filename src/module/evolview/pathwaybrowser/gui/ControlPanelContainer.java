@@ -65,7 +65,7 @@ public class ControlPanelContainer extends JPanel {
         if (jsonFile.exists()) {
             try {
                 bean = EGPSObjectsUtil.obtainJavaBeanByFastaJSON(LeftControlPanelCollapseProperties.class, jsonFile);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.error("Error when load control panel properties.", e);
             }
         }
@@ -73,7 +73,7 @@ public class ControlPanelContainer extends JPanel {
             bean = new LeftControlPanelCollapseProperties();
         }
         boolean[] isCollapseArray = bean.getIsCollapseArray();
-        if (isCollapseArray.length != sizeOfJxTaskPanes) {
+        if (isCollapseArray == null || isCollapseArray.length != sizeOfJxTaskPanes) {
             bean = new LeftControlPanelCollapseProperties();
         }
 

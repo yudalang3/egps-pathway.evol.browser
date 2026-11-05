@@ -522,6 +522,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		if (controller == null || controller.getActiveTreeLayoutProperties() == null || !e.getComponent().isEnabled()) return;
 		boolean isRightClicked = SwingUtilities.isRightMouseButton(e);
 
 		Object source = e.getSource();
@@ -544,6 +545,7 @@ public class CtrlTreeOperationPanelByMiglayout extends BaseCtrlPanel implements 
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if (controller == null || controller.getActiveTreeLayoutProperties() == null) return;
 		Object source = e.getSource();
 		if (searchButton == source) {
 			seachDialog = getSearchDialog();

@@ -39,7 +39,16 @@ public abstract class AbstractAnalysisPanel extends JPanel {
      * @param nodeName the name of the node to select in the tree
      */
     protected final void notifyTreeToSelectNode(String nodeName) {
-        controller.selectNodeInTree(nodeName);
+        if (controller != null) {
+            controller.selectNodeInTree(nodeName, this);
+        }
+    }
+
+    /**
+     * Invalidate any in-flight asynchronous load when the panel is replaced or closed.
+     */
+    public void cancelPendingLoad() {
+        nextLoadVersion();
     }
 
     /**

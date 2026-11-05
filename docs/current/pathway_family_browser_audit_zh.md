@@ -11,29 +11,24 @@
 - 初始高度为零时恢复分隔位置，上方树面板不可见。截图已复现；改为布局后按比例设置。
 - PPTX 读取后改变首选大小未 revalidate，现补齐滚动布局更新。
 
-## 尚未修复：源码可确认
+## 后续跟进修复（2026-11-05）
 
-### P1 搜索无匹配项会访问空列表
+### 已修复：源码可确认问题
 
-位置：`SearchDialogContent.actionPerformed` 的新查询分支。输入不存在的名称，点击 Find next，`findTargets()` 对零个匹配仍返回 false，随后执行 `findRets.get(0)`。预期显示零结果，实际会抛 IndexOutOfBoundsException。建议在取结果前检查空列表，并补充无结果回归测试。
+- **P1 搜索无匹配项访问空列表（`SearchDialogContent` / `FindSearchRecord` / `SeachDialog`）**：同步 `gfamily` 搜索对话框修复，`findTargets()` 在无匹配项时返回 `true` 并显示 `"No matching nodes found."`，修复 `short` 索引溢出、回车搜索、双向循环跳转、折叠子树提示与外部清除选择同步，并在搜索命中节点时联动更新下方分析面板。
+- **P1 导出入口未执行保存（`PathwayFamilyMainFace.exportData`）**：接通 `SaveUtil.saveData`，有分析标签页时导出当前选中的 `JPanel` 分析页，无分析标签页时回退导出当前进化树面板。
+- **P2 重复物种名称处理不一致（`AbstractTsvBasedAnalysisPanel.prepareNameRows` vs `SpeciesInfoPanel.prepareTableData`）**：将 `prepareNameRows` 中的 `tmpMap.put` 统一改为 `tmpMap.putIfAbsent`，与 `SpeciesInfoPanel` 一致保留同名首行记录。
+- **P2 搜索高亮与实际操作选择分离（`PathwayBrowserController` 样式操作）**：新增 `resolveTargetNodesForStyleOperation()`，优先作用于手动选中的 `selectedNodes`（且颜色修改遍历全部选中节点而非仅首个节点），无手动选中时自动作用于搜索高亮节点（`isNodeSelected()`），均无时作用于整棵树。
 
-### P1 导出入口没有执行保存
+### 已加固：异步加载与配置持久化边界
 
-位置：`PathwayFamilyMainFace.exportData`。已导入并选中分析页时点击导出；创建 SaveUtil 后真正的 saveData 调用被注释。预期打开保存流程，实际不做任何操作。建议先明确各分析页支持的数据/图片导出，再接通对应入口。
-
-### P2 重复物种名称的处理不一致
-
-位置：`AbstractTsvBasedAnalysisPanel.prepareNameRows` 与 `SpeciesInfoPanel.prepareTableData`。前者 HashMap.put 保留最后一行，后者保留第一行。同名重复记录可能使不同面板展示不同来源行。建议统一拒绝重复名称或统一保留规则并告知用户。
-
-### P2 搜索高亮与实际操作选择分离
-
-位置：`SearchDialogContent.actionPerformed`、`PathwayBrowserController` 样式操作。搜索仅设置 nodeSelected，不更新 selectedNodes；样式操作依据 selectedNodes。搜索高亮后修改颜色或粗细可能作用于其他选择或全树。建议统一搜索定位、视觉高亮和操作选择的语义。
+- **加载期间点击节点保留选择**：`SpeciesInfoPanel`、`PathwayComponentPanel` 与 `SpeciesTraitPanel` 记录 `lastSelectedNodeName`，异步数据准备完成后自动恢复并渲染加载期间点击的节点，避免被默认提示信息覆盖；`SpeciesInfoPanel` 行选择反向联动进化树时同步通知其他分析面板。
+- **关闭标签页与重新导入时取消旧异步任务**：`AbstractAnalysisPanel.cancelPendingLoad()`、`SubSingleSlidePanel.cancelLoad()` 与 `Voice4pathwayFamilyBrowser.cancelPendingImport()` 在重导或 `closeTab()` 时使旧任务版本失效并停止定时器/防抖器，防止过期任务覆盖界面或弹出错误框。
+- **进化树视图与 EDT 安全**：`PathwayFamilyMainFace.loadingDataInitializeGraphics` 补齐 `TreeSettings.initializeView` 与 `controller.syncTreeControlsFromModel()`；`TreePropertiesAssigner.assignGraphicsNodeEffects` 状态栏提示改为确保在 EDT 上执行；`CtrlTreeOperationPanelByMiglayout` 补齐空树保护。
+- **损坏 JSON 配置容错**：`PathwayFamilyMainFace.loadPersistentBean` 与 `ControlPanelContainer.getCollapsePanesArray` 捕获全部解析异常并回退默认配置。
 
 ## 待进一步验证的风险
 
-- `closeTab()` 仅保存状态，没有取消导入和分析 SwingWorker。关闭或重新导入后旧任务可能继续运行、弹错或更新脱离界面的面板。
-- 在分析数据尚未加载完时点击树节点，加载结束后可能恢复提示页而丢失这次选择。
-- 已有配置损坏时，仅捕获 IOException 的读取路径可能漏掉 JSON 解析异常。
 - 大型树的布局、字体和显示控制还需更大数据量、不同缩放与窗口尺寸的性能和可读性检查。
 
 ## 验证证据

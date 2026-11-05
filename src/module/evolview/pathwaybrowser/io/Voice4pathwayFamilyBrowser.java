@@ -51,9 +51,19 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 		if (javax.swing.SwingUtilities.isEventDispatchThread()) {
 			java.util.concurrent.CompletableFuture.runAsync(() -> {
 				try { importData(o, version); }
-				catch (Exception error) { javax.swing.SwingUtilities.invokeLater(() -> egps2.panels.dialog.SwingDialog.showErrorMSGDialog("Pathway import", error.getMessage())); }
+				catch (Exception error) {
+					javax.swing.SwingUtilities.invokeLater(() -> {
+						if (version == importVersion.get()) {
+							egps2.panels.dialog.SwingDialog.showErrorMSGDialog("Pathway import", error.getMessage());
+						}
+					});
+				}
 			});
 		} else importData(o, version);
+	}
+
+	public void cancelPendingImport() {
+		importVersion.incrementAndGet();
 	}
 
 	private void importData(OrganizedParameterGetter o, int version) throws Exception {

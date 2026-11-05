@@ -16,7 +16,8 @@ public class SeachDialog extends JDialog {
 	 * @param controller
 	 */
 	public SeachDialog(PathwayBrowserController controller) {
-		super(UnifiedAccessPoint.getInstanceFrame(), true);
+		super(UnifiedAccessPoint.getInstanceFrame(), "Find nodes", true);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 200);
 		setLayout(new BorderLayout());
 		SearchDialogContent comp = new SearchDialogContent(controller);

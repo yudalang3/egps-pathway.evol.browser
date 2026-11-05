@@ -191,10 +191,19 @@ public class TreePropertiesAssigner {
 		}
 
 		if (UnifiedAccessPoint.isGULaunched()) {
-			MyFrame instanceFrame = UnifiedAccessPoint.getInstanceFrame();
-			instanceFrame.showTipsOnBottomStatusBar(lists4buttomBars.toString());
-			for (String string : lists4tips) {
-				instanceFrame.prompt(string);
+			Runnable updateUi = () -> {
+				MyFrame instanceFrame = UnifiedAccessPoint.getInstanceFrame();
+				if (instanceFrame != null) {
+					instanceFrame.showTipsOnBottomStatusBar(lists4buttomBars.toString());
+					for (String string : lists4tips) {
+						instanceFrame.prompt(string);
+					}
+				}
+			};
+			if (javax.swing.SwingUtilities.isEventDispatchThread()) {
+				updateUi.run();
+			} else {
+				javax.swing.SwingUtilities.invokeLater(updateUi);
 			}
 		}
 

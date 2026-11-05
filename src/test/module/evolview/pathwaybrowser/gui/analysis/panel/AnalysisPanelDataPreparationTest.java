@@ -46,6 +46,7 @@ public class AnalysisPanelDataPreparationTest {
                 List.of(
                         List.of("color", "alpha", "red"),
                         List.of("size", "beta", "large"),
+                        List.of("color", "alpha", "duplicate-blue"),
                         List.of("ignored", "", "blank name")
                 )
         );
@@ -59,7 +60,7 @@ public class AnalysisPanelDataPreparationTest {
             throw new AssertionError("Headers changed during preparation");
         }
         if (!List.of("color", "alpha", "red").equals(prepared.name2RowData().get("alpha"))) {
-            throw new AssertionError("Expected alpha row data");
+            throw new AssertionError("Duplicate names must keep first row data");
         }
         if (prepared.name2RowData().containsKey("")) {
             throw new AssertionError("Blank names must not be indexed");

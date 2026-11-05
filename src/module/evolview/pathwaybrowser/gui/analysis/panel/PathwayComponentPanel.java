@@ -23,6 +23,7 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
     private Map<String, List<String>> name2RowData = Collections.emptyMap();
     private final SwingDebouncer nodeClickDebouncer = new SwingDebouncer(60, this::displayPendingNode);
     private String pendingNodeName;
+    private String lastSelectedNodeName;
 
     public PathwayComponentPanel(PathwayBrowserController controller, String tsvFilePath) {
         super(controller);
@@ -96,6 +97,11 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
 
         name2RowData = prepared.name2RowData();
 
+        if (lastSelectedNodeName != null && !lastSelectedNodeName.isEmpty()) {
+            displayRowForNode(lastSelectedNodeName);
+            return;
+        }
+
         add(buildInfoPanel("Please select a node from the tree to view pathway components."));
         revalidate();
         repaint();
@@ -106,8 +112,15 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
         if (nodeName == null || nodeName.isEmpty()) {
             return;
         }
+        lastSelectedNodeName = nodeName;
         pendingNodeName = nodeName;
         nodeClickDebouncer.restart();
+    }
+
+    @Override
+    public void cancelPendingLoad() {
+        super.cancelPendingLoad();
+        nodeClickDebouncer.stop();
     }
 
     private void displayPendingNode() {
@@ -119,6 +132,9 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
     }
 
     private void displayRowForNode(String nodeName) {
+        if (headerNames == null || nameColumnIndex < 0) {
+            return;
+        }
         // Find the row data for this node
         List<String> rowData = name2RowData.get(nodeName);
 

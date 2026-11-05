@@ -22,9 +22,14 @@ public class SubSingleSlidePanel extends JPanel {
     private Dimension pageSize;
     private BufferedImage cachedSlideImage;
     private boolean isRendering = false;
+    private volatile boolean cancelled = false;
 
     public SubSingleSlidePanel(String pptxFilePath) {
         this.pptxFilePath = pptxFilePath;
+    }
+
+    void cancelLoad() {
+        cancelled = true;
     }
 
     @Override
@@ -43,18 +48,22 @@ public class SubSingleSlidePanel extends JPanel {
             return;
         }
 
+        cancelled = false;
         isRendering = true;
 
         new SwingWorker<BufferedImage, Void>() {
             @Override
             protected BufferedImage doInBackground() throws Exception {
+                if (cancelled) {
+                    return null;
+                }
                 // Load PPTX and render in background thread
                 try (var input = java.nio.file.Files.newInputStream(java.nio.file.Path.of(pptxFilePath));
                      var presentation = new XMLSlideShow(input)) {
                 XSLFSlide firstSlide = presentation.getSlides().isEmpty() ? null : presentation.getSlides().getFirst();
                 pageSize = presentation.getPageSize();
 
-                if (firstSlide == null || pageSize == null) {
+                if (firstSlide == null || pageSize == null || cancelled) {
                     return null;
                 }
 
@@ -75,6 +84,10 @@ public class SubSingleSlidePanel extends JPanel {
 
             @Override
             protected void done() {
+                if (cancelled) {
+                    isRendering = false;
+                    return;
+                }
                 try {
                     BufferedImage image = get();
                     if (image != null && pageSize != null) {
@@ -84,8 +97,10 @@ public class SubSingleSlidePanel extends JPanel {
                         repaint();
                     }
                 } catch (Exception e) {
-                    log.error("Failed to load and render PPTX file: {}", e.getMessage(), e);
-                    SwingDialog.showErrorMSGDialog("Input error", "Please check the pptx file: " + pptxFilePath);
+                    if (!cancelled) {
+                        log.error("Failed to load and render PPTX file: {}", e.getMessage(), e);
+                        SwingDialog.showErrorMSGDialog("Input error", "Please check the pptx file: " + pptxFilePath);
+                    }
                 } finally {
                     isRendering = false;
                 }
