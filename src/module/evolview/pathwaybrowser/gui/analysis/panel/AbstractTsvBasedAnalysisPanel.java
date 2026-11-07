@@ -116,12 +116,12 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
     static PreparedNameRows prepareNameRows(ParsedTsv parsed) {
         List<String> headers = parsed.headers();
         List<List<String>> rows = parsed.rows();
-        int nameColumnIndex = headers.indexOf("Name");
+        int nameColumnIndex = module.evolview.pathwaybrowser.io.PathwayComponentCountData.findNameColumnIndex(headers);
         if (nameColumnIndex < 0 || rows == null || rows.isEmpty()) {
             return new PreparedNameRows(headers, rows, nameColumnIndex, java.util.Collections.emptyMap());
         }
 
-        java.util.Map<String, List<String>> tmpMap = new java.util.HashMap<>();
+        java.util.Map<String, List<String>> tmpMap = new java.util.LinkedHashMap<>();
         for (List<String> row : rows) {
             if (row != null && nameColumnIndex < row.size()) {
                 String name = row.get(nameColumnIndex);
@@ -191,77 +191,9 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
     private ParsedTsv readExcelFile(File file) throws IOException {
         String fileName = file.getName().toLowerCase();
         boolean isXlsx = fileName.endsWith(".xlsx");
-
-        try (FileInputStream fis = new FileInputStream(file);
-             Workbook workbook = isXlsx ? new XSSFWorkbook(fis) : new HSSFWorkbook(fis)) {
-
-            Sheet sheet = workbook.getSheetAt(0);
-            if (sheet == null || sheet.getPhysicalNumberOfRows() == 0) {
-                return new ParsedTsv(List.of(), List.of());
-            }
-
-            // Determine the maximum number of columns from the header row
-            Row headerRow = sheet.getRow(sheet.getFirstRowNum());
-            if (headerRow == null) {
-                return new ParsedTsv(List.of(), List.of());
-            }
-
-            int columnCount = headerRow.getLastCellNum();
-            if (columnCount <= 0) {
-                return new ParsedTsv(List.of(), List.of());
-            }
-
-            // Read headers
-            List<String> headers = new ArrayList<>(columnCount);
-            for (int col = 0; col < columnCount; col++) {
-                Cell cell = headerRow.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                headers.add(convertCellToString(cell));
-            }
-
-            // Read data rows
-            List<List<String>> rows = new ArrayList<>();
-            int firstDataRow = sheet.getFirstRowNum() + 1;
-            int lastRow = sheet.getLastRowNum();
-
-            for (int rowIdx = firstDataRow; rowIdx <= lastRow; rowIdx++) {
-                Row row = sheet.getRow(rowIdx);
-                if (row == null) {
-                    continue;
-                }
-
-                String[] rowData = new String[columnCount];
-                for (int col = 0; col < columnCount; col++) {
-                    Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                    rowData[col] = convertCellToString(cell);
-                }
-                rows.add(List.of(rowData));
-            }
-
-            return new ParsedTsv(headers, rows);
-        }
-    }
-
-    /**
-     * Convert a cell value to string, handling null and various cell types.
-     */
-    private String convertCellToString(Cell cell) {
-        if (cell == null) {
-            return "";
-        }
-        return switch (cell.getCellType()) {
-            case STRING -> cell.getStringCellValue();
-            case NUMERIC -> {
-                double value = cell.getNumericCellValue();
-                if (value == Math.floor(value) && !Double.isInfinite(value)) {
-                    yield new DecimalFormat("0").format(value);
-                }
-                yield String.valueOf(value);
-            }
-            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
-            case FORMULA -> cell.getCellFormula();
-            case BLANK -> "";
-            default -> "";
-        };
+        module.evolview.pathwaybrowser.io.PathwayComponentCountData.RawTable raw =
+                module.evolview.pathwaybrowser.io.PathwayComponentCountData.readExcel(file, isXlsx);
+        return new ParsedTsv(raw.headers(), raw.rows());
     }
 
     /**
@@ -321,7 +253,7 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
     protected boolean validateNameColumn(ParsedTsv parsed) {
         final String mustHaveName = "Name";
         headerNames = parsed.headers;
-        nameColumnIndex = headerNames.indexOf(mustHaveName);
+        nameColumnIndex = module.evolview.pathwaybrowser.io.PathwayComponentCountData.findNameColumnIndex(headerNames);
 
         if (nameColumnIndex < 0) {
             add(buildErrorPanel("Error: Data file must have a column named \"" + mustHaveName + "\"."));
@@ -366,6 +298,11 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
         if (throwable instanceof java.nio.charset.MalformedInputException) {
             getLogger().error("Data file encoding error: {}", inputFile, throwable);
             showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
+            return;
+        }
+        if (throwable instanceof IllegalArgumentException) {
+            getLogger().error("Invalid data file: {}", inputFile, throwable);
+            showErrorMessage("Invalid data: " + throwable.getMessage());
             return;
         }
         getLogger().error("Error loading data file", throwable);

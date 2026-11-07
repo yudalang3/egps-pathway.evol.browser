@@ -56,6 +56,10 @@ public class SpeciesTraitPanel extends AbstractTsvBasedAnalysisPanel {
             log.error("Data file encoding error: {}", inputFile, e);
             showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
             return;
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid species trait file: {}", inputFile, e);
+            showErrorMessage("Invalid data: " + e.getMessage());
+            return;
         } catch (IOException e) {
             log.error("Error loading data file", e);
             showErrorMessage("Error loading data file.");
@@ -136,15 +140,18 @@ public class SpeciesTraitPanel extends AbstractTsvBasedAnalysisPanel {
             return;
         }
         // Find the row data for this node (with case-insensitive and common/scientific species alias fallback)
-        List<String> rowData = module.evolview.pathwaybrowser.io.PathwayComponentCountData.lookupBySpeciesName(name2RowData, nodeName);
-
-        if (rowData == null) {
+        var match = module.evolview.pathwaybrowser.io.PathwayComponentCountData.resolveSpeciesMatch(name2RowData, nodeName);
+        if (!match.isMatched() || match.value() == null) {
             removeAll();
-            add(buildInfoPanel("No species trait data found for: " + nodeName));
+            String msg = match.isAmbiguous()
+                    ? "Ambiguous species match for \"" + nodeName + "\": " + match.candidates()
+                    : "No species trait data found for: " + nodeName;
+            add(buildInfoPanel(msg));
             revalidate();
             repaint();
             return;
         }
+        List<String> rowData = match.value();
 
         // Build a table with just this one row
         removeAll();

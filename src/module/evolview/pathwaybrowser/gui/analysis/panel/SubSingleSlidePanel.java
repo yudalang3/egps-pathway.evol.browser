@@ -39,12 +39,24 @@ public class SubSingleSlidePanel extends JPanel {
         setBackground(Color.WHITE);
     }
 
-    void cancelLoad() {
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void cancelLoad() {
         cancelled = true;
     }
 
-    boolean isLoaded() {
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public boolean isLoaded() {
         return preparedSlide != null;
+    }
+
+    public BufferedImage getCachedSlideImage() {
+        return cachedSlideImage;
     }
 
     void setSelectedNodeName(String nodeName) {
@@ -108,6 +120,9 @@ public class SubSingleSlidePanel extends JPanel {
                         pageSize = slide.pageSize();
                         cachedSlideImage = PptxSlideRenderer.renderForSpecies(preparedSlide, countData, selectedNodeName);
                         setPreferredSize(pageSize);
+                        if (getWidth() <= 0 || getHeight() <= 0) {
+                            setSize(pageSize);
+                        }
                         revalidate();
                         repaint();
                     }

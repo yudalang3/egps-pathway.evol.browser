@@ -109,26 +109,36 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		return true;
 	}
 
+	public JPanel resolveExportTargetPanel() {
+		PhylogeneticTreePanel selectedPhylogeneticTreePanel = getSelectedPhylogeneticTreePanel();
+		if (selectedPhylogeneticTreePanel == null) {
+			return null;
+		}
+		JideTabbedPane analysisTabs = getTabbedAnalysisPanel();
+		if (analysisTabs != null && analysisTabs.getTabCount() > 0) {
+			Component selectedComponent = analysisTabs.getSelectedComponent();
+			if (selectedComponent instanceof PathwayGalleryPanel gallery) {
+				SubSingleSlidePanel activeSlide = gallery.getActiveSlidePanel();
+				if (activeSlide != null && activeSlide.isLoaded()) {
+					return activeSlide;
+				}
+				return gallery;
+			}
+			if (selectedComponent instanceof JPanel panel) {
+				return panel;
+			}
+		}
+		return selectedPhylogeneticTreePanel;
+	}
+
 	@Override
 	public void exportData() {
-		PhylogeneticTreePanel selectedPhylogeneticTreePanel = getSelectedPhylogeneticTreePanel();
-
-		if (selectedPhylogeneticTreePanel == null) {
+		JPanel targetPanel = resolveExportTargetPanel();
+		if (targetPanel == null) {
 			SwingDialog.showErrorMSGDialog(UnifiedAccessPoint.getInstanceFrame(), "Export error",
 					"There are no data in the remnant,\nPlease input data first.");
 		} else {
-			JideTabbedPane tabbedAnalysisPanel = getTabbedAnalysisPanel();
-			int tabCount = tabbedAnalysisPanel.getTabCount();
-			if (tabCount > 0) {
-				// Export the selected analysis panel (PathwayDetailsPanel, etc.)
-				Component selectedComponent = tabbedAnalysisPanel.getSelectedComponent();
-				if (selectedComponent instanceof JPanel panel) {
-					SaveUtil saveUtil = new SaveUtil();
-					saveUtil.saveData(panel, getClass());
-				}
-			} else {
-				new SaveUtil().saveData(selectedPhylogeneticTreePanel, getClass());
-			}
+			new SaveUtil().saveData(targetPanel, getClass(), null);
 		}
 	}
 
@@ -239,6 +249,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 	 * </pre>
 	 */
 	protected void initializeTheModule() {
+		voiceDataHandler.setModuleClosed(false);
 		// 1. Create controller
 		controller = new PathwayBrowserController(this);
 
@@ -449,6 +460,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 	@Override
 	public boolean closeTab() {
+		voiceDataHandler.setModuleClosed(true);
 		voiceDataHandler.cancelPendingImport();
 		cancelAnalysisPanelLoads();
 

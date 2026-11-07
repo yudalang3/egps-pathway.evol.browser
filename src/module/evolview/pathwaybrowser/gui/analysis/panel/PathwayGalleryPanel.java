@@ -1,6 +1,5 @@
 package module.evolview.pathwaybrowser.gui.analysis.panel;
 
-import com.google.common.collect.Lists;
 import com.jidesoft.swing.JideTabbedPane;
 import module.evolview.pathwaybrowser.PathwayBrowserController;
 import module.evolview.pathwaybrowser.io.PathwayComponentCountData;
@@ -9,7 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ContainerAdapter;
+import java.awt.event.ContainerEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +24,6 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
 
     private final List<String> files;
     private final String componentCountFilePath;
-    private final List<SubSingleSlidePanel> slidesPanel = Lists.newArrayList();
     private JideTabbedPane tabbedPane;
     private volatile PathwayComponentCountData cachedCountData;
 
@@ -84,9 +85,26 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
 
         add(tabbedPane, BorderLayout.CENTER);
 
+        tabbedPane.addContainerListener(new ContainerAdapter() {
+            @Override
+            public void componentRemoved(ContainerEvent e) {
+                SubSingleSlidePanel removed = extractSlidePanel(e.getChild());
+                if (removed != null) {
+                    removed.cancelLoad();
+                }
+                if (tabbedPane.getTabCount() > 0) {
+                    SwingUtilities.invokeLater(PathwayGalleryPanel.this::loadActiveTabAsync);
+                }
+            }
+        });
+
         loadAllSlides();
 
         tabbedPane.addChangeListener(e -> loadActiveTabAsync());
+    }
+
+    public JideTabbedPane getTabbedPane() {
+        return tabbedPane;
     }
 
     @Override
@@ -100,14 +118,42 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
     }
 
     private void loadActiveTabAsync() {
-        if (slidesPanel.isEmpty()) {
-            return;
+        SubSingleSlidePanel active = getActiveSlidePanel();
+        if (active != null) {
+            active.loadSlideAsync();
         }
-        int idx = tabbedPane != null ? tabbedPane.getSelectedIndex() : 0;
-        if (idx < 0 || idx >= slidesPanel.size()) {
-            idx = 0;
+    }
+
+    public SubSingleSlidePanel getActiveSlidePanel() {
+        if (tabbedPane == null) return null;
+        Component comp = tabbedPane.getSelectedComponent();
+        return extractSlidePanel(comp);
+    }
+
+    private SubSingleSlidePanel extractSlidePanel(Component comp) {
+        if (comp instanceof SubSingleSlidePanel sp) {
+            return sp;
         }
-        slidesPanel.get(idx).loadSlideAsync();
+        if (comp instanceof JScrollPane scroll) {
+            Component view = scroll.getViewport().getView();
+            if (view instanceof SubSingleSlidePanel sp) {
+                return sp;
+            }
+        }
+        return null;
+    }
+
+    public List<SubSingleSlidePanel> getLiveSlidePanels() {
+        if (tabbedPane == null) return List.of();
+        List<SubSingleSlidePanel> list = new ArrayList<>();
+        int count = tabbedPane.getTabCount();
+        for (int i = 0; i < count; i++) {
+            SubSingleSlidePanel sp = extractSlidePanel(tabbedPane.getComponentAt(i));
+            if (sp != null) {
+                list.add(sp);
+            }
+        }
+        return list;
     }
 
     @Override
@@ -115,7 +161,7 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
         if (nodeName == null || nodeName.isBlank()) {
             return;
         }
-        for (SubSingleSlidePanel slidePanel : slidesPanel) {
+        for (SubSingleSlidePanel slidePanel : getLiveSlidePanels()) {
             slidePanel.setSelectedNodeName(nodeName);
         }
         loadActiveTabAsync();
@@ -124,7 +170,7 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
     @Override
     public void cancelPendingLoad() {
         super.cancelPendingLoad();
-        for (SubSingleSlidePanel slidePanel : slidesPanel) {
+        for (SubSingleSlidePanel slidePanel : getLiveSlidePanels()) {
             slidePanel.cancelLoad();
         }
     }
@@ -138,7 +184,6 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
             SubSingleSlidePanel slidePanel = new SubSingleSlidePanel(filePath, this::getOrLoadCountData);
             JScrollPane scrollPane = new JScrollPane(slidePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            slidesPanel.add(slidePanel);
 
             tabbedPane.addTab(tabTitle, scrollPane);
             log.debug("Added tab {} for file: {}", i + 1, tabTitle);

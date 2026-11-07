@@ -46,7 +46,7 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
     }
 
     private PreparedNameRows prepareComponentRows(ParsedTsv parsed) {
-        if (parsed != null && parsed.headers() != null && !parsed.headers().contains("Name")) {
+        if (parsed != null && parsed.headers() != null) {
             module.evolview.pathwaybrowser.io.PathwayComponentCountData countData =
                     module.evolview.pathwaybrowser.io.PathwayComponentCountData.fromRawTable(parsed.headers(), parsed.rows());
             if (!countData.getNormalizedHeaders().isEmpty()) {
@@ -66,6 +66,10 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
         } catch (MalformedInputException e) {
             log.error("Data file encoding error: {}", inputFile, e);
             showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
+            return;
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid pathway component count table: {}", inputFile, e);
+            showErrorMessage("Invalid component count data: " + e.getMessage());
             return;
         } catch (IOException e) {
             log.error("Error loading data file", e);
@@ -147,15 +151,18 @@ public class PathwayComponentPanel extends AbstractTsvBasedAnalysisPanel {
             return;
         }
         // Find the row data for this node (with case-insensitive and common/scientific species alias fallback)
-        List<String> rowData = module.evolview.pathwaybrowser.io.PathwayComponentCountData.lookupBySpeciesName(name2RowData, nodeName);
-
-        if (rowData == null) {
+        var match = module.evolview.pathwaybrowser.io.PathwayComponentCountData.resolveSpeciesMatch(name2RowData, nodeName);
+        if (!match.isMatched() || match.value() == null) {
             removeAll();
-            add(buildInfoPanel("No pathway component data found for: " + nodeName));
+            String msg = match.isAmbiguous()
+                    ? "Ambiguous species match for \"" + nodeName + "\": " + match.candidates()
+                    : "No pathway component data found for: " + nodeName;
+            add(buildInfoPanel(msg));
             revalidate();
             repaint();
             return;
         }
+        List<String> rowData = match.value();
 
         // Build a table with just this one row
         removeAll();

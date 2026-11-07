@@ -23,10 +23,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 /**
  * PathwayBrowser Controller - Independent from GeneFamilyController
@@ -550,12 +548,18 @@ public class PathwayBrowserController {
             return;
         }
 
-        // Search for node by name (case-insensitive)
-        Optional<GraphicsNode> foundNode = EvolNodeUtil.searchNodeWithReturn(rootNode,
-                node -> nodeName.equalsIgnoreCase(node.getName()));
+        // Search for node by name using unified 3-tier species matching (preserving duplicate identical names to detect ambiguity)
+        Map<String, List<GraphicsNode>> treeNodesByName = new LinkedHashMap<>();
+        TreeOperationUtil.recursiveIterateTreeIF(rootNode, n -> {
+            if (n.getName() != null && !n.getName().isBlank()) {
+                treeNodesByName.computeIfAbsent(n.getName(), k -> new ArrayList<>()).add(n);
+            }
+        });
 
-        if (foundNode.isPresent()) {
-            GraphicsNode node = foundNode.get();
+        var match = module.evolview.pathwaybrowser.io.PathwayComponentCountData.resolveSpeciesMatch(treeNodesByName, nodeName);
+
+        if (match.isMatched() && match.value() != null && match.value().size() == 1) {
+            GraphicsNode node = match.value().getFirst();
 
             // Clear previous selection
             List<GraphicsNode> selectedNodes = treeLayoutProperties.getSelectedNodes();
@@ -588,13 +592,13 @@ public class PathwayBrowserController {
 
             refreshPhylogeneticTree();
         } else {
-            // Node not found - show message in status bar
+            // Node not found or ambiguous - show message in status bar without causing false partial selection
+            boolean isAmbiguous = match.isAmbiguous() || (match.isMatched() && match.value() != null && match.value().size() > 1);
             if (instanceFrame != null) {
-                instanceFrame.showTipsOnBottomStatusBar(
-                        "Node \"" + nodeName + "\" not found in the tree.");
-            }
-            if (main != null) {
-                main.notifyAnalysisPanelsNodeSelected(nodeName, sourcePanel);
+                String tip = isAmbiguous
+                        ? "Ambiguous tree node match for \"" + nodeName + "\": " + match.candidates()
+                        : "Node \"" + nodeName + "\" not found in the tree.";
+                instanceFrame.showTipsOnBottomStatusBar(tip);
             }
         }
     }

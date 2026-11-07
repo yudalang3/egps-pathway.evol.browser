@@ -79,6 +79,10 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 			log.error("Data file encoding error: {}", inputFile.getAbsolutePath(), e);
 			showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
 			return;
+		} catch (IllegalArgumentException e) {
+			log.error("Invalid species info file: {}", inputFile.getAbsolutePath(), e);
+			showErrorMessage("Invalid data: " + e.getMessage());
+			return;
 		} catch (IOException e) {
 			log.error("Error loading data file", e);
 			showErrorMessage("Error loading data file.");
@@ -215,6 +219,11 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 		if (throwable instanceof MalformedInputException) {
 			log.error("Data file encoding error: {}", inputFile.getAbsolutePath(), throwable);
 			showErrorMessage("Encoding error: TSV file must be UTF-8. Please convert it to UTF-8 and retry.");
+			return;
+		}
+		if (throwable instanceof IllegalArgumentException) {
+			log.error("Invalid species info file: {}", inputFile.getAbsolutePath(), throwable);
+			showErrorMessage("Invalid data: " + throwable.getMessage());
 			return;
 		}
 		log.error("Error loading data file", throwable);
@@ -497,8 +506,15 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	}
 
 	private void highlightRowByName(String nodeName) {
-		Integer modelRow = module.evolview.pathwaybrowser.io.PathwayComponentCountData.lookupBySpeciesName(name2ModelRowIndex, nodeName);
-		if (modelRow == null) return;
+		var match = module.evolview.pathwaybrowser.io.PathwayComponentCountData.resolveSpeciesMatch(name2ModelRowIndex, nodeName);
+		if (!match.isMatched() || match.value() == null) {
+			table.clearSelection();
+			if (match.isAmbiguous() && statusLabel != null) {
+				statusLabel.setText("Ambiguous species match for \"" + nodeName + "\": " + match.candidates());
+			}
+			return;
+		}
+		Integer modelRow = match.value();
 
 		int viewRow = table.convertRowIndexToView(modelRow);
 		if (viewRow < 0 && filterField != null && !filterField.getText().isBlank()) {
@@ -666,9 +682,9 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	static PreparedTableData prepareTableData(ParsedTsv parsed) {
 		String[] headers = parsed.headers.toArray(new String[0]);
 		List<List<String>> rows = parsed.rows;
-		int nameColumnIndex = parsed.headers.indexOf("Name");
+		int nameColumnIndex = module.evolview.pathwaybrowser.io.PathwayComponentCountData.findNameColumnIndex(parsed.headers);
 		Object[][] data = new Object[rows.size()][headers.length];
-		HashMap<String, Integer> tmpIndex = new HashMap<>();
+		Map<String, Integer> tmpIndex = new LinkedHashMap<>();
 
 		for (int r = 0; r < rows.size(); r++) {
 			List<String> row = rows.get(r);
@@ -730,28 +746,10 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	 * Only reads the first sheet.
 	 */
 	private ParsedTsv readExcelFile(File file) throws IOException {
-		ExcelReaderTemplate reader = new ExcelReaderTemplate();
-		KitTable table = reader.readExcelFirstSheet(file.getAbsolutePath());
-		if (table == null) {
-			throw new IOException("Failed to parse Excel file: " + file.getName());
-		}
-
-		List<String> headers = table.getHeaderNames();
-		if (headers == null || headers.isEmpty()) {
-			return new ParsedTsv(List.of(), List.of());
-		}
-
-		int headerSize = headers.size();
-		List<List<String>> rows = new ArrayList<>();
-		for (List<String> srcRow : table.getContents()) {
-			String[] normalized = new String[headerSize];
-			for (int i = 0; i < headerSize; i++) {
-				String val = (srcRow != null && i < srcRow.size()) ? srcRow.get(i) : null;
-				normalized[i] = (val != null) ? val : "";
-			}
-			rows.add(List.of(normalized));
-		}
-		return new ParsedTsv(List.copyOf(headers), rows);
+		boolean isXlsx = file.getName().toLowerCase(Locale.ROOT).endsWith(".xlsx");
+		module.evolview.pathwaybrowser.io.PathwayComponentCountData.RawTable raw =
+				module.evolview.pathwaybrowser.io.PathwayComponentCountData.readExcel(file, isXlsx);
+		return new ParsedTsv(raw.headers(), raw.rows());
 	}
 
 	private String[] splitTsvLine(String line) {

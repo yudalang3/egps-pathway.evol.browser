@@ -57,7 +57,7 @@
 		<td><b>Gene Shape / Box</b></td>
 		<td><code>&lt;GeneID&gt;_comp</code> or <code>&lt;GeneID&gt;_comp&lt;N&gt;</code><br>(or exact <code>&lt;GeneID&gt;</code>)</td>
 		<td><code>APC_comp</code>, <code>CTNNB1_comp</code>, <code>WNT_comp1</code>, <code>DVL_comp1</code></td>
-		<td>Matched to gene <code>APC</code> / <code>CTNNB1</code> / <code>WNT</code> / <code>DVL</code>. Ghosted when count = 0; highlighted with a copy-number badge when count &ge; 1.</td>
+		<td>Matched to gene <code>APC</code> / <code>CTNNB1</code> / <code>WNT</code> / <code>DVL</code>. Ghosted when count is explicitly 0; highlighted with a copy-number badge when count &ge; 1; displayed with a '?' badge when data is missing (<code>NA</code>/empty); unmapped shapes remain unaltered. Trailing <code>*</code> wildcard (e.g. <code>WNT*_comp</code>) aggregates family members.</td>
 	</tr>
 	<tr>
 		<td><b>Gene Label Text</b></td>
@@ -69,16 +69,16 @@
 		<td><b>Stage / Category Slot</b></td>
 		<td><code>&lt;CategoryID&gt;</code></td>
 		<td><code>cat1</code>, <code>cat2</code>, ..., <code>cat9</code></td>
-		<td>Matched to the <code>category</code> column in <code>components.info.tsv</code>; displays <code>Count: X</code> for the selected species.</td>
+		<td>Matched case-insensitively to the <code>category</code> column in <code>components.info.tsv</code>; displays <code>Count: X</code> for the selected species.</td>
 	</tr>
 	<tr>
 		<td><b>Background &amp; Arrows</b></td>
 		<td>Default PowerPoint names</td>
 		<td><code>Rectangle 5</code>, <code>Connector 12</code></td>
-		<td>Pre-rendered once into the cached pathway skeleton for sub-millisecond species switching.</td>
+		<td>Rendered in exact presentation layer order (Z-order) for seamless visual stacking and sub-millisecond species switching.</td>
 	</tr>
 </table>
-<p><font color="#555555">Note: Prefix matching before the first underscore (<code>_</code>) is case-insensitive. Unrenamed text shapes whose text exactly matches a known gene ID (and their enclosing shape) are also matched automatically as a fallback.</font></p>
+<p><font color="#555555">Note: Gene matching is strictly exact (case-insensitive, e.g. <code>WNT1</code> never matches <code>WNT10A</code>); use explicit <code>*</code> wildcard for family aggregation. PowerPoint group shapes (<code>Ctrl+G</code>) are recursively supported.</font></p>
 
 <h3>3.2 SVG (<code>.svg</code>) XML Attribute Convention</h3>
 <p>Vector pathway diagrams in <code>.svg</code> format can also be listed in <code>$pathway.gallery.figure.paths</code>. Set the <code>id</code> or <code>data-gene</code> attribute on SVG elements (<code>&lt;g&gt;</code>, <code>&lt;rect&gt;</code>, <code>&lt;circle&gt;</code>, <code>&lt;ellipse&gt;</code>, <code>&lt;path&gt;</code>, <code>&lt;text&gt;</code>):</p>

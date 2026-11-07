@@ -57,7 +57,7 @@
 		<td><b>基因图形/背景框</b></td>
 		<td><code>&lt;GeneID&gt;_comp</code> 或 <code>&lt;GeneID&gt;_comp&lt;N&gt;</code><br>（或直接命名为 <code>&lt;GeneID&gt;</code>）</td>
 		<td><code>APC_comp</code>, <code>CTNNB1_comp</code>, <code>WNT_comp1</code>, <code>DVL_comp1</code></td>
-		<td>匹配基因 <code>APC</code> / <code>CTNNB1</code> / <code>WNT</code> / <code>DVL</code>；拷贝数为 0 时淡化，&ge; 1 时在组件右上角绘制拷贝数角标。</td>
+		<td>匹配基因 <code>APC</code> / <code>CTNNB1</code> / <code>WNT</code> / <code>DVL</code>；拷贝数显式为 0 时淡化为丢失，&ge; 1 时绘制拷贝数角标与高亮外框；缺测（<code>NA</code>/空/<code>?</code>）时正常显示并标浅灰 <code>?</code> 角标；未映射图形保持原样。若需对家族成员聚合求和可使用 <code>*</code> 通配符（如 <code>WNT*_comp</code>）。</td>
 	</tr>
 	<tr>
 		<td><b>基因名称文本框</b></td>
@@ -69,16 +69,16 @@
 		<td><b>阶段/类别计数框</b></td>
 		<td><code>&lt;CategoryID&gt;</code></td>
 		<td><code>cat1</code>, <code>cat2</code>, ..., <code>cat9</code></td>
-		<td>匹配 <code>components.info.tsv</code> 中 <code>category</code> 列的分组名称，动态替换为当前物种在该分组下的基因总拷贝数（如 <code>Count: 25</code>）。</td>
+		<td>匹配 <code>components.info.tsv</code> 中 <code>category</code> 列的分组名称（忽略大小写），动态替换为当前物种在该分组下的基因总拷贝数（如 <code>Count: 25</code>）。</td>
 	</tr>
 	<tr>
 		<td><b>背景与连接箭头</b></td>
 		<td>保留默认名称（如 <code>椭圆 1</code>、<code>直线 2</code>）</td>
 		<td><code>Rectangle 5</code>, <code>Arrow 12</code></td>
-		<td>作为静态通路骨架底图缓存，物种切换时无需重复解析，保证毫秒级流畅响应。</td>
+		<td>作为静态通路骨架按原始叠放顺序（Z-order）绘制，保证遮挡关系与毫秒级流畅响应。</td>
 	</tr>
 </table>
-<p><font color="#555555">提示：程序按名称前缀（首个下划线 <code>_</code> 之前的部分，不区分大小写）与计数表中的基因名匹配；若形状未在“选择窗格”重命名，但文本框内容恰好等于基因名，程序也会自动识别其及紧邻的外框形状。</font></p>
+<p><font color="#555555">提示：普通基因形状采用严格精确匹配（不区分大小写，如 <code>WNT1</code> 绝不会误匹配 <code>WNT10A</code>）；支持 PowerPoint 组合（<code>Ctrl+G</code> 编组内命名的组件可递归识别）。</font></p>
 
 <h3>3.2 SVG 矢量图 (<code>.svg</code>) 属性设置规范</h3>
 <p>除 <code>.pptx</code> 外，<code>$pathway.gallery.figure.paths</code> 还支持直接导入 <code>.svg</code> 矢量通路图。在 SVG 的 XML 标签（如 <code>&lt;g&gt;</code>、<code>&lt;rect&gt;</code>、<code>&lt;circle&gt;</code>、<code>&lt;ellipse&gt;</code>、<code>&lt;path&gt;</code>、<code>&lt;text&gt;</code>）上设置 <code>id</code> 或 <code>data-gene</code> 属性即可参与物种联动：</p>
