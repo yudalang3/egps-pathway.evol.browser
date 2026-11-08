@@ -994,7 +994,8 @@ public final class PptxSlideRenderer {
         }
     }
 
-    public record BannerStats(int activeCount, int totalCount, int totalCopies) {
+    public record BannerStats(int activeCount, int totalCount, int totalCopies, boolean partial) {
+        public BannerStats(int activeCount, int totalCount, int totalCopies) { this(activeCount, totalCount, totalCopies, false); }
     }
 
     public static BannerStats computeBannerStats(
@@ -1060,24 +1061,29 @@ public final class PptxSlideRenderer {
             int activeCats = 0;
             int mappedCats = 0;
             int catCopies = 0;
+            boolean partial = false;
             for (CategorySlot slot : prepared.categorySlots()) {
                 CategoryMatch catMatch = countData.resolveCategoryForSpecies(speciesName, slot.categoryId());
                 if (catMatch.mappedInTable()) {
                     mappedCats++;
+                    partial |= catMatch.knownGenes() < catMatch.totalGenes();
                     if (catMatch.state() == CountState.PRESENT) {
                         activeCats++;
                         catCopies += catMatch.count();
                     }
                 }
             }
-            return new BannerStats(activeCats, mappedCats, catCopies);
+            return new BannerStats(activeCats, mappedCats, catCopies, partial);
         }
 
-        return new BannerStats(presentGeneUpper.size(), totalGeneUpper.size(), totalCopies);
+        var entries = countData.getGeneEntriesForSpecies(speciesName);
+        boolean partial = totalGeneUpper.stream().anyMatch(name -> entries.entrySet().stream()
+                .noneMatch(e -> e.getKey().equalsIgnoreCase(name) && e.getValue().isKnown()));
+        return new BannerStats(presentGeneUpper.size(), totalGeneUpper.size(), totalCopies, partial);
     }
 
     /**
-     * Composites the species-specific pathway view in &lt; 1 ms using pre-rendered sliced layers.
+     * Composites the species-specific pathway view using pre-rendered sliced layers.
      * Preserves exact PPTX/SVG Z-order, displays copy counts, highlights, and missing/unknown indicators.
      */
     public static BufferedImage renderForSpecies(
@@ -1127,13 +1133,15 @@ public final class PptxSlideRenderer {
             if (match.mappedInTable()) {
                 if (match.state() == CountState.PRESENT) {
                     for (Rectangle2D cluster : gs.instanceClusters()) {
-                        drawComponentHighlightAndBadge(g, cluster, match.count());
+                        drawComponentHighlightAndBadge(g, cluster, match.count(), match.isPartial());
                     }
                 } else if (match.state() == CountState.MISSING) {
                     // Unknown / missing data: subtle gray badge with '?'
                     for (Rectangle2D cluster : gs.instanceClusters()) {
                         drawMissingBadge(g, cluster);
                     }
+                } else {
+                    for (Rectangle2D cluster : gs.instanceClusters()) drawComponentHighlightAndBadge(g, cluster, 0);
                 }
             }
         }
@@ -1150,7 +1158,7 @@ public final class PptxSlideRenderer {
 
         // 4. Species banner
         BannerStats stats = computeBannerStats(prepared, countData, speciesName);
-        drawSpeciesBanner(g, sz.width, sz.height, speciesName, stats.activeCount(), stats.totalCount(), stats.totalCopies());
+        drawSpeciesBanner(g, sz.width, sz.height, speciesName, stats.activeCount(), stats.totalCount(), stats.totalCopies(), stats.partial());
         g.dispose();
         return out;
     }
@@ -1181,7 +1189,11 @@ public final class PptxSlideRenderer {
     }
 
     private static void drawComponentHighlightAndBadge(Graphics2D g, Rectangle2D bounds, int count) {
-        String text = String.valueOf(count);
+        drawComponentHighlightAndBadge(g, bounds, count, false);
+    }
+
+    private static void drawComponentHighlightAndBadge(Graphics2D g, Rectangle2D bounds, int count, boolean partial) {
+        String text = (partial ? "≥" : "") + count;
         Font font = new Font("Arial", Font.BOLD, 10);
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics();
@@ -1192,7 +1204,7 @@ public final class PptxSlideRenderer {
         double by = bounds.getMinY() - bh * 0.35;
 
         RoundRectangle2D pill = new RoundRectangle2D.Double(bx, by, bw, bh, bh, bh);
-        Color badgeBg = count >= 2 ? new Color(211, 84, 0) : new Color(22, 160, 133);
+        Color badgeBg = count == 0 ? new Color(149, 165, 166) : count >= 2 ? new Color(211, 84, 0) : new Color(22, 160, 133);
         g.setColor(new Color(255, 255, 255, 240));
         g.setStroke(new BasicStroke(2.2f));
         g.draw(pill);
@@ -1236,7 +1248,7 @@ public final class PptxSlideRenderer {
             g.draw(dimOverlay);
         }
 
-        String label = isMissing ? "Count: ?" : "Count: " + count;
+        String label = isMissing ? "Count: ?" : "Count: " + (match.knownGenes() < match.totalGenes() ? "≥" : "") + count;
         Font font = new Font("Arial", Font.BOLD, 11);
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics();
@@ -1269,14 +1281,15 @@ public final class PptxSlideRenderer {
             String species,
             int present,
             int total,
-            int copies) {
+            int copies, boolean partial) {
         Font spFont = new Font("Arial", Font.BOLD | Font.ITALIC, 13);
         Font infoFont = new Font("Arial", Font.PLAIN, 11);
         g.setFont(spFont);
         FontMetrics fm1 = g.getFontMetrics();
         int w1 = fm1.stringWidth(species);
 
-        String summary = "  |  Active: " + present + "/" + total + "  (Copies: " + copies + ")";
+        String summary = "  |  Active: " + present + "/" + total + "  (Copies: "
+                + (partial ? copies > 0 ? "≥" + copies : "?" : Integer.toString(copies)) + ")";
         g.setFont(infoFont);
         FontMetrics fm2 = g.getFontMetrics();
         int w2 = fm2.stringWidth(summary);

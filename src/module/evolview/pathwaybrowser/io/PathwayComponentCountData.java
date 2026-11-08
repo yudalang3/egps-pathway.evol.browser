@@ -61,7 +61,14 @@ public final class PathwayComponentCountData {
             boolean mappedInTable,
             CountState state,
             int count,
-            Set<String> matchedGenes) {
+            Set<String> matchedGenes,
+            int knownGenes) {
+        public GeneMatch(boolean mappedInTable, CountState state, int count, Set<String> matchedGenes) {
+            this(mappedInTable, state, count, matchedGenes, state == CountState.MISSING ? 0 : matchedGenes.size());
+        }
+        public boolean isPartial() { return mappedInTable && knownGenes < matchedGenes.size(); }
+        public int totalGenes() { return matchedGenes.size(); }
+        public boolean isComplete() { return mappedInTable && knownGenes == totalGenes(); }
         public static final GeneMatch UNMAPPED = new GeneMatch(false, CountState.MISSING, 0, Set.of());
     }
 
@@ -105,7 +112,9 @@ public final class PathwayComponentCountData {
             Set.of("cow", "cattle", "bos taurus"),
             Set.of("chicken", "gallus gallus"),
             Set.of("zebrafish", "danio rerio"),
-            Set.of("frog", "xenopus", "xenopus tropicalis", "xenopus laevis"),
+            Set.of("frog", "xenopus"),
+            Set.of("xenopus tropicalis"),
+            Set.of("xenopus laevis"),
             Set.of("fruitfly", "fruit fly", "drosophila", "drosophila melanogaster"),
             Set.of("worm", "nematode", "caenorhabditis elegans", "c. elegans", "c elegans"),
             Set.of("yeast", "budding yeast", "saccharomyces cerevisiae", "s. cerevisiae", "s cerevisiae"),
@@ -684,11 +693,13 @@ public final class PathwayComponentCountData {
         }
         int sum = 0;
         boolean anyKnown = false;
+        int knownGenes = 0;
         boolean anyPresent = false;
         for (String g : matchedTableGenes) {
             CountEntry ce = entries.get(g);
             if (ce != null && ce.isKnown()) {
                 anyKnown = true;
+                knownGenes++;
                 sum = Math.addExact(sum, ce.count());
                 if (ce.isPresent()) {
                     anyPresent = true;
@@ -700,9 +711,10 @@ public final class PathwayComponentCountData {
         }
         return new GeneMatch(
                 true,
-                anyPresent ? CountState.PRESENT : CountState.ABSENT,
+                anyPresent ? CountState.PRESENT : knownGenes < matchedTableGenes.size() ? CountState.MISSING : CountState.ABSENT,
                 sum,
-                matchedTableGenes
+                matchedTableGenes,
+                knownGenes
         );
     }
 
@@ -761,7 +773,7 @@ public final class PathwayComponentCountData {
         if (raw == null) {
             return "";
         }
-        String replaced = raw.trim().replace('_', ' ');
+        String replaced = raw.trim().replace('_', ' ').replace('-', ' ');
         if (replaced.isEmpty()) {
             return "";
         }
@@ -844,7 +856,11 @@ public final class PathwayComponentCountData {
                     continue;
                 }
                 String normKey = normalizeSpeciesToken(e.getKey());
-                if (queryGroup.equals(TOKEN_TO_ALIAS_GROUP.get(normKey))) {
+                boolean genericQuery = normQuery.equals("frog") || normQuery.equals("xenopus");
+                boolean genericKey = normKey.equals("frog") || normKey.equals("xenopus");
+                boolean specificQuery = normQuery.equals("xenopus tropicalis") || normQuery.equals("xenopus laevis");
+                boolean specificKey = normKey.equals("xenopus tropicalis") || normKey.equals("xenopus laevis");
+                if (queryGroup.equals(TOKEN_TO_ALIAS_GROUP.get(normKey)) || (genericQuery && specificKey) || (specificQuery && genericKey)) {
                     aliasHits.add(e);
                 }
             }
@@ -978,6 +994,8 @@ public final class PathwayComponentCountData {
                 rows.add(List.of(cells));
             }
             return new RawTable(headers, rows);
+        } catch (IllegalArgumentException error) {
+            throw new IllegalArgumentException("Excel file " + file.getAbsolutePath() + ": " + error.getMessage(), error);
         }
     }
 
@@ -1006,7 +1024,7 @@ public final class PathwayComponentCountData {
             try {
                 CellValue cv = evaluator.evaluate(cell);
                 if (cv == null) {
-                    return "";
+                    throw new IllegalArgumentException("Formula evaluator returned no result");
                 }
                 return switch (cv.getCellType()) {
                     case STRING -> cv.getStringValue() != null ? cv.getStringValue() : "";
@@ -1021,28 +1039,21 @@ public final class PathwayComponentCountData {
                     default -> "";
                 };
             } catch (NotImplementedException ex) {
-                // Fallback to cached result only if Excel stored a valid non-error cached result
-                return switch (cell.getCachedFormulaResultType()) {
-                    case STRING -> cell.getStringCellValue();
-                    case NUMERIC -> formatExcelNumeric(cell.getNumericCellValue());
-                    case BOOLEAN -> Boolean.toString(cell.getBooleanCellValue());
-                    case BLANK -> "";
-                    default -> throw new IllegalArgumentException(
-                            "Unsupported Excel formula at row " + rowNum + ", column " + colNum + ": =" + cell.getCellFormula(),
-                            ex
-                    );
-                };
+                throw new IllegalArgumentException("Unsupported Excel formula in sheet " + cell.getSheet().getSheetName()
+                        + " at row " + rowNum + ", column " + colNum + ": =" + cell.getCellFormula()
+                        + ". Convert the formula to a value in Excel before importing.", ex);
             } catch (IllegalArgumentException ex) {
-                throw ex;
+                throw new IllegalArgumentException("Excel formula in sheet " + cell.getSheet().getSheetName()
+                        + " at row " + rowNum + ", column " + colNum + ": =" + cell.getCellFormula() + ": " + ex.getMessage(), ex);
             } catch (RuntimeException ex) {
                 throw new IllegalArgumentException(
-                        "Failed to evaluate Excel formula at row " + rowNum + ", column " + colNum + ": =" + cell.getCellFormula(),
+                        "Failed to evaluate Excel formula in sheet " + cell.getSheet().getSheetName() + " at row " + rowNum + ", column " + colNum + ": =" + cell.getCellFormula(),
                         ex
                 );
             }
         }
         throw new IllegalArgumentException(
-                "Cannot evaluate Excel formula without evaluator at row " + rowNum + ", column " + colNum + ": =" + cell.getCellFormula()
+                "Cannot evaluate Excel formula without evaluator in sheet " + cell.getSheet().getSheetName() + " at row " + rowNum + ", column " + colNum + ": =" + cell.getCellFormula()
         );
     }
 
