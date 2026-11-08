@@ -21,9 +21,14 @@ import java.util.Optional;
 public class GuiCompCreator {
 
 	private final PathwayBrowserController controller;
+	private final module.evolview.pathwaybrowser.io.PreparedImport prepared;
 
 	public GuiCompCreator(PathwayBrowserController controller) {
+		this(controller, null);
+	}
+	public GuiCompCreator(PathwayBrowserController controller, module.evolview.pathwaybrowser.io.PreparedImport prepared) {
 		this.controller = controller;
+		this.prepared = prepared;
 	}
 
 	/**
@@ -45,7 +50,7 @@ public class GuiCompCreator {
 
 		// Path is provided, check if file exists
 		File file = new File(path);
-		if (!file.exists()) {
+		if (prepared == null && !file.exists()) {
 			throw new IllegalArgumentException(
 				String.format("File not found for %s: %s", parameterName, path));
 		}
@@ -80,7 +85,7 @@ public class GuiCompCreator {
 
 			// Path is provided, check if file exists
 			File file = new File(path);
-			if (!file.exists()) {
+			if (prepared == null && !file.exists()) {
 				throw new IllegalArgumentException(
 					String.format("File not found for %s[%d]: %s", parameterName, i, path));
 			}
@@ -101,6 +106,7 @@ public class GuiCompCreator {
 
 		PathwayComponentPanel pathwayDrawDemo = new PathwayComponentPanel(controller,
 				pathwayDetailsFigure);
+		if (prepared != null) pathwayDrawDemo.installPreparedTable(prepared.tables().get(pathwayDetailsFigure));
 		return Optional.of(pathwayDrawDemo);
 	}
 
@@ -112,6 +118,7 @@ public class GuiCompCreator {
 		}
 
 		SpeciesInfoPanel speciesPanel = new SpeciesInfoPanel(controller, new File(speciesInfoPath));
+		if (prepared != null) speciesPanel.installPreparedTable(prepared.tables().get(speciesInfoPath));
 		return Optional.of(speciesPanel);
 	}
 
@@ -128,6 +135,7 @@ public class GuiCompCreator {
 				validPaths,
 				geneData.getPathwayComponentCountPath()
 		);
+		if (prepared != null) pathwayGalleryPanel.installPrepared(prepared);
 		return Optional.of(pathwayGalleryPanel);
 	}
 
@@ -138,6 +146,7 @@ public class GuiCompCreator {
 		}
 
 		SpeciesTraitPanel speciesTraitPanel = new SpeciesTraitPanel(controller, speciesTraitPath);
+		if (prepared != null) speciesTraitPanel.installPreparedTable(prepared.tables().get(speciesTraitPath));
 		return Optional.of(speciesTraitPanel);
 	}
 

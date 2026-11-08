@@ -29,6 +29,8 @@ import java.util.*;
 import java.util.List;
 
 public class SpeciesInfoPanel extends AbstractAnalysisPanel {
+    private module.evolview.pathwaybrowser.io.PathwayComponentCountData.RawTable preparedTable;
+    public void installPreparedTable(module.evolview.pathwaybrowser.io.PathwayComponentCountData.RawTable table) { preparedTable = table; }
 
     private static final Logger log = LoggerFactory.getLogger(SpeciesInfoPanel.class);
     private final File inputFile;
@@ -732,6 +734,7 @@ public class SpeciesInfoPanel extends AbstractAnalysisPanel {
 	 * Automatically detects format based on file extension.
 	 */
 	private ParsedTsv readSpreadsheet(File file) throws IOException {
+        if (preparedTable != null) return new ParsedTsv(preparedTable.headers(), preparedTable.rows());
 		String fileName = file.getName().toLowerCase();
 		if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
 			log.debug("Reading Excel file: {}", file.getAbsolutePath());

@@ -18,6 +18,7 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 	private final java.util.concurrent.atomic.AtomicBoolean preparing = new java.util.concurrent.atomic.AtomicBoolean();
 	private final java.util.concurrent.atomic.AtomicInteger importVersion = new java.util.concurrent.atomic.AtomicInteger();
 	private volatile boolean moduleClosed = false;
+	private volatile javax.swing.SwingWorker<Void, Void> importWorker;
 
 	public void setModuleClosed(boolean closed) {
 		this.moduleClosed = closed;
@@ -58,23 +59,37 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 
 	@Override
 	public void execute(OrganizedParameterGetter o) throws Exception {
+		if (moduleClosed) return;
+		if (importWorker != null) importWorker.cancel(true);
 		int version = importVersion.incrementAndGet();
+		progress(version, "Preparing pathway data…");
 		if (javax.swing.SwingUtilities.isEventDispatchThread()) {
-			java.util.concurrent.CompletableFuture.runAsync(() -> {
-				try { importData(o, version); }
-				catch (Exception error) {
-					javax.swing.SwingUtilities.invokeLater(() -> {
-						if (version == importVersion.get()) {
-							egps2.panels.dialog.SwingDialog.showErrorMSGDialog("Pathway import", error.getMessage());
-						}
-					});
+			importWorker = new javax.swing.SwingWorker<>() {
+				@Override protected Void doInBackground() throws Exception { importData(o, version); return null; }
+				@Override protected void done() {
+					if (moduleClosed || version != importVersion.get() || isCancelled()) return;
+					try { get(); }
+					catch (Exception error) {
+						Throwable cause = error.getCause() == null ? error : error.getCause();
+						egps2.panels.dialog.SwingDialog.showErrorMSGDialog("Pathway import", cause.getMessage());
+					} finally { progress(version, null); }
 				}
-			});
-		} else importData(o, version);
+			};
+			importWorker.execute();
+		} else {
+			try { importData(o, version); } finally { progress(version, null); }
+		}
 	}
 
 	public void cancelPendingImport() {
 		importVersion.incrementAndGet();
+		if (importWorker != null) importWorker.cancel(true);
+	}
+
+	private void progress(int version, String message) {
+		javax.swing.SwingUtilities.invokeLater(() -> {
+			if (!moduleClosed && version == importVersion.get()) pathwayFamilyMainFace.setImportProgress(message);
+		});
 	}
 
 	private void importData(OrganizedParameterGetter o, int version) throws Exception {
@@ -84,20 +99,13 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 		// Validate optional paths before replacing the current view.
 		for (String path : java.util.List.of(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getPathwayComponentCountPath(), importBeanInfo.getSpeciesTraitPath())) validatePath(path);
 		if (importBeanInfo.getPathwayGalleryPaths() != null) for (String path : importBeanInfo.getPathwayGalleryPaths()) validatePath(path);
-		for (String path : java.util.List.of(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getSpeciesTraitPath())) validateNameColumnTable(path);
-		if (!disabled(importBeanInfo.getPathwayComponentCountPath())) {
-			validateTable(importBeanInfo.getPathwayComponentCountPath());
-			try {
-				PathwayComponentCountData.load(new java.io.File(importBeanInfo.getPathwayComponentCountPath()));
-			} catch (java.io.IOException e) {
-				throw new IllegalArgumentException("Failed to read component count table: " + importBeanInfo.getPathwayComponentCountPath(), e);
-			}
-		}
-		if (importBeanInfo.getPathwayGalleryPaths() != null) for (String path : importBeanInfo.getPathwayGalleryPaths()) {
-			try {
-				module.evolview.pathwaybrowser.gui.analysis.panel.PptxSlideRenderer.validateGalleryFile(path);
-			} catch (java.io.IOException e) {
-				throw new IllegalArgumentException("Failed to read pathway gallery file: " + path, e);
+		var tables = new java.util.LinkedHashMap<String, PathwayComponentCountData.RawTable>();
+		for (String path : java.util.List.of(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getSpeciesTraitPath(), importBeanInfo.getPathwayComponentCountPath())) {
+			if (!disabled(path)) {
+				var raw = PathwayComponentCountData.readRawTable(new java.io.File(path));
+				if (PathwayComponentCountData.findNameColumnIndex(raw.headers()) < 0 && !path.equals(importBeanInfo.getPathwayComponentCountPath()))
+					throw new IllegalArgumentException("Missing Name column: " + path);
+				tables.put(path, raw);
 			}
 		}
 
@@ -112,14 +120,38 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 		TreePropertiesAssigner treePropertiesAssigner = new TreePropertiesAssigner();
 		treePropertiesAssigner.assign(treeLayoutProperties, importBeanInfo);
 		treePropertiesAssigner.assignGraphicsNodeEffects(convertNode, importBeanInfo);
+		PathwayComponentCountData counts = disabled(importBeanInfo.getPathwayComponentCountPath())
+				? PathwayComponentCountData.empty() : PathwayComponentCountData.fromRawTable(
+					tables.get(importBeanInfo.getPathwayComponentCountPath()).headers(), tables.get(importBeanInfo.getPathwayComponentCountPath()).rows());
+		var preparedSlides = new java.util.LinkedHashMap<String, module.evolview.pathwaybrowser.gui.analysis.panel.PptxSlideRenderer.PreparedSlide>();
+		if (importBeanInfo.getPathwayGalleryPaths() != null) for (String path : importBeanInfo.getPathwayGalleryPaths()) {
+			if (moduleClosed || version != importVersion.get()) return;
+			if (disabled(path)) continue;
+			progress(version, "Preparing pathway " + (preparedSlides.size() + 1) + "/" + importBeanInfo.getPathwayGalleryPaths().size());
+			module.evolview.pathwaybrowser.gui.analysis.panel.PptxSlideRenderer.PreparedSlide slide;
+			try {
+				slide = prepareGallerySlide(path, counts,
+						() -> moduleClosed || version != importVersion.get());
+			} catch (Exception error) {
+				throw new IllegalArgumentException("Failed to prepare pathway gallery file: " + path + ": " + error.getMessage(), error);
+			}
+			if (slide == null) return;
+			preparedSlides.put(path, slide);
+		}
+		PreparedImport prepared = new PreparedImport(counts, preparedSlides, tables);
 
 
 		javax.swing.SwingUtilities.invokeLater(() -> {
 			if (moduleClosed || version != importVersion.get()) return;
 			pathwayFamilyMainFace.invokeTheFeatureMethod(0);
-			pathwayFamilyMainFace.loadingDataInitializeGraphics(importBeanInfo, treeLayoutProperties);
+			pathwayFamilyMainFace.loadingDataInitializeGraphics(importBeanInfo, treeLayoutProperties, prepared);
 		});
 
+	}
+
+	protected module.evolview.pathwaybrowser.gui.analysis.panel.PptxSlideRenderer.PreparedSlide prepareGallerySlide(
+			String path, PathwayComponentCountData counts, java.util.function.BooleanSupplier cancelled) throws Exception {
+		return module.evolview.pathwaybrowser.gui.analysis.panel.PptxSlideRenderer.prepareSlide(path, counts, cancelled);
 	}
 
 	@Override
@@ -135,18 +167,6 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 	}
 	private static boolean disabled(String path) {
 		return path == null || path.isBlank() || path.equalsIgnoreCase("false") || path.equalsIgnoreCase("f") || path.equalsIgnoreCase("null");
-	}
-	private static void validateNameColumnTable(String path) {
-		if (disabled(path)) return;
-		PathwayComponentCountData.RawTable raw;
-		try {
-			raw = PathwayComponentCountData.readRawTable(java.nio.file.Path.of(path).toFile());
-		} catch (java.io.IOException e) {
-			throw new IllegalArgumentException("Invalid table file: " + path, e);
-		}
-		if (PathwayComponentCountData.findNameColumnIndex(raw.headers()) < 0) {
-			throw new IllegalArgumentException("Missing Name column: " + path);
-		}
 	}
 	static void validateTable(String path) throws Exception {
 		if (disabled(path)) return;

@@ -60,6 +60,19 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 	// Data handler
 	private final Voice4pathwayFamilyBrowser voiceDataHandler = new Voice4pathwayFamilyBrowser(this);
+	private JProgressBar importProgress;
+
+	public void setImportProgress(String message) {
+		if (importProgress == null) {
+			importProgress = new JProgressBar();
+			importProgress.setIndeterminate(true);
+			importProgress.setStringPainted(true);
+			add(importProgress, BorderLayout.NORTH);
+		}
+		importProgress.setString(message);
+		importProgress.setVisible(message != null);
+		revalidate();
+	}
 
 	// Tab color provider for JIDE tabbed panes
 	protected GradientColorProvider tabColorProvider = new GradientColorProvider() {
@@ -122,7 +135,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 				if (activeSlide != null && activeSlide.isLoaded()) {
 					return activeSlide;
 				}
-				return gallery;
+				return null;
 			}
 			if (selectedComponent instanceof JPanel panel) {
 				return panel;
@@ -134,12 +147,21 @@ public class PathwayFamilyMainFace extends ModuleFace {
 	@Override
 	public void exportData() {
 		JPanel targetPanel = resolveExportTargetPanel();
+		if (targetPanel instanceof SubSingleSlidePanel slide) targetPanel = slide.createExportSnapshot();
 		if (targetPanel == null) {
-			SwingDialog.showErrorMSGDialog(UnifiedAccessPoint.getInstanceFrame(), "Export error",
-					"There are no data in the remnant,\nPlease input data first.");
+			showExportNotReady();
 		} else {
-			new SaveUtil().saveData(targetPanel, getClass(), null);
+			saveExportPanel(targetPanel);
 		}
+	}
+
+	protected void showExportNotReady() {
+		SwingDialog.showErrorMSGDialog(UnifiedAccessPoint.getInstanceFrame(), "Export error",
+				"No complete canvas is ready. Please import data or wait for pathway preparation to finish.");
+	}
+
+	protected void saveExportPanel(JPanel panel) {
+		new SaveUtil().saveData(panel, getClass(), null);
 	}
 
 	@Override
@@ -304,6 +326,11 @@ public class PathwayFamilyMainFace extends ModuleFace {
 	 */
 	public void loadingDataInitializeGraphics(ImporterBean4PathwayFamilyBrowser geneData,
 											  TreeLayoutProperties treeLayoutProperties) {
+		loadingDataInitializeGraphics(geneData, treeLayoutProperties, null);
+	}
+
+	public void loadingDataInitializeGraphics(ImporterBean4PathwayFamilyBrowser geneData,
+			TreeLayoutProperties treeLayoutProperties, module.evolview.pathwaybrowser.io.PreparedImport prepared) {
 
 		// 1. Create and set up the phylogenetic tree panel
 		GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
@@ -339,7 +366,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		// 4. Parse component information from TSV file
 		String componentsInfoPath = geneData.getComponentsInfoPath();
 
-		GuiCompCreator guiCompCreator = new GuiCompCreator(controller);
+		GuiCompCreator guiCompCreator = new GuiCompCreator(controller, prepared);
 
 		Optional<PathwayGalleryPanel> pathwayGalleryPanel = guiCompCreator.createPathwayGalleryPanel(
 				controller,

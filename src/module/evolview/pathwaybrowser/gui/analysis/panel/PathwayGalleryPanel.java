@@ -26,6 +26,7 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
     private final String componentCountFilePath;
     private JideTabbedPane tabbedPane;
     private volatile PathwayComponentCountData cachedCountData;
+    private boolean closed;
 
     public PathwayGalleryPanel(PathwayBrowserController controller, List<String> files) {
         this(controller, files, null);
@@ -107,6 +108,13 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
         return tabbedPane;
     }
 
+    public void installPrepared(module.evolview.pathwaybrowser.io.PreparedImport prepared) {
+        cachedCountData = prepared.counts();
+        for (SubSingleSlidePanel panel : getLiveSlidePanels()) {
+            panel.installPrepared(prepared.slides().get(panel.getFilePath()), prepared.counts());
+        }
+    }
+
     @Override
     public String getTitle() {
         return "Pathway Gallery";
@@ -118,6 +126,7 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
     }
 
     private void loadActiveTabAsync() {
+        if (closed) return;
         SubSingleSlidePanel active = getActiveSlidePanel();
         if (active != null) {
             active.loadSlideAsync();
@@ -158,7 +167,7 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
 
     @Override
     public void treeNodeClicked(String nodeName) {
-        if (nodeName == null || nodeName.isBlank()) {
+        if (closed || nodeName == null || nodeName.isBlank()) {
             return;
         }
         for (SubSingleSlidePanel slidePanel : getLiveSlidePanels()) {
@@ -169,6 +178,7 @@ public class PathwayGalleryPanel extends AbstractAnalysisPanel {
 
     @Override
     public void cancelPendingLoad() {
+        closed = true;
         super.cancelPendingLoad();
         for (SubSingleSlidePanel slidePanel : getLiveSlidePanels()) {
             slidePanel.cancelLoad();

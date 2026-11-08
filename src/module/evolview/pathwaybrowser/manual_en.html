@@ -28,7 +28,7 @@
 <ul>
 	<li><b>Pathway Gallery</b>: Accepts one or more pathway diagrams (<code>.pptx</code>, <code>.svg</code>, <code>.png</code>, <code>.jpg</code>). When <code>$pathway.component.counts.path</code> is provided and a species node is clicked on the tree, shapes matching pathway genes or categories are updated instantaneously:
 		<ul>
-			<li><b>Present Genes (Count &ge; 1)</b>: Rendered at full clarity with a <b>copy-number badge</b> at the top-right corner of the shape (blue badge for single-copy, orange-red highlight border and badge for multi-copy expansion).</li>
+			<li><b>Present Genes (Count &ge; 1)</b>: Rendered at full clarity with a <b>copy-number badge</b> at the top-right corner (green for one copy, orange-red for multiple copies).</li>
 			<li><b>Absent Genes (Count = 0)</b>: Automatically ghosted (faded to low opacity) to highlight lineage-specific gene loss.</li>
 			<li><b>Stage / Category Summaries</b>: Shapes named after categories (e.g. <code>cat1</code>..<code>cat9</code>) dynamically display the summed gene copies for that stage in the selected species (<code>Count: X</code>).</li>
 		</ul>
@@ -110,6 +110,12 @@
 </ol>
 <p>Select <b>Example-1 through Example-6</b> in the import dialog: (1) Complete interactive Wnt workflow (<code>9_model_species_evolution.nwk</code>, <code>components.info.tsv</code>, <code>wnt_pathway2.pptx</code>, <code>pathway_counts.pptx</code>, <code>demo_selection.pptx</code>); (2) Glycolysis with Newick text; (3) Excel tables; (4) Multiple diagrams with table-tree input; (5) Partial coverage and zero counts; (6) 64-tip circular tree. Bundled files are automatically installed into <code>config/bioData/pathwayBrowser/examples</code> on first run without overwriting user-modified files.</p>
 
+<h2>5. Missing values, names and file preparation</h2>
+<p>Families (such as <code>WNT*</code>), categories and the Copies summary share one rule: complete data show an exact number; incomplete data with a positive known sum show <b>&ge;N</b>, a known lower bound; incomplete data with a zero known sum show <b>?</b> at full opacity. Only complete zero counts show <b>0</b> and ghost the shape. Unmapped content retains its original appearance.</p>
+<p>Name matching ignores case and normalizes whitespace, underscores and hyphens. Explicit aliases such as Human map to Homo sapiens. <i>Xenopus tropicalis</i> and <i>Xenopus laevis</i> never substitute for each other. Generic Frog or Xenopus names match only a unique candidate; multiple candidates are ambiguous.</p>
+<p>Apache POI evaluates Excel formulas. Unsupported or failed formulas stop the import with the file, sheet, row, column and formula in the diagnostic; stale cached results are never used. In Excel, copy the formula cells and Paste Values before saving if evaluation is unsupported.</p>
+<p>Import prepares the tree, tables and every diagram sequentially in the background, with preparation progress. The view switches only after all files succeed; any failure preserves the previous view. PPTX reads slide one and handles parent-group flips, rotations and nested coordinates. SVG supports local leaf, group and nested <code>use</code> references and explicit instance gene bindings. Unbound instances remain static. External, cyclic and unresolved references fail explicitly. Other SVG rendering capabilities depend on the bundled JSVG implementation rather than full browser SVG support.</p>
+<p>Pathway export saves a complete ready canvas snapshot, independent of scrolling or viewport size. An unready canvas prompts the user to wait and is not saved. Closing a module or tab cancels its background worker and ignores late callbacks.</p>
 </blockquote>
 </body>
 </html>

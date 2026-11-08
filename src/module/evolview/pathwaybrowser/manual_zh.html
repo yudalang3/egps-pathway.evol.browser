@@ -28,7 +28,7 @@
 <ul>
 	<li><b>Pathway Gallery（通路画廊）</b>：支持导入多个通路图文件（<code>.pptx</code>、<code>.svg</code>、<code>.png</code>、<code>.jpg</code>）。当配置了 <code>$pathway.component.counts.path</code> 基因计数表并点击系统树上的物种节点时，通路图会根据形状 ID 与基因名称自动匹配：
 		<ul>
-			<li><b>存在基因（Count &ge; 1）</b>：保持清晰高亮显示，并在组件右上角叠加<b>基因拷贝数角标</b>（单拷贝显示蓝底角标，多拷贝扩张显示橙红高亮角标与外框）。</li>
+			<li><b>存在基因（Count &ge; 1）</b>：保持清晰显示，并在组件右上角叠加<b>基因拷贝数角标</b>（单拷贝显示绿色角标，多拷贝显示橙红角标）。</li>
 			<li><b>缺失基因（Count = 0）</b>：该基因对应的形状与文字自动半透明淡化（Ghosting），直观呈现通路组分在特定物种中的丢失。</li>
 			<li><b>通路阶段汇总（Category Counts）</b>：若计数表包含 <code>category</code> 列（如 <code>cat1</code>..<code>cat9</code>），画布中对应 ID 的汇总框会自动更新该物种在该阶段的拷贝总数（<code>Count: X</code>）。</li>
 		</ul>
@@ -110,6 +110,12 @@
 </ol>
 <p>在导入窗口可选择 <b>Example-1 至 Example-6</b>，依次为：Wnt 通路完整交互流程（包含 <code>9_model_species_evolution.nwk</code>、<code>components.info.tsv</code> 以及 <code>wnt_pathway2.pptx</code>、<code>pathway_counts.pptx</code>、<code>demo_selection.pptx</code>）、糖酵解（Newick 文本）、Excel 表格、多图画廊（表格树）、部分覆盖与零计数、64 叶环形树。示例文件在首次运行时自动生成到 <code>config/bioData/pathwayBrowser/examples</code> 目录；用户已修改的同名文件不会被覆盖，缺失文件会在打开导入窗口时自动补齐。</p>
 
+<h2>5. 缺测、名称匹配与文件准备</h2>
+<p>家族（例如 <code>WNT*</code>）、类别与底部 Copies 使用相同语义：全部已知时显示精确数字；存在缺测且已知和大于零时显示 <b>&ge;N</b>（已知下界）；存在缺测且已知和为零时显示 <b>?</b>，保持清晰。只有全部已知且为零才显示 <b>0</b> 并淡化。没有计数映射的图形保持原样。</p>
+<p>名称匹配忽略大小写，统一空白、下划线和连字符；明确别名如 Human 对应 Homo sapiens。<i>Xenopus tropicalis</i> 与 <i>Xenopus laevis</i> 不互相替代。Frog、Xenopus 等泛称仅在候选唯一时匹配；多候选为歧义，不自动挑选。</p>
+<p>Excel 公式由 Apache POI 实际求值；不支持或求值失败时停止导入，提示文件、工作表、行列与公式，不使用可能过期的缓存。可先在 Excel 中复制并“粘贴为值”，再保存导入。</p>
+<p>导入时后台串行准备树、表格和全部通路图，进度条显示当前准备阶段。全部成功后统一替换；任意一张图失败保留原视图。PPTX 读取第一页，支持父组镜像、旋转及嵌套坐标。SVG 支持本地叶图元、组合及嵌套 <code>use</code> 引用和实例基因绑定；未绑定的引用保持静态。外部、循环或找不到的引用会报错。SVG 其余绘制能力取决于当前 JSVG，不等于浏览器支持的全部 SVG 特性。</p>
+<p>通路导出仅针对已经就绪的完整缓存画布，与滚动位置、视口尺寸无关；未就绪时提示等待，不保存部分画面。模块或标签页关闭后取消对应后台任务，并忽略迟到回调。</p>
 </blockquote>
 </body>
 </html>

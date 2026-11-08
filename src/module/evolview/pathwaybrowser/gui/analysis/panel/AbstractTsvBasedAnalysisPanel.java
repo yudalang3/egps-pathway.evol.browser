@@ -36,6 +36,8 @@ import java.util.List;
  * Subclasses must implement the specific display logic for their data.
  */
 public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPanel {
+    private module.evolview.pathwaybrowser.io.PathwayComponentCountData.RawTable preparedTable;
+    public void installPreparedTable(module.evolview.pathwaybrowser.io.PathwayComponentCountData.RawTable table) { preparedTable = table; }
 
     private static final Logger log = LoggerFactory.getLogger(AbstractTsvBasedAnalysisPanel.class);
 
@@ -170,6 +172,7 @@ public abstract class AbstractTsvBasedAnalysisPanel extends AbstractAnalysisPane
      * @throws IOException if file cannot be read or parsed
      */
     protected ParsedTsv readSpreadsheet(File file) throws IOException {
+        if (preparedTable != null) return new ParsedTsv(preparedTable.headers(), preparedTable.rows());
         String fileName = file.getName().toLowerCase();
         if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
             log.debug("Reading Excel file: {}", file.getAbsolutePath());

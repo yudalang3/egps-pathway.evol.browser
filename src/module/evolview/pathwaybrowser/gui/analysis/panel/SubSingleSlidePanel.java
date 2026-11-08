@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * Panel for displaying a single pathway diagram from a PPTX, SVG, PNG, or JPG file.
  * Pre-renders the static skeleton and dynamic component sprites in a background worker,
- * and overlays copy counts and highlights in &lt; 1 ms when a species node is selected on the tree.
+ * and overlays copy counts when a species node is selected on the tree.
  */
 public class SubSingleSlidePanel extends JPanel {
     private static final Logger log = LoggerFactory.getLogger(SubSingleSlidePanel.class);
@@ -28,6 +28,7 @@ public class SubSingleSlidePanel extends JPanel {
     private String selectedNodeName;
     private boolean isRendering = false;
     private volatile boolean cancelled = false;
+    private SwingWorker<PptxSlideRenderer.PreparedSlide, Void> worker;
 
     public SubSingleSlidePanel(String filePath) {
         this(filePath, PathwayComponentCountData::empty);
@@ -45,6 +46,7 @@ public class SubSingleSlidePanel extends JPanel {
 
     public void cancelLoad() {
         cancelled = true;
+        if (worker != null) worker.cancel(true);
     }
 
     public boolean isCancelled() {
@@ -59,7 +61,40 @@ public class SubSingleSlidePanel extends JPanel {
         return cachedSlideImage;
     }
 
+    /** A fixed-size snapshot, independent of the scroll viewport and later selection. */
+    public JPanel createExportSnapshot() {
+        if (cancelled || cachedSlideImage == null) return null;
+        BufferedImage image = new BufferedImage(cachedSlideImage.getWidth(), cachedSlideImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.drawImage(cachedSlideImage, 0, 0, null);
+        graphics.dispose();
+        JPanel snapshot = new JPanel() {
+            @Override protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(image, 0, 0, null);
+            }
+        };
+        snapshot.setBackground(Color.WHITE);
+        snapshot.setSize(image.getWidth(), image.getHeight());
+        snapshot.setPreferredSize(snapshot.getSize());
+        return snapshot;
+    }
+
+    public void installPrepared(PptxSlideRenderer.PreparedSlide slide, PathwayComponentCountData counts) {
+        if (cancelled) return;
+        if (slide == null) throw new IllegalArgumentException("Missing prepared gallery: " + filePath);
+        preparedSlide = slide;
+        countData = counts;
+        pageSize = slide.pageSize();
+        cachedSlideImage = PptxSlideRenderer.renderForSpecies(slide, counts, selectedNodeName);
+        setPreferredSize(pageSize);
+        setSize(pageSize);
+        revalidate();
+        repaint();
+    }
+
     void setSelectedNodeName(String nodeName) {
+        if (cancelled) return;
         this.selectedNodeName = nodeName;
         if (preparedSlide != null) {
             cachedSlideImage = PptxSlideRenderer.renderForSpecies(preparedSlide, countData, selectedNodeName);
@@ -79,6 +114,7 @@ public class SubSingleSlidePanel extends JPanel {
     }
 
     void loadSlideAsync() {
+        if (cancelled) return;
         if (preparedSlide != null) {
             cachedSlideImage = PptxSlideRenderer.renderForSpecies(preparedSlide, countData, selectedNodeName);
             repaint();
@@ -91,7 +127,7 @@ public class SubSingleSlidePanel extends JPanel {
         cancelled = false;
         isRendering = true;
 
-        new SwingWorker<PptxSlideRenderer.PreparedSlide, Void>() {
+        worker = new SwingWorker<PptxSlideRenderer.PreparedSlide, Void>() {
             private PathwayComponentCountData loadedCountData;
 
             @Override
@@ -135,6 +171,7 @@ public class SubSingleSlidePanel extends JPanel {
                     isRendering = false;
                 }
             }
-        }.execute();
+        };
+        worker.execute();
     }
 }

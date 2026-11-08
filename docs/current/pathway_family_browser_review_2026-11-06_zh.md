@@ -1,5 +1,7 @@
 # Pathway Family Browser 审核问题汇总与处理清单
 
+> 2026-11-08 更新：本文保留历史审核发现；基线 `9854633` 的剩余 8 项已按后续规划修复。当前验证与限制见 [修复记录](pathway_family_browser_remaining_fixes_2026-11-08_zh.md) 和 [Walkthrough](pathway_family_browser_review_2026-11-06_zh_workthough.md)，不再沿用此前“100% 完成”的概括。
+
 审核日期：2026-11-06。基准提交：`cd0a4b2287ddc577dfdcf15e143d11eecb66aa8f`。
 
 本文件汇总 2026-11-05 的审核结论，并加入 2026-11-06 的补充核查，供集中修复和验收使用。**本轮只新增此 Markdown 文档，没有修改生产代码、测试、依赖或示例资源。**
