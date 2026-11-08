@@ -47,6 +47,14 @@
 
 ---
 
+## Pathway Family Browser
+
+| 主题 | English | 中文 |
+|------|---------|------|
+| 模块技术规范与实现参考 | [pathway_family_browser.md](pathway_family_browser.md) | [pathway_family_browser_zh.md](pathway_family_browser_zh.md) |
+
+---
+
 ## 外部语言 API
 
 | 主题 | English | 中文 |

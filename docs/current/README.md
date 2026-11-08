@@ -47,6 +47,14 @@ Context menus, deletion confirmation and leaf information export: [usage guide](
 
 ---
 
+## Pathway Family Browser
+
+| Topic | English | 中文 |
+|------|---------|------|
+| Module specification & reference | [pathway_family_browser.md](pathway_family_browser.md) | [pathway_family_browser_zh.md](pathway_family_browser_zh.md) |
+
+---
+
 ## External Language APIs
 
 | Topic | English | 中文 |
