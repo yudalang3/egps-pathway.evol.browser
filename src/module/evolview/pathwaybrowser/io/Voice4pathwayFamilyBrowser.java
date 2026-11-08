@@ -82,13 +82,14 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 	}
 
 	public void cancelPendingImport() {
-		importVersion.incrementAndGet();
+		int cancelledVersion = importVersion.incrementAndGet();
+		progress(cancelledVersion, null);
 		if (importWorker != null) importWorker.cancel(true);
 	}
 
 	private void progress(int version, String message) {
 		javax.swing.SwingUtilities.invokeLater(() -> {
-			if (!moduleClosed && version == importVersion.get()) pathwayFamilyMainFace.setImportProgress(message);
+			if (pathwayFamilyMainFace != null && !moduleClosed && version == importVersion.get()) pathwayFamilyMainFace.setImportProgress(message);
 		});
 	}
 
@@ -97,10 +98,10 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 		ImporterBean4PathwayFamilyBrowser importBeanInfo = paramsAssignerAndParser4pathwayFamBrowser
 				.getImportBeanInfo(o);
 		// Validate optional paths before replacing the current view.
-		for (String path : java.util.List.of(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getPathwayComponentCountPath(), importBeanInfo.getSpeciesTraitPath())) validatePath(path);
+		for (String path : java.util.Arrays.asList(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getPathwayComponentCountPath(), importBeanInfo.getSpeciesTraitPath())) validatePath(path);
 		if (importBeanInfo.getPathwayGalleryPaths() != null) for (String path : importBeanInfo.getPathwayGalleryPaths()) validatePath(path);
 		var tables = new java.util.LinkedHashMap<String, PathwayComponentCountData.RawTable>();
-		for (String path : java.util.List.of(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getSpeciesTraitPath(), importBeanInfo.getPathwayComponentCountPath())) {
+		for (String path : java.util.Arrays.asList(importBeanInfo.getSpeciesInfoPath(), importBeanInfo.getSpeciesTraitPath(), importBeanInfo.getPathwayComponentCountPath())) {
 			if (!disabled(path)) {
 				var raw = PathwayComponentCountData.readRawTable(new java.io.File(path));
 				if (PathwayComponentCountData.findNameColumnIndex(raw.headers()) < 0 && !path.equals(importBeanInfo.getPathwayComponentCountPath()))
@@ -166,7 +167,7 @@ public class Voice4pathwayFamilyBrowser extends AbstractGuiBaseVoiceFeaturedPane
 		if (!java.nio.file.Files.isRegularFile(java.nio.file.Path.of(path))) throw new IllegalArgumentException("File not found: " + path);
 	}
 	private static boolean disabled(String path) {
-		return path == null || path.isBlank() || path.equalsIgnoreCase("false") || path.equalsIgnoreCase("f") || path.equalsIgnoreCase("null");
+		return PathwayInputPaths.disabled(path);
 	}
 	static void validateTable(String path) throws Exception {
 		if (disabled(path)) return;

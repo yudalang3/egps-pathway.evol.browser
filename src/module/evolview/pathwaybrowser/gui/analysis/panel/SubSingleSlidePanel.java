@@ -74,6 +74,7 @@ public class SubSingleSlidePanel extends JPanel {
                 g.drawImage(image, 0, 0, null);
             }
         };
+        snapshot.putClientProperty("pathway.snapshot", Boolean.TRUE);
         snapshot.setBackground(Color.WHITE);
         snapshot.setSize(image.getWidth(), image.getHeight());
         snapshot.setPreferredSize(snapshot.getSize());

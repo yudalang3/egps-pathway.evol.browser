@@ -223,6 +223,7 @@ public final class PptxSlideRenderer {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Invalid or unparseable SVG file: " + path, e);
             }
+            prepareSvgSlide(p.toFile(), PathwayComponentCountData.empty(), () -> false);
         } else if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
             try (var stream = ImageIO.createImageInputStream(p.toFile())) {
                 if (stream == null || !ImageIO.getImageReaders(stream).hasNext()) {
@@ -343,6 +344,18 @@ public final class PptxSlideRenderer {
         return at;
     }
 
+    private static Rectangle2D actualBounds(XSLFShape shape, Map<Shape<?, ?>, Rectangle2D> bounds) {
+        if (shape instanceof XSLFGroupShape group) {
+            Rectangle2D union = null;
+            for (XSLFShape child : group.getShapes()) {
+                Rectangle2D next = actualBounds(child, bounds);
+                if (next != null) union = union == null ? next.getBounds2D() : union.createUnion(next);
+            }
+            return union;
+        }
+        return bounds.get(shape);
+    }
+
     public static Rectangle2D computeRotatedBounds(XSLFShape s) {
         if (s == null) {
             return new Rectangle2D.Double(0, 0, 0, 0);
@@ -439,6 +452,8 @@ public final class PptxSlideRenderer {
             BufferedImage fullSlideImage = new BufferedImage(pageSize.width, pageSize.height, BufferedImage.TYPE_INT_ARGB);
             Graphics2D gFull = fullSlideImage.createGraphics();
             setupEnhancedRendering(gFull, null);
+            Map<Shape<?, ?>, Rectangle2D> actualBounds = new IdentityHashMap<>();
+            ((EnhancedDrawFactory) gFull.getRenderingHint(Drawable.DRAW_FACTORY)).bounds = actualBounds;
             try {
                 firstSlide.draw(gFull);
             } catch (Exception ex) {
@@ -465,7 +480,7 @@ public final class PptxSlideRenderer {
             Set<XSLFShape> categoryShapes = Collections.newSetFromMap(new IdentityHashMap<>());
             List<CategorySlot> categorySlots = new ArrayList<>();
 
-            classifyShapes(topShapes, countData, null, shape2Gene, labelShapes, categoryShapes, categorySlots, allLeafShapes);
+            classifyShapes(topShapes, countData, null, shape2Gene, labelShapes, categoryShapes, categorySlots, allLeafShapes, actualBounds);
 
             // 2. Spatial pairing for unnamed backing shapes behind *_name text boxes
             for (XSLFShape s : allLeafShapes) {
@@ -485,12 +500,12 @@ public final class PptxSlideRenderer {
                     if (!txt.isEmpty()) {
                         continue;
                     }
-                    Rectangle2D r = computeRotatedBounds(as);
+                    Rectangle2D r = actualBounds(as, actualBounds);
                     if (r == null || r.getWidth() <= 0 || r.getHeight() <= 0 || r.getWidth() > 160 || r.getHeight() > 80) {
                         continue;
                     }
                     for (Map.Entry<XSLFShape, String> entry : labelShapes.entrySet()) {
-                        Rectangle2D lr = computeRotatedBounds(entry.getKey());
+                        Rectangle2D lr = actualBounds(entry.getKey(), actualBounds);
                         if (lr != null && r.contains(lr.getCenterX(), lr.getCenterY())) {
                             shape2Gene.put(s, entry.getValue());
                             break;
@@ -568,7 +583,7 @@ public final class PptxSlideRenderer {
                         gs.drawImage(dynCanvas, 0, 0, bounds.width, bounds.height, bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, null);
                         gs.dispose();
 
-                        List<Rectangle2D> clusters = clusterShapeBounds(new ArrayList<>(dynChunk));
+                        List<Rectangle2D> clusters = clusterShapeBounds(new ArrayList<>(dynChunk), actualBounds);
                         GeneSprite sprite = new GeneSprite(geneId, bounds.x, bounds.y, sliceSprite, clusters);
                         layers.add(new DynamicLayer(geneId, sprite));
                         slicesByGene.computeIfAbsent(geneId, k -> new ArrayList<>()).add(sprite);
@@ -585,7 +600,7 @@ public final class PptxSlideRenderer {
             for (Map.Entry<String, List<XSLFShape>> entry : allGeneLeaves.entrySet()) {
                 String geneId = entry.getKey();
                 List<XSLFShape> gShapes = entry.getValue();
-                List<Rectangle2D> clusters = clusterShapeBounds(gShapes);
+                List<Rectangle2D> clusters = clusterShapeBounds(gShapes, actualBounds);
                 List<GeneSprite> slices = slicesByGene.get(geneId);
                 geneSprites.put(geneId, mergeGeneSlices(geneId, slices, clusters, pageSize));
             }
@@ -602,15 +617,15 @@ public final class PptxSlideRenderer {
             Map<XSLFShape, String> labelShapes,
             Set<XSLFShape> categoryShapes,
             List<CategorySlot> categorySlots,
-            List<XSLFShape> topShapes) {
+            List<XSLFShape> topShapes, Map<Shape<?, ?>, Rectangle2D> actualBounds) {
         if (container == null) return;
         for (XSLFShape s : container) {
             String rawName = s.getShapeName() == null ? "" : s.getShapeName().trim();
             if (CATEGORY_ID_PATTERN.matcher(rawName).matches()) {
-                Rectangle2D bounds = computeRotatedBounds(s);
+                Rectangle2D bounds = actualBounds(s, actualBounds);
                 if (bounds != null && bounds.getWidth() > 0 && bounds.getHeight() > 0) {
                     categoryShapes.add(s);
-                    Rectangle2D stageBounds = findEnclosingStageBox(topShapes, s, bounds);
+                    Rectangle2D stageBounds = findEnclosingStageBox(topShapes, s, bounds, actualBounds);
                     Font font = extractShapeFont(s);
                     Color color = extractShapeTextColor(s);
                     categorySlots.add(new CategorySlot(rawName.toLowerCase(Locale.ROOT), bounds, stageBounds, font, color));
@@ -656,7 +671,7 @@ public final class PptxSlideRenderer {
 
             if (s instanceof XSLFGroupShape group) {
                 // Propagate canonical gene name to children
-                classifyShapes(group.getShapes(), countData, canonicalGene, shape2Gene, labelShapes, categoryShapes, categorySlots, topShapes);
+                classifyShapes(group.getShapes(), countData, canonicalGene, shape2Gene, labelShapes, categoryShapes, categorySlots, topShapes, actualBounds);
             } else if (canonicalGene != null) {
                 // Only register leaf shapes into shape2Gene
                 shape2Gene.put(s, canonicalGene);
@@ -1386,7 +1401,7 @@ public final class PptxSlideRenderer {
         FontMetrics fm1 = g.getFontMetrics();
         int w1 = fm1.stringWidth(species);
 
-        String summary = "  |  Active: " + present + "/" + total + "  (Copies: "
+        String summary = "  |  Active: " + (partial ? present > 0 ? "≥" + present : "?" : Integer.toString(present)) + "/" + total + "  (Copies: "
                 + (partial ? copies > 0 ? "≥" + copies : "?" : Integer.toString(copies)) + ")";
         g.setFont(infoFont);
         FontMetrics fm2 = g.getFontMetrics();
@@ -1415,12 +1430,12 @@ public final class PptxSlideRenderer {
         g.drawString(summary, boxX + padX + w1, baseline);
     }
 
-    private static Rectangle2D findEnclosingStageBox(List<XSLFShape> shapes, XSLFShape catShape, Rectangle2D catBounds) {
+    private static Rectangle2D findEnclosingStageBox(List<XSLFShape> shapes, XSLFShape catShape, Rectangle2D catBounds, Map<Shape<?, ?>, Rectangle2D> actualBounds) {
         for (XSLFShape s : shapes) {
             if (s == catShape) {
                 continue;
             }
-            Rectangle2D r = computeRotatedBounds(s);
+            Rectangle2D r = actualBounds(s, actualBounds);
             if (r != null && r.getWidth() > 0 && r.getHeight() > 0
                     && r.getWidth() < 300 && r.getHeight() < 150
                     && r.contains(catBounds.getCenterX(), catBounds.getCenterY())) {
@@ -1461,10 +1476,10 @@ public final class PptxSlideRenderer {
         return Color.WHITE;
     }
 
-    private static List<Rectangle2D> clusterShapeBounds(List<XSLFShape> shapes) {
+    private static List<Rectangle2D> clusterShapeBounds(List<XSLFShape> shapes, Map<Shape<?, ?>, Rectangle2D> actualBounds) {
         List<Rectangle2D> rects = new ArrayList<>();
         for (XSLFShape s : shapes) {
-            Rectangle2D r = computeRotatedBounds(s);
+            Rectangle2D r = actualBounds(s, actualBounds);
             if (r != null && r.getWidth() > 0 && r.getHeight() > 0) {
                 rects.add(r.getBounds2D());
             }
@@ -1611,6 +1626,7 @@ public final class PptxSlideRenderer {
         private final Slide<?, ?> targetSlide;
         private final Predicate<Shape<?, ?>> leafFilter;
         private final boolean includeBackground;
+        private Map<Shape<?, ?>, Rectangle2D> bounds;
 
         public EnhancedDrawFactory(Predicate<Shape<?, ?>> leafFilter) {
             this(null, leafFilter, true);
@@ -1670,7 +1686,17 @@ public final class PptxSlideRenderer {
             if (leafFilter != null && !leafFilter.test(shape)) {
                 return noOpDrawable(shape);
             }
-            return super.getDrawable(shape);
+            Drawable delegate = super.getDrawable(shape);
+            if (bounds == null || !(shape instanceof PlaceableShape<?, ?> placeable)) return delegate;
+            return new DrawShape(shape) {
+                @Override public void applyTransform(Graphics2D graphics) { delegate.applyTransform(graphics); }
+                @Override public void draw(Graphics2D graphics) {
+                    Rectangle2D anchor = DrawShape.getAnchor(graphics, placeable);
+                    if (anchor != null) bounds.put(shape, graphics.getTransform().createTransformedShape(anchor).getBounds2D());
+                    delegate.draw(graphics);
+                }
+                @Override public void drawContent(Graphics2D graphics) { delegate.drawContent(graphics); }
+            };
         }
 
         private static DrawShape noOpDrawable(Shape<?, ?> shape) {

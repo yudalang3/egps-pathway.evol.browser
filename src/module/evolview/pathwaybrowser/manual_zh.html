@@ -57,7 +57,7 @@
 		<td><b>基因图形/背景框</b></td>
 		<td><code>&lt;GeneID&gt;_comp</code> 或 <code>&lt;GeneID&gt;_comp&lt;N&gt;</code><br>（或直接命名为 <code>&lt;GeneID&gt;</code>）</td>
 		<td><code>APC_comp</code>, <code>CTNNB1_comp</code>, <code>WNT_comp1</code>, <code>DVL_comp1</code></td>
-		<td>匹配基因 <code>APC</code> / <code>CTNNB1</code> / <code>WNT</code> / <code>DVL</code>；拷贝数显式为 0 时淡化为丢失，&ge; 1 时绘制拷贝数角标与高亮外框；缺测（<code>NA</code>/空/<code>?</code>）时正常显示并标浅灰 <code>?</code> 角标；未映射图形保持原样。若需对家族成员聚合求和可使用 <code>*</code> 通配符（如 <code>WNT*_comp</code>）。</td>
+		<td>匹配基因 <code>APC</code> / <code>CTNNB1</code> / <code>WNT</code> / <code>DVL</code>；拷贝数显式为 0 时淡化为丢失，&ge; 1 时绘制拷贝数角标；缺测（<code>NA</code>/空/<code>?</code>）时正常显示并标浅灰 <code>?</code> 角标；未映射图形保持原样。若需对家族成员聚合求和可使用 <code>*</code> 通配符（如 <code>WNT*_comp</code>）。</td>
 	</tr>
 	<tr>
 		<td><b>基因名称文本框</b></td>
@@ -116,6 +116,7 @@
 <p>Excel 公式由 Apache POI 实际求值；不支持或求值失败时停止导入，提示文件、工作表、行列与公式，不使用可能过期的缓存。可先在 Excel 中复制并“粘贴为值”，再保存导入。</p>
 <p>导入时后台串行准备树、表格和全部通路图，进度条显示当前准备阶段。全部成功后统一替换；任意一张图失败保留原视图。PPTX 读取第一页，支持父组镜像、旋转及嵌套坐标。SVG 支持本地叶图元、组合及嵌套 <code>use</code> 引用和实例基因绑定；未绑定的引用保持静态。外部、循环或找不到的引用会报错。SVG 其余绘制能力取决于当前 JSVG，不等于浏览器支持的全部 SVG 特性。</p>
 <p>通路导出仅针对已经就绪的完整缓存画布，与滚动位置、视口尺寸无关；未就绪时提示等待，不保存部分画面。模块或标签页关闭后取消对应后台任务，并忽略迟到回调。</p>
+<p>导出时可明确选择“系统树”或“当前分析页”。通路快照保存为 PPTX 时嵌入整幅 PNG，保持完整尺寸，但不保留原图可编辑矢量对象。全部通路标签关闭后需要重新导入图形。部分缺测时 Active 也显示已知下界（如 &ge;1/2）或未知（?/2）。</p>
 </blockquote>
 </body>
 </html>

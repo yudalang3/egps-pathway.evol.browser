@@ -116,6 +116,7 @@
 <p>Apache POI evaluates Excel formulas. Unsupported or failed formulas stop the import with the file, sheet, row, column and formula in the diagnostic; stale cached results are never used. In Excel, copy the formula cells and Paste Values before saving if evaluation is unsupported.</p>
 <p>Import prepares the tree, tables and every diagram sequentially in the background, with preparation progress. The view switches only after all files succeed; any failure preserves the previous view. PPTX reads slide one and handles parent-group flips, rotations and nested coordinates. SVG supports local leaf, group and nested <code>use</code> references and explicit instance gene bindings. Unbound instances remain static. External, cyclic and unresolved references fail explicitly. Other SVG rendering capabilities depend on the bundled JSVG implementation rather than full browser SVG support.</p>
 <p>Pathway export saves a complete ready canvas snapshot, independent of scrolling or viewport size. An unready canvas prompts the user to wait and is not saved. Closing a module or tab cancels its background worker and ignores late callbacks.</p>
+<p>Export explicitly selects the system tree or current analysis page. Pathway snapshots saved as PPTX embed a full-size PNG, without preserving editable source vector objects. Import a diagram again after closing all gallery tabs. With missing data, Active also shows a known lower bound (e.g. &ge;1/2) or unknown (?/2).</p>
 </blockquote>
 </body>
 </html>

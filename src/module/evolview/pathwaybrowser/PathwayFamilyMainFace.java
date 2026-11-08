@@ -147,6 +147,11 @@ public class PathwayFamilyMainFace extends ModuleFace {
 	@Override
 	public void exportData() {
 		JPanel targetPanel = resolveExportTargetPanel();
+        if (getSelectedPhylogeneticTreePanel() != null && getTabbedAnalysisPanel().getTabCount() > 0) {
+            int choice = chooseExportTarget();
+            if (choice < 0) return;
+            if (choice == 0) targetPanel = getSelectedPhylogeneticTreePanel();
+        }
 		if (targetPanel instanceof SubSingleSlidePanel slide) targetPanel = slide.createExportSnapshot();
 		if (targetPanel == null) {
 			showExportNotReady();
@@ -155,13 +160,21 @@ public class PathwayFamilyMainFace extends ModuleFace {
 		}
 	}
 
-	protected void showExportNotReady() {
+	protected int chooseExportTarget() {
+        return JOptionPane.showOptionDialog(this, "Choose export target", "Export", JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, new String[]{"System tree", "Current analysis"}, "Current analysis");
+    }
+
+    protected void showExportNotReady() {
 		SwingDialog.showErrorMSGDialog(UnifiedAccessPoint.getInstanceFrame(), "Export error",
-				"No complete canvas is ready. Please import data or wait for pathway preparation to finish.");
+				getTabbedAnalysisPanel().getSelectedComponent() instanceof PathwayGalleryPanel gallery && gallery.getActiveSlidePanel() == null
+                    ? "No pathway image remains. Please import a diagram." : "No complete canvas is ready. Please wait for preparation.");
 	}
 
 	protected void saveExportPanel(JPanel panel) {
-		new SaveUtil().saveData(panel, getClass(), null);
+		SaveUtil saver = Boolean.TRUE.equals(panel.getClientProperty("pathway.snapshot"))
+                ? new module.evolview.pathwaybrowser.io.PathwaySnapshotSaveUtil() : new SaveUtil();
+        saver.saveData(panel, getClass(), null);
 	}
 
 	@Override
@@ -332,6 +345,16 @@ public class PathwayFamilyMainFace extends ModuleFace {
 	public void loadingDataInitializeGraphics(ImporterBean4PathwayFamilyBrowser geneData,
 			TreeLayoutProperties treeLayoutProperties, module.evolview.pathwaybrowser.io.PreparedImport prepared) {
 
+        if (prepared != null) {
+            for (String path : geneData.getPathwayGalleryPaths() == null ? List.<String>of() : geneData.getPathwayGalleryPaths()) {
+                if (module.evolview.pathwaybrowser.io.PathwayInputPaths.disabled(path)) continue;
+                if (!prepared.slides().containsKey(path) || prepared.slides().get(path).fullSlideImage() == null || prepared.slides().get(path).pageSize() == null || prepared.slides().get(path).pageSize().width <= 0 || prepared.slides().get(path).pageSize().height <= 0) throw new IllegalArgumentException("Missing prepared gallery: " + path);
+            }
+            for (String path : java.util.Arrays.asList(geneData.getSpeciesInfoPath(), geneData.getSpeciesTraitPath(), geneData.getPathwayComponentCountPath())) {
+                if (module.evolview.pathwaybrowser.io.PathwayInputPaths.disabled(path)) continue;
+                if (!prepared.tables().containsKey(path)) throw new IllegalArgumentException("Missing prepared table: " + path);
+            }
+        }
 		// 1. Create and set up the phylogenetic tree panel
 		GraphicsNode root = treeLayoutProperties.getOriginalRootNode();
 		PhylogeneticTreePanel phylogeneticTreePanel = new PhylogeneticTreePanel(treeLayoutProperties, root,

@@ -61,7 +61,7 @@ public final class RemainingGraphicsRegressionTest {
             }
             require(differences == 0, "SVG reference " + i + " lost appearance: " + differences + " pixels");
             require(prepared.geneSprites().containsKey("A"), "Explicit instance binding missing");
-            if (i < 5) require((prepared.skeletonImage().getRGB(125, 20) >>> 24) > 0 || i == 0,
+            if (i < 5) require((prepared.skeletonImage().getRGB(i == 0 ? 75 : 125, 20) >>> 24) > 0,
                     "Unbound reference must remain static: " + i);
             System.out.println("SVG reference case " + i + " pixel exact");
         }

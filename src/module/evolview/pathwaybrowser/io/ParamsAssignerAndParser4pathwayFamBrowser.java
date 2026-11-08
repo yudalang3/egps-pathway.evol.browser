@@ -5,7 +5,6 @@ import module.evolview.moderntreeviewer.io.MTVImportInforBean;
 import module.evolview.moderntreeviewer.io.ParamsAssignerAndParser4ModernTreeView;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,12 +36,12 @@ public class ParamsAssignerAndParser4pathwayFamBrowser extends ParamsAssignerAnd
 		Optional<List<String>> complicatedValues = str.getComplicatedValues("pathway.gallery.figure.paths");
 		if (complicatedValues.isPresent()) {
 			List<String> strings = complicatedValues.get();
-			bean.pathwayGalleryPaths = Collections.unmodifiableList(strings.subList(1, strings.size()));
+			bean.pathwayGalleryPaths = strings.subList(1, strings.size()).stream().filter(path -> !PathwayInputPaths.disabled(path)).map(PathwayInputPaths::normalize).toList();
 		}
 
-		bean.speciesInfoPath = str.getSimplifiedStringWithDefault("pathway.species.info.path");
-		bean.pathwayComponentCountPath = str.getSimplifiedStringWithDefault("pathway.component.counts.path");
-		bean.speciesTraitPath = str.getSimplifiedStringWithDefault("species.traits.path");
+		bean.speciesInfoPath = PathwayInputPaths.normalize(str.getSimplifiedStringWithDefault("pathway.species.info.path"));
+		bean.pathwayComponentCountPath = PathwayInputPaths.normalize(str.getSimplifiedStringWithDefault("pathway.component.counts.path"));
+		bean.speciesTraitPath = PathwayInputPaths.normalize(str.getSimplifiedStringWithDefault("species.traits.path"));
 
 
 		return bean;

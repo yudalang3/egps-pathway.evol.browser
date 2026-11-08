@@ -1,6 +1,5 @@
 package module.evolview.pathwaybrowser;
 
-import com.google.common.base.Strings;
 import module.evolview.pathwaybrowser.gui.analysis.panel.PathwayComponentPanel;
 import module.evolview.pathwaybrowser.gui.analysis.panel.PathwayGalleryPanel;
 import module.evolview.pathwaybrowser.gui.analysis.panel.SpeciesInfoPanel;
@@ -41,10 +40,7 @@ public class GuiCompCreator {
 	 */
 	private boolean isPathNotProvided(String path, String parameterName) {
 		// Check if path is not provided (null, empty, or false-like values)
-		if (Strings.isNullOrEmpty(path) ||
-			path.equalsIgnoreCase("false") ||
-			path.equalsIgnoreCase("f") ||
-			path.equalsIgnoreCase("null")) {
+		if (module.evolview.pathwaybrowser.io.PathwayInputPaths.disabled(path)) {
 			return true;
 		}
 
@@ -76,10 +72,7 @@ public class GuiCompCreator {
 			String path = paths.get(i);
 
 			// Skip if not provided
-			if (Strings.isNullOrEmpty(path) ||
-				path.equalsIgnoreCase("false") ||
-				path.equalsIgnoreCase("f") ||
-				path.equalsIgnoreCase("null")) {
+			if (module.evolview.pathwaybrowser.io.PathwayInputPaths.disabled(path)) {
 				continue;
 			}
 

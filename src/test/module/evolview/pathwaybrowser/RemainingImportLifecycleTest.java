@@ -18,6 +18,7 @@ public final class RemainingImportLifecycleTest {
             SwingUtilities.invokeAndWait(() -> {
                 face[0] = new PathwayFamilyMainFace(new IndependentModuleLoader()) {
                     @Override public void invokeTheFeatureMethod(int index) { /* Isolate host usage telemetry. */ }
+                    @Override protected int chooseExportTarget() { return 1; }
                     @Override protected void saveExportPanel(JPanel panel) { saves[0]++; }
                     @Override protected void showExportNotReady() { notReady[0]++; }
                 };
@@ -33,6 +34,46 @@ public final class RemainingImportLifecycleTest {
             var previous = tabs.getComponentAt(0);
             var layout = face[0].getController().getTreeLayoutProperties();
             require(tree != null, "Good import did not commit");
+            var parsedBlank = new ParamsAssignerAndParser4pathwayFamBrowser().getImportBeanInfo(parser.getOrganizedParameterGetter(good + "\n$pathway.gallery.figure.paths=\n   \n\t\n"));
+            require(parsedBlank.getPathwayGalleryPaths().isEmpty(), "Blank continuation retained");
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    var bean = new ParamsAssignerAndParser4pathwayFamBrowser().getImportBeanInfo(parser.getOrganizedParameterGetter(good));
+                    face[0].loadingDataInitializeGraphics(bean, layout, new PreparedImport(PathwayComponentCountData.empty(), java.util.Map.of(), java.util.Map.of()));
+                    throw new AssertionError("Incomplete preparation accepted");
+                } catch (IllegalArgumentException expected) { }
+                require(tree == face[0].getSelectedPhylogeneticTreePanel() && previous == tabs.getComponentAt(0), "Preflight changed old view");
+            });
+            var blocked = new CountDownLatch(1);
+            var cancellable = new Voice4pathwayFamilyBrowser(face[0]) {
+                @Override protected module.evolview.pathwaybrowser.gui.analysis.panel.PptxSlideRenderer.PreparedSlide prepareGallerySlide(
+                        String path, PathwayComponentCountData counts, java.util.function.BooleanSupplier cancelled) throws Exception {
+                    blocked.countDown(); new CountDownLatch(1).await(); return null;
+                }
+            };
+            SwingUtilities.invokeAndWait(() -> {
+                try { cancellable.execute(parser.getOrganizedParameterGetter(good)); }
+                catch (Exception error) { throw new RuntimeException(error); }
+            });
+            await(blocked);
+            SwingUtilities.invokeAndWait(cancellable::cancelPendingImport);
+            SwingUtilities.invokeAndWait(() -> {
+                try { cancellable.cancelPendingImport(); cancellable.execute(parser.getOrganizedParameterGetter(good)); }
+                catch (Exception error) { throw new RuntimeException(error); }
+            });
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    var field = PathwayFamilyMainFace.class.getDeclaredField("importProgress"); field.setAccessible(true);
+                    require(((JProgressBar)field.get(face[0])).isVisible(), "Old cancellation hid new import progress");
+                } catch (ReflectiveOperationException error) { throw new RuntimeException(error); }
+                cancellable.cancelPendingImport();
+            });
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    var field = PathwayFamilyMainFace.class.getDeclaredField("importProgress"); field.setAccessible(true);
+                    require(!((JProgressBar)field.get(face[0])).isVisible(), "Cancelled progress remains visible");
+                } catch (ReflectiveOperationException error) { throw new RuntimeException(error); }
+            });
             SwingUtilities.invokeAndWait(() -> {
                 var gallery = new module.evolview.pathwaybrowser.gui.analysis.panel.PathwayGalleryPanel(face[0].getController(), java.util.List.of("not-ready.pptx"));
                 tabs.addTab("unready", gallery); tabs.setSelectedComponent(gallery);
