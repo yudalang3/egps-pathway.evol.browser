@@ -23,7 +23,6 @@ import org.apache.poi.sl.usermodel.ShapeType;
 import org.apache.poi.sl.usermodel.Slide;
 import org.apache.poi.sl.usermodel.TextParagraph;
 import org.apache.poi.xslf.usermodel.*;
-import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -185,7 +184,7 @@ public final class PptxSlideRenderer {
                     throw new IllegalArgumentException("No slides in PPTX: " + path);
                 }
                 XSLFSlide first = ppt.getSlides().getFirst();
-                if (ppt.getPageSize() == null) {
+                if (ppt.getPageSize() == null || ppt.getPageSize().width <= 0 || ppt.getPageSize().height <= 0) {
                     throw new IllegalArgumentException("Invalid PPTX page size: " + path);
                 }
                 // Force parsing of first slide's shapes to catch corrupted internal XML
@@ -331,6 +330,9 @@ public final class PptxSlideRenderer {
                 if (rot != 0.0) {
                     at.rotate(Math.toRadians(rot), anchor.getCenterX(), anchor.getCenterY());
                 }
+                at.translate(anchor.getCenterX(), anchor.getCenterY());
+                at.scale(gs.getFlipHorizontal() ? -1 : 1, gs.getFlipVertical() ? -1 : 1);
+                at.translate(-anchor.getCenterX(), -anchor.getCenterY());
                 at.translate(anchor.getX(), anchor.getY());
                 if (interior != null && interior.getWidth() > 0 && interior.getHeight() > 0) {
                     at.scale(anchor.getWidth() / interior.getWidth(), anchor.getHeight() / interior.getHeight());
@@ -429,8 +431,8 @@ public final class PptxSlideRenderer {
             }
             XSLFSlide firstSlide = presentation.getSlides().isEmpty() ? null : presentation.getSlides().getFirst();
             Dimension pageSize = presentation.getPageSize();
-            if (firstSlide == null || pageSize == null) {
-                return null;
+            if (firstSlide == null || pageSize == null || pageSize.width <= 0 || pageSize.height <= 0) {
+                throw new IOException("Invalid or empty PPTX: " + pptxPath);
             }
 
             // Render native fullSlideImage once (100% authentic POI rendering)
@@ -440,7 +442,7 @@ public final class PptxSlideRenderer {
             try {
                 firstSlide.draw(gFull);
             } catch (Exception ex) {
-                System.err.println("Warning: error rendering native slide image via POI: " + ex.getMessage());
+                throw new IOException("Unable to render PPTX: " + pptxPath, ex);
             }
             gFull.dispose();
 
@@ -689,6 +691,21 @@ public final class PptxSlideRenderer {
             throw new IOException("Failed to parse SVG file: " + svgFile.getName(), e);
         }
 
+        Map<String, Element> ids = new LinkedHashMap<>();
+        Set<String> referenced = new LinkedHashSet<>();
+        NodeList svgNodes = doc.getElementsByTagName("*");
+        for (int i = 0; i < svgNodes.getLength(); i++) {
+            Element element = (Element) svgNodes.item(i);
+            String id = element.getAttribute("id");
+            if (!id.isEmpty() && ids.putIfAbsent(id, element) != null) throw new IOException("Duplicate SVG id: " + id);
+            if (element.getTagName().replaceFirst("^.*:", "").equals("use")) {
+                String href = element.hasAttribute("href") ? element.getAttribute("href") : element.getAttribute("xlink:href");
+                if (!href.startsWith("#")) throw new IOException("Only local SVG use references are supported: " + href);
+                referenced.add(href.substring(1));
+            }
+        }
+        for (String id : referenced) validateSvgReference(id, ids, new HashSet<>());
+
         SVGDocument originalSvgDoc;
         try (InputStream is = Files.newInputStream(svgFile.toPath())) {
             originalSvgDoc = new SVGLoader().load(is);
@@ -698,8 +715,10 @@ public final class PptxSlideRenderer {
         }
 
         FloatSize fSize = originalSvgDoc.size();
-        int width = Math.max(10, Math.round(fSize.width));
-        int height = Math.max(10, Math.round(fSize.height));
+        if (!Float.isFinite(fSize.width) || !Float.isFinite(fSize.height) || fSize.width <= 0 || fSize.height <= 0)
+            throw new IOException("Invalid SVG dimensions: " + svgFile);
+        int width = Math.max(1, Math.round(fSize.width));
+        int height = Math.max(1, Math.round(fSize.height));
         Dimension pageSize = new Dimension(width, height);
 
         // Render authentic full slide image via jsvg
@@ -734,7 +753,7 @@ public final class PptxSlideRenderer {
                     toHide.add(leaf);
                 }
             }
-            BufferedImage catCanvas = renderSvgElementSubset(doc, width, height, toHide);
+            BufferedImage catCanvas = renderSvgElementSubset(doc, width, height, toHide, ids, referenced);
             Rectangle catRect = scanNonTransparentBounds(catCanvas);
             Rectangle2D catBounds = (catRect != null)
                     ? new Rectangle2D.Double(catRect.x, catRect.y, catRect.width, catRect.height)
@@ -775,7 +794,7 @@ public final class PptxSlideRenderer {
                         toHide.add(el);
                     }
                 }
-                BufferedImage staticImg = renderSvgElementSubset(doc, width, height, toHide);
+                BufferedImage staticImg = renderSvgElementSubset(doc, width, height, toHide, ids, referenced);
                 layers.add(new StaticLayer(staticImg));
             } else {
                 // Contiguous dynamic slice for one gene
@@ -791,7 +810,7 @@ public final class PptxSlideRenderer {
                         toHide.add(el);
                     }
                 }
-                BufferedImage dynCanvas = renderSvgElementSubset(doc, width, height, toHide);
+                BufferedImage dynCanvas = renderSvgElementSubset(doc, width, height, toHide, ids, referenced);
                 Rectangle bounds = scanNonTransparentBounds(dynCanvas);
                 if (bounds != null) {
                     BufferedImage sliceSprite = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
@@ -805,7 +824,7 @@ public final class PptxSlideRenderer {
                     GeneSprite sprite = new GeneSprite(geneId, bounds.x, bounds.y, sliceSprite, List.of(b2d));
                     layers.add(new DynamicLayer(geneId, sprite));
                     slicesByGene.computeIfAbsent(geneId, k -> new ArrayList<>()).add(sprite);
-                }
+                } else throw new IOException("Empty SVG gene slice: " + geneId + " in " + svgFile);
             }
         }
 
@@ -958,22 +977,63 @@ public final class PptxSlideRenderer {
             Document doc,
             int width,
             int height,
-            List<Element> elementsToHide) {
-        record ReplacedNode(Node parent, Element element, Comment placeholder) {
+            List<Element> elementsToHide, Map<String, Element> ids, Set<String> referenced) {
+        Document slice = (Document) doc.cloneNode(true);
+        NodeList originals = doc.getElementsByTagName("*");
+        NodeList copies = slice.getElementsByTagName("*");
+        Map<Element, Element> copyOf = new IdentityHashMap<>();
+        for (int i = 0; i < originals.getLength(); i++) {
+            Element source = (Element) originals.item(i);
+            copyOf.put(source, (Element) copies.item(i));
         }
-        List<ReplacedNode> replaced = new ArrayList<>(elementsToHide.size());
-        for (Element el : elementsToHide) {
-            Node parent = el.getParentNode();
-            if (parent != null) {
-                Comment placeholder = doc.createComment("slice-skip");
-                parent.replaceChild(placeholder, el);
-                replaced.add(new ReplacedNode(parent, el, placeholder));
+        Map<String, String> targetIds = new LinkedHashMap<>();
+        int sequence = 0;
+        String prefix = "slice-reference-" + UUID.randomUUID() + "-";
+        for (String id : referenced) {
+            if (!ids.containsKey(id)) throw new IllegalArgumentException("Unresolved SVG reference: #" + id);
+            targetIds.put(id, prefix + sequence++);
+        }
+        for (String id : referenced) {
+            Element source = ids.get(id);
+            Element definition = (Element) source.cloneNode(true);
+            Map<String, String> renamed = new LinkedHashMap<>(targetIds);
+            // Retain the original selector/inheritance context, including direct-child rules.
+            Element branch = definition;
+            Node parent = source.getParentNode();
+            while (parent instanceof Element ancestor && ancestor != doc.getDocumentElement()) {
+                Element context = (Element) ancestor.cloneNode(false);
+                context.appendChild(branch);
+                branch = context;
+                parent = ancestor.getParentNode();
             }
+            List<Element> definitionNodes = new ArrayList<>();
+            definitionNodes.add(branch);
+            NodeList descendants = branch.getElementsByTagName("*");
+            for (int i = 0; i < descendants.getLength(); i++) definitionNodes.add((Element) descendants.item(i));
+            for (Element node : definitionNodes) {
+                String oldId = node.getAttribute("id");
+                if (!oldId.isEmpty()) renamed.put(oldId, node == definition ? targetIds.get(id) : prefix + sequence++);
+            }
+            for (Element node : definitionNodes) rewriteSvgReferences(node, renamed, true);
+            Element defs = slice.createElement("defs");
+            defs.appendChild(slice.importNode(branch, true));
+            slice.getDocumentElement().appendChild(defs);
+            NodeList styles = doc.getElementsByTagName("style");
+            for (int i = 0; i < styles.getLength(); i++) {
+                Element style = slice.createElement("style");
+                style.setTextContent(rewriteSvgIds(styles.item(i).getTextContent(), renamed));
+                slice.getDocumentElement().appendChild(style);
+            }
+        }
+        for (Element node : copyOf.values()) rewriteSvgReferences(node, targetIds, false);
+        for (Element el : elementsToHide) {
+            Element copy = copyOf.get(el);
+            if (copy != null && copy.getParentNode() != null) copy.getParentNode().removeChild(copy);
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.transform(new DOMSource(doc), new StreamResult(baos));
+            transformer.transform(new DOMSource(slice), new StreamResult(baos));
 
             SVGDocument subDoc = new SVGLoader().load(new ByteArrayInputStream(baos.toByteArray()));
             BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -982,15 +1042,53 @@ public final class PptxSlideRenderer {
                 EGPSMainGuiUtil.setupHighQualityRendering(g2d);
                 subDoc.render(null, g2d, new ViewBox(0, 0, width, height));
                 g2d.dispose();
-            }
+            } else throw new IOException("Unable to render SVG slice");
             return img;
         } catch (Exception e) {
-            return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        } finally {
-            for (int i = replaced.size() - 1; i >= 0; i--) {
-                ReplacedNode rn = replaced.get(i);
-                rn.parent().replaceChild(rn.element(), rn.placeholder());
-            }
+            throw new IllegalArgumentException("Unable to prepare SVG slice", e);
+        }
+    }
+
+    private static String rewriteSvgIds(String text, Map<String, String> ids) {
+        var matcher = Pattern.compile("([^{}]+)\\{([^{}]*)\\}").matcher(text);
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            String selector = matcher.group(1);
+            for (var entry : ids.entrySet()) selector = selector.replaceAll("#" + Pattern.quote(entry.getKey()) + "(?![\\w-])", "#" + entry.getValue());
+            matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(selector + "{" + rewriteSvgUrls(matcher.group(2), ids) + "}"));
+        }
+        matcher.appendTail(result);
+        return result.toString();
+    }
+
+    private static String rewriteSvgUrls(String text, Map<String, String> ids) {
+        for (var entry : ids.entrySet()) text = text.replaceAll("(url\\(\\s*['\"]?)#" + Pattern.quote(entry.getKey()) + "(?=['\"]?\\s*\\))", "$1#" + entry.getValue());
+        return text;
+    }
+
+    private static void validateSvgReference(String id, Map<String, Element> ids, Set<String> active) {
+        if (!active.add(id)) throw new IllegalArgumentException("Cyclic SVG reference: #" + id);
+        Element target = ids.get(id);
+        if (target == null) throw new IllegalArgumentException("Unresolved SVG reference: #" + id);
+        List<Element> nodes = new ArrayList<>();
+        nodes.add(target);
+        NodeList children = target.getElementsByTagName("*");
+        for (int i = 0; i < children.getLength(); i++) nodes.add((Element) children.item(i));
+        for (Element node : nodes) if (node.getTagName().replaceFirst("^.*:", "").equals("use")) {
+            String href = node.hasAttribute("href") ? node.getAttribute("href") : node.getAttribute("xlink:href");
+            if (href.startsWith("#")) validateSvgReference(href.substring(1), ids, active);
+        }
+        active.remove(id);
+    }
+
+    private static void rewriteSvgReferences(Element node, Map<String, String> ids, boolean renameId) {
+        if (renameId && ids.containsKey(node.getAttribute("id"))) node.setAttribute("id", ids.get(node.getAttribute("id")));
+        for (int i = 0; i < node.getAttributes().getLength(); i++) {
+            Node attr = node.getAttributes().item(i);
+            String value = attr.getNodeValue();
+            if ((attr.getNodeName().equals("href") || attr.getNodeName().equals("xlink:href")) && value.startsWith("#")) {
+                if (ids.containsKey(value.substring(1))) attr.setNodeValue("#" + ids.get(value.substring(1)));
+            } else if (!attr.getNodeName().equals("id")) attr.setNodeValue(rewriteSvgUrls(value, ids));
         }
     }
 
