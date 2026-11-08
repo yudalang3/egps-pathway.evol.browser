@@ -356,6 +356,7 @@ public final class PptxSlideRenderer {
         return bounds.get(shape);
     }
 
+    /** Compatibility approximation without POI drawing context; overlays use captured actual bounds. */
     public static Rectangle2D computeRotatedBounds(XSLFShape s) {
         if (s == null) {
             return new Rectangle2D.Double(0, 0, 0, 0);
@@ -1692,6 +1693,19 @@ public final class PptxSlideRenderer {
                 @Override public void applyTransform(Graphics2D graphics) { delegate.applyTransform(graphics); }
                 @Override public void draw(Graphics2D graphics) {
                     Rectangle2D anchor = DrawShape.getAnchor(graphics, placeable);
+                    if (anchor != null && (anchor.getWidth() == 0 ^ anchor.getHeight() == 0)
+                            && shape instanceof XSLFSimpleShape simple) {
+                        PaintStyle paint = simple.getStrokeStyle().getPaint();
+                        boolean visible = paint != null;
+                        if (paint instanceof PaintStyle.SolidPaint solid)
+                            visible = solid.getSolidColor() != null && DrawPaint.applyColorTransform(solid.getSolidColor()).getAlpha() > 0;
+                        if (visible) {
+                            double thickness = Math.max(1, simple.getLineWidth());
+                            anchor = new Rectangle2D.Double(anchor.getX() - (anchor.getWidth() == 0 ? thickness / 2 : 0),
+                                    anchor.getY() - (anchor.getHeight() == 0 ? thickness / 2 : 0),
+                                    anchor.getWidth() == 0 ? thickness : anchor.getWidth(), anchor.getHeight() == 0 ? thickness : anchor.getHeight());
+                        }
+                    }
                     if (anchor != null) bounds.put(shape, graphics.getTransform().createTransformedShape(anchor).getBounds2D());
                     delegate.draw(graphics);
                 }

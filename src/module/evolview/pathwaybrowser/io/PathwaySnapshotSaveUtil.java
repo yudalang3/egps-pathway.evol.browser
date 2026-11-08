@@ -31,22 +31,38 @@ public class PathwaySnapshotSaveUtil extends SaveUtil {
     }
 
     @Override protected Optional<File> process(JComponent panel, Pair<SaveFileFilter, Consumer<String>> action, JFileChooser chooser) {
+        Component parent = egps2.UnifiedAccessPoint.isGULaunched() ? egps2.UnifiedAccessPoint.getInstanceFrame() : panel;
         chooser.resetChoosableFileFilters();
         chooser.setAcceptAllFileFilterUsed(false);
         for (String extension : new String[]{"png", "jpg", "pptx", "svg", "pdf", "eps"})
             chooser.addChoosableFileFilter(new FileNameExtensionFilter(extension.toUpperCase() + " (*." + extension + ")", extension));
-        if (chooser.showSaveDialog(panel) != JFileChooser.APPROVE_OPTION) return Optional.empty();
+        if (chooser.showSaveDialog(parent) != JFileChooser.APPROVE_OPTION) return Optional.empty();
         String extension = ((FileNameExtensionFilter) chooser.getFileFilter()).getExtensions()[0];
         File file = chooser.getSelectedFile();
         if (!file.getName().toLowerCase(java.util.Locale.ROOT).endsWith("." + extension)) file = new File(file.getPath() + "." + extension);
-        if (file.exists() && JOptionPane.showConfirmDialog(panel, "Overwrite " + file.getName() + "?", "Export", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return Optional.empty();
+        if (file.exists() && !confirmOverwrite(parent, file)) return Optional.empty();
         try {
-            if (extension.equals("pptx")) savePptx(panel, file);
-            else directlyProduceFigureAccording2filePath(file.toString(), panel);
+            switch (extension) {
+                case "pptx" -> savePptx(panel, file);
+                case "png", "jpg" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsBitGraphics(extension, panel, file);
+                case "pdf" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsPDF(panel, file);
+                case "svg", "eps" -> egps2.frame.gui.VectorGraphicsEncoder.saveVectorGraphic(panel, file.getAbsolutePath(),
+                        extension.equals("svg") ? egps2.frame.gui.VectorGraphicsEncoder.VectorGraphicsFormat.SVG : egps2.frame.gui.VectorGraphicsEncoder.VectorGraphicsFormat.EPS);
+                default -> throw new IllegalArgumentException("Unsupported format: " + extension);
+            }
             return Optional.of(file);
         } catch (Exception error) {
-            JOptionPane.showMessageDialog(panel, error.getMessage(), "Export failed", JOptionPane.ERROR_MESSAGE);
+            showSaveError(parent, error);
             return Optional.empty();
         }
     }
+
+    protected boolean confirmOverwrite(Component parent, File file) {
+        return JOptionPane.showConfirmDialog(parent, "Overwrite " + file.getName() + "?", "Export", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
+
+    protected void showSaveError(Component parent, Exception error) {
+        JOptionPane.showMessageDialog(parent, error.getMessage(), "Export failed", JOptionPane.ERROR_MESSAGE);
+    }
+
 }

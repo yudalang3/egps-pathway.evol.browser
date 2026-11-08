@@ -8,6 +8,7 @@ import java.awt.image.*;
 
 public class FollowupGeometryTest {
     public static void main(String[] args) throws Exception {
+        java.nio.file.Files.createDirectories(java.nio.file.Path.of("temp"));
         for (int flip=0;flip<4;flip++) for (double scaleX : new double[]{1.0, 4.0}) for (int rot : new int[]{0, 30, 45, 90}) {
             try (XMLSlideShow ppt = new XMLSlideShow()) {
                 ppt.setPageSize(new Dimension(900, 500));

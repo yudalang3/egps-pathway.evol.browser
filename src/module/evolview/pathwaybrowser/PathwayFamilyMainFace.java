@@ -162,7 +162,7 @@ public class PathwayFamilyMainFace extends ModuleFace {
 
 	protected int chooseExportTarget() {
         return JOptionPane.showOptionDialog(this, "Choose export target", "Export", JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE, null, new String[]{"System tree", "Current analysis"}, "Current analysis");
+                JOptionPane.QUESTION_MESSAGE, null, new String[]{"Phylogeny", "Current analysis"}, "Current analysis");
     }
 
     protected void showExportNotReady() {

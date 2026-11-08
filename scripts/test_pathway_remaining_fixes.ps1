@@ -1,6 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $classes = @(
+    'module.evolview.pathwaybrowser.P3BoundaryTest',
     'module.evolview.pathwaybrowser.RemainingDataRegressionTest',
     'module.evolview.pathwaybrowser.FollowupExportTest',
     'module.evolview.pathwaybrowser.FollowupGeometryTest',
