@@ -20,6 +20,8 @@ public final class P3BoundaryTest {
             var panel = new JPanel() { @Override protected void paintComponent(Graphics g) { g.setColor(Color.RED); g.fillRect(0,0,getWidth(),getHeight()); } };
             panel.setSize(120,80);
             class Saver extends PathwaySnapshotSaveUtil {
+                Saver(boolean snapshotPptx) { super(snapshotPptx); }
+
                 boolean overwrite = true;
                 @Override protected boolean confirmOverwrite(Component parent, File file) { require(parent == panel, "Wrong fallback parent"); return overwrite; }
                 @Override protected void showSaveError(Component parent, Exception error) { throw new AssertionError(error); }
@@ -33,8 +35,20 @@ public final class P3BoundaryTest {
                     });
                 }
             }
-            var saver = new Saver();
+            var saver = new Saver(true);
             try {
+                var newExports = Files.createTempDirectory(dir, "export-");
+                for (boolean snapshot : new boolean[]{false, true}) {
+                    var export = new Saver(snapshot);
+                    Path svg = newExports.resolve("diagram-" + snapshot + ".SVG");
+                    require(export.run(svg, "svg", false).orElseThrow().equals(svg.toFile()), "New SVG filename changed");
+                    require(Files.readString(svg).contains("<svg"), "SVG output is missing");
+                    Path pptx = newExports.resolve("diagram-" + snapshot + ".PPTX");
+                    require(export.run(pptx, "pptx", false).orElseThrow().equals(pptx.toFile()), "New PPTX filename changed");
+                    try (var presentation = new XMLSlideShow(Files.newInputStream(pptx))) {
+                        require(presentation.getPictureData().size() == (snapshot ? 1 : 0), "PPTX backend changed");
+                    }
+                }
                 for (String suffix : new String[]{"PNG", "JPG", "PDF", "pNg", "jPg", "pDf", "SVG", "EPS", "PPTX"}) {
                     Path file = dir.resolve("diagram." + suffix); Files.writeString(file,"old");
                     require(saver.run(file,suffix.toLowerCase(java.util.Locale.ROOT),false).orElseThrow().equals(file.toFile()), "File renamed");

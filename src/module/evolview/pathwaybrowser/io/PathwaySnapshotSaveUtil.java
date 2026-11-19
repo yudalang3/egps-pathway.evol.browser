@@ -14,8 +14,18 @@ import java.io.*;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-/** Module-local saving: PPTX explicitly embeds the rendered canvas rather than SLGraphics. */
+/** Pathway export with separate PPTX handling for analysis snapshots and tree drawings. */
 public class PathwaySnapshotSaveUtil extends SaveUtil {
+    private final boolean snapshotPptx;
+
+    public PathwaySnapshotSaveUtil() {
+        this(true);
+    }
+
+    public PathwaySnapshotSaveUtil(boolean snapshotPptx) {
+        this.snapshotPptx = snapshotPptx;
+    }
+
     public static void savePptx(JComponent panel, File file) throws IOException {
         BufferedImage image = new BufferedImage(panel.getWidth(), panel.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = image.createGraphics();
@@ -43,7 +53,10 @@ public class PathwaySnapshotSaveUtil extends SaveUtil {
         if (file.exists() && !confirmOverwrite(parent, file)) return Optional.empty();
         try {
             switch (extension) {
-                case "pptx" -> savePptx(panel, file);
+                case "pptx" -> {
+                    if (snapshotPptx) savePptx(panel, file);
+                    else egps2.utils.common.util.EGPSPrintUtilities.saveAsPptx(panel, file);
+                }
                 case "png", "jpg" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsBitGraphics(extension, panel, file);
                 case "pdf" -> egps2.utils.common.util.EGPSPrintUtilities.saveAsPDF(panel, file);
                 case "svg", "eps" -> egps2.frame.gui.VectorGraphicsEncoder.saveVectorGraphic(panel, file.getAbsolutePath(),

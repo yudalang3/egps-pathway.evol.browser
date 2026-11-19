@@ -2,6 +2,7 @@ package test.module.evolview.moderntreeviewer;
 
 import module.evolview.moderntreeviewer.io.*;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
+import module.evolview.model.tree.GraphicsNode;
 import module.evolview.phylotree.visualization.layout.TreeLayoutProperties;
 import javax.swing.*;
 import java.awt.*;
@@ -95,7 +96,8 @@ public class TreeExportGuiAcceptance {
         Path testHome = OUTPUT.resolve("home").toAbsolutePath();
         Files.createDirectories(testHome.resolve(".egps2/config/jsonData"));
         System.setProperty("user.home",testHome.toString());
-        var bean = new MTVImportInforBean(); bean.setInput_nwk_string("('A,B':1234.56789,'O''Brien':0.000000123456789):3;");
+        var bean = new MTVImportInforBean();
+        bean.setInput_nwk_string("('中文,叶':1234.56789,'O''Brien':0.000000123456789):3;");
         var root = new TreeParser4MTV().parseTree(bean).orElseThrow();
         try {
             SwingUtilities.invokeAndWait(() -> {
@@ -107,7 +109,13 @@ public class TreeExportGuiAcceptance {
             run("new",file);
             Path saved = TreeExportHandler.withExtension(file,"nwk");
             String original = Files.readString(saved);
-            require(original.contains("'A,B':1234.56789") && original.endsWith(":3.0;"),"Saved contents");
+            require(original.contains("'中文,叶':1234.56789") && original.endsWith(":3.0;"),"Saved contents");
+            var reimport = new MTVImportInforBean();
+            reimport.setInput_nwk_path(saved.toAbsolutePath().toString());
+            var reopened = new TreeParser4MTV().parseTree(reimport).orElseThrow();
+            require("中文,叶".equals(((GraphicsNode) reopened.getChildAt(0)).getName())
+                            && "O'Brien".equals(((GraphicsNode) reopened.getChildAt(1)).getName()),
+                    "Reimport retains quoted Chinese and apostrophe labels");
             run("cancel",file); require(original.equals(Files.readString(saved)),"Cancelled overwrite unchanged");
             run("overwrite",saved); require(confirmSeen,"Confirmed actual existing path");
             run("failure",OUTPUT.resolve("missing-parent/output"));

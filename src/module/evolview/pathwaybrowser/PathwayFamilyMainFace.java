@@ -10,7 +10,7 @@ import egps2.frame.ModuleFace;
 import egps2.modulei.IInformation;
 import egps2.modulei.IModuleLoader;
 import egps2.panels.dialog.SwingDialog;
-import egps2.utils.common.util.SaveUtil;
+import module.evolview.pathwaybrowser.io.PathwaySnapshotSaveUtil;
 import module.evolview.gfamily.work.gui.tree.PhylogeneticTreePanel;
 import module.evolview.gfamily.work.listener.TreeListener;
 import module.evolview.model.tree.GraphicsNode;
@@ -172,8 +172,8 @@ public class PathwayFamilyMainFace extends ModuleFace {
 	}
 
 	protected void saveExportPanel(JPanel panel) {
-		SaveUtil saver = Boolean.TRUE.equals(panel.getClientProperty("pathway.snapshot"))
-                ? new module.evolview.pathwaybrowser.io.PathwaySnapshotSaveUtil() : new SaveUtil();
+        boolean snapshot = Boolean.TRUE.equals(panel.getClientProperty("pathway.snapshot"));
+        var saver = new PathwaySnapshotSaveUtil(snapshot);
         saver.saveData(panel, getClass(), null);
 	}
 
