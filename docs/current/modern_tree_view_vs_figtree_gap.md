@@ -52,9 +52,8 @@ The comparison is based on the source tree visible in this repository. Capabilit
 
 ### Export and Persistence
 
-- Module-level export currently writes `.nwk`
-- Leaf-information TSV export is supported
-- Popup-based picture export entry is currently not implemented
+- The module Export command writes Newick, PDF, SVG, EPS, PPTX, PNG and JPEG.
+- The tree context menu exports leaf information as TSV.
 
 ---
 
@@ -90,7 +89,7 @@ Status labels:
 | Input | NEXUS / BEAST annotated trees | Common | Missing | No visible NEXUS importer in current source |
 | Tree-set | Multi-tree browsing in one file | Common | Missing | Current flow is single-tree oriented |
 | Layout | Rectangular / Circular / Radial | Common | Supported | Provided through layout switcher |
-| Layout | Unrooted / fan-style layouts | Common | Missing | No unrooted layout type visible |
+| Layout | Unrooted layouts | Common | Supported | Equal-angle, Equal-daylight and N-body each support phylogram and cladogram modes |
 | Display | Leaf labels and fonts | Common | Supported | GUI + parameter system |
 | Display | Internal labels and support values | Common | Supported | GUI toggles + `inner.show.*` |
 | Display | Branch-length presentation modes | Common | Partial | Basic support exists, but no FigTree-style scale-mode panel |
@@ -109,8 +108,8 @@ Status labels:
 | Styling | Attribute-driven mapping and legend | Common | Missing | Current node-visual config is name-based, not metadata-driven |
 | Clipboard | Copy labels or subtree | Common | Missing | No visible clipboard export path |
 | Annotation | Clade annotation | Common | Supported | MTV is stronger than a pure tree viewer here |
-| Export | Vector graphics (`PDF`/`SVG`/`EPS`) | Common | Missing | Popup export entry is empty; module export is `.nwk` only |
-| Export | Bitmap graphics (`PNG`/`JPEG`) | Common | Missing | Same limitation |
+| Export | Vector graphics (`PDF`/`SVG`/`EPS`) | Common | Supported | Module Export uses `TreeExportHandler` |
+| Export | Bitmap graphics (`PNG`/`JPEG`) | Common | Supported | Module Export uses `TreeExportHandler` |
 | Export | NEXUS / JSON tree export | Common | Missing | No equivalent export path visible |
 | Reproducibility | Save layout + style + annotation project state | Common | Partial | Parameters and annotations exist, but not as a unified project file |
 
@@ -120,10 +119,9 @@ Status labels:
 
 ### P0: Core Replacement Gaps
 
-1. High-quality graphics export
-2. Reroot and midpoint-root workflow
-3. Metadata-driven style mapping plus legend
-4. Rotate-node interaction
+1. Reroot and midpoint-root workflow
+2. Metadata-driven style mapping plus legend
+3. Rotate-node interaction
 
 These gaps most directly affect whether MTV can substitute for FigTree in routine tree-figure work.
 
@@ -143,7 +141,6 @@ These gaps most directly affect whether MTV can substitute for FigTree in routin
 
 ## Recommended Implementation Entry Points
 
-- Export workflow: `TreePopupMenu.exportPicturesOrData()`
 - Reroot and rotate-node UI: internal-node popup actions in `TreePopupMenu`
 - Metadata-driven visual mapping: extend the current `advanced.node.visual.config` path in `TreePropertiesAssigner`
 - Unified project persistence: serialize tree input, layout, styles, annotations, and creative-mode state together

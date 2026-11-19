@@ -52,9 +52,8 @@
 
 ### 导出与持久化
 
-- 模块级导出当前写出 `.nwk`
-- 已支持导出叶信息 TSV
-- 右键图片导出入口当前尚未实现
+- 模块的 Export 命令支持 Newick、PDF、SVG、EPS、PPTX、PNG 和 JPEG。
+- 树的右键菜单支持导出叶信息 TSV。
 
 ---
 
@@ -90,7 +89,7 @@ FigTree 通常被拿来对标的能力包括：
 | 输入 | NEXUS / BEAST annotated trees | 常用 | Missing | 当前源码中未见 NEXUS importer |
 | Tree-set | 单文件多树浏览 | 常用 | Missing | 当前仍以单树流程为主 |
 | 布局 | Rectangular / Circular / Radial | 常用 | Supported | 由布局切换器提供 |
-| 布局 | Unrooted / fan-style | 常用 | Missing | 当前未见 unrooted 布局类型 |
+| 布局 | 无根布局 | 常用 | Supported | Equal-angle、Equal-daylight 和 N-body 均支持 Phylogram 与 Cladogram |
 | 显示 | 叶标签与字体 | 常用 | Supported | GUI 与参数系统都支持 |
 | 显示 | 内部标签与支持度 | 常用 | Supported | GUI 开关与 `inner.show.*` |
 | 显示 | 分支长度展示模式 | 常用 | Partial | 有基础支持，但缺少 FigTree 式的长度模式面板 |
@@ -109,8 +108,8 @@ FigTree 通常被拿来对标的能力包括：
 | 样式 | 按属性映射并生成 legend | 常用 | Missing | 目前节点视觉配置仍是 name-based，不是 metadata-driven |
 | 剪贴板 | 复制标签或子树 | 常用 | Missing | 未见剪贴板导出路径 |
 | 标注 | Clade annotation | 常用 | Supported | 这部分 MTV 其实强于纯查看器 |
-| 导出 | 矢量图（`PDF`/`SVG`/`EPS`） | 常用 | Missing | 图片导出入口为空；模块导出只写 `.nwk` |
-| 导出 | 位图（`PNG`/`JPEG`） | 常用 | Missing | 同上 |
+| 导出 | 矢量图（`PDF`/`SVG`/`EPS`） | 常用 | Supported | 通过模块的 Export 命令调用 `TreeExportHandler` |
+| 导出 | 位图（`PNG`/`JPEG`） | 常用 | Supported | 通过模块的 Export 命令调用 `TreeExportHandler` |
 | 导出 | NEXUS / JSON 树导出 | 常用 | Missing | 当前未见对应导出 |
 | 可复现性 | 保存布局+样式+标注项目状态 | 常用 | Partial | 参数和标注都存在，但还不是统一工程文件 |
 
@@ -120,10 +119,9 @@ FigTree 通常被拿来对标的能力包括：
 
 ### P0：能否替代 FigTree 的核心差距
 
-1. 高质量图形导出
-2. Reroot 与 midpoint root 流程
-3. 基于 metadata 的样式映射与 legend
-4. Rotate-node 交互
+1. Reroot 与 midpoint root 流程
+2. 基于 metadata 的样式映射与 legend
+3. Rotate-node 交互
 
 这些能力最直接决定 MTV 能否替代 FigTree 完成日常树图工作。
 
@@ -143,7 +141,6 @@ FigTree 通常被拿来对标的能力包括：
 
 ## 建议的实现切入点
 
-- 导出流程：`TreePopupMenu.exportPicturesOrData()`
 - Reroot 和 rotate-node：在 `TreePopupMenu` 的 internal-node 菜单中补齐
 - 基于 metadata 的视觉映射：在 `TreePropertiesAssigner` 的 `advanced.node.visual.config` 现有路径上扩展
 - 统一工程持久化：将输入树、布局、样式、标注和 creative-mode 状态一起序列化

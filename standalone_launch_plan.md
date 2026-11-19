@@ -99,7 +99,7 @@ flowchart TD
 | 树交互与弹窗 | 搜索、字体、折叠等对话框及共享 `TreeListener` 使用宿主窗口、状态栏或右侧属性面板。树右键菜单还可经宿主加载另一模块。 | 弹窗可评估组件所属窗口；状态反馈、属性编辑与跨模块动作需分别设计，不能归结为 owner 替换。 |
 | 公共对话框工具 | shell 中 `EGPSFileChooser` 的无参显示方法及部分 `SwingDialog` 包装方法会直接获取宿主。 | 需沿实际调用链核对；不能认为替换本模块三处调用就完成解耦。 |
 | 初始化可见性 | `PathwayFamilyMainFace` 构造器为 `protected`；`ModuleFace.initializeModuleFaceGUI()` 为包级方法，普通测试包无法直接调用。 | Pathway 原型通过公开的 `loader.getFace()` 创建面板，并以 `PathwayFamilyMainFace` 类型调用其公开的 `initializeGraphics()`；先挂载和布局，再初始化一次。此方法不是全部模块的通用公共契约。 |
-| 动作、关闭与持久化 | 宿主菜单动作通常以当前标签为目标；`ModuleFace.moduleExisted()` 是包级方法，还承担统计持久化及引用释放。Pathway 的 `closeTab()` 保存界面状态。 | 独立菜单须显式绑定目标面板；仅 `dispose()` 或调用 `closeTab()` 不等价于完整宿主关闭流程。当前 Pathway `exportData()` 中实际保存调用被注释，不能把添加菜单等同于导出已实现。 |
+| 动作、关闭与持久化 | 宿主菜单动作通常以当前标签为目标；`ModuleFace.moduleExisted()` 是包级方法，还承担统计持久化及引用释放。Pathway 的 `closeTab()` 保存界面状态。 | 独立菜单须显式绑定目标面板；仅 `dispose()` 或调用 `closeTab()` 不等价于完整宿主关闭流程。工作台中的 Pathway `exportData()` 已支持导出系统树或当前分析。独立窗口需要验证文件选择器的父窗口、取消和保存反馈。 |
 | 其他模块 | 23 个入口对应不同模块；如 `ComputationalModuleFace` 的运行逻辑仍依赖宿主工具栏和进度反馈。 | 先验证 Pathway 单模块，再逐模块评估，不能由其继承 `JPanel` 推导所有模块可独立运行。 |
 
 上述公共依赖位于 `egps-shell`，本工程不能直接修改其源码。后续若确需新增通用生命周期或宿主服务接口，应由维护者在 shell 工程单独评估实施；本次仅修正文档。
