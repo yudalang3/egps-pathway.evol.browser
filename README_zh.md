@@ -315,9 +315,10 @@ System.setProperty("file.encoding", "UTF-8")
 ## 文档
 
 详细的开发者信息，请参阅：
-- [CLAUDE.md](CLAUDE.md) - 开发指南和架构细节
-- [modules_we_have.md](docs/current/modules_we_have.md) - 详细的模块规范
-- [docs/current/](docs/current/) - 当前文档
+- [docs/current/README_zh.md](docs/current/README_zh.md) - 当前文档索引（本地 AI 开发规范见未纳入版本追踪的 `CLAUDE.md` / `AGENTS.md`）
+- [modules_we_have_zh.md](docs/current/modules_we_have_zh.md) - 详细的模块规范（全部 23 个模块）
+- [launchers/README.md](launchers/README.md) 与 [standalone_launch_plan.md](standalone_launch_plan.md) - 模块启动脚本与独立窗口启动机制评估
+- [rPackage/README.md](rPackage/README.md) - `yytree` R 语言包使用与开发指南
 - [src/api/rpython/README_zh.md](src/api/rpython/README_zh.md) - R/Python 桥接入口说明
 
 ## 贡献指南
@@ -344,4 +345,4 @@ System.setProperty("file.encoding", "UTF-8")
 
 **项目**：eGPS2 通路进化浏览器
 **版本**：2.2.0
-**最后更新**：2026-01-01
+**最后更新**：2026-11-19

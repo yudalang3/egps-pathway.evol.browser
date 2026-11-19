@@ -2,7 +2,7 @@
 
 > **文档性质**：当前实现说明与后续架构规划；独立窗口方案尚未实现、尚未验证。
 >
-> **核对基线**：`17a3c2b`，2026-10-17。
+> **核对基线**：初始架构评估基线 `17a3c2b`（2026-10-17），2026-11-19 同步 Pathway 导出状态。
 >
 > **适用范围**：当前工程的模块启动脚本；脱离宿主的评估以 Pathway family browser 为试点，不代表其他模块已兼容。
 
@@ -107,7 +107,7 @@ flowchart TD
 ### 核对依据
 
 - 当前实现：`launchers/_launch_module_common.bat`、`launchers/_launch_module_common.sh`、中英文 README 的模块启动脚本说明。
-- 启动与生命周期：`../egps-shell/src/egps2/Launcher.java`、`UnifiedAccessPoint.java`，以及该工程 `src/egps2/frame/` 下的 `MyFrame.java`、`ModuleFace.java`、`ComputationalModuleFace.java`。
+- 启动与生命周期：`../egps-shell/src/egps2/Launcher.java`、`UnifiedAccessPoint.java`，以及 `../egps-shell/src/egps2/frame/` 下的 `MyFrame.java`、`ModuleFace.java`、`ComputationalModuleFace.java`。
 - 本模块链路：`src/module/evolview/pathwaybrowser/` 下的 `PathwayFamilyMainFace.java`、`PathwayBrowserController.java`、`io/Voice4pathwayFamilyBrowser.java`，以及共享树组件与监听器。
 - 公共导入与桥接：shell 的 `VersatileOpenInputClickAbstractGuiBase.java`、对话框工具，以及本工程 `src/api/rpython/ExternalGuiLauncherSupport.java`。
 

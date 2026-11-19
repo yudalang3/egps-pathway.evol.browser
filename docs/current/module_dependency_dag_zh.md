@@ -1,150 +1,166 @@
-# 模块依赖 DAG
+# 模块依赖图与分层架构（DAG & Layers）
 
 ## 概览
 
-本文描述 `module.evolview.pathwaybrowser` 模块生态当前的有向无环依赖图。
+本文描述 `egps-pathway.evol.browser` 仓库中 `src/module/` 模块生态当前的包级依赖结构。
 
-**当前事实**
+**当前源码事实**
 
-- **包总数：** 18
-- **包含模块的包：** 8
-- **工具包：** 10
-- **模块总数：** 18
-- **依赖层数：** 7
-- **循环依赖：** 0
-
-下图反映的是当前源码布局。`treebuilder` 已纳入当前依赖面。
+- **顶层功能子包总数（`src/module/**`）：** 26
+- **包含 `IModuleLoader` 入口的包：** 13（5 个单模块直接包、5 个 `evolview.*` 可视化模块包，以及 `evoldist`、`multiseq`、`treebuilder` 3 个多模块父包）
+- **支撑与工具包：** 13
+- **独立模块加载入口总数：** 23
+- **逻辑架构分层：** 7 层
 
 ---
 
-## 依赖规则
+## 架构分层原则与真实源码耦合说明
 
-当前架构遵循以下规则：
+1. **自顶向下的主逻辑分层**：高层复合浏览器（`pathwaybrowser`、`treebarplot`、`genebrowser`）位于最顶层，只向下消费核心树视图（`gfamily`、`moderntreeviewer`）、树模型与布局层（`evolview.model`、`evolview.phylotree`）、I/O 解析层（`evoltreio`）以及公共 UI 工具（`evolview.common`）。
+2. **核心树视图对等共享组（`gfamily <-> moderntreeviewer`）**：
+   - `evolview.moderntreeviewer` 复用了位于 `evolview.gfamily` 下的共享树画布 `PhylogeneticTreePanel`、控制器基类 `GeneFamilyController` 及布局/操作面板。
+   - `evolview.gfamily` 复用了位于 `evolview.moderntreeviewer` 下的 `MTVImportInforBean`、`ParamsAssignerAndParser4ModernTreeView`、`TreeParser4MTV` 与 `TreePropertiesAssigner`，并在右键“在新标签页查看子树”时通过 `IndependentModuleLoader` 打开 MTV。
+3. **计算流水线结果跳转（`treebuilder -> moderntreeviewer`）**：
+   - `treebuilder` 下的 4 个建树模块在建树完成后，均直接调用 `evolview.moderntreeviewer.IndependentModuleLoader` 将生成的 `GraphicsNode` 树展示在 Modern Tree View 中。
+4. **全量统一编译**：
+   - 由于存在上述对等组件共享以及配置/模型跨包引用（`evoltrepipline -> evoltreio -> evolview.model -> multiseq`），工程编译采用单次 `javac` 全量编译（见 `compile.bat` / `compile.sh`）。
 
-1. 依赖只允许向下流动。
-2. 低层包不依赖应用层包。
-3. `evoltrepipline` 保持为共享基础设施，而不是业务逻辑容器。
-4. `evolview.phylotree` 与 `gfamily` 保持解耦。
-5. `evoltreio` 依赖 `evolview.model`，而不是浏览器专用 UI 包。
-
-图中 `A --> B` 表示 `A` 依赖 `B`。
+下图中 `A --> B` 表示包 `A` 引用（`import`）了包 `B`。
 
 ---
 
-## DAG 图
+## 包级依赖关系图
 
 ```mermaid
 graph TB
-    subgraph Level7["Level 7: 目标模块"]
-        pathwaybrowser["pathwaybrowser<br/>[MODULE]"]:::module
+    subgraph Level7["Level 7: 复合浏览器与联合视图"]
+        pathwaybrowser["evolview.pathwaybrowser<br/>[MODULE]"]:::module
+        treebarplot["evolview.treebarplot<br/>[MODULE]"]:::module
+        genebrowser["evolview.genebrowser<br/>[MODULE]"]:::module
     end
 
-    subgraph Level6["Level 6: 应用层"]
-        gfamily["gfamily<br/>[MODULE]"]:::module
-        moderntreeviewer["moderntreeviewer<br/>[MODULE]"]:::module
+    subgraph Level6["Level 6: 核心树视图（对等共享组）"]
+        gfamily["evolview.gfamily<br/>[MODULE]"]:::module
+        moderntreeviewer["evolview.moderntreeviewer<br/>[MODULE]"]:::module
     end
 
-    subgraph Level5["Level 5: I/O 层"]
+    subgraph Level5["Level 5: 树 I/O 与节点工具"]
         evoltreio["evoltreio<br/>[UTILITY]"]:::utility
+        treenodecoll["treenodecoll<br/>[MODULE]"]:::module
+        demo["evolview.demo<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level4["Level 4: 模型层"]
-        model["evolview.model<br/>[UTILITY]"]:::utility
+    subgraph Level4["Level 4: 树可视化布局与模型层"]
         phylotree["evolview.phylotree<br/>[UTILITY]"]:::utility
+        model["evolview.model<br/>[UTILITY]"]:::utility
+        common["evolview.common<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level3["Level 3: 流程编排层"]
-        evoltre["evoltre<br/>[UTILITY]"]:::utility
-        multiseq["multiseq<br/>[6 MODULES]"]:::module
+    subgraph Level3["Level 3: 比对与建树工作流层"]
         treebuilder["treebuilder<br/>[4 MODULES]"]:::module
+        multiseq["multiseq<br/>[6 MODULES]"]:::module
+        evoltre["evoltre<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level2["Level 2: 核心算法层"]
-        evoldist["evoldist<br/>[3 MODULES]"]:::module
-        remnant["remnant<br/>[UTILITY]"]:::utility
+    subgraph Level2["Level 2: 距离与进化重构算法层"]
         parsimonytre["parsimonytre<br/>[UTILITY]"]:::utility
+        remnant["remnant<br/>[UTILITY]"]:::utility
+        evoldist["evoldist<br/>[3 MODULES]"]:::module
     end
 
-    subgraph Level1["Level 1: 共享基础设施"]
-        evoltrepipline["evoltrepipline<br/>[UTILITY]<br/>接口 · 常量 · 共享 UI"]:::utility
+    subgraph Level1["Level 1: 共享流水线基础设施"]
+        evoltrepipline["evoltrepipline<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level0["Level 0: 基础工具层"]
+    subgraph Level0["Level 0: 独立工具模块与基础支撑层"]
         ambigbse["ambigbse<br/>[MODULE]"]:::module
+        pill["pill<br/>[MODULE]"]:::module
+        treeconveop["treeconveop<br/>[MODULE]"]:::module
+        treetanglegram["treetanglegram<br/>[MODULE]"]:::module
+        extprog["config.externalprograms<br/>[UTILITY]"]:::utility
         genome["genome<br/>[UTILITY]"]:::utility
         evolknow["evolknow<br/>[UTILITY]"]:::utility
-        pill["pill<br/>[MODULE]"]:::module
         webmsaoperator["webmsaoperator<br/>[UTILITY]"]:::utility
     end
 
     pathwaybrowser --> gfamily
-    pathwaybrowser --> model
     pathwaybrowser --> moderntreeviewer
     pathwaybrowser --> phylotree
+    pathwaybrowser --> model
+    pathwaybrowser --> common
 
-    gfamily --> model
+    treebarplot --> gfamily
+    treebarplot --> moderntreeviewer
+    treebarplot --> phylotree
+    treebarplot --> model
+    treebarplot --> evolknow
+
+    genebrowser --> gfamily
+    genebrowser --> model
+
+    gfamily <--> moderntreeviewer
     gfamily --> phylotree
-    gfamily --> evolknow
+    gfamily --> model
+    gfamily --> common
+    gfamily --> evoltreio
     gfamily --> evoltre
-    gfamily --> multiseq
 
+    moderntreeviewer --> phylotree
     moderntreeviewer --> model
     moderntreeviewer --> evoltreio
     moderntreeviewer --> pill
 
-    evoltreio --> model
-    phylotree --> model
+    treenodecoll --> evoltreio
+    demo --> phylotree
+    demo --> parsimonytre
 
-    evoltre --> parsimonytre
-    multiseq --> evoltrepipline
-    multiseq --> evoltre
-    multiseq --> webmsaoperator
-    treebuilder --> evoltrepipline
-    treebuilder --> remnant
+    phylotree --> model
+    phylotree --> evoltreio
+    phylotree --> remnant
+    evoltreio --> model
+    model --> multiseq
+
+    treebuilder --> moderntreeviewer
+    treebuilder --> phylotree
+    treebuilder --> model
     treebuilder --> multiseq
     treebuilder --> evoldist
+    treebuilder --> remnant
+    treebuilder --> evoltrepipline
+    treebuilder --> webmsaoperator
 
-    evoldist --> evoltrepipline
-    remnant --> evoltrepipline
-    remnant --> evoldist
+    multiseq --> extprog
+    multiseq --> evoltre
+    multiseq --> evoltrepipline
+    multiseq --> webmsaoperator
+    evoltre --> parsimonytre
+
     parsimonytre --> evoldist
+    remnant --> evoldist
+    remnant --> evoltrepipline
+    remnant --> webmsaoperator
+    evoldist --> evoltrepipline
+    evoldist --> webmsaoperator
+
+    evoltrepipline --> evoltreio
 
     classDef module fill:#e1f5e1,stroke:#4caf50,stroke-width:2px,color:#000
     classDef utility fill:#e3f2fd,stroke:#2196f3,stroke-width:2px,color:#000
-
-    style Level0 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
-    style Level1 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style Level2 fill:#fce4ec,stroke:#e91e63,stroke-width:2px
-    style Level3 fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style Level4 fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
-    style Level5 fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
-    style Level6 fill:#ffe0b2,stroke:#ff6f00,stroke-width:2px
-    style Level7 fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px
 ```
 
 ---
 
 ## 分层摘要
 
-| 层级 | 角色 | 包 |
-|------|------|----|
-| 0 | 基础工具 | `ambigbse`、`genome`、`evolknow`、`pill`、`webmsaoperator` |
-| 1 | 共享基础设施 | `evoltrepipline` |
-| 2 | 核心算法 | `evoldist`、`remnant`、`parsimonytre` |
-| 3 | 流程编排 | `evoltre`、`multiseq`、`treebuilder` |
-| 4 | 模型层 | `evolview.model`、`evolview.phylotree` |
-| 5 | I/O 层 | `evoltreio` |
-| 6 | 应用层 | `evolview.moderntreeviewer`、`evolview.gfamily` |
-| 7 | 目标模块 | `evolview.pathwaybrowser` |
+| 层级 | 角色 | 包含的包 |
+|------|------|----------|
+| 0 | 独立工具模块与基础支撑层 | `ambigbse` [1]、`pill` [1]、`treeconveop` [1]、`treetanglegram` [1]、`config.externalprograms`、`genome`、`evolknow`、`webmsaoperator` |
+| 1 | 共享流水线基础设施 | `evoltrepipline` |
+| 2 | 距离与进化重构算法层 | `evoldist` [3]、`remnant`、`parsimonytre` |
+| 3 | 比对与建树工作流层 | `multiseq` [6]、`treebuilder` [4]、`evoltre` |
+| 4 | 树可视化布局与模型层 | `evolview.model`、`evolview.phylotree`、`evolview.common` |
+| 5 | 树 I/O 与节点收集工具 | `evoltreio`、`treenodecoll` [1]、`evolview.demo` |
+| 6 | 核心树视图（对等共享组） | `evolview.moderntreeviewer` [1]、`evolview.gfamily` [1] |
+| 7 | 复合浏览器与联合视图 | `evolview.pathwaybrowser` [1]、`evolview.treebarplot` [1]、`evolview.genebrowser` [1] |
 
----
-
-## 关键演进结果
-
-当前 DAG 已经稳定体现出这些结果：
-
-- `evoltrepipline` 不再依赖业务算法包。
-- `evolview.phylotree` 通过共享树可视化抽象与 `gfamily` 解耦。
-- `evoltreio` 以 `evolview.model` 为树结构读写基础。
-- 共享的 alignment-view 数据模型已经放到 `evoltrepipline.alignment`。
-- `pathwaybrowser` 保持在依赖面的最顶层，只消费下层能力。
+*（方括号 `[N]` 表示该包下包含的独立 `IModuleLoader` 数量，总计 23 个。）*

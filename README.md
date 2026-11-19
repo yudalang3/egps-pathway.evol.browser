@@ -315,9 +315,10 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) file for details.
 ## Documentation
 
 For detailed developer information, see:
-- [CLAUDE.md](CLAUDE.md) - Developer guidance and architecture details
+- [docs/current/README.md](docs/current/README.md) - Current documentation index (`CLAUDE.md` / `AGENTS.md` provide local AI developer guidance)
 - [modules_we_have.md](docs/current/modules_we_have.md) - Detailed module specifications
-- [docs/current/](docs/current/) - Current documentation
+- [launchers/README.md](launchers/README.md) & [standalone_launch_plan.md](standalone_launch_plan.md) - Module launcher scripts and standalone launch architecture evaluation
+- [rPackage/README.md](rPackage/README.md) - `yytree` R package user and developer guide
 - [src/api/rpython/README.md](src/api/rpython/README.md) - R/Python bridge entry-point guide
 
 ## Contributing
@@ -344,4 +345,4 @@ For issues, questions, or contributions, please refer to the project documentati
 
 **Project**: eGPS2 Pathway Evolution Browser
 **Version**: 2.2.0
-**Last Updated**: 2026-01-01
+**Last Updated**: 2026-11-19

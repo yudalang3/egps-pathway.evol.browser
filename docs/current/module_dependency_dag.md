@@ -1,125 +1,151 @@
-# Module Dependency DAG
+# Module Dependency DAG and Architecture Layers
 
 ## Overview
 
-This document describes the current directed acyclic dependency graph for the `module.evolview.pathwaybrowser` module ecosystem.
+This document describes the package-level dependency architecture for the `src/module/` ecosystem in `egps-pathway.evol.browser`.
 
-**Current facts**
+**Current source facts**
 
-- **Total packages:** 18
-- **Packages containing modules:** 8
-- **Utility packages:** 10
-- **Total modules:** 18
-- **Dependency layers:** 7
-- **Circular dependencies:** 0
-
-The graph below reflects the current source layout. `treebuilder` is included in the current dependency surface.
+- **Total top-level functional packages (`src/module/**`):** 26
+- **Packages containing `IModuleLoader` entries:** 13 (5 direct single-module packages, 5 `evolview.*` browser/viewer packages, and 3 multi-module parent packages `evoldist`, `multiseq`, `treebuilder`)
+- **Support / utility packages:** 13
+- **Total standalone modules:** 23
+- **Logical architecture layers:** 7
 
 ---
 
-## Dependency Rules
+## Architectural Principles and Real Source Coupling
 
-The current architecture follows these rules:
+1. **Downward logical layering**: High-level browser and viewer modules (`pathwaybrowser`, `treebarplot`, `genebrowser`) sit at the top layer and consume lower-level tree models (`evolview.model`, `evolview.phylotree`), I/O parsers (`evoltreio`), and shared UI utilities (`evolview.common`).
+2. **Shared tree panel and parameter parser peer group (`gfamily <-> moderntreeviewer`)**:
+   - `evolview.moderntreeviewer` reuses `PhylogeneticTreePanel`, `GeneFamilyController`, and layout/operation control panels hosted under `evolview.gfamily`.
+   - `evolview.gfamily` reuses `MTVImportInforBean`, `ParamsAssignerAndParser4ModernTreeView`, `TreeParser4MTV`, and `TreePropertiesAssigner` from `evolview.moderntreeviewer`, and opens clade subtrees in new MTV tabs via `IndependentModuleLoader`.
+3. **Result viewer handoff (`treebuilder -> moderntreeviewer`)**:
+   - All 4 tree-construction modules under `treebuilder` invoke `evolview.moderntreeviewer.IndependentModuleLoader` after tree reconstruction to display the resulting phylogeny in Modern Tree View.
+4. **Full-project compilation**:
+   - Because of the peer sharing above and configuration/model cross-references (`evoltrepipline -> evoltreio -> evolview.model -> multiseq`), all `src/**/*.java` sources are compiled together in a single `javac` pass (`compile.bat` / `compile.sh`).
 
-1. Dependencies flow downward only.
-2. Lower layers do not depend on application-layer packages.
-3. `evoltrepipline` stays as shared infrastructure rather than business logic.
-4. `evolview.phylotree` remains decoupled from `gfamily`.
-5. `evoltreio` depends on `evolview.model` instead of browser-specific UI packages.
-
-Read the graph as `A --> B`, meaning `A` depends on `B`.
+Read the graph below as `A --> B`, meaning `A` imports from `B`.
 
 ---
 
-## DAG Graph
+## Dependency Graph
 
 ```mermaid
 graph TB
-    subgraph Level7["Level 7: Target Module"]
-        pathwaybrowser["pathwaybrowser<br/>[MODULE]"]:::module
+    subgraph Level7["Level 7: Composite Browsers & Viewers"]
+        pathwaybrowser["evolview.pathwaybrowser<br/>[MODULE]"]:::module
+        treebarplot["evolview.treebarplot<br/>[MODULE]"]:::module
+        genebrowser["evolview.genebrowser<br/>[MODULE]"]:::module
     end
 
-    subgraph Level6["Level 6: Application Layer"]
-        gfamily["gfamily<br/>[MODULE]"]:::module
-        moderntreeviewer["moderntreeviewer<br/>[MODULE]"]:::module
+    subgraph Level6["Level 6: Core Tree Viewers (Peer Group)"]
+        gfamily["evolview.gfamily<br/>[MODULE]"]:::module
+        moderntreeviewer["evolview.moderntreeviewer<br/>[MODULE]"]:::module
     end
 
-    subgraph Level5["Level 5: I/O Layer"]
+    subgraph Level5["Level 5: Tree I/O & Utilities"]
         evoltreio["evoltreio<br/>[UTILITY]"]:::utility
+        treenodecoll["treenodecoll<br/>[MODULE]"]:::module
+        demo["evolview.demo<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level4["Level 4: Model Layer"]
-        model["evolview.model<br/>[UTILITY]"]:::utility
+    subgraph Level4["Level 4: Tree Visualization & Model Layer"]
         phylotree["evolview.phylotree<br/>[UTILITY]"]:::utility
+        model["evolview.model<br/>[UTILITY]"]:::utility
+        common["evolview.common<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level3["Level 3: Process Orchestration"]
-        evoltre["evoltre<br/>[UTILITY]"]:::utility
-        multiseq["multiseq<br/>[6 MODULES]"]:::module
+    subgraph Level3["Level 3: Alignment & Tree Construction Workflows"]
         treebuilder["treebuilder<br/>[4 MODULES]"]:::module
+        multiseq["multiseq<br/>[6 MODULES]"]:::module
+        evoltre["evoltre<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level2["Level 2: Core Algorithms"]
-        evoldist["evoldist<br/>[3 MODULES]"]:::module
-        remnant["remnant<br/>[UTILITY]"]:::utility
+    subgraph Level2["Level 2: Distance & Reconstruction Algorithms"]
         parsimonytre["parsimonytre<br/>[UTILITY]"]:::utility
+        remnant["remnant<br/>[UTILITY]"]:::utility
+        evoldist["evoldist<br/>[3 MODULES]"]:::module
     end
 
-    subgraph Level1["Level 1: Shared Infrastructure"]
-        evoltrepipline["evoltrepipline<br/>[UTILITY]<br/>interfaces · constants · shared UI"]:::utility
+    subgraph Level1["Level 1: Shared Pipeline Infrastructure"]
+        evoltrepipline["evoltrepipline<br/>[UTILITY]"]:::utility
     end
 
-    subgraph Level0["Level 0: Base Utilities"]
+    subgraph Level0["Level 0: Standalone Modules & Base Utilities"]
         ambigbse["ambigbse<br/>[MODULE]"]:::module
+        pill["pill<br/>[MODULE]"]:::module
+        treeconveop["treeconveop<br/>[MODULE]"]:::module
+        treetanglegram["treetanglegram<br/>[MODULE]"]:::module
+        extprog["config.externalprograms<br/>[UTILITY]"]:::utility
         genome["genome<br/>[UTILITY]"]:::utility
         evolknow["evolknow<br/>[UTILITY]"]:::utility
-        pill["pill<br/>[MODULE]"]:::module
         webmsaoperator["webmsaoperator<br/>[UTILITY]"]:::utility
     end
 
     pathwaybrowser --> gfamily
-    pathwaybrowser --> model
     pathwaybrowser --> moderntreeviewer
     pathwaybrowser --> phylotree
+    pathwaybrowser --> model
+    pathwaybrowser --> common
 
-    gfamily --> model
+    treebarplot --> gfamily
+    treebarplot --> moderntreeviewer
+    treebarplot --> phylotree
+    treebarplot --> model
+    treebarplot --> evolknow
+
+    genebrowser --> gfamily
+    genebrowser --> model
+
+    gfamily <--> moderntreeviewer
     gfamily --> phylotree
-    gfamily --> evolknow
+    gfamily --> model
+    gfamily --> common
+    gfamily --> evoltreio
     gfamily --> evoltre
-    gfamily --> multiseq
 
+    moderntreeviewer --> phylotree
     moderntreeviewer --> model
     moderntreeviewer --> evoltreio
     moderntreeviewer --> pill
 
-    evoltreio --> model
-    phylotree --> model
+    treenodecoll --> evoltreio
+    demo --> phylotree
+    demo --> parsimonytre
 
-    evoltre --> parsimonytre
-    multiseq --> evoltrepipline
-    multiseq --> evoltre
-    multiseq --> webmsaoperator
-    treebuilder --> evoltrepipline
-    treebuilder --> remnant
+    phylotree --> model
+    phylotree --> evoltreio
+    phylotree --> remnant
+    evoltreio --> model
+    model --> multiseq
+
+    treebuilder --> moderntreeviewer
+    treebuilder --> phylotree
+    treebuilder --> model
     treebuilder --> multiseq
     treebuilder --> evoldist
+    treebuilder --> remnant
+    treebuilder --> evoltrepipline
+    treebuilder --> webmsaoperator
 
-    evoldist --> evoltrepipline
-    remnant --> evoltrepipline
-    remnant --> evoldist
+    multiseq --> extprog
+    multiseq --> evoltre
+    multiseq --> evoltrepipline
+    multiseq --> webmsaoperator
+    evoltre --> parsimonytre
+
     parsimonytre --> evoldist
+    remnant --> evoldist
+    remnant --> evoltrepipline
+    remnant --> webmsaoperator
+    evoldist --> evoltrepipline
+    evoldist --> webmsaoperator
+
+    evoltrepipline --> evoltreio
 
     classDef module fill:#e1f5e1,stroke:#4caf50,stroke-width:2px,color:#000
     classDef utility fill:#e3f2fd,stroke:#2196f3,stroke-width:2px,color:#000
-
-    style Level0 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
-    style Level1 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style Level2 fill:#fce4ec,stroke:#e91e63,stroke-width:2px
-    style Level3 fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style Level4 fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
-    style Level5 fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
-    style Level6 fill:#ffe0b2,stroke:#ff6f00,stroke-width:2px
-    style Level7 fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px
 ```
 
 ---
@@ -128,23 +154,13 @@ graph TB
 
 | Level | Role | Packages |
 |-------|------|----------|
-| 0 | Base utilities | `ambigbse`, `genome`, `evolknow`, `pill`, `webmsaoperator` |
-| 1 | Shared infrastructure | `evoltrepipline` |
-| 2 | Core algorithms | `evoldist`, `remnant`, `parsimonytre` |
-| 3 | Process orchestration | `evoltre`, `multiseq`, `treebuilder` |
-| 4 | Model layer | `evolview.model`, `evolview.phylotree` |
-| 5 | I/O layer | `evoltreio` |
-| 6 | Application layer | `evolview.moderntreeviewer`, `evolview.gfamily` |
-| 7 | Target module | `evolview.pathwaybrowser` |
+| 0 | Standalone modules & base utilities | `ambigbse` [1], `pill` [1], `treeconveop` [1], `treetanglegram` [1], `config.externalprograms`, `genome`, `evolknow`, `webmsaoperator` |
+| 1 | Shared pipeline infrastructure | `evoltrepipline` |
+| 2 | Distance & reconstruction algorithms | `evoldist` [3], `remnant`, `parsimonytre` |
+| 3 | Alignment & tree construction workflows | `multiseq` [6], `treebuilder` [4], `evoltre` |
+| 4 | Tree visualization & model layer | `evolview.model`, `evolview.phylotree`, `evolview.common` |
+| 5 | Tree I/O & node collection | `evoltreio`, `treenodecoll` [1], `evolview.demo` |
+| 6 | Core tree viewers (peer group) | `evolview.moderntreeviewer` [1], `evolview.gfamily` [1] |
+| 7 | Composite browsers & viewers | `evolview.pathwaybrowser` [1], `evolview.treebarplot` [1], `evolview.genebrowser` [1] |
 
----
-
-## Key Evolution Results
-
-The current DAG already reflects these established outcomes:
-
-- `evoltrepipline` no longer depends on business-layer algorithm packages.
-- `evolview.phylotree` is separated from `gfamily` through shared tree-visualization abstractions.
-- `evoltreio` reads and writes tree structures against `evolview.model`.
-- Shared alignment-view data models now live in `evoltrepipline.alignment`.
-- `pathwaybrowser` stays at the top of the dependency surface and only consumes lower layers.
+*(Bracketed numbers `[N]` indicate the number of standalone `IModuleLoader` implementations in each package; total = 23.)*

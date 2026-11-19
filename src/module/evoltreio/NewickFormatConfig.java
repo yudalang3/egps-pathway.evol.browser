@@ -10,8 +10,8 @@ import module.evoltreio.exception.NewickFormatException;
  * <pre>
  * Format | Leaf Node      | Internal Node     | Description
  * -------|----------------|-------------------|------------------------------------------
- *   0    | name:dist      | support:dist      | Flexible with support values (default)
- *   1    | name:dist      | name:dist         | Internal node names instead of support
+ *   0    | name:dist      | support:dist      | Flexible with support values
+ *   1    | name:dist      | name:dist         | Internal node names instead of support (default)
  *   2    | name:dist      | support:dist      | Strict format 0 (all fields required)
  *   3    | name:dist      | name:dist         | Strict format 1 (all fields required)
  *   4    | name:dist      | - (none)          | Leaf only, no internal node data
@@ -134,7 +134,7 @@ public class NewickFormatConfig {
 	}
 
 	/**
-	 * Get the default format configuration (format 0).
+	 * Get the default format configuration (format 1).
 	 */
 	public static NewickFormatConfig getDefaultFormat() {
 		try {

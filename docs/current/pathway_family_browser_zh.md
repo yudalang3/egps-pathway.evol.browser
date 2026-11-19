@@ -80,11 +80,11 @@ Pathway Family Browser（通路家族浏览器）是 eGPS2 中用于结合物种
 
 ## 5. 导出机制
 
-- **双目标路由**：点击导出时，若系统发生树与分析标签页同时就绪，支持弹窗明确选择导出“Phylogenetic tree”（系统发生树）或“Current analysis”（当前分析页）。
+- **双目标路由**：点击导出时，若系统发生树与分析标签页同时就绪，支持弹窗明确选择导出“Phylogeny”（系统发生树）或“Current analysis”（当前分析页）。
 - **通路离屏快照高保真导出**：
   通路画廊导出独立于视口尺寸与滚动条位置，完整导出全画幅就绪画布。
-- **PPTX 嵌图适配**：
-  针对离屏位图快照，专用保存工具 `PathwaySnapshotSaveUtil` 采用 Apache POI `XMLSlideShow.addPicture(..., PictureType.PNG)` 显式嵌入全尺寸位图，解决基础组件在无矢量对象时输出白图的限制。
+- **矢量树与快照 PPTX 分流导出**：
+  专用保存工具 `PathwaySnapshotSaveUtil(boolean snapshotPptx)` 区分系统树与通路快照：导出“Phylogeny”（系统树）为 PPTX 时调用共享矢量导出器 `EGPSPrintUtilities.saveAsPptx` 输出可编辑矢量图元；导出“Current analysis”（通路画廊快照）为 PPTX 时采用 Apache POI `XMLSlideShow.addPicture(..., PictureType.PNG)` 显式嵌入全尺寸高分辨率位图，解决基础组件在离屏快照无矢量对象时输出白图的限制。
 - **格式兼容性**：
   支持 PNG、JPG、SVG、PDF、EPS、PPTX。位图格式自动补齐白底；保留用户选择的大小写扩展名并确保主窗口居中。
 
@@ -115,4 +115,4 @@ Pathway Family Browser（通路家族浏览器）是 eGPS2 中用于结合物种
 
 1. **复杂 Excel 公式**：若表格使用了 POI 尚未支持的特殊函数或外部数据透视表引用，建议在 Excel 中先全选并执行“粘贴为数值”后再行导入。
 2. **第三方 SVG 特效**：SVG 支持标准 SVG 1.1 核心特性；非标准滤镜或浏览器特有扩展依赖 bundled `jsvg-1.2.0` 的实现程度。
-3. **PPTX 导出本质**：从通路快照导出的 PPTX 内部承载的是高保真全画幅 PNG，不支持在 PowerPoint 中对通路图内单个图元进行二次矢量解组编辑。
+3. **PPTX 导出模式区分**：选择“Phylogeny”导出的系统树 PPTX 为可编辑矢量图元；从通路画廊快照（“Current analysis”）导出的 PPTX 内部承载的是高保真全画幅 PNG，不支持在 PowerPoint 中对通路图内单个图元进行二次矢量解组编辑。

@@ -32,8 +32,9 @@
 - 支持对选中节点做批量视觉修改
 - 支持 ladderize
 - 支持折叠与展开
-- 支持 swap sibling 和 detach node
+- 支持 swap sibling、add child、add sibling and merge、detach node 以及带确认的 delete clade
 - 支持将选中的 clade 在新的 MTV tab 中打开
+- 支持将整棵树或选中子树复制为 Newick 到系统剪贴板
 
 ### 标注系统
 
@@ -101,12 +102,12 @@ FigTree 通常被拿来对标的能力包括：
 | 交互 | Rotate node | 常用 | Missing | 当前未暴露 UI 入口 |
 | 交互 | Reroot / midpoint root | 常用 | Missing | 可能有底层线索，但 MTV 没有现成流程 |
 | 编辑 | Swap sibling | 常用 | Supported | 右键菜单已支持 |
-| 编辑 | Prune/delete taxa、批量删除 | 常用 | Partial | 有单节点 detach，没有批量和历史操作 |
+| 编辑 | Prune/delete taxa、批量删除 | 常用 | Partial | 已支持带确认的 `Delete clade` 与 `Detach node`，暂无多选批量删除与历史撤销 |
 | 折叠 | Collapse / expand clade | 常用 | Supported | 右键与手势都支持 |
 | 折叠 | Cartoon / collapse-as-single-taxon | 常用 | Partial | 有三角折叠样式，但不等同完整 cartoon 语义 |
 | 样式 | 手工改色、线宽、节点大小 | 常用 | Supported | 操作面板和控制器已支持 |
 | 样式 | 按属性映射并生成 legend | 常用 | Missing | 目前节点视觉配置仍是 name-based，不是 metadata-driven |
-| 剪贴板 | 复制标签或子树 | 常用 | Missing | 未见剪贴板导出路径 |
+| 剪贴板 | 复制标签或子树 | 常用 | Partial | `ModernTreeOperationPanel` 已支持 `Copy tree as Newick` 与 `Copy subtree as Newick` |
 | 标注 | Clade annotation | 常用 | Supported | 这部分 MTV 其实强于纯查看器 |
 | 导出 | 矢量图（`PDF`/`SVG`/`EPS`） | 常用 | Supported | 通过模块的 Export 命令调用 `TreeExportHandler` |
 | 导出 | 位图（`PNG`/`JPEG`） | 常用 | Supported | 通过模块的 Export 命令调用 `TreeExportHandler` |

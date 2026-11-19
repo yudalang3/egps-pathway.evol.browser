@@ -80,10 +80,10 @@ The module implements a strict three-state count model (`CountState`):
 
 ## 5. Export Capabilities
 
-- **Dual-target Routing**: Supports explicit selection between the phylogenetic tree and the active analysis page.
-- **Viewport-independent Snapshot**: Exports the complete ready canvas regardless of current scrolling or scaling.
-- **PPTX Snapshot Embedding**: Custom `PathwaySnapshotSaveUtil` embeds the high-resolution rendered PNG snapshot into PPTX slides via `XMLSlideShow.addPicture`, preventing blank slide output from standard `SLGraphics`.
-- **Formats Supported**: PNG, JPG, SVG, PDF, EPS, PPTX, with automatic white background fill for raster images and centered modal dialogs.
+- **Dual-target Routing**: Supports explicit selection between `Phylogeny` (the phylogenetic tree) and `Current analysis` (the active analysis page) when both are ready.
+- **Viewport-independent Snapshot**: Pathway gallery export captures the complete ready canvas regardless of current scrolling or scaling.
+- **Split Vector & Snapshot PPTX Export**: `PathwaySnapshotSaveUtil(boolean snapshotPptx)` separates tree and snapshot PPTX handling: exporting `Phylogeny` as PPTX delegates to `EGPSPrintUtilities.saveAsPptx` to preserve editable vector tree primitives, whereas exporting `Current analysis` pathway snapshots embeds the high-resolution rendered PNG snapshot into PPTX slides via `XMLSlideShow.addPicture`.
+- **Formats Supported**: PNG, JPG, SVG, PDF, EPS, PPTX, with automatic white background fill for raster images, preserved filename casing, and centered modal dialogs.
 
 ---
 
@@ -112,4 +112,4 @@ All 14 test suites in `scripts/test_pathway_remaining_fixes.ps1` execute cleanly
 
 1. **Complex Excel Formulas**: For unsupported external references or complex formulas, perform "Paste as Values" in Excel before importing.
 2. **Advanced SVG Features**: SVG capabilities match SVG 1.1 core specifications in bundled `jsvg-1.2.0`.
-3. **PPTX Snapshot Export**: Exported PPTX slides embed high-resolution PNG snapshots rather than editable vector primitives.
+3. **PPTX Export Modes**: Exporting `Phylogeny` to PPTX produces editable vector tree graphics, whereas exporting a pathway gallery snapshot (`Current analysis`) to PPTX embeds a high-resolution full-canvas PNG snapshot rather than editable source diagram primitives.

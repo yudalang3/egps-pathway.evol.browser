@@ -2,166 +2,161 @@
 
 ## Overview
 
-This document describes the current package-level dependency tree for the `module.evolview.pathwaybrowser` module ecosystem.
+This document lists the complete package-level dependency tree for all 26 functional packages (and 23 `IModuleLoader` modules) under `src/module/`.
 
 **Current status**
 
-- **Strict DAG:** yes
-- **Total packages:** 18
-- **Packages containing modules:** 8
-- **Utility packages:** 10
-- **Total modules:** 18
-- **Architecture depth:** 7 dependency layers
+- **Total functional packages under `src/module/`:** 26
+- **Packages containing `IModuleLoader` entries:** 13
+- **Utility / support packages:** 13
+- **Total standalone modules:** 23
+- **Logical architecture depth:** 7 layers
 
 ---
 
 ## Package Breakdown
 
-### Packages Containing Modules
+### Packages Containing Modules (13 packages, 23 modules)
 
-**Direct module packages**
+**Single-module direct packages (5 modules)**
 
-1. `pathwaybrowser`
-2. `gfamily`
-3. `moderntreeviewer`
-4. `ambigbse`
-5. `pill`
+1. `ambigbse` (1 module)
+2. `pill` (1 module)
+3. `treeconveop` (1 module, hosting 2 dockable VOICE sub-tabs)
+4. `treenodecoll` (1 module)
+5. `treetanglegram` (1 module)
 
-**Parent packages with submodules**
+**`evolview.*` visualization module packages (5 modules)**
 
-6. `evoldist` with 3 modules
-7. `multiseq` with 6 modules
-8. `treebuilder` with 4 modules
+6. `evolview.genebrowser` (1 module)
+7. `evolview.gfamily` (1 module)
+8. `evolview.moderntreeviewer` (1 module)
+9. `evolview.pathwaybrowser` (1 module)
+10. `evolview.treebarplot` (1 module)
 
-### Utility Packages
+**Multi-module workflow parent packages (13 modules)**
 
-1. `evolview.model`
-2. `evolview.phylotree`
-3. `evolknow`
-4. `evoltre`
-5. `evoltreio`
-6. `evoltrepipline`
-7. `genome`
-8. `parsimonytre`
-9. `remnant`
-10. `webmsaoperator`
+11. `evoldist` (3 modules: `gene2dist`, `msa2distview`, `view`)
+12. `multiseq` (6 modules: `aligner`, `alignerwithref`, `alignment/trimmer`, `alignment/view`, `deversitydescriptor`, `gene2msa`)
+13. `treebuilder` (4 modules: `fromdist`, `frommaf`, `frommsa`, `gene2tree`)
+
+### Utility & Support Packages (13 packages)
+
+1. `config.externalprograms`
+2. `evolknow`
+3. `evoltre`
+4. `evoltreio`
+5. `evoltrepipline`
+6. `evolview.common`
+7. `evolview.demo`
+8. `evolview.model`
+9. `evolview.phylotree`
+10. `genome`
+11. `parsimonytre`
+12. `remnant`
+13. `webmsaoperator`
 
 ---
 
-## Layered Dependency Structure
+## Package-by-Package Direct Dependencies (`import module.*`)
 
-### Level 0: Base Utilities
+### Level 0: Standalone Modules & Base Utilities
 
-- `ambigbse` [module]
-- `genome` [utility]
-- `evolknow` [utility]
-- `pill` [module]
-- `webmsaoperator` [utility]
+- `ambigbse` [1 module] -> *(no internal `module.*` dependencies)*
+- `pill` [1 module] -> *(no internal `module.*` dependencies)*
+- `treeconveop` [1 module] -> *(no internal `module.*` dependencies)*
+- `treetanglegram` [1 module] -> *(no internal `module.*` dependencies)*
+- `config.externalprograms` [utility] -> *(no internal `module.*` dependencies)*
+- `genome` [utility] -> *(no internal `module.*` dependencies)*
+- `evolknow` [utility] -> *(no internal `module.*` dependencies)*
+- `webmsaoperator` [utility] -> *(no internal `module.*` dependencies)*
 
-### Level 1: Shared Infrastructure
+### Level 1: Shared Pipeline Infrastructure
 
-- `evoltrepipline` [utility]
+- `evoltrepipline` [utility] -> `evoltreio`
 
-### Level 2: Core Algorithms
+### Level 2: Distance & Reconstruction Algorithms
 
-- `evoldist` [3 modules] -> `evoltrepipline`
-- `remnant` [utility] -> `evoltrepipline`, `evoldist`
+- `evoldist` [3 modules] -> `evoltrepipline`, `webmsaoperator`
+- `remnant` [utility] -> `evoldist`, `evoltrepipline`, `webmsaoperator`
 - `parsimonytre` [utility] -> `evoldist`
 
-### Level 3: Process Orchestration
+### Level 3: Alignment & Tree Construction Workflows
 
 - `evoltre` [utility] -> `parsimonytre`
-- `multiseq` [6 modules] -> `evoltrepipline`, `evoltre`, `webmsaoperator`
-- `treebuilder` [4 modules] -> `evoltrepipline`, `remnant`, `multiseq`, `evoldist`
+- `multiseq` [6 modules] -> `config.externalprograms`, `evoltre`, `evoltrepipline`, `webmsaoperator`
+- `treebuilder` [4 modules] -> `evoldist`, `evoltrepipline`, `evolview.model`, `evolview.moderntreeviewer`, `evolview.phylotree`, `multiseq`, `remnant`, `webmsaoperator`
 
-### Level 4: Model Layer
+### Level 4: Tree Visualization & Model Layer
 
-- `evolview.model` [utility]
-- `evolview.phylotree` [utility] -> `evolview.model`
+- `evolview.common` [utility] -> *(no internal `module.*` dependencies)*
+- `evolview.model` [utility] -> `multiseq` (`PositionConvertor`)
+- `evolview.phylotree` [utility] -> `evoltreio`, `evolview.model`, `remnant`
 
-### Level 5: I/O Layer
+### Level 5: Tree I/O & Node Collection
 
 - `evoltreio` [utility] -> `evolview.model`
+- `treenodecoll` [1 module] -> `evoltreio`
+- `evolview.demo` [utility] -> `evolview.phylotree`, `parsimonytre`
 
-### Level 6: Application Layer
+### Level 6: Core Tree Viewers (Peer Group)
 
-- `evolview.moderntreeviewer` [module] -> `evolview.model`, `evoltreio`, `pill`
-- `evolview.gfamily` [module] -> `evolview.model`, `evolview.phylotree`, `evolknow`, `evoltre`, `multiseq`
+- `evolview.moderntreeviewer` [1 module] -> `evoltreio`, `evolview.gfamily`, `evolview.model`, `evolview.phylotree`, `pill`
+- `evolview.gfamily` [1 module] -> `evoltre`, `evoltreio`, `evolview.common`, `evolview.model`, `evolview.moderntreeviewer`, `evolview.phylotree`
 
-### Level 7: Target Module
+### Level 7: Composite Browsers & Viewers
 
-- `evolview.pathwaybrowser` [module] -> `gfamily`, `evolview.model`, `moderntreeviewer`, `evolview.phylotree`
-
----
-
-## Complete Dependency Tree
-
-```
-module.evolview.pathwaybrowser [MODULE]
-│
-├─ module.evolview.gfamily [MODULE]
-│  ├─ module.evolview.model [UTILITY]
-│  ├─ module.evolview.phylotree [UTILITY] -> model
-│  ├─ module.evolknow [UTILITY]
-│  ├─ module.evoltre [UTILITY] -> parsimonytre -> evoldist -> evoltrepipline
-│  └─ module.multiseq [6 MODULES] -> evoltrepipline, evoltre, webmsaoperator
-│
-├─ module.evolview.model [UTILITY]
-│
-├─ module.evolview.moderntreeviewer [MODULE]
-│  ├─ module.evolview.model [UTILITY]
-│  ├─ module.evoltreio [UTILITY] -> model
-│  └─ module.pill [MODULE]
-│
-└─ module.evolview.phylotree [UTILITY] -> model
-
-Base dependencies:
-├─ module.ambigbse [MODULE]
-├─ module.genome [UTILITY]
-├─ module.evolknow [UTILITY]
-├─ module.pill [MODULE]
-├─ module.webmsaoperator [UTILITY]
-├─ module.evoltrepipline [UTILITY]
-├─ module.evoldist [3 MODULES] -> evoltrepipline
-├─ module.remnant [UTILITY] -> evoltrepipline, evoldist
-├─ module.parsimonytre [UTILITY] -> evoldist
-└─ module.treebuilder [4 MODULES] -> evoltrepipline, remnant, multiseq, evoldist
-```
-
-Legend:
-
-- `[MODULE]` means the package contains `IModuleLoader` implementations
-- `[UTILITY]` means the package provides shared support code
-- `->` means "depends on"
+- `evolview.pathwaybrowser` [1 module] -> `evolview.common`, `evolview.gfamily`, `evolview.model`, `evolview.moderntreeviewer`, `evolview.phylotree`
+- `evolview.treebarplot` [1 module] -> `evolknow`, `evolview.gfamily`, `evolview.model`, `evolview.moderntreeviewer`, `evolview.phylotree`
+- `evolview.genebrowser` [1 module] -> `evolview.gfamily`, `evolview.model`
 
 ---
 
-## Compilation Order
-
-Because the dependency graph is acyclic, the packages can be compiled in strict order:
+## Complete Dependency Tree View
 
 ```text
-1. genome, evolknow, ambigbse, pill, webmsaoperator
-2. evoltrepipline
-3. evoldist
-4. remnant
-5. parsimonytre
-6. evoltre
-7. multiseq
-8. treebuilder
-9. evolview.model
-10. evolview.phylotree
-11. evoltreio
-12. evolview.moderntreeviewer
-13. evolview.gfamily
-14. evolview.pathwaybrowser
+Top-level composite visualization modules:
+├─ module.evolview.pathwaybrowser [MODULE]
+│  ├─ module.evolview.common [UTILITY]
+│  ├─ module.evolview.gfamily [MODULE] (peer with moderntreeviewer)
+│  ├─ module.evolview.moderntreeviewer [MODULE] (peer with gfamily)
+│  ├─ module.evolview.phylotree [UTILITY] -> evoltreio, model, remnant
+│  └─ module.evolview.model [UTILITY] -> multiseq
+│
+├─ module.evolview.treebarplot [MODULE]
+│  ├─ module.evolview.gfamily [MODULE]
+│  ├─ module.evolview.moderntreeviewer [MODULE]
+│  ├─ module.evolview.phylotree [UTILITY]
+│  ├─ module.evolview.model [UTILITY]
+│  └─ module.evolknow [UTILITY]
+│
+└─ module.evolview.genebrowser [MODULE]
+   ├─ module.evolview.gfamily [MODULE]
+   └─ module.evolview.model [UTILITY]
+
+Core tree viewers & utilities:
+├─ module.evolview.gfamily [MODULE] <--> module.evolview.moderntreeviewer [MODULE]
+│  ├─ module.evolview.phylotree [UTILITY]
+│  ├─ module.evolview.model [UTILITY]
+│  ├─ module.evolview.common [UTILITY]
+│  ├─ module.evoltreio [UTILITY] -> model
+│  ├─ module.evoltre [UTILITY] -> parsimonytre -> evoldist
+│  └─ module.pill [MODULE]
+│
+├─ module.treenodecoll [MODULE] -> evoltreio -> model
+├─ module.treeconveop [MODULE] (standalone + 2 dockable VOICE tabs)
+└─ module.treetanglegram [MODULE] (standalone)
+
+Workflows & base modules:
+├─ module.treebuilder [4 MODULES] -> evoldist, evoltrepipline, multiseq, remnant, webmsaoperator, moderntreeviewer, phylotree, model
+├─ module.multiseq [6 MODULES] -> config.externalprograms, evoltre, evoltrepipline, webmsaoperator
+├─ module.evoldist [3 MODULES] -> evoltrepipline, webmsaoperator
+├─ module.ambigbse [MODULE] (standalone)
+└─ module.pill [MODULE] (standalone)
 ```
 
 ---
 
-## Current Design Summary
+## Build Note
 
-- The package graph is strictly acyclic.
-- Core algorithms remain below application-layer viewers and browsers.
-- Tree visualization infrastructure is shared through `evolview.phylotree` and `evolview.model`.
-- `pathwaybrowser` remains the top-level consumer in this dependency surface.
+Because `gfamily` and `moderntreeviewer` share tree-panel and parameter-parsing components bidirectionally, and `evoltrepipline`, `evoltreio`, `evolview.model`, and `multiseq` cross-reference configuration and alignment helpers, all packages under `src/` are compiled together in a single `javac` invocation via `compile.bat` (Windows) or `bash compile.sh` (Linux/macOS/WSL).

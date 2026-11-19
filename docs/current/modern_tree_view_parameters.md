@@ -9,7 +9,7 @@ Precedence: program defaults → user defaults → explicit VOICE → current tr
 | Display/Show scale bar | `display.show.scale.bar` | tree.show.scale.bar | `true` | Display the branch-length scale where a uniform pixel scale is available. Unavailable in cladograms and Beta spirals. Use true or false. |
 | Display/Show axis | `display.show.axis` | tree.show.axis.bar | `true` | Display the coordinate axis where the layout supports it. Use true or false. |
 | Display/Show title | `display.show.title` | tree.show.title | `true` | Display the statement below the tree. Use true or false. |
-| Display/Show canvas size | `display.show.canvas.size` | tree.show.width.height | `false` | Display canvas width and height in pixels. Use true or false. |
+| Display/Show canvas size | `display.show.canvas.size` | tree.show.width.height | `false` | Show or hide canvas width, height and top, left, bottom and right margins in the upper-left corner (pixels). Use true or false. |
 | Display/Title text | `display.title.text` | tree.title.string, bottom.title.string | `"The phylogenetic tree with {0} high-quality sequenced samples."` | Bottom statement. {0} is replaced by the number of leaves. |
 | Display/Branch length unit | `display.branch.length.unit` | tree.branch.length.unit, branch.length.unit | `""` | Axis unit, for example MYA. An empty string omits the unit. |
 | Display/Reverse axis | `display.reverse.axis` | tree.need.reverse.axis, need.reverse.axis.bar | `false` | Reverse the axis direction, for example for time before present. Use true or false. |
@@ -72,7 +72,6 @@ Precedence: program defaults → user defaults → explicit VOICE → current tr
 ## Compatibility details
 
 - `layout.circular.inner.radius.ratio=0.2` uses 20% of the outer radius. The left panel accepts 20-100%; 100% collapses radial branches onto one circle. Legacy `layout.circular.inner.radius.px`, `layout.circular.inner.radius`, old JSONC Inner radius and null ratios migrate to 20%. An explicit ratio takes priority. Current snapshots contain only the ratio.
-
 - `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.
 - Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.
 - Legacy packed font keys are expanded before canonical family/size/style values. Explicit `font.axis.inherit.label.font` has final precedence. Empty legacy `font.axis` inherits labels; explicit axis attributes disable implicit inheritance.

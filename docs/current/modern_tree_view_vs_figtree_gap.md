@@ -32,8 +32,9 @@ The comparison is based on the source tree visible in this repository. Capabilit
 - Batch visual edits for selected nodes
 - Ladderize operations
 - Collapse and expand
-- Swap sibling and detach node
+- Swap sibling, add child, add sibling and merge, detach node, and confirmed clade deletion
 - Open selected clade in a new MTV tab
+- Copy full tree or selected subtree as Newick to the system clipboard
 
 ### Annotation System
 
@@ -101,12 +102,12 @@ Status labels:
 | Interaction | Rotate node | Common | Missing | No current UI entry point |
 | Interaction | Reroot / midpoint root | Common | Missing | Some low-level clues exist, but no exposed MTV workflow |
 | Editing | Swap sibling | Common | Supported | Popup menu |
-| Editing | Prune/delete taxa and bulk prune | Common | Partial | Single-node detach exists; bulk and history tools do not |
+| Editing | Prune/delete taxa and bulk prune | Common | Partial | Confirmed `Delete clade` and `Detach node` exist; multi-selection bulk prune and undo history do not |
 | Collapse | Collapse / expand clade | Common | Supported | Popup + gesture support |
 | Collapse | Cartoon / collapse-as-single-taxon | Common | Partial | Triangle-style collapse exists; full cartoon semantics do not |
 | Styling | Manual color, width, node-size edits | Common | Supported | Operation panel + controller logic |
 | Styling | Attribute-driven mapping and legend | Common | Missing | Current node-visual config is name-based, not metadata-driven |
-| Clipboard | Copy labels or subtree | Common | Missing | No visible clipboard export path |
+| Clipboard | Copy labels or subtree | Common | Partial | `ModernTreeOperationPanel` supports `Copy tree as Newick` and `Copy subtree as Newick` |
 | Annotation | Clade annotation | Common | Supported | MTV is stronger than a pure tree viewer here |
 | Export | Vector graphics (`PDF`/`SVG`/`EPS`) | Common | Supported | Module Export uses `TreeExportHandler` |
 | Export | Bitmap graphics (`PNG`/`JPEG`) | Common | Supported | Module Export uses `TreeExportHandler` |

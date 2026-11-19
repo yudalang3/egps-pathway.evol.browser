@@ -34,4 +34,4 @@
 
 1. 新的 R/Python Java bridge 类应放在 `src/api/rpython`。
 2. 这个目录只保留入口类和轻量级桥接工具。
-3. 如果 wrapper 依赖这里的类，记得同步更新 `docs/current/external_language_api.md`。
+3. 如果 wrapper 依赖这里的类，记得同步更新 `docs/current/external_language_api.md` 与 `docs/current/external_language_api_zh.md`。

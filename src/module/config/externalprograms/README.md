@@ -2,23 +2,21 @@
 
 ## Overview
 
-The External Program Configuration System provides a centralized way to manage paths to external executable programs used by eGPS modules, such as:
+The External Program Configuration System (`module.config.externalprograms`) provides a centralized manager for external executable program paths used by eGPS modules, such as:
 
-- **MAFFT** - Multiple sequence alignment tool
-- **ClustalW** - Multiple sequence alignment tool
-- **MUSCLE** - Multiple sequence alignment tool
+- **MAFFT** (`PROGRAM_MAFFT = "MAFFT"`) - Multiple sequence alignment tool
+- **ClustalW** (`PROGRAM_CLUSTALW = "CLUSTALW"`) - Multiple sequence alignment tool
+- **MUSCLE** (`PROGRAM_MUSCLE = "MUSCLE"`) - Multiple sequence alignment tool
 
-## Components
+## Core Component: `ExternalProgramConfigManager`
 
-### 1. ExternalProgramConfigManager
+`ExternalProgramConfigManager` is a singleton configuration manager that:
+- Stores program paths in `~/.egps/external_programs/external.programs.paths.json` (under `EGPSProperties.PROPERTIES_DIR`)
+- Provides APIs for getting, setting, and saving program paths
+- Validates paths to ensure files exist and are executable (`ValidationResult`)
+- Automatically registers paths with `UnifiedAccessPoint.getExternalProgramPath()` for backward compatibility
 
-A singleton configuration manager that:
-- Stores program paths in `~/.egps/external_programs/external.programs.paths.json`
-- Provides API for getting/setting program paths
-- Validates paths to ensure files exist and are executable
-- Automatically registers paths with `UnifiedAccessPoint` for backward compatibility
-
-**Usage Example:**
+### Usage Example
 
 ```java
 // Get the singleton instance
@@ -27,35 +25,23 @@ ExternalProgramConfigManager manager = ExternalProgramConfigManager.getInstance(
 // Get MAFFT path
 String mafftPath = manager.getProgramPath("MAFFT");
 
-// Set MAFFT path
-manager.setProgramPath("MAFFT", "/usr/local/bin/mafft");
-manager.saveConfig();
-
 // Validate a path
-ValidationResult result = manager.validatePath("/path/to/mafft");
+ExternalProgramConfigManager.ValidationResult result = manager.validatePath(mafftPath);
 if (result.isValid()) {
-    System.out.println("Path is valid!");
+    // Save and register with UnifiedAccessPoint
+    manager.setProgramPath("MAFFT", mafftPath);
+    manager.saveConfig();
 }
 ```
 
-### 2. ExternalProgramConfigPanel
+## User-Facing GUI Integration
 
-A GUI panel that allows users to:
-- View all configured external programs
-- Browse for executable files
-- Test paths to verify they're valid and executable
-- Save configuration persistently
+The standalone external-program configuration module has been retired. User-facing path configuration is now directly embedded at the top of the two active MAFFT modules:
 
-**Features:**
-- **Browse Button**: Opens file chooser to select executable
-- **Test Button**: Validates path exists and is executable
-- **Save Button**: Persists configuration to JSON file
-- **Reload Button**: Reloads configuration from disk
-- **Status Indicators**: Shows whether each path is valid (green ✓) or invalid (red ✗)
+1. **Multi-sequences aligner: MAFFT** (`src/module/multiseq/aligner/gui/IndependentMafftGUIPanel.java`)
+2. **Quick reference-based aligner** (`src/module/multiseq/alignerwithref/GuiMain.java`)
 
-### 3. IndependentModuleLoader
-
-Integrates the configuration panel into the eGPS module system, making it accessible from the main application.
+Both panels expose an executable path field along with **Browse...** and **Test** buttons, sharing the persisted MAFFT path through `ExternalProgramConfigManager`. For details, see [docs/current/mafft_path_config_integration.md](../../../../docs/current/mafft_path_config_integration.md).
 
 ## Configuration File Format
 
@@ -65,96 +51,21 @@ Integrates the configuration panel into the eGPS module system, making it access
 ```json
 {
   "MAFFT": "/usr/local/bin/mafft",
-  "CLUSTALW": "/usr/bin/clustalw2",
+  "CLUSTALW": "",
   "MUSCLE": ""
 }
 ```
 
 Empty strings indicate the program is not configured.
 
-## Integration with Existing Code
-
-The configuration manager automatically registers paths with `UnifiedAccessPoint`, ensuring backward compatibility with existing code:
-
-```java
-// Existing code continues to work
-String mafftPath = UnifiedAccessPoint.getExternalProgramPath().get("MAFFT");
-```
-
 ## Adding New External Programs
-
-To add support for a new external program:
 
 1. Add a constant in `ExternalProgramConfigManager`:
    ```java
    public static final String PROGRAM_MY_TOOL = "MY_TOOL";
    ```
-
-2. Add it to `getSupportedPrograms()`:
-   ```java
-   public static List<String> getSupportedPrograms() {
-       return Arrays.asList(PROGRAM_MAFFT, PROGRAM_CLUSTALW,
-                           PROGRAM_MUSCLE, PROGRAM_MY_TOOL);
-   }
-   ```
-
-3. Update `createDefaultConfig()` to include the new program:
-   ```java
-   defaultPaths.put(PROGRAM_MY_TOOL, "");
-   ```
-
-The GUI will automatically display the new program.
-
-## Usage in Modules
-
-Modules that require external programs should:
-
-1. Get the path from the configuration manager
-2. Validate it exists
-3. Provide clear error messages if not configured
-
-**Example:**
-
-```java
-ExternalProgramConfigManager configMgr = ExternalProgramConfigManager.getInstance();
-String mafftPath = configMgr.getProgramPath("MAFFT");
-
-if (mafftPath == null || mafftPath.isEmpty()) {
-    throw new Exception(
-        "MAFFT is not configured. Please configure it in:\n" +
-        "Tools → External Programs Config"
-    );
-}
-
-if (!configMgr.isProgramConfigured("MAFFT")) {
-    throw new Exception(
-        "MAFFT path is invalid or file is not executable.\n" +
-        "Please check configuration in: Tools → External Programs Config"
-    );
-}
-
-// Use the path...
-```
-
-## Persistence
-
-- Configuration is automatically saved to `~/.egps/external_programs/`
-- Uses JSON format via `MapPersistence` utility
-- Changes are immediately registered with `UnifiedAccessPoint`
-- Configuration persists across application restarts
+2. Add it to `getSupportedPrograms()` and `createDefaultConfig()`.
 
 ## Logging
 
-The system uses SLF4J for logging:
-- INFO: Configuration loading/saving events
-- DEBUG: Individual path changes
-- WARN: Missing config files (automatically created)
-- ERROR: Failed to load/save configuration
-
-## Version
-
-Introduced in: **eGPS 2.2.0**
-
-## Authors
-
-eGPS Team
+The manager uses SLF4J (`org.slf4j.Logger`) for logging configuration initialization, loading, validation, and saving events.

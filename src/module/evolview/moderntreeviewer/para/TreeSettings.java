@@ -306,30 +306,105 @@ public final class TreeSettings {
         return setting.description + " VOICE: " + setting.voice;
     }
 
+    private static String chineseDescription(String keyOrPath, String englishDescription) {
+        return switch (keyOrPath) {
+            case "Display/Show scale bar" -> "在有统一像素比例尺的布局中显示枝长比例尺；枝长图（Cladogram）和 Beta 螺线不可用。取值 true 或 false。";
+            case "Display/Show axis" -> "在布局支持时显示坐标轴。取值 true 或 false。";
+            case "Display/Show title" -> "在树图下方显示底部标题说明。取值 true 或 false。";
+            case "Display/Show canvas size" -> "在左上角显示或隐藏画布宽高及上、左、下、右四周边距（像素）。取值 true 或 false。";
+            case "Display/Title text" -> "底部说明文本；{0} 会被替换为叶节点数量。";
+            case "Display/Branch length unit" -> "坐标轴与比例尺单位（例如 MYA）；空字符串表示不显示单位。";
+            case "Display/Reverse axis" -> "反转坐标轴方向（例如展示距今年代）。取值 true 或 false。";
+            case "Labels/Show leaf names" -> "在叶节点旁显示名称标签。取值 true 或 false。";
+            case "Labels/Right align leaf labels" -> "在矩形和倾斜布局中将叶标签列右对齐。取值 true 或 false。";
+            case "Labels/Show internal node names" -> "在内部节点上显示名称标签。取值 true 或 false。";
+            case "Labels/Show bootstrap values" -> "当树中包含支持度时显示 Bootstrap 支持度数值。取值 true 或 false。";
+            case "Labels/Show branch lengths" -> "显示分支长度数值。取值 true 或 false。";
+            case "Root/Show root branch" -> "显示通向根节点的根枝。取值 true 或 false。";
+            case "Root/Root branch length" -> "根枝像素长度（0–200）。";
+            case "Fonts/Labels/Family", "Fonts/Title/Family", "Fonts/Axis and scale bar/Family" -> "本机已安装的字体族或 Java 逻辑字体（例如 Monospaced）。";
+            case "Fonts/Labels/Size", "Fonts/Title/Size", "Fonts/Axis and scale bar/Size" -> "字号大小，单位为磅 pt（1–200）。";
+            case "Fonts/Labels/Style", "Fonts/Title/Style", "Fonts/Axis and scale bar/Style" -> "字形样式：Regular、Bold、Italic 或 Bold Italic。";
+            case "Layout/Type" -> "树图布局类型。可选值：" + String.join("; ", LAYOUTS.values()) + "。";
+            case "Layout/Margins/Top", "Layout/Margins/Left", "Layout/Margins/Bottom", "Layout/Margins/Right" -> "画布留白边距像素值（0–10000），不含自动预留的标签空间。";
+            case "Rectangular layout/Branch curvature" -> "分支曲率百分比（0–100），仅作用于矩形布局。";
+            case "Circular layout/Start angle" -> "起始角度（0–360 度），仅作用于环形布局。";
+            case "Circular layout/Arc extent" -> "圆弧展开角度（0–360 度），仅作用于环形布局。";
+            case "Circular layout/Inner radius ratio" -> "内半径除以外半径，取值 0.2–1，仅作用于内翻环形（Circular cladogram inward）。左侧界面使用 20%–100%；100% 时所有节点落在同一圆周。旧像素设置和 null 比例统一恢复为 20%。";
+            case "Spiral layout/Start angle" -> "起始角度（0–360 度），仅作用于螺旋布局。";
+            case "Spiral layout/Total angle" -> "螺旋总展开角度（0–10000 度）。";
+            case "Spiral layout/Arm spacing" -> "螺旋臂间距系数（0–50），非直接像素距离。";
+            case "Spiral layout/Beta factor" -> "Beta 螺旋增长因子（1.0–5.0），请填写实际数值而非百分比。";
+            case "Slant layout/Tree width" -> "树体宽度占比百分比（0–100），仅作用于倾斜（Slant）布局。";
+            case "Slant layout/Left margin" -> "左侧留白比例百分比（0–100），仅作用于倾斜（Slant）布局。";
+            case "Slant layout/Rotation" -> "倾斜布局旋转角度：0、90、180 或 270 度。";
+            case "Radial layout/Rotation" -> "整体旋转角度（0–360 度），仅作用于无根（Radial）布局。";
+            case "Mouse wheel/Zoom height" -> "允许鼠标滚轮缩放树体高度。取值 true 或 false。";
+            case "Mouse wheel/Zoom width" -> "允许鼠标滚轮缩放树体宽度。取值 true 或 false。";
+            case "View/Height scale" -> "相对初始适配尺寸的高度缩放百分比（100–100000）。";
+            case "View/Width scale" -> "相对初始适配尺寸的宽度缩放百分比（100–100000）。环形、螺旋和无根布局始终等比缩放。";
+            case "View/Lock aspect ratio" -> "手动缩放时锁定宽高比。环形、螺旋和无根布局始终保持等比缩放。取值 true 或 false。";
+            case "Fonts/Axis and scale bar/Inherit label font" -> "坐标轴与比例尺沿用标签字体。VOICE 中置空 font.axis 同样表示继承标签字体。取值 true 或 false。";
+            case "Node style/Scope" -> "样式作用范围：Selected clades 表示选中节点及其全部后代（无选中时作用于整棵树）；其他可选值为 All nodes、Leaves only。该作用范围不会写入用户默认配置。";
+            case "Node style/Color" -> "节点与分支颜色（#RRGGBB）或 Mixed；保持 Mixed 不变可保留各节点原有的不同颜色。";
+            case "Node style/Branch line width" -> "分支线宽像素值（0–200）或 Mixed。";
+            case "Node style/Node radius" -> "节点圆点半径像素值（0–200）或 Mixed。";
+            case "Creative mode/Enabled" -> "开启创作模式：水平拖拽修改枝长，右键编辑节点。仅限矩形系统发生树（Rectangular phylogram），且不会作为启用状态保存到用户默认配置。取值 true 或 false。";
+            case "input.newick.text" -> "直接输入的 Newick 字符串，优先级高于文件输入。";
+            case "input.newick.file" -> "Newick 文件路径，在未提供 Newick 文本时使用。";
+            case "input.table.file" -> "表格式树文件路径，在未提供两类 Newick 输入源时使用。";
+            case "input.newick.format" -> "Newick 解析格式（0–9）：0 将内部节点读作支持度；1 将内部节点读作名称。";
+            case "input.newick.remove.whitespace" -> "解析前是否移除空白字符；保持 false 可保留节点名称中的空格。";
+            case "input.node.styles.file" -> "节点样式 TSV 文件路径。必填列：name；可选列：fillColor、circleRadius、lineThickness、displayName。会覆盖导入时的统一节点样式。";
+            default -> englishDescription;
+        };
+    }
+
     public static String referenceMarkdown(boolean chinese) {
         StringBuilder text = new StringBuilder(chinese ? "# Modern Tree View 参数对照\n\n" : "# Modern Tree View parameter reference\n\n");
         text.append(chinese
                 ? "由参数定义表生成。高级参数路径和 JSONC 文件保持不变；新模板只使用规范 VOICE key，旧脚本无需重写。\n\n优先级：程序默认 → 用户默认 → VOICE 显式参数 → 当前树修改。单个字段中：规范 key → 当前旧名 → 更早历史旧名。\n\n"
                 : "Generated from the settings registry. Advanced parameters paths and existing JSONC files remain unchanged. New templates use canonical VOICE keys; existing scripts do not need rewriting.\n\nPrecedence: program defaults → user defaults → explicit VOICE → current tree edits. Per field: canonical key → current legacy key → older alias.\n\n");
-        text.append("| Advanced parameters path | Canonical VOICE key | Legacy aliases | Program default | Meaning and constraints |\n|---|---|---|---|---|\n");
+        text.append(chinese
+                ? "| 高级参数路径 (Advanced parameters path) | 规范 VOICE key | 兼容旧别名 (Legacy aliases) | 程序默认值 | 含义与约束 |\n|---|---|---|---|---|\n"
+                : "| Advanced parameters path | Canonical VOICE key | Legacy aliases | Program default | Meaning and constraints |\n|---|---|---|---|---|\n");
         for (Setting setting : SETTINGS) {
+            String desc = chinese ? chineseDescription(setting.path, setting.description) : setting.description;
             text.append("| ").append(setting.path).append(" | `").append(setting.voice).append("` | ")
                     .append(String.join(", ", setting.aliases)).append(" | `").append(JSON.toJSONString(setting.initial))
-                    .append("` | ").append(setting.description.replace("|", "\\|")).append(" |\n");
+                    .append("` | ").append(desc.replace("|", "\\|")).append(" |\n");
         }
-        text.append("\n## Import-only parameters\n\n| Canonical VOICE key | Legacy aliases | Default | Meaning |\n|---|---|---|---|\n");
-        for (InputSetting setting : inputSettings()) text.append("| `").append(setting.key).append("` | ")
-                .append(String.join(", ", setting.aliases)).append(" | `").append(setting.value).append("` | ").append(setting.description).append(" |\n");
-        text.append("\n## Compatibility details\n\n")
-                .append("- `layout.circular.inner.radius.ratio=0.2` uses 20% of the outer radius. The left panel accepts 20-100%; 100% collapses radial branches onto one circle. Legacy `layout.circular.inner.radius.px`, `layout.circular.inner.radius`, old JSONC Inner radius and null ratios migrate to 20%. An explicit ratio takes priority. Current snapshots contain only the ratio.\n")
-                .append("- `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.\n")
-                .append("- Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.\n")
-                .append("- Legacy packed font keys are expanded before canonical family/size/style values. Explicit `font.axis.inherit.label.font` has final precedence. Empty legacy `font.axis` inherits labels; explicit axis attributes disable implicit inheritance.\n")
-                .append("- Layout accepts the listed English names, existing enum names, and RECTANGULAR/CIRCULAR/SPIRAL/SLANT/RADIAL. Unknown names are errors.\n")
-                .append("- Boolean examples use true/false; legacy T/F remain accepted. Fonts use Regular, Bold, Italic, or Bold Italic.\n")
-                .append("- Selected clades includes selected nodes and descendants; without selection it means the whole tree. Leaves only limits that scope to leaves. Import has no selection.\n")
-                .append("- Apply changes the current tree only. Save as user defaults stores reusable preferences separately. Scope, Mixed values and creative-mode activation are not saved.\n")
-                .append("- Data sources, Newick options, and node-style files belong to import, not the current tree's display snapshot. Per-node annotations override imported uniform styles.\n");
+        text.append(chinese
+                ? "\n## 仅导入期参数（Import-only parameters）\n\n| 规范 VOICE key | 兼容旧别名 | 默认值 | 含义 |\n|---|---|---|---|\n"
+                : "\n## Import-only parameters\n\n| Canonical VOICE key | Legacy aliases | Default | Meaning |\n|---|---|---|---|\n");
+        for (InputSetting setting : inputSettings()) {
+            String desc = chinese ? chineseDescription(setting.key, setting.description) : setting.description;
+            text.append("| `").append(setting.key).append("` | ")
+                    .append(String.join(", ", setting.aliases)).append(" | `").append(setting.value).append("` | ").append(desc).append(" |\n");
+        }
+        if (chinese) {
+            text.append("\n## 兼容性细节\n\n")
+                    .append("- `layout.circular.inner.radius.ratio=0.2` 表示内半径为外半径的 20%。左侧可设置 20%–100%，100% 时径向树枝收缩到同一圆周。旧参数 `layout.circular.inner.radius.px`、`layout.circular.inner.radius`、旧 JSONC 内径和 null 比例统一恢复为 20%；同次输入显式比例优先。当前参数快照只保存比例。\n")
+                    .append("- `layout.spiral.beta=1.75` 等价于旧参数 `layout.spiral.beta.factor=175`（旧键名保留 0.01 单位）。\n")
+                    .append("- 旧版边距参数使用 `top,left,bottom,right` 像素串；规范单边键名仅覆盖各自对应的边。\n")
+                    .append("- 旧版打包字体键（如 `FontName,Style,Size`）会先展开，再由规范的 family/size/style 单项覆盖。显式指定的 `font.axis.inherit.label.font` 具有最终优先级；置空的旧版 `font.axis` 表示继承标签字体，而显式指定坐标轴字体属性则会关闭隐式继承。\n")
+                    .append("- 布局类型接受上表列出的英文显示名、既有 `TreeLayout` 枚举名以及 `RECTANGULAR`、`CIRCULAR`、`SPIRAL`、`SLANT`、`RADIAL` 简写；未知布局名称会直接报错。\n")
+                    .append("- 布尔参数推荐使用 `true`/`false`，旧版 `T`/`F` 仍兼容支持。字体样式使用 `Regular`、`Bold`、`Italic` 或 `Bold Italic`。\n")
+                    .append("- `Selected clades` 包含选中节点及其全部后代，无选中节点时代表整棵树；`Leaves only` 将该范围限制为其中的叶节点。导入阶段没有预选节点。\n")
+                    .append("- `Apply` 仅修改当前树视图；`Save as user defaults` 将可复用的偏好单独持久化。作用范围（Scope）、`Mixed` 状态以及创作模式（Creative mode）开关不会写入默认配置。\n")
+                    .append("- 数据源、Newick 解析选项及节点样式文件仅属于导入配置，不进入当前树的显示参数快照。逐节点注释样式文件会覆盖导入时的全局统一样式。\n");
+        } else {
+            text.append("\n## Compatibility details\n\n")
+                    .append("- `layout.circular.inner.radius.ratio=0.2` uses 20% of the outer radius. The left panel accepts 20-100%; 100% collapses radial branches onto one circle. Legacy `layout.circular.inner.radius.px`, `layout.circular.inner.radius`, old JSONC Inner radius and null ratios migrate to 20%. An explicit ratio takes priority. Current snapshots contain only the ratio.\n")
+                    .append("- `layout.spiral.beta=1.75` is equivalent to legacy `layout.spiral.beta.factor=175`. The old key retains its 0.01 unit.\n")
+                    .append("- Legacy margins use `top,left,bottom,right` pixels. Canonical single-side keys override only their side.\n")
+                    .append("- Legacy packed font keys are expanded before canonical family/size/style values. Explicit `font.axis.inherit.label.font` has final precedence. Empty legacy `font.axis` inherits labels; explicit axis attributes disable implicit inheritance.\n")
+                    .append("- Layout accepts the listed English names, existing enum names, and RECTANGULAR/CIRCULAR/SPIRAL/SLANT/RADIAL. Unknown names are errors.\n")
+                    .append("- Boolean examples use true/false; legacy T/F remain accepted. Fonts use Regular, Bold, Italic, or Bold Italic.\n")
+                    .append("- Selected clades includes selected nodes and descendants; without selection it means the whole tree. Leaves only limits that scope to leaves. Import has no selection.\n")
+                    .append("- Apply changes the current tree only. Save as user defaults stores reusable preferences separately. Scope, Mixed values and creative-mode activation are not saved.\n")
+                    .append("- Data sources, Newick options, and node-style files belong to import, not the current tree's display snapshot. Per-node annotations override imported uniform styles.\n");
+        }
         return text.toString();
     }
 

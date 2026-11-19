@@ -55,15 +55,15 @@
 
 | 简称 | 文件 |
 | --- | --- |
-| CountData | [PathwayComponentCountData.java](../../src/module/evolview/pathwaybrowser/io/PathwayComponentCountData.java) |
-| Renderer | [PptxSlideRenderer.java](../../src/module/evolview/pathwaybrowser/gui/analysis/panel/PptxSlideRenderer.java) |
-| SlidePanel | [SubSingleSlidePanel.java](../../src/module/evolview/pathwaybrowser/gui/analysis/panel/SubSingleSlidePanel.java) |
-| Gallery | [PathwayGalleryPanel.java](../../src/module/evolview/pathwaybrowser/gui/analysis/panel/PathwayGalleryPanel.java) |
-| Controller | [PathwayBrowserController.java](../../src/module/evolview/pathwaybrowser/PathwayBrowserController.java) |
-| MainFace | [PathwayFamilyMainFace.java](../../src/module/evolview/pathwaybrowser/PathwayFamilyMainFace.java) |
-| Voice | [Voice4pathwayFamilyBrowser.java](../../src/module/evolview/pathwaybrowser/io/Voice4pathwayFamilyBrowser.java) |
-| Examples | [PathwayBrowserExamples.java](../../src/module/evolview/pathwaybrowser/io/PathwayBrowserExamples.java) |
-| 帮助 | [manual_zh.html](../../src/module/evolview/pathwaybrowser/manual_zh.html) |
+| CountData | [PathwayComponentCountData.java](../../../src/module/evolview/pathwaybrowser/io/PathwayComponentCountData.java) |
+| Renderer | [PptxSlideRenderer.java](../../../src/module/evolview/pathwaybrowser/gui/analysis/panel/PptxSlideRenderer.java) |
+| SlidePanel | [SubSingleSlidePanel.java](../../../src/module/evolview/pathwaybrowser/gui/analysis/panel/SubSingleSlidePanel.java) |
+| Gallery | [PathwayGalleryPanel.java](../../../src/module/evolview/pathwaybrowser/gui/analysis/panel/PathwayGalleryPanel.java) |
+| Controller | [PathwayBrowserController.java](../../../src/module/evolview/pathwaybrowser/PathwayBrowserController.java) |
+| MainFace | [PathwayFamilyMainFace.java](../../../src/module/evolview/pathwaybrowser/PathwayFamilyMainFace.java) |
+| Voice | [Voice4pathwayFamilyBrowser.java](../../../src/module/evolview/pathwaybrowser/io/Voice4pathwayFamilyBrowser.java) |
+| Examples | [PathwayBrowserExamples.java](../../../src/module/evolview/pathwaybrowser/io/PathwayBrowserExamples.java) |
+| 帮助 | [manual_zh.html](../../../src/module/evolview/pathwaybrowser/manual_zh.html) |
 
 ## 4. 已确认问题明细
 

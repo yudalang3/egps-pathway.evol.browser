@@ -80,9 +80,7 @@ Modern Tree View（MTV）不只是一个独立的可视化模块。在这个项�
 
 ### 6. 外部 R 入口
 
-`src/api/rpython/RlangInterfaceEGPS.java` 现在会复用同一条基于配置文件的 MTV 导入路径，因此 R 和 Python 走的是同一套入口。
-
-虽然它目前还没有真正把传入 JSON 解析成树数据，但它依然属于初始化表面的一部分，因为它代表了另一种从正常 GUI 工作流之外进入 MTV 的方式。
+`src/api/rpython/RlangInterfaceEGPS.java` 的 `openModernTreeView(String configFilePath)` 直接委托给 `ModernTreeViewPyLauncher.launchFromConfigFile(configFilePath)`，因此 R 侧桌面调用和 Python 走的是同一套基于 VOICE 配置文件的导入入口（而同类的 `showPayloadAndReturnLength(String jsonPayload)` 仅作为轻量级弹窗连通性测试辅助方法）。
 
 ## 核心初始化链路
 

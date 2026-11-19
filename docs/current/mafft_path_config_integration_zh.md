@@ -2,20 +2,22 @@
 
 ## 概览
 
-`aligner` 与 `alignerwithref` 两个模块现在共享同一套 MAFFT 可执行文件路径配置流程。GUI 会在执行前验证 MAFFT 二进制文件，并在多次运行之间保留用户选择的路径。
+`multiseq/aligner` 与 `multiseq/alignerwithref` 两个模块共享同一套 MAFFT 可执行文件路径配置流程。GUI 会在执行前验证 MAFFT 二进制文件，并在多次运行之间保留用户选择的路径。
 
 ## 当前行为
 
-- 两个模块都提供路径输入框，以及 `Browse` 和 `Test` 操作。
+- 两个模块的顶部 `MAFFT Configuration` 面板均提供路径输入框，以及 `Browse` 和 `Test` 操作。
 - 验证逻辑会检查文件是否存在且是否可执行。
-- 同一份已保存路径会被两个模块共同复用。
+- 同一份已保存路径会被两个模块及底层比对执行器共同复用。
 
 ## 持久化
 
-路径由 `ExternalProgramConfigManager` 管理，并持久化到：
+MAFFT 可执行文件路径由 `ExternalProgramConfigManager`（`src/module/config/externalprograms/ExternalProgramConfigManager.java`）统一管理：
 
-- Java Preferences
-- `~/.egps/external_programs/external.programs.paths.json`
+- 磁盘持久化位置：`~/.egps/external_programs/external.programs.paths.json`（位于 `EGPSProperties.PROPERTIES_DIR` 下）
+- 运行时内存同步：自动注册至 `UnifiedAccessPoint.getExternalProgramPath()`，供比对调用链直接读取
+
+*（注：`alignerwithref/GuiMain` 中的 Java `Preferences` 仅用于记忆上次选择的参考序列与待比对序列文件路径，不存储 MAFFT 可执行文件路径。）*
 
 ## 错误处理
 

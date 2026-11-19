@@ -61,7 +61,7 @@ flowchart LR
 
 统一入口：`pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/test_pathway_remaining_fixes.ps1`。
 
-脚本先全量编译，再运行原有 7 套及新增 4 套测试；每套使用隔离的 `user.home`。结果记录到 [remaining-test-results.json](../../logs/remaining-test-results.json)，逐套日志位于 `logs/remaining-<测试类>.log`。
+脚本先全量编译，再运行原有 7 套及新增 4 套测试；每套使用隔离的 `user.home`。结果记录到 `logs/remaining-test-results.json`，逐套日志位于 `logs/remaining-<测试类>.log`。
 
 | 新增测试 | 主要断言 |
 | --- | --- |
