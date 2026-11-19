@@ -64,6 +64,7 @@ public final class PathwayBrowserExamples {
         else if(index==3)active.put("input.table.file",directory.resolve("species.tpv").toString());
         else active.put("input.newick.file",directory.resolve(index==5?"large.nwk":index==0?"9_model_species_evolution.nwk":"species.nwk").toString());
         active.put("layout.type",index==5?"Circular phylogram":"Rectangular phylogram");
+        if(index==5)active.put("font.labels.size.pt","10");
         active.put("layout.margins.bottom.px","10");
         active.put("display.title.text",TITLES.get(index)+" (teaching tree and values)");
         active.put("labels.show.leaf.names","true");

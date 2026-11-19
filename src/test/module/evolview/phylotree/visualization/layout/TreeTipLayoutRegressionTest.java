@@ -116,6 +116,7 @@ public class TreeTipLayoutRegressionTest {
         LeafLabelStateInitializer.applyInitialLeafLabelState(properties, false);
         require(radial.getRequiredCanvasSize(100, 100).width < 300, "Hidden labels release space");
         testColumnLabelsAndSlope();
+        testInternalLabelClearance();
         testDegenerateLayouts();
         testSpiralParameters();
     }
@@ -123,6 +124,9 @@ public class TreeTipLayoutRegressionTest {
     private static class LabelRenderer extends RectPhyloLayout {
         LabelRenderer(TreeLayoutProperties properties, GraphicsNode root, TreeLayoutHost host) { super(properties, root, host); }
         int measuredWidth() { return getMaxLengthLeafNameWidthAccording2CurrentFont(); }
+        int internalBaseline(GraphicsNode node, FontMetrics metrics) {
+            return internalNameBaseline(node, metrics, (int) node.getXSelf() + node.getDrawUnit().getCircleRadius() + 4);
+        }
         BufferedImage label(GraphicsNode leaf) {
             BufferedImage image = new BufferedImage(500, 100, BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics = image.createGraphics();
@@ -132,6 +136,25 @@ public class TreeTipLayoutRegressionTest {
             graphics.dispose();
             return image;
         }
+    }
+
+    private static void testInternalLabelClearance() {
+        GraphicsNode parent = new GraphicsNode("Other");
+        GraphicsNode branch = new GraphicsNode("Frog");
+        parent.addChild(branch);
+        parent.setXSelf(40);
+        parent.setYSelf(80);
+        branch.setXSelf(100);
+        branch.setYSelf(80);
+        TreeLayoutProperties properties = new TreeLayoutProperties(parent);
+        PhylogeneticTreePanel host = new PhylogeneticTreePanel(properties);
+        LabelRenderer layout = new LabelRenderer(properties, parent, host);
+        FontMetrics metrics = host.getFontMetrics(properties.getGlobalFont());
+        require(layout.internalBaseline(parent, metrics) + metrics.getDescent() < 80,
+                "Internal label clears the horizontal child branch");
+        branch.setYSelf(100);
+        require(layout.internalBaseline(parent, metrics) == (int) (80 + 0.5 * metrics.getAscent()),
+                "Other internal labels keep their usual baseline");
     }
 
     private static void testColumnLabelsAndSlope() {

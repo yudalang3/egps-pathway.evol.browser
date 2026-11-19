@@ -234,23 +234,19 @@ print(y)
 
 ## 0.1.0 export limitations / 导出限制
 
-The default eGPS exporters are retained. Successful file creation does not guarantee complete graphical content. PDF embeds mapped Unicode fonts when available; SVG free heatmaps may fail; PPTX may omit free heatmaps or misplace circular labels. Confirmed dependency defects are documented rather than repaired or bypassed.
+PDF is the priority vector format in 0.1.0. All current drawing layers, including free_heatmap cells, are exported as vectors; mapped text fonts are embedded. Large vector heatmaps can produce larger files. This is verified on the current Windows font environment; other platforms require separate font verification.
 
-沿用默认 eGPS 导出器。文件生成成功不代表图形完整：PDF 已增加可用 Unicode 字体映射与嵌入；SVG 自由热图可能报错，PPTX 可能缺失自由热图或出现圆形标签错位。确认属于依赖的问题只记录，不修复或绕过。复现与处理原则见仓库 docs/current/yytree-0.1.0-review.md。
-
-PDF is the priority vector format in 0.1.0. All current drawing layers, including free_heatmap cells, are exported as vectors; mapped text fonts are embedded. Large vector heatmaps can produce larger files. This is verified on the current Windows font environment; other platforms require separate font verification. SVG/PPTX limitations remain unchanged.
-
-PDF 是 0.1.0 优先验收的矢量格式。现有绘图图层（包括自由热图单元格）均输出为矢量，映射的文字字体会嵌入。大型全矢量热图可能增加文件体积。目前在本机 Windows 字体环境验证，其他平台须单独验证字体；SVG/PPTX 限制不变。
+PDF 是 0.1.0 优先验收的矢量格式。现有绘图图层（包括自由热图单元格）均输出为矢量，映射的文字字体会嵌入。大型全矢量热图可能增加文件体积。目前在本机 Windows 字体环境验证，其他平台须单独验证字体。
 
 PDF regression: run scripts/test_yytree_pdf_vector.R with the eGPS installation path, then scripts/check_yytree_pdf_vector.py using Python with pypdf. validate_yytree.ps1 includes both checks; override -PdfPython for another Python interpreter.
 
 验证方式：先以 eGPS 安装路径运行 scripts/test_yytree_pdf_vector.R，再使用带 pypdf、Pillow 的 Python 运行 scripts/check_yytree_pdf_vector.py，并确保 Poppler 的 pdftoppm 在 PATH 中。统一验证脚本已接入两项检查，可通过 -PdfPython 指定解释器。
 
-SVG 热图现复用矢量单元格绘制，消除了图片插值接口异常。但综合 SVG 的视觉验收未通过：依赖序列化器可能使旋转标题后的图例及自由图形继续处于错误变换组中，造成错位或超出画布。按依赖问题停止修复原则，本轮不继续适配。PDF 仍为优先输出；PPTX 的图像接口及文字变换限制保持不变。
+SVG uses the shared Apache Batik 1.20 exporter supplied by eGPS2. Configure yytree with an updated eGPS2 installation whose `dependency-egps/` contains the shared exporter and Batik runtime. The third-party LICENSE and NOTICE files are in those JARs under `META-INF/`. Rotated labels retain their own transforms, heatmaps use vector cells, and text remains editable. The viewer needs access to the requested fonts.
 
-SVG verification: scripts/check_yytree_svg_vector.cjs accepts an optional browser executable; scripts/check_yytree_svg_pixels.py compares screenshots with PNG references and currently fails on the documented dependency transform issue.
+SVG 使用 eGPS2 提供的 Apache Batik 1.20 共享导出器。请将 `config_yytree()` 指向新版 eGPS2 安装，其中的 `dependency-egps/` 包含共享导出器和 Batik 运行时。第三方 LICENSE 和 NOTICE 位于这些 JAR 的 `META-INF/`。旋转标题和标签各自应用变换，热图以矢量单元格绘制，文字可选取和编辑。查看端需要安装相应字体。
 
-SVG 验证：check_yytree_svg_vector.cjs 可传浏览器路径，check_yytree_svg_pixels.py 对照 PNG；当前会因上述依赖变换问题失败，不能当作验收通过。
+SVG 验证：`check_yytree_svg_vector.cjs` 可传浏览器路径，`check_yytree_svg_pixels.py` 将 10 张浏览器截图与 PNG 对照。
 
-PPTX 本地适配：保留现有 POI/JAR，修正绘图状态隔离与文字变换，标签、图例、自由文字及节点/分支注释使用可编辑文本框；自由热图逐格输出矢量。字体不嵌入，跨机器可能替换。PDF 仍是优先格式，SVG 限制保持不变。验收脚本：test_yytree_pdf_vector.R、render_yytree_pptx.ps1（本机PowerPoint）、check_yytree_pptx.py。原PPTX限制以通过本机实际渲染的案例为准，不保证任意字体/平台。
+PPTX 本地适配：保留现有 POI/JAR，修正绘图状态隔离与文字变换，标签、图例、自由文字及节点/分支注释使用可编辑文本框；自由热图逐格输出矢量。字体不嵌入，跨机器可能替换。验收脚本：test_yytree_pdf_vector.R、render_yytree_pptx.ps1（本机PowerPoint）、check_yytree_pptx.py。原PPTX限制以通过本机实际渲染的案例为准，不保证任意字体/平台。
 

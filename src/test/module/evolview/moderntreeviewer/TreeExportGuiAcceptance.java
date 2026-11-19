@@ -45,9 +45,9 @@ public class TreeExportGuiAcceptance {
                 JFileChooser chooser = find(dialog,JFileChooser.class);
                 if (chooser != null && !approved) {
                     capture(dialog,scenario + "-chooser");
-                    if (scenario.equals("png")) {
+                    if (scenario.equals("png") || scenario.equals("svg")) {
                         for (var filter : chooser.getChoosableFileFilters())
-                            if (filter.getDescription().startsWith("PNG")) chooser.setFileFilter(filter);
+                            if (filter.getDescription().startsWith(scenario.toUpperCase(java.util.Locale.ROOT))) chooser.setFileFilter(filter);
                     }
                     chooser.setSelectedFile(destination.toAbsolutePath().toFile());
                     approved = true; chooser.approveSelection(); return;
@@ -114,6 +114,10 @@ public class TreeExportGuiAcceptance {
             require(!Files.exists(OUTPUT.resolve("missing-parent/output.nwk")),"Failed export creates no output");
             Path png = OUTPUT.resolve("figure-" + System.nanoTime() + ".PNG"); run("png",png);
             require(ImageIO.read(TreeExportHandler.withExtension(png,"png").toFile()) != null,"Valid PNG export");
+            Path svg = OUTPUT.resolve("figure-" + System.nanoTime() + ".SVG"); run("svg",svg);
+            String vector = Files.readString(svg);
+            require(vector.contains("<svg ") && vector.contains("<text") && !Files.exists(Path.of(svg + ".svg")),
+                    "SVG contains editable text and keeps the supplied extension");
             org.slf4j.LoggerFactory.getLogger(TreeExportGuiAcceptance.class).info("TreeExportGuiAcceptance passed");
         } catch (Throwable error) {
             org.slf4j.LoggerFactory.getLogger(TreeExportGuiAcceptance.class).error("GUI acceptance failed",error);

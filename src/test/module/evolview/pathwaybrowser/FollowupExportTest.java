@@ -24,7 +24,14 @@ public class FollowupExportTest {
             System.out.println(ext+" bytes="+Files.size(file));
             if(ext.equals("jpg")){var loaded=ImageIO.read(file.toFile());System.out.println("jpg size="+loaded.getWidth()+"x"+loaded.getHeight());}
             if(ext.equals("pptx")){try(var book=new XMLSlideShow(Files.newInputStream(file))){if(book.getPictureData().size()!=1)throw new AssertionError("PPTX image missing");System.out.println("pptx size="+book.getPageSize()+" pictures="+book.getPictureData().size());var back=new BufferedImage(420,260,BufferedImage.TYPE_INT_ARGB);var graphics=back.createGraphics();book.getSlides().get(0).draw(graphics);graphics.dispose();if(back.getRGB(200,100)!=image.getRGB(200,100))throw new AssertionError("PPTX pixels missing");ImageIO.write(back,"png",dir.resolve("pptx-readback.png").toFile());System.out.println("pptx readback center="+Integer.toHexString(back.getRGB(200,100))+" expected red="+Integer.toHexString(image.getRGB(200,100)));}}
-            if(ext.equals("svg")){String text=Files.readString(file);System.out.println("svg image="+text.contains("<image")+" size-prefix="+text.substring(0,Math.min(500,text.length())).replace('\n',' '));}
+            if (ext.equals("svg")) {
+                String text = Files.readString(file);
+                if (!text.contains("<image") || !text.contains("data:image/png;base64,")
+                        || !text.contains("width=\"420\"") || !text.contains("height=\"260\"")) {
+                    throw new AssertionError("SVG must contain the embedded PNG and its full canvas dimensions");
+                }
+                System.out.println("SVG snapshot dimensions and embedded PNG passed");
+            }
         }
         System.exit(0);
     }

@@ -9,6 +9,8 @@ import egps2.frame.gui.EGPSMainGuiUtil;
 import egps2.panels.dialog.SwingDialog;
 import egps2.panels.dialog.modern.ModernDialogType;
 import graphic.engine.guicalculator.BlankArea;
+import graphic.engine.guirelated.EGPSVectorExporter;
+import graphic.engine.guirelated.SwingDisplayInterface;
 import module.evolview.model.tree.GraphicsNode;
 import module.evolview.model.tree.ScaleBarProperty;
 import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
@@ -34,6 +36,12 @@ public final class YyTreeBridge {
 
     public String probeRuntime() throws Exception {
         if (Runtime.version().feature() < 25) throw new IllegalStateException("Java 25 or newer is required.");
+        try {
+            EGPSVectorExporter.class.getMethod("exportAsSVG", SwingDisplayInterface.class, Dimension.class, File.class);
+            Class.forName("org.apache.batik.svggen.SVGGraphics2D");
+        } catch (ReflectiveOperationException | LinkageError error) {
+            throw new IllegalStateException("Update the eGPS2 installation used by config_yytree() to a build with the shared Batik SVG exporter and its runtime JARs.", error);
+        }
         TreeLayoutHost.class.getMethod("getHostComponent");
         BaseLayout.class.getMethod("calculateForPainting", int.class, int.class);
         for (Class<?> type : List.of(RectPhyloLayout.class, CircularPhylo.class,
@@ -233,8 +241,7 @@ public final class YyTreeBridge {
             switch (format) {
                 case "pdf" -> PdfExport.save(drawing.get(), new File(path));
                 case "pptx" -> PptxExport.save(drawing.get(), new File(path));
-                case "svg" -> egps2.frame.gui.VectorGraphicsEncoder.saveVectorGraphic(drawing.get(), path,
-                    egps2.frame.gui.VectorGraphicsEncoder.VectorGraphicsFormat.SVG);
+                case "svg" -> EGPSVectorExporter.exportAsSVG(drawing.get()::print, drawing.get().getSize(), new File(path));
             }
         } catch (LinkageError error) {
             throw new IllegalStateException("Export dependency failed: " + error, error);

@@ -8,6 +8,7 @@ tree <- "(((Arabidopsis:1,Rice:1):1,Yeast:2):1,((Worm:1,Fly:1):1,(Zebrafish:2,(F
 
 original <- yytree(tree, width = 1600, height = 1200) + leaf_labels() + leaf_render(size = 3)
 updated <- original + leaf_render(df = data.frame(name = "Human", fill = "red", size = 7))
+updated <- updated + interact(data.frame(name = "Human", group = "Mammals"))
 comparison <- updated + yytree::layout(name = "slant")
 plots <- list(original = original, updated = updated, comparison = comparison)
 y <- updated

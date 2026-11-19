@@ -296,6 +296,24 @@ public class RectPhyloLayout extends RectangularLayout {
 	}
 
 	@Override
+	protected int internalNameBaseline(GraphicsNode node, FontMetrics metrics, int labelX) {
+		int branchY = (int) node.getYSelf();
+		double clearance = 0;
+		for (int i = 0; i < node.getChildCount(); i++) {
+			GraphicsNode child = (GraphicsNode) node.getChildAt(i);
+			if ((int) child.getYSelf() == branchY && (int) child.getXSelf() >= labelX
+					&& child.getDrawUnit().getLineColor().getAlpha() > 0) {
+				clearance = Math.max(clearance, child.getDrawUnit().getStroke().getLineWidth() / 2.0);
+			}
+		}
+		if (clearance > 0) {
+			clearance = Math.max(clearance, node.getDrawUnit().getCircleRadius());
+			return branchY - (int) Math.ceil(clearance) - metrics.getDescent() - 2;
+		}
+		return super.internalNameBaseline(node, metrics, labelX);
+	}
+
+	@Override
 	protected void innerNodeDrawingProcess(Graphics2D g2d, GraphicsNode node) {
 		g2d.setColor(node.getDrawUnit().getLineColor());
 		drawEachLines(g2d, node);

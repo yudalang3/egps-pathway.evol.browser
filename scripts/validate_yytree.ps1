@@ -70,13 +70,17 @@ try {
         & (Join-Path $R 'R.exe') CMD check --no-manual --no-build-vignettes yytree_0.1.0.tar.gz
         if ($LASTEXITCODE -ne 0) { throw 'R CMD check failed.' }
         Copy-Item -LiteralPath (Join-Path $release 'yytree.Rcheck\00check.log') -Destination (Join-Path $logs 'yytree-check.log') -Force
+        if (!(Select-String -LiteralPath (Join-Path $logs 'yytree-check.log') -Pattern '^Status: OK$' -Quiet)) {
+            throw 'R CMD check did not report Status: OK.'
+        }
         & (Join-Path $R 'R.exe') CMD INSTALL --build "--library=$library" yytree_0.1.0.tar.gz
         if ($LASTEXITCODE -ne 0) { throw 'Windows package build failed.' }
-        Copy-Item -LiteralPath (Join-Path $release 'yytree_0.1.0.tar.gz') -Destination $dist -Force
-        Copy-Item -LiteralPath (Join-Path $release 'yytree_0.1.0.zip') -Destination $dist -Force
     } finally { Pop-Location }
-    & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_binary.R (Join-Path $dist 'yytree_0.1.0.zip') $Egps
-    if ($LASTEXITCODE -ne 0) { throw 'Windows ZIP installation smoke test failed.' }
+    foreach ($archive in @('yytree_0.1.0.tar.gz', 'yytree_0.1.0.zip')) {
+        & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_binary.R (Join-Path $release $archive) $Egps
+        if ($LASTEXITCODE -ne 0) { throw "Installation smoke test failed for $archive." }
+    }
+    Copy-Item -LiteralPath (Join-Path $release 'yytree_0.1.0.tar.gz'),(Join-Path $release 'yytree_0.1.0.zip') -Destination $dist -Force
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/update_yytree_library.R (Join-Path $dist 'yytree_0.1.0.zip')
     if ($LASTEXITCODE -ne 0) { throw 'Stable local library update failed.' }
     & (Join-Path $R 'Rscript.exe') --vanilla scripts/test_yytree_pdf_vector.R $Egps

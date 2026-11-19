@@ -616,14 +616,12 @@ public abstract class BaseLayout implements ITreeLayout {
             g2d.setFont(treeLayoutProperties.getGlobalFont());
 
             FontMetrics fontMetrics = g2d.getFontMetrics();
-            int height = fontMetrics.getAscent();
             double angleIfNeeded = node.getAngleIfNeeded();
 
             int xx = (int) (x2 + circleRadius + 4);
-            int yy = (int) (y2 + 0.5 * height);
-
             String drawString = node.getName();
             if (!Strings.isNullOrEmpty(drawString)) {
+                int yy = internalNameBaseline(node, fontMetrics, xx);
                 if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
                     double radians = Math.toRadians(angleIfNeeded);
                     AffineTransform originalTransform = g2d.getTransform();
@@ -636,6 +634,10 @@ public abstract class BaseLayout implements ITreeLayout {
             }
         }
 
+    }
+
+    protected int internalNameBaseline(GraphicsNode node, FontMetrics metrics, int labelX) {
+        return (int) (node.getYSelf() + 0.5 * metrics.getAscent());
     }
 
     /**

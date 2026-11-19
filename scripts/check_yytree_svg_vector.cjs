@@ -10,10 +10,14 @@ const { pathToFileURL } = require('node:url');
       const file=path.resolve('temp/yytree-pdf-vector',`${i}.svg`);
       await page.goto(pathToFileURL(file).href);
       await page.evaluate(()=>document.fonts.ready);
-      const valid=await page.evaluate(()=>!!document.querySelector('svg') &&
-        !document.querySelector('parsererror,image,foreignObject') &&
-        document.querySelectorAll('path,rect,polygon').length>10 &&
-        document.documentElement.textContent.includes('test 中文'));
+      const valid=await page.evaluate(()=>{
+        const freeText=[...document.querySelectorAll('text')].find(el=>el.textContent.trim()==='test 中文');
+        const transform=freeText?.getCTM();
+        return !!document.querySelector('svg') &&
+          !document.querySelector('parsererror,image,foreignObject') &&
+          document.querySelectorAll('path,rect,polygon').length>10 &&
+          transform && Math.abs(transform.b)<1e-6 && Math.abs(transform.c)<1e-6;
+      });
       if(!valid) throw new Error(`Invalid vector SVG: ${i}`);
       await page.screenshot({path:file.replace('.svg','-svg.png')});
     }

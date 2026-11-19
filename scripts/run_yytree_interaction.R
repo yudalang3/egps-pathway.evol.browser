@@ -3,6 +3,7 @@ args <- commandArgs(trailingOnly = TRUE)
 smoke <- "--smoke" %in% args
 Sys.setenv(YYTREE_EXAMPLES_NO_GUI = if (smoke) "1" else "0")
 dir.create("logs", showWarnings = FALSE)
+dir.create("temp/yytree-human-interaction", recursive = TRUE, showWarnings = FALSE)
 source("rPackage/human_test/run7_interaction_for_human.R", encoding = "UTF-8")
 stopifnot(length(plots) == 6L, identical(p, p_restored))
 invisible(lapply(plots, yytree:::.scene_json))

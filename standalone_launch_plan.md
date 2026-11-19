@@ -32,7 +32,9 @@ bash launchers/launch_module_pathway_family_browser.sh
 
 Windows 使用现有 `eGPS.args` 和分号分隔的 classpath；WSL 脚本使用 Linux Java、冒号分隔的 classpath，保留可移植 JVM 参数并排除 Windows 专用参数。每个入口固定传入一个模块加载器类名，不透传额外参数，数据通过模块界面导入。Windows 失败时暂停显示错误并保留 Java 退出码。
 
-**WSL 需要 Linux JDK 25 和 WSLg 或已配置的 X Server；脚本尚未进行 WSL 运行验证，由使用者自行验证。** 完整模块后缀清单见 [中文 README](README_zh.md#模块启动脚本) 和 [英文 README](README.md)。
+**WSL 需要 Linux JDK 25 和 WSLg 或已配置的 X Server。** 2026-11-18 在 Ubuntu 22.04／WSL 2 通过全部 `launchers/*.sh` 和 LF 版 `compile.sh` 的 Bash 语法检查。从 `/tmp` 调用 Pathway 启动器时，版本检查按预期拒绝 OpenJDK 11。该环境未发现 `javac`、图形显示变量或 X11 socket，实际编译、窗口启动和 PNG 导出待具备环境后验证。日志位于 `logs/pathway-wsl-verification.log`。
+
+Windows 复验从仓库外调用 Pathway BAT。已有工作台配置的测试环境成功启动 eGPS，并将 Pathway 加载器传给工作台。日志位于 `logs/pathway-launcher-windows.log`。完整模块后缀清单见 [中文 README](README_zh.md#模块启动脚本) 和 [英文 README](README.md)。
 
 ### 2.2 宿主启动与模块挂载（源码确认）
 

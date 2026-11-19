@@ -3,9 +3,12 @@ package module.evolview.pathwaybrowser;
 import module.evolview.pathwaybrowser.io.*;
 import module.evolview.pathwaybrowser.gui.analysis.panel.AbstractAnalysisPanel;
 import module.evolview.pathwaybrowser.gui.dialog.SearchDialogContent;
+import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
+import module.evolview.phylotree.visualization.layout.TipLabelGeometry;
 import egps2.builtin.modules.voice.fastmodvoice.VoiceParameterParser;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Area;
 import java.nio.file.*;
 
 /** Real Swing import/render smoke test; use an isolated user.home. */
@@ -55,12 +58,44 @@ public final class PathwayBrowserWorkflowTest {
                 });
                 Thread.sleep(200);
                 SwingUtilities.invokeAndWait(()->{
+                    if(index==5) {
+                        var tree=face[0].getSelectedPhylogeneticTreePanel();
+                        var leaves=GraphicTreePropertyCalculator.getLeaves(tree.getRootNode());
+                        var font=tree.getLayoutProperties().getGlobalFont();
+                        if(leaves.size()!=64 || font.getSize2D()!=10 || !tree.getTreePanelScale().equals(new Dimension(100,100)))
+                            throw new AssertionError("Example 6 must start with 64 leaves, 10-point labels and 100% scale");
+                        var metrics=tree.getFontMetrics(font);
+                        Area occupied=new Area();
+                        for(var leaf:leaves) {
+                            var bounds=TipLabelGeometry.at(leaf.getAngleIfNeeded(),leaf.getDrawUnit().getCircleRadius(),
+                                    leaf.getName(),metrics).boundsAt(leaf.getXSelf(),leaf.getYSelf());
+                            if(!leaf.getDrawUnit().isDrawName() || !tree.getVisibleRect().contains(bounds.getBounds2D()))
+                                throw new AssertionError("Example 6 label clipped or hidden: "+leaf.getName());
+                            Area overlap=new Area(bounds);
+                            overlap.intersect(occupied);
+                            if(!overlap.isEmpty())throw new AssertionError("Example 6 label overlaps: "+leaf.getName());
+                            occupied.add(new Area(bounds));
+                        }
+                    }
                     var image=new java.awt.image.BufferedImage(face[0].getWidth(),face[0].getHeight(),java.awt.image.BufferedImage.TYPE_INT_RGB);
                     var graphics=image.createGraphics();
                     try { face[0].printAll(graphics);javax.imageio.ImageIO.write(image,"png",Path.of("temp","pathway-workflow-"+(index+1)+".png").toFile()); }
                     catch(Exception error) { throw new RuntimeException(error); }finally { graphics.dispose(); }
                 });
             }
+            SwingUtilities.invokeAndWait(()->{
+                window[0].setSize(1000,750);
+                window[0].validate();
+                var tree=face[0].getSelectedPhylogeneticTreePanel();
+                tree.setTreePanelScale(150,150);
+                var scroll=(JScrollPane)SwingUtilities.getAncestorOfClass(JScrollPane.class,tree);
+                scroll.validate();
+                if(!tree.getTreePanelScale().equals(new Dimension(150,150)) || !scroll.getVerticalScrollBar().isVisible())
+                    throw new AssertionError("The small window must allow scaling and scrolling");
+                scroll.getVerticalScrollBar().setValue(30);
+                if(scroll.getViewport().getViewPosition().y==0)throw new AssertionError("Tree did not scroll");
+                ((AbstractAnalysisPanel)face[0].getTabbedAnalysisPanel().getComponentAt(0)).treeNodeClicked("Sample1");
+            });
             // Verify search dialog (no-match safety, Find/Prev navigation, and style operation target resolution)
             SwingUtilities.invokeAndWait(()->{
                 var controller = face[0].getController();

@@ -9,7 +9,7 @@
 - 保留 `out/production/egps-pathway.evol.browser/` 编译输出及 `dependency-egps/` 中的依赖 JAR。Windows 还需要项目根目录的 `eGPS.args`。
 - WSL 使用 Linux JDK，并需要 WSLg 或已配置的 X Server；不能使用 Windows Java 替代。
 
-启动脚本不会自动编译。**WSL 脚本尚未进行运行验证，由使用者自行验证。**
+启动脚本不会自动编译。**全部 WSL 启动脚本已在 Ubuntu 22.04／WSL 2 通过 Bash 语法检查。** 图形验收待具备 Linux JDK 25 及可用的 WSLg 或 X Server 后执行。
 
 ## Windows 用法
 
