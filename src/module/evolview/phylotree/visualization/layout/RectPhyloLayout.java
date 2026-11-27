@@ -30,7 +30,10 @@ public class RectPhyloLayout extends RectangularLayout {
 	@Override
 	protected void beforeCalculate(int width, int height) {
 		super.beforeCalculate(width, height);
+		configureLayoutGeometry(width, height);
+	}
 
+	protected void configureLayoutGeometry(int width, int height) {
 		loop = 0;
 		// x axis
 		LongestRoot2leafBean maxLengthOfRoot2LeafBean = GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode);
@@ -124,6 +127,11 @@ public class RectPhyloLayout extends RectangularLayout {
 
 	@Override
 	protected void configurateLinageTypeAnnotation(AnnotationsProperties4LinageType annotationsProperties) {
+		configureLineageGeometry(annotationsProperties);
+		super.configurateLinageTypeAnnotation(annotationsProperties);
+	}
+
+	protected void configureLineageGeometry(AnnotationsProperties4LinageType annotationsProperties) {
 		final double rightMostXLocationOfLeaf = getRightMostXLocation(GraphicTreePropertyCalculator.getLeaves(rootNode)) + 5;
 		linageTypeSidewardAnnotationCalculator = new Function<LinkedList<GraphicsNode>, OutterSidewardLocation>() {
 
@@ -178,8 +186,6 @@ public class RectPhyloLayout extends RectangularLayout {
 				return ret;
 			}
 		};
-
-		super.configurateLinageTypeAnnotation(annotationsProperties);
 
 	}
 

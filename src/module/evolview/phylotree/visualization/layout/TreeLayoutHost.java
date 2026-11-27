@@ -16,4 +16,7 @@ public interface TreeLayoutHost {
 	AnnotationsProperties getMainAnnotationsProperties();
 	AnnotationsProperties4LinageType getLinageTypeAnnotationsProperties();
 	Container getHostComponent();
+
+	/** Desktop hosts let the arch layout reserve room for its own decorations. */
+	default boolean useArchDecorationInsets() { return false; }
 }

@@ -848,7 +848,11 @@ public class PhylogeneticTreePanel extends JPanel implements TreeLayoutHost {
 		return present[0];
 	}
 
+	@Override
+	public boolean useArchDecorationInsets() { return true; }
+
 	public boolean isUniformScaleLayout() {
+		if (layoutProp.getMyLayout() == TreeLayout.RECT_HALF_CIRCLE) return true;
 		String name = layoutProp.getMyLayout().name();
 		return name.startsWith("RADIAL_") || name.startsWith("SPRIAL_") || name.contains("CIR_");
 	}

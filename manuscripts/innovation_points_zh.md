@@ -85,12 +85,13 @@ MTV-GUI 的 Creative mode 支持对已有树执行增加子节点、增加兄弟
 建议表述：**我们提出并实现一种拱形系统发育树布局（arch layout），将累计显示枝长与叶序映射到由左右竖直边和顶部半圆组成的开放轮廓（half-stadium contour），并为 clade 高亮与外轮廓注释轨道构建相应的几何表示。**
 
 **核心几何特性（方法学论点基础）：**
-- 与纯矩形（高叶数时纵轴过长、页宽利用率低）和纯圆形（全周径向压缩、左右半周文字旋转倒置、底部闭合易拥挤）不同，拱形布局是一种**混合参数化轮廓**：外轮廓按等周长均分叶节点，向内延伸时**左右两直边段保持平行、无径向压缩且叶标签水平无旋转**，而**顶半圆段按径向比例收敛以平滑折返并压缩整体纵横比**，底部保持开放以避免底部拥挤。
-- 当累计枝长 $r = 0$（根节点及零枝长后代）时，映射在左右直边段形成一条**竖直中轴脊柱（spine）**，仅在顶半圆段汇聚于半圆圆心，与圆形布局“单一圆心放射”存在本质区别。
+- 拱形布局把等距的叶序采样点放在开放外轮廓上。向内缩小时，左右直边保持平行，沿直边的采样间距保持恒定，叶标签水平朝外。顶半圆的弧长按 $r/R$ 缩短，形成平滑折返。这样的几何组合能否改善空间利用和阅读表现，需要通过对照验证。
+- 当累计显示枝长 $d(v)=0$ 时，径向坐标 $r(v)=0$。此时左右直边映射到同一条**竖直中轴（spine）**，顶半圆映射到半圆圆心。
 
-**已核实实现与 `待修复代码缺陷`：**
-- **`yytree` 端（当前完整实现）**：[YyTreeBridge.java](../rPackage/java/src/main/java/api/rpython/yytree/YyTreeBridge.java) 复用 [RectHalfCircleLayout.java](../src/module/evolview/phylotree/visualization/layout/RectHalfCircleLayout.java) 的 `recursiveCalculate()` 与 `pointOnPerimeter()` 节点坐标，但**独立实现了**四项关键能力：1) 依据画布宽高预约束有效高度（`fittedHeight`，避免窄画布溢出）；2) 顶部及左右三侧预留标签/轨道空间而底部保持开放；3) 通过 `contour()` 连续绘制跨左直边—半圆—右直边的兄弟连线；4) 沿外法线方向放置水平叶标签（支持 `left`/`center`/`right` 对齐）与外轮廓多轨注释及 `arch_align` 虚线延长。
-- **MTV-GUI 端（`待修复代码缺陷`）**：源码审查发现 [RectHalfCircleLayout.java](../src/module/evolview/phylotree/visualization/layout/RectHalfCircleLayout.java) 自身绘制路径存在 4 处未完成缺陷——① `drawLineOfSiblingConnection()` 中 `// 3` 分支（首子在左直边、末子在右直边，涵盖多数树的根节点与跨拱深层 clade）为空，导致树干断连；② 半径 `0.3 * workHeight` 未约束宽度，窄画布（$W/H < 0.6$）水平溢出；③ 叶标签未重写 `usesTipLabels()` 导致左直边标签向右压盖树枝，且存入 `angleIfNeeded` 为弧度但父类按度数解析；④ 硬编码 2px 圆点，不响应枝色/线宽/折叠样式。详细登记见 [audit_checklist_zh.md](audit_checklist_zh.md)，**修复验收前，正文不得宣称 MTV-GUI 端的拱形绘制与 `yytree` 同等完备**。
+**两端实现：**
+
+- **`yytree`** 复用拱形节点坐标计算，并独立绘制三段连续轮廓。叶标签沿外法线方向放置，文字保持水平并支持 `left`、`center`、`right` 对齐。外轮廓支持多轨注释与 `arch_align` 的虚线延长。全零枝长边界见 `BLK-04`。 [YyTreeBridge.java](../rPackage/java/src/main/java/api/rpython/yytree/YyTreeBridge.java)
+- **MTV-GUI** 按工作区宽度拟合拱高，沿连续轮廓绘制跨拱兄弟连接、谱系高亮和外侧标注。两侧叶标签水平朝外，拱顶标签沿外法线旋转，枝长文字沿真实枝段居中。非对称树、窄画布、标注与 SVG 导出已通过回归。 [RectHalfCircleLayout.java](../src/module/evolview/phylotree/visualization/layout/RectHalfCircleLayout.java) · [核查清单 `BLK-01`](audit_checklist_zh.md)
 
 需要回答的评价问题：该布局在哪些树形（平衡/非平衡、中等规模叶数）、画布纵横比和注释密度下能相比矩形、圆形及开放扇形（如 `ggtree` fan `open.angle = 180`）减少重叠或提升阅读准确率？全零枝长下 `arch_align` 的外轮廓退化如何处理？这些均为待验证问题。
 
@@ -129,7 +130,7 @@ Alpha/Beta 螺旋可作为布局方法的补充说明：分别以阿基米德螺
 |---|---|---|---|
 | 启动与运行依赖 | 需启动 eGPS2 桌面工作台（JDK 25+） | 独立 Swing 窗体，不启动工作台；仍需本地 eGPS2 安装目录与 Java 25+ | 两者共享核心布局类，但不共享完整工程文件 |
 | 输入格式 | Newick（0–9 格式）、ITP 表格式树、节点样式 TSV | Newick 字符串/文件、`ape::phylo`、`hclust`、R 数据框/矩阵 | 均不直接解析 NEXUS/BEAST；R 端可先经 `ape`/`treeio` 转 `phylo` |
-| 树布局集合 | 22 种（矩形 6、环形 5 含内翻、螺旋 4、斜树 1、无根 6 含 Equal-daylight/N-body） | 7 种（`rect`/`rect_align`、`circ`/`circ_align`、`arch`/`arch_align`、四方向 `slant`） | MTV-GUI 侧重探索（含无根/螺旋）；`yytree` 侧重带多轨注释的发表图（拱形渲染当前以 `yytree` 为准） |
+| 树布局集合 | 22 种（矩形 6、环形 5 含内翻、螺旋 4、斜树 1、无根 6 含 Equal-daylight/N-body） | 7 种（`rect`/`rect_align`、`circ`/`circ_align`、`arch`/`arch_align`、四方向 `slant`） | MTV-GUI 侧重交互探索与样式调整，`yytree` 支持叶端对齐和多轨注释 |
 | 树结构与枝长编辑 | 支持（Creative mode：增删节点、`GroupDragSession` 拖拽、背景图描摹、折叠、拆子树新标签） | 不支持直接改树拓扑/枝长（由 R 脚本上游处理，如 `ape` 提子树） | 上游 MTV-GUI 修树/描摹导出 Newick → 下游 `yytree` 读入出图 |
 | 多轨数据注释与图例 | 仅支持 clade 标注（sideward / in-situ / node-to-leaf）与名称高亮；无数据框驱动多轨热图与图例 | 支持多列分类轨道、共享色阶数值热图、间距控制、四角自动换列图例与 MRCA 注释 | 互补关系：MTV-GUI 偏单树探索，`yytree` 偏多维数据整合 |
 | 自由图元编辑与代码回传 | 不支持 | 支持九类 `free_*` 直接编辑、`Snap To Point` 吸附、100 步撤销与 R 代码生成 | C1 核心机制位于 `yytree` |

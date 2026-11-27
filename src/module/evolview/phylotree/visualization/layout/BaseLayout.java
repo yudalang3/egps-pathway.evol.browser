@@ -150,6 +150,7 @@ public abstract class BaseLayout implements ITreeLayout {
                 }
             }
             for (var annotation : annotations.getOutterSidewardAnnos()) {
+                if (!useDefaultSingletonSideward()) break;
                 if (!annotation.shouldConfigurateAndPaint()) continue;
                 var leaves = GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
                 if (leaves.size() == 1 && !(annotation.getShape() instanceof java.awt.geom.Arc2D)) {
@@ -249,6 +250,8 @@ public abstract class BaseLayout implements ITreeLayout {
 
     protected void configurateMainAnnotation(AnnotationsProperties annotationsProperties) {
     }
+
+    protected boolean useDefaultSingletonSideward() { return true; }
 
     protected void configurateLinageTypeAnnotation(AnnotationsProperties4LinageType annotationsProperties) {
 
@@ -611,29 +614,25 @@ public abstract class BaseLayout implements ITreeLayout {
 
         DrawUtil.drawRoundClassifiedColor(g2d, (int) x2, (int) y2, circleRadius);
 
-        if (drawUnit.isDrawName() && !node.isNameBootstrap()) {
+        if (drawUnit.isDrawName() && !node.isNameBootstrap() && !Strings.isNullOrEmpty(node.getName())) {
             g2d.setColor(Color.black);
             g2d.setFont(treeLayoutProperties.getGlobalFont());
-
-            FontMetrics fontMetrics = g2d.getFontMetrics();
-            double angleIfNeeded = node.getAngleIfNeeded();
-
-            int xx = (int) (x2 + circleRadius + 4);
-            String drawString = node.getName();
-            if (!Strings.isNullOrEmpty(drawString)) {
-                int yy = internalNameBaseline(node, fontMetrics, xx);
-                if (angleIfNeeded != 0) {// 如果存在旋转角，就旋转
-                    double radians = Math.toRadians(angleIfNeeded);
-                    AffineTransform originalTransform = g2d.getTransform();
-                    g2d.rotate(-radians, x2, y2);
-                    g2d.drawString(drawString, xx, yy);
-                    g2d.setTransform(originalTransform);
-                } else {
-                    g2d.drawString(drawString, xx, yy);
-                }
-            }
+            drawInternalNodeName(g2d, node);
         }
+    }
 
+    protected void drawInternalNodeName(Graphics2D graphics, GraphicsNode node) {
+        int x = (int) (node.getXSelf() + node.getDrawUnit().getCircleRadius() + 4);
+        int y = internalNameBaseline(node, graphics.getFontMetrics(), x);
+        double angle = node.getAngleIfNeeded();
+        if (angle == 0) {
+            graphics.drawString(node.getName(), x, y);
+            return;
+        }
+        AffineTransform originalTransform = graphics.getTransform();
+        graphics.rotate(-Math.toRadians(angle), node.getXSelf(), node.getYSelf());
+        graphics.drawString(node.getName(), x, y);
+        graphics.setTransform(originalTransform);
     }
 
     protected int internalNameBaseline(GraphicsNode node, FontMetrics metrics, int labelX) {

@@ -49,8 +49,8 @@
 | Mouse wheel/Zoom height | `mouse.wheel.zoom.height` | wheel.height.scale.on, height.scale.on | `true` | 允许鼠标滚轮缩放树体高度。取值 true 或 false。 |
 | Mouse wheel/Zoom width | `mouse.wheel.zoom.width` | wheel.width.scale.on, width.scale.on | `true` | 允许鼠标滚轮缩放树体宽度。取值 true 或 false。 |
 | View/Height scale | `view.height.scale.percent` | view.height.scale | `100` | 相对初始适配尺寸的高度缩放百分比（100–100000）。 |
-| View/Width scale | `view.width.scale.percent` | view.width.scale | `100` | 相对初始适配尺寸的宽度缩放百分比（100–100000）。环形、螺旋和无根布局始终等比缩放。 |
-| View/Lock aspect ratio | `view.lock.aspect.ratio` |  | `false` | 手动缩放时锁定宽高比。环形、螺旋和无根布局始终保持等比缩放。取值 true 或 false。 |
+| View/Width scale | `view.width.scale.percent` | view.width.scale | `100` | 相对初始适配尺寸的宽度缩放百分比（100–100000）。拱形、环形、螺旋和无根布局始终等比缩放。 |
+| View/Lock aspect ratio | `view.lock.aspect.ratio` |  | `false` | 手动缩放时锁定宽高比。拱形、环形、螺旋和无根布局始终保持等比缩放。取值 true 或 false。 |
 | Fonts/Axis and scale bar/Inherit label font | `font.axis.inherit.label.font` | font.axis | `true` | 坐标轴与比例尺沿用标签字体。VOICE 中置空 font.axis 同样表示继承标签字体。取值 true 或 false。 |
 | Node style/Scope | `node.style.scope` |  | `"Selected clades"` | 样式作用范围：Selected clades 表示选中节点及其全部后代（无选中时作用于整棵树）；其他可选值为 All nodes、Leaves only。该作用范围不会写入用户默认配置。 |
 | Node style/Color | `node.style.color` | node.color | `"#000000"` | 节点与分支颜色（#RRGGBB）或 Mixed；保持 Mixed 不变可保留各节点原有的不同颜色。 |

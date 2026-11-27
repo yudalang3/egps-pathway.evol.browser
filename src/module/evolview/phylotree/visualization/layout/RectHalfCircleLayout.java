@@ -1,322 +1,437 @@
 package module.evolview.phylotree.visualization.layout;
 
 import module.evolview.model.tree.GraphicsNode;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties;
+import module.evolview.phylotree.visualization.annotation.AnnotationsProperties4LinageType;
+import module.evolview.phylotree.visualization.annotation.OutterSidewardLocation;
+import module.evolview.phylotree.visualization.annotation.SidewardNodeAnnotation;
 import module.evolview.phylotree.visualization.graphics.struct.NodeType;
 import module.evolview.phylotree.visualization.graphics.struct.TreeDecideUtil;
 import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator;
-import module.evolview.phylotree.visualization.graphics.struct.util.GraphicTreePropertyCalculator.LongestRoot2leafBean;
-import org.apache.commons.math3.util.FastMath;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.util.ArrayDeque;
+import java.util.List;
 
 public class RectHalfCircleLayout extends RectPhyloLayout {
+    private static final double RADIUS_FRACTION = 0.3;
+    private static final double SINGLE_TIP_HALF_SPAN = 3;
+
+    private record DecorationInsets(int outer, int bottom) { }
+
+    private int archRadius;
+    private int sideLength;
+    private double arcEnd;
+    private double perimeterLength;
+    private double centerX;
+    private double centerY;
+    private double bottomY;
+    private double maximumVisibleDistance;
+
+    public RectHalfCircleLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
+            TreeLayoutHost phylogeneticTreePanel) {
+        super(controller, rootNode, phylogeneticTreePanel);
+    }
+
     @Override
     protected boolean hasCoordinateAxis() { return false; }
 
-	private int halfWorkWidth;
-	private int halfWorkRadius;
-	private int halfWorkHeight;
-	private Point2D.Double topCircleCenter = new Point2D.Double();
-	private Point2D.Double canvasCenter = new Point2D.Double();
+    @Override
+    protected boolean usesTipLabels() { return true; }
 
-	private double globalRadicus;
-	private double maxJudgeAngle;
-	// 第一个矩形边的分割点
-	private int rectH;
-	// 矩形边加上半圆
-	private double highBound;
-	private double totalAvaliableLength;
+    @Override
+    public void prepareLabelSpace() {
+        treeLayoutProperties.synchronizeColumnLabelReserve(0);
+    }
 
-	private Line2D.Double lineDrawUtil = new Line2D.Double();
-	Arc2D.Double arc2d = new Arc2D.Double();
+    @Override
+    public Dimension getRequiredCanvasSize(int width, int height) {
+        prepareLabelSpace();
+        treeLayoutProperties.synchronizeScaleMargins(0, 0, 0, 0);
+        DecorationInsets insets = decorationInsets();
+        int minimumHeight = (int) Math.ceil(minimumTreeRadius() / RADIUS_FRACTION);
+        int minimumWidth = (int) Math.ceil(2 * RADIUS_FRACTION * minimumHeight);
+        return new Dimension(Math.max(width, minimumWidth + blankArea.getLeft() + blankArea.getRight() + 2 * insets.outer()),
+                Math.max(height, minimumHeight + blankArea.getTop() + blankArea.getBottom() + insets.outer() + insets.bottom()));
+    }
 
-	public RectHalfCircleLayout(TreeLayoutProperties controller, GraphicsNode rootNode,
-			TreeLayoutHost phylogeneticTreePanel) {
-		super(controller, rootNode, phylogeneticTreePanel);
-	}
+    private DecorationInsets decorationInsets() {
+        if (!phylogeneticTreePanel.useArchDecorationInsets()) return new DecorationInsets(0, 0);
 
-	@Override
-	protected void beforeCalculate(int width, int height) {
-		super.beforeCalculate(width, height);
+        FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+        double outer = 0, bottom = 0;
+        var visible = new ArrayDeque<GraphicsNode>();
+        visible.push(rootNode);
+        while (!visible.isEmpty()) {
+            var node = visible.pop();
+            double marker = decorationExtent(node);
+            outer = Math.max(outer, marker);
+            bottom = Math.max(bottom, marker);
+            if (node.getCollapse()) continue;
+            if (node.getDrawUnit().isDrawName() && !node.isNameBootstrap() && node.getName() != null && !node.getName().isEmpty()) {
+                var box = TipLabelGeometry.at(0, node.getDrawUnit().getCircleRadius(), node.getName(), metrics).box();
+                double vertical = Math.max(-box.getMinY(), box.getMaxY());
+                outer = Math.max(outer, Math.hypot(box.getMaxX(), vertical));
+                bottom = Math.max(bottom, vertical);
+            }
+            for (int i = 0; i < node.getChildCount(); i++) visible.push((GraphicsNode) node.getChildAt(i));
+        }
 
-		// 计算方式
+        double annotationOuter = 0, annotationBottom = 0;
+        for (var annotation : phylogeneticTreePanel.getMainAnnotationsProperties().getOutterSidewardAnnos()) {
+            if (!annotation.shouldConfigurateAndPaint()) continue;
+            var style = annotation.getSidewardNodeAnnotation();
+            Font textFont = style.getTextFont() == null ? treeLayoutProperties.getGlobalFont() : style.getTextFont();
+            String text = style.getTextString() == null ? "" : style.getTextString();
+            FontMetrics label = phylogeneticTreePanel.getHostComponent().getFontMetrics(textFont);
+            double stroke = style.getLineStroke().getLineWidth();
+            double width = label.stringWidth(text), height = text.isEmpty() ? 0 : label.getHeight();
+            annotationOuter = Math.max(annotationOuter, sidewardGap(style) + stroke / 2
+                    + (text.isEmpty() ? 0 : style.getTextGap() + Math.hypot(width, height)) + SINGLE_TIP_HALF_SPAN);
+            annotationBottom = Math.max(annotationBottom,
+                    Math.max(SINGLE_TIP_HALF_SPAN + stroke, (style.isDrawTextHorizontal() ? height : width) / 2));
+        }
+        var lineage = phylogeneticTreePanel.getLinageTypeAnnotationsProperties();
+        if (lineage.hasAnnotation() && lineage.isShowSidewardAnno()) {
+            double maxGap = 0, maxStroke = 0;
+            for (var style : lineage.getCateglory2SidewardNodeAnnotation().values()) {
+                maxGap = Math.max(maxGap, sidewardGap(style));
+                maxStroke = Math.max(maxStroke, style.getLineStroke().getLineWidth());
+            }
+            if (maxGap > 0 || maxStroke > 0) {
+                annotationOuter = Math.max(annotationOuter, maxGap + maxStroke / 2);
+                annotationBottom = Math.max(annotationBottom, SINGLE_TIP_HALF_SPAN + maxStroke);
+            }
+        }
+        return new DecorationInsets((int) Math.ceil(outer + annotationOuter + 2),
+                (int) Math.ceil(Math.max(bottom, annotationBottom) + 2));
+    }
 
-		int workWidth = blankArea.getWorkWidth((int) currentWidth);
-		int workHeight = blankArea.getWorkHeight((int) currentHeight);
-		globalRadicus = 0.5 * workHeight;
+    private double decorationExtent(GraphicsNode node) {
+        double radius = node.getDrawUnit().getCircleRadius();
+        if (node.getCollapse()) {
+            var collapse = getCollapseProporty(node);
+            int size = collapse == null ? 15 : collapse.getTriangleSize();
+            radius = Math.max(radius, Math.sqrt(2) * size);
+        }
+        var stroke = node.getDrawUnit().getStroke();
+        double capExtent = stroke.getEndCap() == BasicStroke.CAP_SQUARE ? Math.sqrt(2) : 1;
+        return radius + capExtent * stroke.getLineWidth() / 2;
+    }
 
-		canvasCenter.setLocation(blankArea.getLeft() + 0.5 * workWidth, blankArea.getTop() + 0.5 * workHeight);
-		// 黄金比例
-//		halfWorkRadius = (int) (0.382 * workHeight);
-		halfWorkRadius = (int) (0.3 * workHeight);
+    @Override
+    protected void configureLayoutGeometry(int width, int height) {
+        DecorationInsets insets = decorationInsets();
+        int availableHeight = Math.max(0, blankArea.getWorkHeight(height));
+        int topReserve = Math.min(availableHeight, insets.outer());
+        int workWidth = Math.max(0, blankArea.getWorkWidth(width) - 2 * insets.outer());
+        int workHeight = Math.max(0, availableHeight - topReserve - insets.bottom());
+        int fittedHeight = Math.min(workHeight, (int) Math.floor(workWidth / (2 * RADIUS_FRACTION)));
+        int top = blankArea.getTop() + topReserve + (workHeight - fittedHeight) / 2;
 
+        archRadius = (int) (RADIUS_FRACTION * fittedHeight);
+        sideLength = fittedHeight - archRadius;
+        arcEnd = sideLength + Math.PI * archRadius;
+        perimeterLength = arcEnd + sideLength;
+        centerX = blankArea.getLeft() + 0.5 * blankArea.getWorkWidth(width);
+        centerY = top + archRadius;
+        bottomY = top + fittedHeight;
 
-		halfWorkWidth = halfWorkRadius;
-		rectH = workHeight - halfWorkRadius;
-		halfWorkHeight = (int) (0.5 * rectH);
-		totalAvaliableLength = rectH + FastMath.PI * halfWorkRadius;
-		highBound = rectH + FastMath.PI * halfWorkRadius;
-		totalAvaliableLength += rectH;
+        loop = 0;
+        maximumVisibleDistance = BranchLengthDomain.maximum(rootNode, true);
+        canvas2logicRatio = maximumVisibleDistance > 0 ? archRadius / maximumVisibleDistance : 0;
+        eachYGapLength = perimeterLength / Math.max(1.0, GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
+        configureBottomScaleBarDrawProperty(maximumVisibleDistance, null, workWidth);
+    }
 
-//		System.out.println(rectH + "\t" + (FastMath.PI * halfWorkRadius));
+    @Override
+    public void calculateForPainting(int width, int height) {
+        beforeCalculate(width, height);
+        recursiveCalculate(rootNode, 0);
+        scaleBarProperty.setIfDrawScaleBar(maximumVisibleDistance > 0 && archRadius > 0);
+        afterCalculation();
+    }
 
-		topCircleCenter.setLocation(canvasCenter.getX(), halfWorkRadius + blankArea.getTop());
+    @Override
+    protected void recursiveCalculate(GraphicsNode node, double parentDepth) {
+        double depth = node == rootNode ? 0 : parentDepth + node.getDisplayedBranchLength();
+        double radius = radialDistance(depth);
+        node.setRadicusIfNeeded(radius);
 
-		maxJudgeAngle = FastMath.atan2(halfWorkRadius, globalRadicus);
-//		startAngleInRadian = maxJudgeAngle - FastMath.PI;
-//		endAngleInRadian = FastMath.PI - maxJudgeAngle;
-//		totalAngleInRadian = endAngleInRadian + endAngleInRadian;
+        double perimeter;
+        if (TreeDecideUtil.decideNodeType(node, rootNode) == NodeType.LEAF) {
+            perimeter = loop++ * eachYGapLength;
+        } else {
+            for (int i = 0; i < node.getChildCount(); i++) {
+                recursiveCalculate((GraphicsNode) node.getChildAt(i), depth);
+            }
+            perimeter = treeLayoutProperties.averageValueOfChildrenForParent(node);
+        }
+        node.setDoubleVariable(perimeter);
+        assignValue(node, radius, perimeter);
+        assignValue4XYParent(node, radialDistance(parentDepth), perimeter);
+    }
 
-		loop = 0;
-		// x axis
-		LongestRoot2leafBean maxLengthOfRoot2LeafBean = GraphicTreePropertyCalculator.getMaxLengthOfRoot2Leaf(rootNode);
-		double maxLengthOfRoot2Leaf = maxLengthOfRoot2LeafBean.getLength();
+    private double radialDistance(double depth) {
+        return maximumVisibleDistance > 0 ? archRadius * (depth / maximumVisibleDistance) : 0;
+    }
 
-		canvas2logicRatio = maxLengthOfRoot2Leaf > 0 ? halfWorkRadius / maxLengthOfRoot2Leaf : 0;
-		// y axis
-		eachYGapLength = totalAvaliableLength / Math.max(1.0, GraphicTreePropertyCalculator.getLeafNumber(rootNode) - 1.0);
-
-		configureBottomScaleBarDrawProperty(maxLengthOfRoot2LeafBean.getLength(), maxLengthOfRoot2LeafBean.getLeaf(),workWidth);
-	}
-
-	@Override
-	public void calculateForPainting(int width, int height) {
-		beforeCalculate(width, height);
-
-		GraphicsNode root = rootNode;
-		// 将root的branchLength设置为0；否则会影响可视化
-//		root.setDisplayedBranchLength(0);
-		double storedRootLength = root.getDisplayedBranchLength();
-        root.setDisplayedBranchLength(0);
-        try { recursiveCalculate(root, 0); } finally { root.setDisplayedBranchLength(storedRootLength); }
-
-		this.scaleBarProperty.setIfDrawScaleBar(true);
-
-		afterCalculation();
-	}
-
-	protected void recursiveCalculate(GraphicsNode node, double cumulateBranchLengthExceptCurrent) {
-		double parentLineageLength = cumulateBranchLengthExceptCurrent * canvas2logicRatio;
-		double lineageLength = parentLineageLength + node.getDisplayedBranchLength() * canvas2logicRatio;
-
-		// 这个 Radicus 用来存储 lineageLength
-		node.setRadicusIfNeeded(lineageLength);
-
-		NodeType nodeType = TreeDecideUtil.decideNodeType(node, rootNode);
-		switch (nodeType) {
-		case LEAF:
-			double currYAxisLength = loop * eachYGapLength;
-			node.setDoubleVariable(currYAxisLength);
-			assignValue(node, lineageLength, currYAxisLength);
-			assignValue4XYParent(node, parentLineageLength, currYAxisLength);
-//			System.out.println(node.getYSelf() + "\t" + node.getYParent());
-
-			loop++;
-			break;
-		default:
-			for (int i = 0; i < node.getChildCount(); i++) {
-				recursiveCalculate((GraphicsNode) node.getChildAt(i),
-						cumulateBranchLengthExceptCurrent + node.getDisplayedBranchLength());
-			}
-			currYAxisLength = treeLayoutProperties.averageValueOfChildrenForParent(node);
-			node.setDoubleVariable(currYAxisLength);
-
-			assignValue(node, lineageLength, currYAxisLength);
-			assignValue4XYParent(node, parentLineageLength, currYAxisLength);
-
-			if (nodeType == NodeType.ROOT) {
-				node.setXParent(canvasCenter.getX());
-			}
-			break;
-		}
-	}
-
-	public void assignValue(GraphicsNode node, double lineageLength, double currYAxisLength) {
-        Point2D.Double point = pointOnPerimeter(lineageLength, currYAxisLength);
-        if (currYAxisLength >= rectH && currYAxisLength < highBound)
-            node.setAngleIfNeeded((currYAxisLength - rectH) / halfWorkRadius);
+    public void assignValue(GraphicsNode node, double radius, double perimeter) {
+        Point2D.Double point = pointOnPerimeter(radius, perimeter);
+        node.setAngleIfNeeded(outwardAngle(perimeter));
         node.setXSelf(point.x);
         node.setYSelf(point.y);
-	}
+    }
 
-	public void assignValue4XYParent(GraphicsNode node, double lineageLength, double currYAxisLength) {
-        Point2D.Double point = pointOnPerimeter(lineageLength, currYAxisLength);
+    public void assignValue4XYParent(GraphicsNode node, double radius, double perimeter) {
+        Point2D.Double point = pointOnPerimeter(radius, perimeter);
         node.setXParent(point.x);
         node.setYParent(point.y);
-	}
+    }
+
+    private double arcAngle(double perimeter) {
+        return 180 - Math.toDegrees((perimeter - sideLength) / archRadius);
+    }
+
+    private double outwardAngle(double perimeter) {
+        return perimeter < sideLength ? 180 : perimeter < arcEnd ? arcAngle(perimeter) : 0;
+    }
 
     private Point2D.Double pointOnPerimeter(double radius, double perimeter) {
-        if (perimeter < rectH)
-            return new Point2D.Double(canvasCenter.x-radius, currentHeight-blankArea.getBottom()-perimeter);
-        if (perimeter < highBound) {
-            double angle=(perimeter-rectH)/halfWorkRadius;
-            return new Point2D.Double(topCircleCenter.x-radius*Math.cos(angle), topCircleCenter.y-radius*Math.sin(angle));
+        if (perimeter < sideLength) {
+            return new Point2D.Double(centerX - radius, bottomY - perimeter);
         }
-        return new Point2D.Double(canvasCenter.x+radius, currentHeight-blankArea.getBottom()-(totalAvaliableLength-perimeter));
+        if (perimeter < arcEnd) {
+            double angle = (perimeter - sideLength) / archRadius;
+            return new Point2D.Double(centerX - radius * Math.cos(angle), centerY - radius * Math.sin(angle));
+        }
+        return new Point2D.Double(centerX + radius, bottomY - (perimeterLength - perimeter));
     }
-    private Path2D annotationPath(double radius, double start, double end) {
-        Path2D path=new Path2D.Double();
-        int steps=Math.max(1,(int)Math.ceil(Math.abs(end-start)/3));
-        for(int i=0;i<=steps;i++) {
-            Point2D point=pointOnPerimeter(radius,start+(end-start)*i/steps);
-            if(i==0) path.moveTo(point.getX(),point.getY()); else path.lineTo(point.getX(),point.getY());
+
+    Path2D contour(double radius, double start, double end) {
+        Path2D path = new Path2D.Double();
+        Point2D first = pointOnPerimeter(radius, start);
+        path.moveTo(first.getX(), first.getY());
+        if (start == end) return path;
+
+        boolean forward = start < end;
+        double entry = forward ? sideLength : arcEnd;
+        double exit = forward ? arcEnd : sideLength;
+        double arcStart = forward ? Math.max(start, entry) : Math.min(start, entry);
+        double arcStop = forward ? Math.min(end, exit) : Math.max(end, exit);
+        if (forward ? arcStart < arcStop : arcStart > arcStop) {
+            Point2D seam = pointOnPerimeter(radius, arcStart);
+            path.lineTo(seam.getX(), seam.getY());
+            if (radius > 0) {
+                double angle = arcAngle(arcStart);
+                Arc2D arc = new Arc2D.Double();
+                arc.setArcByCenter(centerX, centerY, radius, angle, arcAngle(arcStop) - angle, Arc2D.OPEN);
+                path.append(arc, true);
+            }
+        } else if (archRadius == 0 && Math.min(start, end) < sideLength && Math.max(start, end) >= sideLength) {
+            // An offset contour can still have width when the reference arch has collapsed.
+            path.lineTo(centerX + (forward ? -radius : radius), centerY);
+            path.lineTo(centerX + (forward ? radius : -radius), centerY);
         }
+        Point2D last = pointOnPerimeter(radius, end);
+        path.lineTo(last.getX(), last.getY());
         return path;
     }
+
     @Override
-    protected void configurateMainAnnotation(module.evolview.phylotree.visualization.annotation.AnnotationsProperties properties) {
-        super.configurateMainAnnotation(properties);
-        for(var annotation:properties.getInternalNode2LeafAnnos()) {
-            if(!annotation.shouldConfigurateAndPaint()) continue;
-            var node=annotation.getCurrentGraphicsNode();
-            var leaves=GraphicTreePropertyCalculator.getLeaves(node);
-            double start=leaves.getFirst().getDoubleVariable(), end=leaves.getLast().getDoubleVariable();
-            if(start==end) { annotation.setDrawShape(new Ellipse2D.Double(node.getXSelf()-3,node.getYSelf()-3,6,6)); continue; }
-            double outer=leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(0);
-            Path2D region=annotationPath(outer,start,end);
-            region.append(annotationPath(node.getRadicusIfNeeded(),end,start),true);
-            region.closePath(); annotation.setDrawShape(region);
+    protected void configurateMainAnnotation(AnnotationsProperties properties) {
+        for (var annotation : properties.getInternalNode2LeafAnnos()) {
+            if (!annotation.shouldConfigurateAndPaint()) continue;
+            var node = annotation.getCurrentGraphicsNode();
+            annotation.setDrawShape(cladeRegion(GraphicTreePropertyCalculator.getLeaves(node), node));
         }
-        for(var annotation:properties.getOutterSidewardAnnos()) {
-            if(!annotation.shouldConfigurateAndPaint()) continue;
-            var leaves=GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
-            double start=leaves.getFirst().getDoubleVariable(), end=leaves.getLast().getDoubleVariable();
-            if(start==end) { start-=3; end+=3; }
-            double radius=leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(0)+annotation.getSidewardNodeAnnotation().getLineGap()+annotation.getSidewardNodeAnnotation().getLineStroke().getLineWidth()/2;
-            Point2D point=pointOnPerimeter(radius+10,(start+end)/2);
-            annotation.setTextLocationAndShape(point.getX(),point.getY(),annotationPath(radius,start,end));
+        properties.configurateLeafNamesAnnotaion(false);
+
+        double outer = properties.getOutterSidewardAnnos().isEmpty() ? 0 : outerDecorationRadius();
+        for (var annotation : properties.getOutterSidewardAnnos()) {
+            if (!annotation.shouldConfigurateAndPaint()) continue;
+            var leaves = GraphicTreePropertyCalculator.getLeaves(annotation.getCurrentGraphicsNode());
+            double start = leaves.getFirst().getDoubleVariable(), end = leaves.getLast().getDoubleVariable();
+            var style = annotation.getSidewardNodeAnnotation();
+            double radius = outer + sidewardGap(style);
+            annotation.setShape(sidewardShape(radius, start, end));
+            annotation.setTextLocation(sidewardTextBaseline(radius, (start + end) / 2, style));
+        }
+        for (var annotation : properties.getInternalNode2LeafInsituAnnos()) {
+            if (annotation.shouldConfigurateAndPaint()) annotation.configurate();
         }
     }
 
-	@Override
-	public void paintGraphics(Graphics2D g2d) {
-		g2d.setColor(rootNode.getDrawUnit().getLineColor());
-		g2d.setFont(treeLayoutProperties.getGlobalFont());
+    @Override
+    protected boolean useDefaultSingletonSideward() { return false; }
 
+    @Override
+    protected void configureLineageGeometry(AnnotationsProperties4LinageType properties) {
+        if (properties.isShowSidewardAnno()) {
+            double gap = properties.getCateglory2SidewardNodeAnnotation().values().stream()
+                    .mapToDouble(RectHalfCircleLayout::sidewardGap).max().orElse(0);
+            double radius = outerDecorationRadius() + gap;
+            linageTypeSidewardAnnotationCalculator = leaves -> {
+                var location = new OutterSidewardLocation();
+                location.setShape(sidewardShape(radius, leaves.getFirst().getDoubleVariable(), leaves.getLast().getDoubleVariable()));
+                return location;
+            };
+        }
+        if (properties.isShowInternalNode2leafAnno()) {
+            linageTypeNode2LeafAnnotationCalculator = leaves -> {
+                var location = new OutterSidewardLocation();
+                var ancestor = GraphicTreePropertyCalculator.getMostRecentCommonAnsester(leaves.getFirst(), leaves.getLast());
+                location.setShape(cladeRegion(leaves, ancestor));
+                return location;
+            };
+        }
+    }
 
+    private Shape cladeRegion(List<GraphicsNode> leaves, GraphicsNode ancestor) {
+        var first = leaves.getFirst();
+        double start = first.getDoubleVariable(), end = leaves.getLast().getDoubleVariable();
+        if (start == end) {
+            return new Ellipse2D.Double(first.getXSelf() - 3, first.getYSelf() - 3, 6, 6);
+        }
+        double outer = leaves.stream().mapToDouble(GraphicsNode::getRadicusIfNeeded).max().orElse(0);
+        Path2D region = contour(outer, start, end);
+        region.append(contour(ancestor.getRadicusIfNeeded(), end, start), true);
+        region.closePath();
+        return region;
+    }
 
-		drawAnnotationBackgrounds(g2d);
-		recursiveDraw(rootNode, g2d);
-		commonTailInDrawingProcess(g2d);
-        drawScaleBar(g2d);
-	}
+    private double outerDecorationRadius() {
+        FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(treeLayoutProperties.getGlobalFont());
+        double outer = 0;
+        double[] point = new double[2];
+        for (var leaf : GraphicTreePropertyCalculator.getLeaves(rootNode)) {
+            outer = Math.max(outer, leaf.getRadicusIfNeeded() + decorationExtent(leaf));
+            if (leaf.getCollapse() || !leaf.getDrawUnit().isDrawName() || leaf.getName() == null || leaf.getName().isEmpty()) continue;
+            var bounds = getTipLabelGeometry(leaf, metrics).boundsAt(leaf.getXSelf(), leaf.getYSelf());
+            for (var corners = bounds.getPathIterator(null); !corners.isDone(); corners.next()) {
+                if (corners.currentSegment(point) != PathIterator.SEG_CLOSE) {
+                    outer = Math.max(outer, Math.hypot(point[0] - centerX, Math.max(0, centerY - point[1])));
+                }
+            }
+        }
+        return outer;
+    }
 
-	private void recursiveDraw(GraphicsNode node, Graphics2D g2d) {
-		NodeType nodeType = TreeDecideUtil.decideNodeType(node, rootNode);
-		switch (nodeType) {
-		case LEAF:
-			double xSelf = node.getXSelf();
-			double ySelf = node.getYSelf();
-			g2d.fillOval((int) (xSelf - 2), (int) (ySelf - 2), 4, 4);
+    private static double sidewardGap(SidewardNodeAnnotation style) {
+        return style.getLineGap() + style.getLineStroke().getLineWidth() / 2;
+    }
 
-			if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
-				drawEachLeafNameGraphicsIfNeeded(g2d, node, xSelf, ySelf);
-			}
+    private Shape sidewardShape(double radius, double start, double end) {
+        if (start != end) return contour(radius, start, end);
 
-			lineDrawUtil.setLine(xSelf, ySelf, node.getXParent(), node.getYParent());
-			g2d.draw(lineDrawUtil);
-			break;
-		default:
+        var point = pointOnPerimeter(radius, start);
+        double angle = Math.toRadians(outwardAngle(start));
+        double dx = SINGLE_TIP_HALF_SPAN * Math.sin(angle);
+        double dy = SINGLE_TIP_HALF_SPAN * Math.cos(angle);
+        return new Line2D.Double(point.x - dx, point.y - dy, point.x + dx, point.y + dy);
+    }
 
-			xSelf = node.getXSelf();
-			ySelf = node.getYSelf();
-			g2d.fillOval((int) (xSelf - 2), (int) (ySelf - 2), 4, 4);
-			if (treeLayoutProperties.getShowLeafPropertiesInfo().isShowLeafLabel()) {
-				g2d.drawString(node.getName(), (int) (xSelf - 2), (int) (ySelf - 2));
-			}
+    private Point2D.Double sidewardTextBaseline(double radius, double perimeter, SidewardNodeAnnotation style) {
+        Font textFont = style.getTextFont() == null ? treeLayoutProperties.getGlobalFont() : style.getTextFont();
+        String text = style.getTextString() == null ? "" : style.getTextString();
+        FontMetrics metrics = phylogeneticTreePanel.getHostComponent().getFontMetrics(textFont);
+        double width = metrics.stringWidth(text), height = metrics.getHeight();
+        double centerToBaseline = metrics.getAscent() - height / 2;
+        double angle = Math.toRadians(outwardAngle(perimeter));
+        double nx = Math.cos(angle), ny = -Math.sin(angle);
+        boolean horizontal = style.isDrawTextHorizontal();
+        double support = (Math.abs(nx) * (horizontal ? width : height)
+                + Math.abs(ny) * (horizontal ? height : width)) / 2;
+        double centerRadius = radius + style.getLineStroke().getLineWidth() / 2 + style.getTextGap() + support;
+        var center = pointOnPerimeter(centerRadius, perimeter);
+        return horizontal ? new Point2D.Double(center.x - width / 2, center.y + centerToBaseline)
+                : new Point2D.Double(center.x + centerToBaseline, center.y + width / 2);
+    }
 
-			lineDrawUtil.setLine(xSelf, ySelf, node.getXParent(), node.getYParent());
-			g2d.draw(lineDrawUtil);
-			
-			GraphicsNode firstNode = null;
-			GraphicsNode lastNode = null;
-			for (int i = 0; i < node.getChildCount(); i++) {
-				GraphicsNode child = (GraphicsNode) node.getChildAt(i);
+    @Override
+    protected void drawBranchLengthLabel(Graphics2D graphics, GraphicsNode node) {
+        if (node == rootNode) return;
 
-				recursiveDraw(child, g2d);
-				if (firstNode == null) {
-					firstNode = child;
-				}
-				lastNode = child;
-			}
+        double dx = node.getXSelf() - node.getXParent(), dy = node.getYSelf() - node.getYParent();
+        double angle = dx == 0 && dy == 0 ? -Math.toRadians(node.getAngleIfNeeded()) : Math.atan2(dy, dx);
+        if (angle > Math.PI / 2) angle -= Math.PI;
+        else if (angle < -Math.PI / 2) angle += Math.PI;
 
-			// 这个 Radicus 用来存储 lineageLength
-			drawLineOfSiblingConnection(firstNode, lastNode, node.getRadicusIfNeeded(), g2d);
+        String text = String.valueOf(node.getRealBranchLength());
+        FontMetrics metrics = graphics.getFontMetrics();
+        graphics.translate(node.getXParent() + dx / 2, node.getYParent() + dy / 2);
+        graphics.rotate(angle);
+        float gap = node.getDrawUnit().getStroke().getLineWidth() / 2 + 2;
+        graphics.drawString(text, -metrics.stringWidth(text) / 2f, -metrics.getDescent() - gap);
+    }
 
-			if (nodeType == NodeType.ROOT) {
+    @Override
+    protected void drawInternalNodeName(Graphics2D graphics, GraphicsNode node) {
+        var placement = getTipLabelGeometry(node, graphics.getFontMetrics());
+        Graphics2D label = (Graphics2D) graphics.create();
+        try {
+            label.translate(node.getXSelf(), node.getYSelf());
+            label.rotate(placement.rotation());
+            label.drawString(node.getName(), (float) placement.x(), (float) placement.baseline());
+        } finally {
+            label.dispose();
+        }
+    }
 
-			}
-			break;
-		}
-	}
+    @Override
+    protected void leafLineDrawingProcess(Graphics2D graphics, GraphicsNode node) {
+        commonDrawEachUnit(graphics, node, node != rootNode);
+    }
 
-	private void drawLineOfSiblingConnection(GraphicsNode firstNode, GraphicsNode lastNode,
-			double parentCurrYAxisLength, Graphics2D g2d) {
-		double firstNodeXParent = firstNode.getXParent();
-		double firstNodeYParent = firstNode.getYParent();
-		double lastNodeXParent = lastNode.getXParent();
-		double lastNodeYParent = lastNode.getYParent();
+    @Override
+    protected void rootDrawingProcess(Graphics2D graphics, GraphicsNode node) {
+        drawChildContour(graphics, node);
+    }
 
-		double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    @Override
+    protected void innerNodeDrawingProcess(Graphics2D graphics, GraphicsNode node) {
+        commonDrawEachUnit(graphics, node, true);
+        drawChildContour(graphics, node);
+    }
 
-		double firstCurrYAxisLength = firstNode.getDoubleVariable();
-		double lastCurrYAxisLength = lastNode.getDoubleVariable();
+    private void drawChildContour(Graphics2D graphics, GraphicsNode node) {
+        if (node.getChildCount() < 2) return;
+        double start = node.getChildAt(0).getDoubleVariable();
+        double end = node.getChildAt(node.getChildCount() - 1).getDoubleVariable();
+        var style = node.getDrawUnit();
+        graphics.setColor(style.getLineColor());
+        graphics.setStroke(style.getStroke());
+        graphics.draw(contour(node.getRadicusIfNeeded(), start, end));
+    }
 
-		if (firstCurrYAxisLength < rectH) {
-			if (lastCurrYAxisLength < rectH) {
-				// 1
-				x1 = firstNodeXParent;
-				y1 = firstNodeYParent;
-				x2 = lastNodeXParent;
-				y2 = lastNodeYParent;
-			} else if (lastCurrYAxisLength < highBound) {
-				// 2
-				x1 = firstNodeXParent;
-				y1 = firstNodeYParent;
-				x2 = firstNodeXParent;
-				y2 = halfWorkRadius + blankArea.getTop();
-				// others
-				arc2d.setFrameFromCenter(topCircleCenter.getX(), topCircleCenter.getY(),
-						topCircleCenter.getX() - parentCurrYAxisLength, topCircleCenter.getY() - parentCurrYAxisLength);
+    @Override
+    protected TracingPaintingProperty configurateTracingShape(GraphicsNode node, Color color) {
+        var tracing = new TracingPaintingProperty();
+        tracing.path = new GeneralPath();
+        tracing.path.moveTo(node.getXSelf(), node.getYSelf());
+        node.getDrawUnit().setNodeSelected(true);
 
-				arc2d.setAngles(lastNodeXParent, lastNodeYParent, x2, y2);
-				g2d.draw(arc2d);
-			} else {
-				// 3
-
-			}
-		} else if (firstCurrYAxisLength < highBound) {
-			if (lastCurrYAxisLength < highBound) {
-				// 4
-				arc2d.setFrameFromCenter(topCircleCenter.getX(), topCircleCenter.getY(),
-						topCircleCenter.getX() - parentCurrYAxisLength, topCircleCenter.getY() - parentCurrYAxisLength);
-
-				arc2d.setAngles(lastNodeXParent, lastNodeYParent, firstNodeXParent, firstNodeYParent);
-				g2d.draw(arc2d);
-			} else {
-				// 5
-				x1 = lastNodeXParent;
-				y1 = halfWorkRadius + blankArea.getTop();
-				x2 = lastNodeXParent;
-				y2 = lastNodeYParent;
-				// others
-				arc2d.setFrameFromCenter(topCircleCenter.getX(), topCircleCenter.getY(),
-						topCircleCenter.getX() - parentCurrYAxisLength, topCircleCenter.getY() - parentCurrYAxisLength);
-
-				arc2d.setAngles(lastNodeXParent, y1, firstNodeXParent, firstNodeYParent);
-				g2d.draw(arc2d);
-			}
-		} else {
-			// 6
-			x1 = firstNodeXParent;
-			y1 = firstNodeYParent;
-			x2 = lastNodeXParent;
-			y2 = lastNodeYParent;
-		}
-
-		lineDrawUtil.setLine(x1, y1, x2, y2);
-		g2d.draw(lineDrawUtil);
-	}
-
+        GraphicsNode current = node;
+        while (current != rootNode && current.getParent() instanceof GraphicsNode parent) {
+            tracing.path.lineTo(current.getXParent(), current.getYParent());
+            tracing.path.append(contour(parent.getRadicusIfNeeded(), current.getDoubleVariable(), parent.getDoubleVariable()), true);
+            current = parent;
+        }
+        tracing.pointOfNode = getDisplayedNodePosition(node);
+        tracing.fillColor = color;
+        return tracing;
+    }
 }

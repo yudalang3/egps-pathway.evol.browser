@@ -6,16 +6,18 @@
 
 ## 1. 投稿前代码与运行时阻塞清单
 
-以下各项均经 2026-11-26/27 源码审查确认；**所有 `P0` 项闭环前，正文不得宣称对应端能力已完备或跨平台可用**。
+以下各项均经 2026-11-26/27 源码审查确认。正文应按各项验收结果陈述对应端的能力与平台覆盖范围。
 
 | 编号 | 级别 | 涉及源码/模块 | 源码核实的现状与风险 | 关闭条件（验收标准） | 当前状态 |
 |---|---|---|---|---|---|
-| `BLK-01` | **P0** | [RectHalfCircleLayout.java](../src/module/evolview/phylotree/visualization/layout/RectHalfCircleLayout.java)（MTV-GUI） | 1) `drawLineOfSiblingConnection()` 第 285–288 行 `// 3` 分支为空，首子在左直边、末子在右直边时树干断连；2) 半径 `0.3 * workHeight` 未约束宽度，$W/H < 0.6$ 时水平溢出；3) 未重写 `usesTipLabels()` 导致左直边叶标签向右压盖树枝，且 `angleIfNeeded` 写入弧度但父类按度数解析；4) 硬编码 2px 圆点忽略枝色/线宽/折叠样式。 | 修复全部 4 处缺陷（或与 `YyTreeBridge` 共享核心轮廓绘制逻辑），并在平衡树、不平衡树、窄画布下通过视觉与坐标回归测试；或者在投稿稿件中明确禁用/排除 MTV-GUI 端拱形展示（不推荐，易遭审稿人实测质疑）。 | 待修复 |
+| `BLK-01` | **P0** | [RectHalfCircleLayout.java](../src/module/evolview/phylotree/visualization/layout/RectHalfCircleLayout.java)（MTV-GUI） | 原实现的跨拱分支为空，窄画布可能裁切，文字、节点样式、标注及比例尺存在渲染缺陷。 | 在平衡树、不平衡且根到叶累计枝长不等的树、窄画布上验证六种轮廓区间、文字朝向、样式与折叠、正根枝长、普通及分类标注、画布净空和缩放。通过 MTV-GUI 的 SVG 导出，并用仓内既有 bridge JAR 验证 `yytree` 兼容性。 | 已通过 [MTV-GUI 拱形回归](../src/test/module/evolview/phylotree/visualization/layout/ArchLayoutRegressionTest.java) 和 `YyTreeGeometryTest`。 |
 | `BLK-02` | **P0** | [runtime.R](../rPackage/R/runtime.R)、[PdfExport.java](../rPackage/java/src/main/java/api/rpython/yytree/PdfExport.java)、[yytree README](../rPackage/README.md) | `yytree` 需外部安装兼容版 eGPS2 与 Java 25+；历史 PDF/SVG/PPTX 验收仅覆盖本机 Windows 字体环境，且 README/示例包含作者本机回退路径。 | 1) 在 Windows、Linux、macOS 三平台干净环境完成 `yytree` + eGPS2 + Java 25 独立安装测试；2) 验证三平台 Unicode/CJK 字体映射与 PDF/SVG/PPTX 结构/像素一致性；3) 清理对外文档与示例中的本机绝对路径，提供审稿人可复现的 Release/Zenodo 下载与配置指引。 | 待验证 |
 | `BLK-03` | **P0** | [FreeShapeEditorTest.java](../rPackage/java/src/test/java/api/rpython/yytree/FreeShapeEditorTest.java)、[test-free-shape-editor.R](../rPackage/tests/testthat/test-free-shape-editor.R) | Java 测试生成了 `roundtrip.json` 夹具，但 `test-free-shape-editor.R` 仅 28 行（测箭头参数与热图 `source`），**尚无消费生成的 R 代码片段并在干净 R 会话中重建比对的自动化重放验收**。 | 新增自动化重放脚本：覆盖九类图元、三种坐标、`Snap To Point` 吸附、Z 序重排、空列表状态与热图矩阵，在干净 R 会话解析执行并完成语法/对象容差/渲染像素三层断言，留存归档日志。 | 待建设 |
 | `BLK-04` | **P1** | [YyTreeBridge.java](../rPackage/java/src/main/java/api/rpython/yytree/YyTreeBridge.java)（第 489 行） | `arch_align` 计算 `outer` 取叶节点 `getRadicusIfNeeded()` 最大值；全零枝长树上叶集非空但半径均为 `0.0`，`outer` 退化为 `0.0`，导致对齐延长线缩回中轴。 | 明确并测试全零枝长树在 `arch` 与 `arch_align` 下的预期行为（报错、回退单位长度或固定 `outer = archRadius`），并写入 3.2 节回归测试。 | 待确认 |
 | `BLK-05` | **P1** | [FreeShapes.java](../rPackage/java/src/main/java/api/rpython/yytree/FreeShapes.java)（第 126、177 行） | `quote()` 会转义 `\n` 与 `\t`，但 `draw()` 使用 AWT `g.drawString()`，不渲染多行换行；同时测试夹具已包含含 `\n` 字符串。 | 二选一闭环：要么在 `FreeShapes.draw()`/`textBounds()` 支持多行渲染并在 PDF/SVG/PPTX 同步验收，要么在 R/GUI 输入校验与文档中明确限定 `free_text` 为单行字符串。 | 待确认 |
 | `BLK-06` | **P1** | [DESCRIPTION](../rPackage/DESCRIPTION)、[SOURCES.txt](../src/module/evolview/moderntreeviewer/examples/SOURCES.txt) | 工程与 `yytree` 采用 Apache-2.0，而 MTV 内置的 `ape::bird.orders` 与 `ape::hivtree.newick` 采用 GPL-2。 | 核对投稿复现包与软件分发包的许可证声明与文件隔离，确保不发生许可证污染且上游署名完整。 | 待复核 |
+
+后续工程事项包括统一 MTV-GUI 与 `yytree` 的轮廓计算。两端目前共享枝段节点坐标计算，并各自负责绘制。合并轮廓计算时需同时验证 R bridge 与已安装 eGPS2 的版本兼容性。
 
 ---
 
@@ -47,7 +49,7 @@
 | 交互形态 | 本地 Swing GUI + VOICE/JSONC | R 脚本 + 独立 Swing 预览编辑 | R 脚本（含部分交互扩展 [L11]） | 本地 Java GUI | 本地 GUI + 模块化脚本 | Web GUI + 模板/API | Web GUI + 表格模板 | JS / R / Python + 交互编辑 | Python 脚本 + Web/本地交互 |
 | 本地离线与核心依赖 | 离线；需 eGPS2 + JDK 25+ | 离线；需 R 4.2+ + eGPS2 + Java 25+ | 离线；R 生态 | 离线；Java | 离线；桌面安装包 | 在线服务为主 | 在线服务为主 | 待核实全文 | 离线；Python 生态 |
 | 树输入格式 | Newick (0–9)、ITP 表格 | Newick、`phylo`、`hclust` | Newick、NEXUS、BEAST 等（经 `treeio`） | Newick、NEXUS、BEAST | 待核实 | 待核实 | 待核实 | 待核实 | 待核实 |
-| 布局覆盖（含拱形/无根/螺旋） | 22 种（含无根优化、螺旋；拱形待修 `BLK-01`） | 7 种（含完整拱形与四向斜树；无螺旋/无根） | 矩形、圆形、开放扇形、无根等（无双直边拱形） | 矩形、圆形、无根 | 待核实 | 待核实 | 待核实 | 待核实 | 待核实 |
+| 布局覆盖（含拱形/无根/螺旋） | 22 种（含已通过回归的拱形、螺旋和无根优化） | 7 种（含拱形及其对齐变体、四向斜树；无螺旋/无根） | 矩形、圆形、开放扇形、无根等（无双直边拱形） | 矩形、圆形、无根 | 待核实 | 待核实 | 待核实 | 待核实 | 待核实 |
 | 多轨数据注释与图例 | 仅 clade 标注；无数据框驱动多轨热图 | 多列分类、共享色阶热图、间距与四角图例 | 极丰富（`ggplot2` 图层语法） | 节点属性着色/有限图例 | 待核实 | 丰富 Web 模板 | 丰富表格驱动轨道 | 待核实 | 大规模元数据汇总与注释 |
 | 树拓扑/枝长直接编辑 | Creative mode（含背景图描摹；无撤销；无 Reroot/Rotate） | 否（交由 R 上游处理） | 脚本修改拓扑/枝长 | Reroot、Rotate、Collapse、Order | 待核实 | 待核实 | 待核实 | 待核实 | 待核实 |
 | 自由图元直接编辑 | 否 | 九类自由图元 + 节点吸附 + 100 步撤销 | 有限/依赖外部插件 | 否 | 待核实 | 待核实 | 待核实 | 待核实 | 待核实 |

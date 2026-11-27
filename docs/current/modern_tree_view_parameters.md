@@ -49,8 +49,8 @@ Precedence: program defaults → user defaults → explicit VOICE → current tr
 | Mouse wheel/Zoom height | `mouse.wheel.zoom.height` | wheel.height.scale.on, height.scale.on | `true` | Allow the mouse wheel to change tree height. Use true or false. |
 | Mouse wheel/Zoom width | `mouse.wheel.zoom.width` | wheel.width.scale.on, width.scale.on | `true` | Allow the mouse wheel to change tree width. Use true or false. |
 | View/Height scale | `view.height.scale.percent` | view.height.scale | `100` | Height as a percentage of fitted size (100-100000). |
-| View/Width scale | `view.width.scale.percent` | view.width.scale | `100` | Width as a percentage of fitted size (100-100000). Circular, spiral and radial layouts scale uniformly. |
-| View/Lock aspect ratio | `view.lock.aspect.ratio` |  | `false` | Keep the aspect ratio during manual zoom. Circular, spiral and radial layouts always scale uniformly. Use true or false. |
+| View/Width scale | `view.width.scale.percent` | view.width.scale | `100` | Width as a percentage of fitted size (100-100000). Arch, circular, spiral and radial layouts scale uniformly. |
+| View/Lock aspect ratio | `view.lock.aspect.ratio` |  | `false` | Keep the aspect ratio during manual zoom. Arch, circular, spiral and radial layouts always scale uniformly. Use true or false. |
 | Fonts/Axis and scale bar/Inherit label font | `font.axis.inherit.label.font` | font.axis | `true` | Use the label font for the axis and scale bar. Empty VOICE font.axis inherits the label font. Use true or false. |
 | Node style/Scope | `node.style.scope` |  | `"Selected clades"` | Selected clades includes selected nodes and descendants; without selection, the whole tree. Other choices: All nodes, Leaves only. Scope is not saved. |
 | Node style/Color | `node.style.color` | node.color | `"#000000"` | Node and branch color as #RRGGBB, or Mixed. Leave Mixed unchanged to preserve different values. |

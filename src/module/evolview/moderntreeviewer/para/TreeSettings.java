@@ -156,8 +156,8 @@ public final class TreeSettings {
 
     static {
         number("View/Height scale", 100, 100, 100000, "view.height.scale", "Height as a percentage of fitted size (100-100000).", TreeLayoutProperties::getInitialHeightScale, (p, v) -> p.setInitialHeightScale(v.intValue()));
-        number("View/Width scale", 100, 100, 100000, "view.width.scale", "Width as a percentage of fitted size (100-100000). Circular, spiral and radial layouts scale uniformly.", TreeLayoutProperties::getInitialWidthScale, (p, v) -> p.setInitialWidthScale(v.intValue()));
-        flag("View/Lock aspect ratio", false, "view.lock.aspect.ratio", "Keep the aspect ratio during manual zoom. Circular, spiral and radial layouts always scale uniformly.", TreeLayoutProperties::isLockAspectRatio, TreeLayoutProperties::setLockAspectRatio);
+        number("View/Width scale", 100, 100, 100000, "view.width.scale", "Width as a percentage of fitted size (100-100000). Arch, circular, spiral and radial layouts scale uniformly.", TreeLayoutProperties::getInitialWidthScale, (p, v) -> p.setInitialWidthScale(v.intValue()));
+        flag("View/Lock aspect ratio", false, "view.lock.aspect.ratio", "Keep the aspect ratio during manual zoom. Arch, circular, spiral and radial layouts always scale uniformly.", TreeLayoutProperties::isLockAspectRatio, TreeLayoutProperties::setLockAspectRatio);
         flag("Fonts/Axis and scale bar/Inherit label font", true, "font.axis", "Use the label font for the axis and scale bar. Empty VOICE font.axis inherits the label font.", TreeLayoutProperties::isAxisFontInherited, TreeLayoutProperties::setAxisFontInherited);
         add("Node style/Scope", "Selected clades", null, "Selected clades includes selected nodes and descendants; without selection, the whole tree. Other choices: All nodes, Leaves only. Scope is not saved.", v -> {
             if (!List.of("Selected clades", "All nodes", "Leaves only").contains(v)) throw new IllegalArgumentException("Use Selected clades, All nodes or Leaves only"); return v;
@@ -342,8 +342,8 @@ public final class TreeSettings {
             case "Mouse wheel/Zoom height" -> "允许鼠标滚轮缩放树体高度。取值 true 或 false。";
             case "Mouse wheel/Zoom width" -> "允许鼠标滚轮缩放树体宽度。取值 true 或 false。";
             case "View/Height scale" -> "相对初始适配尺寸的高度缩放百分比（100–100000）。";
-            case "View/Width scale" -> "相对初始适配尺寸的宽度缩放百分比（100–100000）。环形、螺旋和无根布局始终等比缩放。";
-            case "View/Lock aspect ratio" -> "手动缩放时锁定宽高比。环形、螺旋和无根布局始终保持等比缩放。取值 true 或 false。";
+            case "View/Width scale" -> "相对初始适配尺寸的宽度缩放百分比（100–100000）。拱形、环形、螺旋和无根布局始终等比缩放。";
+            case "View/Lock aspect ratio" -> "手动缩放时锁定宽高比。拱形、环形、螺旋和无根布局始终保持等比缩放。取值 true 或 false。";
             case "Fonts/Axis and scale bar/Inherit label font" -> "坐标轴与比例尺沿用标签字体。VOICE 中置空 font.axis 同样表示继承标签字体。取值 true 或 false。";
             case "Node style/Scope" -> "样式作用范围：Selected clades 表示选中节点及其全部后代（无选中时作用于整棵树）；其他可选值为 All nodes、Leaves only。该作用范围不会写入用户默认配置。";
             case "Node style/Color" -> "节点与分支颜色（#RRGGBB）或 Mixed；保持 Mixed 不变可保留各节点原有的不同颜色。";
@@ -618,13 +618,17 @@ public final class TreeSettings {
         if (changes.containsKey("View/Height scale") || changes.containsKey("View/Width scale")) {
             int height = ((Number) changes.getOrDefault("View/Height scale", scale.height)).intValue();
             int width = ((Number) changes.getOrDefault("View/Width scale", scale.width)).intValue();
-            if (properties.isLockAspectRatio() && !tree.isUniformScaleLayout()
-                    && changes.containsKey("View/Height scale") != changes.containsKey("View/Width scale")) {
-                double factor = changes.containsKey("View/Height scale") ? height / (double) scale.height : width / (double) scale.width;
-                factor = Math.max(factor, Math.max(100.0 / scale.height, 100.0 / scale.width));
-                factor = Math.min(factor, Math.min(100000.0 / scale.height, 100000.0 / scale.width));
-                height = (int) Math.round(scale.height * factor);
-                width = (int) Math.round(scale.width * factor);
+            boolean heightChanged = changes.containsKey("View/Height scale");
+            if (heightChanged != changes.containsKey("View/Width scale")) {
+                if (tree.isUniformScaleLayout()) {
+                    height = width = heightChanged ? height : width;
+                } else if (properties.isLockAspectRatio()) {
+                    double factor = heightChanged ? height / (double) scale.height : width / (double) scale.width;
+                    factor = Math.max(factor, Math.max(100.0 / scale.height, 100.0 / scale.width));
+                    factor = Math.min(factor, Math.min(100000.0 / scale.height, 100000.0 / scale.width));
+                    height = (int) Math.round(scale.height * factor);
+                    width = (int) Math.round(scale.width * factor);
+                }
             }
             tree.setTreePanelScale(height, width);
         }
