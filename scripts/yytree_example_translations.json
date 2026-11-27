@@ -1,7 +1,7 @@
 {
   "Basic: Newick and hierarchical clustering": "基础用法：Newick 与层次聚类",
   "Run this file independently in R/RStudio after installing yytree.": "安装 yytree 后，在 R 或 RStudio 中独立运行本文件。",
-  "Set EGPS_HOME or replace the fallback with your eGPS installation directory.": "设置 EGPS_HOME，或把默认路径替换为自己的 eGPS 安装目录。",
+  "Set EGPS_HOME to your eGPS2 installation directory (or macOS .app bundle) before running.": "运行前请将 EGPS_HOME 设为本机 eGPS2 安装目录（macOS 可直接指向 .app 包）。",
   "A. Newick: define tree, build the plot, then show it.": "甲、Newick：定义 tree，创建绘图，再显示窗口。",
   "Numbers after colons are branch lengths. The default layout is rectangular.": "冒号后的数字是枝长，默认使用矩形布局。",
   "B. Numeric data: calculate distances and build a hierarchical cluster.": "乙、数值数据：计算距离，再进行层次聚类。",

@@ -2,12 +2,12 @@
 ## 安装 yytree 后，在 R 或 RStudio 中独立运行本文件。
 # library(yytree)
 ## 设置 EGPS_HOME，或把默认路径替换为自己的 eGPS 安装目录。
-#config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
+#config_yytree(Sys.getenv("EGPS_HOME"))
 
 #### 开发时的快速启动方式
-lib <- "C:/Users/yudal/Documents/project/eGPS2/jars/egps2_collections/egps-pathway.evol.browser/rPackage/library"
+lib <- file.path(getwd(), "rPackage", "library")
 library(yytree, lib.loc = lib)
-path2egps <- "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"
+path2egps <- Sys.getenv("EGPS_HOME")
 config_yytree(path2egps )
 # 重新启动，因为底层用了processx，所以不像rJava那样不能重新启动JVM
 config_yytree(path2egps, max_memory_heap = "8g", max_memory_stack = "16m", restart = TRUE) 

@@ -13,7 +13,10 @@ Install yytree first, then run either language in an interactive R/RStudio sessi
 先安装 yytree，然后在交互式 R 或 RStudio 中选择一种语言运行：
 
 ```r
-Sys.setenv(EGPS_HOME = "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+# Windows: Sys.setenv(EGPS_HOME = "D:/software/eGPS_v2_windows_x64")
+# Linux:   Sys.setenv(EGPS_HOME = "/opt/eGPS_v2_ubuntu_x64")
+# macOS:   Sys.setenv(EGPS_HOME = "/Applications/eGPS_v2_macOS.app")
+Sys.setenv(EGPS_HOME = "/path/to/eGPS2")
 source("rPackage/examples/example1_basic.R", encoding = "UTF-8")
 # Or / 或者：
 source("rPackage/examples/example1_basic_zh.R", encoding = "UTF-8")
@@ -150,8 +153,8 @@ Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设�
 
 ## Validation / 验证
 
-```powershell
-& 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_examples.R
+```bash
+Rscript --vanilla scripts/test_yytree_examples.R "$EGPS_HOME"
 ```
 
 Only the 29 English scripts execute. Chinese scripts are parsed and compared as R
@@ -163,8 +166,8 @@ The report is `logs/yytree-examples.json`. GUI checks run separately:
 不重复执行。全部绘图输出至 `temp/yytree-examples`，报告放在 `logs/yytree-examples.json`。
 GUI 交互另行检查：
 
-```powershell
-& 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_integration.R $env:EGPS_HOME temp/yytree-qa --gui
+```bash
+Rscript --vanilla scripts/test_yytree_integration.R "$EGPS_HOME" temp/yytree-qa --gui
 ```
 
 The paired source is maintained in `scripts/generate_yytree_examples.py`;

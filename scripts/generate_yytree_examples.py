@@ -18,8 +18,10 @@ measurements <- matrix(rnorm(length(leaf_names) * 4), length(leaf_names), 4,
 '''
 HEADER = '''# <<Run this file independently in R/RStudio after installing yytree.|安装 yytree 后，在 R 或 RStudio 中独立运行本文件。>>
 library(yytree)
-# <<Set EGPS_HOME or replace the fallback with your eGPS installation directory.|设置 EGPS_HOME，或把默认路径替换为自己的 eGPS 安装目录。>>
-config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
+# <<Set EGPS_HOME to your eGPS2 installation directory (or macOS .app bundle) before running.|运行前请将 EGPS_HOME 设为本机 eGPS2 安装目录（macOS 可直接指向 .app 包）。>>
+egps_home <- Sys.getenv("EGPS_HOME")
+if (!nzchar(egps_home)) stop('Set Sys.setenv(EGPS_HOME = "/path/to/eGPS2") before running this example.', call. = FALSE)
+config_yytree(egps_home)
 
 '''
 FOOTER = '''
@@ -269,7 +271,8 @@ plots <- list(matrix = base + free_text(.1, .79, "<<Independent matrix|独立矩
 ''', TREE_CODE)
 
 add('window_interaction', '<<Update a preview and open an independent comparison|更新预览与打开独立比较窗口>>', '''
-original <- yytree(tree, width = 1600, height = 1200) + leaf_labels() + leaf_render(size = 3)
+original <- yytree(tree, width = 1600, height = 1200) + leaf_labels() + leaf_render(size = 3) +
+  interact(data.frame(name = c("Human", "Mouse"), clade = c("Mammals", "Mammals")))
 updated <- original + leaf_render(df = data.frame(name = "Human", fill = "red", size = 7))
 comparison <- updated + yytree::layout(name = "slant")
 plots <- list(original = original, updated = updated, comparison = comparison)
@@ -299,7 +302,7 @@ if (Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1") {
 # <<Call this helper explicitly to quit Java and start a fresh preview.|需要退出 Java 并重新启动预览时，显式调用此函数。>>
 restart_preview <- function() {
   quit_yytree()
-  config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
+  config_yytree(egps_home)
   print(y)
 }
 ''', TREE_CODE, footer=False)
@@ -470,7 +473,10 @@ Install yytree first, then run either language in an interactive R/RStudio sessi
 先安装 yytree，然后在交互式 R 或 RStudio 中选择一种语言运行：
 
 ```r
-Sys.setenv(EGPS_HOME = "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+# Windows: Sys.setenv(EGPS_HOME = "D:/software/eGPS_v2_windows_x64")
+# Linux:   Sys.setenv(EGPS_HOME = "/opt/eGPS_v2_ubuntu_x64")
+# macOS:   Sys.setenv(EGPS_HOME = "/Applications/eGPS_v2_macOS.app")
+Sys.setenv(EGPS_HOME = "/path/to/eGPS2")
 source("rPackage/examples/example1_basic.R", encoding = "UTF-8")
 # Or / 或者：
 source("rPackage/examples/example1_basic_zh.R", encoding = "UTF-8")
@@ -583,8 +589,8 @@ Swing 外观由 JVM 共享。加载或配置 yytree、离屏渲染都不会设�
 
 ## Validation / 验证
 
-```powershell
-& 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_examples.R
+```bash
+Rscript --vanilla scripts/test_yytree_examples.R "$EGPS_HOME"
 ```
 
 Only the 29 English scripts execute. Chinese scripts are parsed and compared as R
@@ -596,8 +602,8 @@ The report is `logs/yytree-examples.json`. GUI checks run separately:
 不重复执行。全部绘图输出至 `temp/yytree-examples`，报告放在 `logs/yytree-examples.json`。
 GUI 交互另行检查：
 
-```powershell
-& 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla scripts/test_yytree_integration.R $env:EGPS_HOME temp/yytree-qa --gui
+```bash
+Rscript --vanilla scripts/test_yytree_integration.R "$EGPS_HOME" temp/yytree-qa --gui
 ```
 
 The paired source is maintained in `scripts/generate_yytree_examples.py`;

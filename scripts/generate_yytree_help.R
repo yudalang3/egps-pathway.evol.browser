@@ -170,7 +170,7 @@ document("inner_node_annotation", "Place a shape and text beside a selected inte
   'base <- yytree("((A:1,B:2):1,C:3);")\np <- base + inner_node_annotation("A", "B", text = "AB ancestor")\nq <- base + inner_node_annotation(shape = "ellipse", size = 16,\n  df = data.frame(name1 = "A", name2 = "B", text = "AB", fill = "gold"))')
 
 document("config_yytree", "Start or reuse the Java subprocess used by all yytree previews.",
-  c(path2egps = r"(Required. One existing eGPS installation-directory string containing \file{dependency-egps} JARs. The installation's \file{jre} is preferred; if absent, \env{JAVA_HOME} is used. Java 25 or newer is required. The package supplies its bridge JAR, not the eGPS core.)",
+  c(path2egps = r"(Required. One existing eGPS installation-directory string containing \file{dependency-egps} JARs (on macOS, a \file{.app} bundle, its parent distribution directory, or \file{Contents/Resources} are all accepted). The installation's \file{jre} (including macOS \file{jre/Contents/Home}) is preferred; if absent, \env{JAVA_HOME} is used. Java 25 or newer is required. The package supplies its bridge JAR, not the eGPS core.)",
     max_memory_heap = r"(One Java heap-limit string, default \code{"4g"}, passed as \code{-Xmx}. Positive integer followed by \code{m} or \code{g}, case-insensitive; for example \code{"512m"}. Changing a configured value requires \code{restart = TRUE}.)",
     max_memory_stack = r"(One per-thread Java stack-size string, default \code{"8m"}, passed as \code{-Xss}. Positive integer followed by \code{k}, \code{m}, or \code{g}, case-insensitive; for example \code{"512k"} or \code{"16m"}. Changing a configured value requires \code{restart = TRUE}.)",
     restart = r"(One nonmissing logical value, default \code{FALSE}. With \code{FALSE}, identical configuration reuses a live subprocess and changed configuration raises an error. \code{TRUE} closes all existing windows and restarts Java with the supplied configuration, even if unchanged.)"),
@@ -354,7 +354,7 @@ Add \code{leaf_labels(show = TRUE)} before \code{leaf_label_render()}; the most 
 # Each topic owns exactly its listed functions; links supply broader context.
 document("export", "Export a complete plot without opening a preview window.",
   c(plot = "A yytree plot object.", file = "One output path ending in .pdf, .svg or .pptx; existing files are overwritten."),
-  "Configure Java first with config_yytree(). Output uses the logical canvas dimensions and the R plot definition. Preview navigation and edits not copied back to R are excluded. PPTX uses the existing eGPS exporter and retains its limitations.",
+  "Configure Java first with config_yytree(). Output uses the logical canvas dimensions and the R plot definition. Preview navigation and edits not copied back to R are excluded. PDF export recursively discovers TrueType fonts across standard Windows, Linux, and macOS font directories plus optional YYTREE_FONT_DIR (iText 5.1.3 requires TrueType .ttf or TrueType .ttc fonts for Unicode/CJK embedding). SVG uses the shared Batik 1.20 exporter; PPTX uses the local POI adaptation.",
   '\\dontrun{\np <- yytree("(A:1,B:2);") + leaf_labels()\nexport(p, "plot.pdf")\nexport(p, "plot.svg")\n}',
   "The absolute output path, invisibly.")
 document("interact", "Attach node hover information in the interactive preview.",

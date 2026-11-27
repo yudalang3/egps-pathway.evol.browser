@@ -1,7 +1,8 @@
 # Run from an interactive R session after installing yytree.
-# Optional: set EGPS_HOME before sourcing this file.
+# Set EGPS_HOME before sourcing this file (e.g. Sys.setenv(EGPS_HOME = "/path/to/eGPS2")).
 library(yytree)
-egps <- Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+egps <- Sys.getenv("EGPS_HOME")
+if (!nzchar(egps)) stop('Set Sys.setenv(EGPS_HOME = "/path/to/eGPS2") before running this script.', call. = FALSE)
 config_yytree(egps)
 
 tree <- "((('Arabidopsis thaliana':1,'Oryza sativa':1):1,'Saccharomyces cerevisiae':2):1,(('Caenorhabditis elegans':1,'Drosophila melanogaster':1):1,('Danio rerio':2,(Xenopus:1,('Homo sapiens':1,'Mus musculus':1):1):1):1):1);"

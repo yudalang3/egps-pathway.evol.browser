@@ -1,3 +1,5 @@
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) >= 1L && nzchar(args[1])) Sys.setenv(EGPS_HOME = args[1])
 .libPaths(c(normalizePath("temp/yytree-library", winslash = "/"), .libPaths()))
 Sys.setenv(YYTREE_EXAMPLES_NO_GUI = "1")
 library(yytree)

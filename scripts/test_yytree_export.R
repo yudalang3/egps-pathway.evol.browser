@@ -1,8 +1,11 @@
-Sys.setenv(LC_ALL = "English_United States.utf8", JAVA_TOOL_OPTIONS = "-Djava.awt.headless=true")
-for (f in list.files("rPackage/R", full.names = TRUE)) sys.source(f, globalenv())
-# Source execution needs the installed bridge locator used by config_yytree.
-library(yytree, lib.loc = "rPackage/library")
-config_yytree("C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+args <- commandArgs(trailingOnly = TRUE)
+egps <- if (length(args) >= 1L && nzchar(args[1])) args[1] else Sys.getenv("EGPS_HOME")
+if (!nzchar(egps)) stop('Pass the eGPS2 path as argv[1] or set EGPS_HOME.', call. = FALSE)
+Sys.setenv(JAVA_TOOL_OPTIONS = "-Djava.awt.headless=true")
+lib_dir <- if (length(args) >= 2L && nzchar(args[2])) args[2] else if (dir.exists("rPackage/library")) "rPackage/library" else NULL
+if (!is.null(lib_dir)) .libPaths(c(normalizePath(lib_dir, winslash = "/"), .libPaths()))
+library(yytree)
+config_yytree(egps)
 dir.create("temp/yytree-export", recursive = TRUE, showWarnings = FALSE)
 for (code in 1:7) {
   p <- yytree("((A:1,B:2):1,C:3);") + layout(code = code) + leaf_labels()

@@ -1,0 +1,693 @@
+[
+  {
+    "name": "nine_shapes_modes_snap_zorder",
+    "code": "+ free_rectangle(x = 0.3500000000000001, y = 0.36197916666666674, width = 0.15, height = 0.1380208333333333, mode = \"relative\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_ellipse(x = 42.5, y = 43.098958333333336, width = 15.0, height = 13.802083333333329, mode = \"percent\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_line(x1 = 500.0, y1 = 400.0, x2 = 350.00000000000006, y2 = 289.58333333333337, mode = \"pixel\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_arrow(x1 = 0.5, y1 = 0.5, x2 = 0.3500000000000001, y2 = 0.36197916666666674, mode = \"relative\", line_color = \"#000000FF\", line_thickness = 2.0, line_type = \"solid\", head_style = \"filled\", head_length = NULL, head_width = NULL) +\n  free_bezier(points = matrix(c(35.00000000000001, 39.6484375, 40.0, 36.19791666666667, 45.0, 43.098958333333336, 50.0, 39.6484375), nrow = 4, byrow = TRUE), mode = \"percent\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_bezier_ring(points1 = matrix(c(350.00000000000006, 317.1875, 400.0, 289.58333333333337, 450.0, 344.7916666666667, 500.0, 317.1875), nrow = 4, byrow = TRUE), points2 = matrix(c(350.00000000000006, 372.3958333333333, 400.0, 344.7916666666667, 450.0, 400.0, 500.0, 372.3958333333333), nrow = 4, byrow = TRUE), mode = \"pixel\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_polygon(points = matrix(c(0.05, 0.0625, 0.16979166666666667, 0.07552083333333334, 0.1197916666666667, 0.20052083333333337), nrow = 3, byrow = TRUE), mode = \"relative\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_text(x = 49.43402777777779, y = 14.891493055555557, text = \"中文 \\\"title\\\" \\\\ path [ok]\", mode = \"percent\", locator = \"right\", gap = 14.048611111111116, color = \"#12345680\", size = 36.125000000000014) +\n  free_heatmap(x = 100.0, y = 480.0, width = 250.0, height = 160.0, matrix = matrix(c(0.0, NA_real_, 10.0, -2.0, 5.0, 8.0), nrow = 2, byrow = TRUE), colors = c(\"#2166ACFF\", \"#FFFFFFFF\", \"#B2182BFF\"), limits = c(0, 10), mode = \"pixel\") +\n  free_arrow(x1 = 0.12, y1 = 0.275, x2 = 0.494, y2 = 0.025, mode = \"relative\", line_color = \"#000000FF\", line_thickness = 2.0, line_type = \"solid\", head_style = \"filled\", head_length = NULL, head_width = NULL) +\n  free_ellipse(x = 58.0, y = 58.125, width = 10.0, height = 10.0, mode = \"percent\", fill_color = \"#2040E0FF\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_rectangle(x = 520.0, y = 420.0, width = 120.0, height = 90.0, mode = \"pixel\", fill_color = \"#E02020FF\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\")",
+    "layers": [
+      {
+        "type": "rectangle",
+        "mode": "relative",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "x": 0.3500000000000001,
+        "y": 0.36197916666666674,
+        "width": 0.15,
+        "height": 0.1380208333333333
+      },
+      {
+        "type": "ellipse",
+        "mode": "percent",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "x": 42.5,
+        "y": 43.098958333333336,
+        "width": 15.0,
+        "height": 13.802083333333329
+      },
+      {
+        "type": "line",
+        "mode": "pixel",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "x1": 500.0,
+        "y1": 400.0,
+        "x2": 350.00000000000006,
+        "y2": 289.58333333333337
+      },
+      {
+        "type": "arrow",
+        "mode": "relative",
+        "line_color": "#000000FF",
+        "line_thickness": 2,
+        "line_type": "solid",
+        "head_style": "filled",
+        "x1": 0.5,
+        "y1": 0.5,
+        "x2": 0.3500000000000001,
+        "y2": 0.36197916666666674
+      },
+      {
+        "type": "bezier",
+        "mode": "percent",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "points": [
+          [
+            35.00000000000001,
+            39.6484375
+          ],
+          [
+            40.0,
+            36.19791666666667
+          ],
+          [
+            45.0,
+            43.098958333333336
+          ],
+          [
+            50.0,
+            39.6484375
+          ]
+        ]
+      },
+      {
+        "type": "bezier_ring",
+        "mode": "pixel",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "points": [
+          [
+            350.00000000000006,
+            317.1875
+          ],
+          [
+            400.0,
+            289.58333333333337
+          ],
+          [
+            450.0,
+            344.7916666666667
+          ],
+          [
+            500.0,
+            317.1875
+          ]
+        ],
+        "points2": [
+          [
+            350.00000000000006,
+            372.3958333333333
+          ],
+          [
+            400.0,
+            344.7916666666667
+          ],
+          [
+            450.0,
+            400.0
+          ],
+          [
+            500.0,
+            372.3958333333333
+          ]
+        ]
+      },
+      {
+        "type": "polygon",
+        "mode": "relative",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "points": [
+          [
+            0.05,
+            0.0625
+          ],
+          [
+            0.16979166666666667,
+            0.07552083333333334
+          ],
+          [
+            0.1197916666666667,
+            0.20052083333333337
+          ]
+        ]
+      },
+      {
+        "mode": "percent",
+        "size": 36.125000000000014,
+        "gap": 14.048611111111116,
+        "x": 49.43402777777779,
+        "y": 14.891493055555557,
+        "text": "中文 \"title\" \\ path [ok]",
+        "type": "text",
+        "locator": "right",
+        "fill_color": "#12345680"
+      },
+      {
+        "mode": "pixel",
+        "cells": [
+          [
+            "#2166ACFF",
+            null,
+            "#B2182BFF"
+          ],
+          [
+            "#2166ACFF",
+            "#FEFEFEFF",
+            "#D0747FFF"
+          ]
+        ],
+        "x": 100.0,
+        "width": 250.0,
+        "y": 480.0,
+        "source": {
+          "matrix": [
+            [
+              0.0,
+              null,
+              10.0
+            ],
+            [
+              -2.0,
+              5.0,
+              8.0
+            ]
+          ],
+          "colors": [
+            "#2166ACFF",
+            "#FFFFFFFF",
+            "#B2182BFF"
+          ],
+          "limits": [
+            0,
+            10
+          ]
+        },
+        "type": "free_heatmap",
+        "height": 160.0
+      },
+      {
+        "type": "arrow",
+        "mode": "relative",
+        "line_color": "#000000FF",
+        "line_thickness": 2,
+        "line_type": "solid",
+        "head_style": "filled",
+        "x1": 0.12,
+        "y1": 0.275,
+        "x2": 0.494,
+        "y2": 0.025
+      },
+      {
+        "mode": "percent",
+        "line_type": "solid",
+        "x": 58.0,
+        "width": 10.0,
+        "line_thickness": 1,
+        "y": 58.125,
+        "type": "ellipse",
+        "height": 10.0,
+        "fill_color": "#2040E0FF",
+        "line_color": "#000000FF"
+      },
+      {
+        "mode": "pixel",
+        "line_type": "solid",
+        "x": 520.0,
+        "width": 120.0,
+        "line_thickness": 1,
+        "y": 420.0,
+        "type": "rectangle",
+        "height": 90.0,
+        "fill_color": "#E02020FF",
+        "line_color": "#000000FF"
+      }
+    ],
+    "checks": {
+      "modes_expected": [
+        "relative",
+        "percent",
+        "pixel"
+      ],
+      "shape_types_expected": [
+        "rectangle",
+        "ellipse",
+        "line",
+        "arrow",
+        "bezier",
+        "bezier_ring",
+        "polygon",
+        "text",
+        "free_heatmap"
+      ],
+      "snap_check": {
+        "layer_index": 10,
+        "x_field": "x2",
+        "y_field": "y2",
+        "expected_x": 494.0,
+        "expected_y": 20.0
+      },
+      "zorder_probe": {
+        "control_rgb": [
+          32,
+          64,
+          224
+        ],
+        "x": 580,
+        "y": 465,
+        "expected_rgb": [
+          224,
+          32,
+          32
+        ],
+        "control_name": "zorder_before_reorder"
+      }
+    }
+  },
+  {
+    "name": "zorder_before_reorder",
+    "code": "+ free_rectangle(x = 0.3500000000000001, y = 0.36197916666666674, width = 0.15, height = 0.1380208333333333, mode = \"relative\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_ellipse(x = 42.5, y = 43.098958333333336, width = 15.0, height = 13.802083333333329, mode = \"percent\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_line(x1 = 500.0, y1 = 400.0, x2 = 350.00000000000006, y2 = 289.58333333333337, mode = \"pixel\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_arrow(x1 = 0.5, y1 = 0.5, x2 = 0.3500000000000001, y2 = 0.36197916666666674, mode = \"relative\", line_color = \"#000000FF\", line_thickness = 2.0, line_type = \"solid\", head_style = \"filled\", head_length = NULL, head_width = NULL) +\n  free_bezier(points = matrix(c(35.00000000000001, 39.6484375, 40.0, 36.19791666666667, 45.0, 43.098958333333336, 50.0, 39.6484375), nrow = 4, byrow = TRUE), mode = \"percent\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_bezier_ring(points1 = matrix(c(350.00000000000006, 317.1875, 400.0, 289.58333333333337, 450.0, 344.7916666666667, 500.0, 317.1875), nrow = 4, byrow = TRUE), points2 = matrix(c(350.00000000000006, 372.3958333333333, 400.0, 344.7916666666667, 450.0, 400.0, 500.0, 372.3958333333333), nrow = 4, byrow = TRUE), mode = \"pixel\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_polygon(points = matrix(c(0.05, 0.0625, 0.16979166666666667, 0.07552083333333334, 0.1197916666666667, 0.20052083333333337), nrow = 3, byrow = TRUE), mode = \"relative\", fill_color = \"#FFD70040\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_text(x = 49.43402777777779, y = 14.891493055555557, text = \"中文 \\\"title\\\" \\\\ path [ok]\", mode = \"percent\", locator = \"right\", gap = 14.048611111111116, color = \"#12345680\", size = 36.125000000000014) +\n  free_heatmap(x = 100.0, y = 480.0, width = 250.0, height = 160.0, matrix = matrix(c(0.0, NA_real_, 10.0, -2.0, 5.0, 8.0), nrow = 2, byrow = TRUE), colors = c(\"#2166ACFF\", \"#FFFFFFFF\", \"#B2182BFF\"), limits = c(0, 10), mode = \"pixel\") +\n  free_arrow(x1 = 0.12, y1 = 0.275, x2 = 0.494, y2 = 0.025, mode = \"relative\", line_color = \"#000000FF\", line_thickness = 2.0, line_type = \"solid\", head_style = \"filled\", head_length = NULL, head_width = NULL) +\n  free_rectangle(x = 520.0, y = 420.0, width = 120.0, height = 90.0, mode = \"pixel\", fill_color = \"#E02020FF\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\") +\n  free_ellipse(x = 58.0, y = 58.125, width = 10.0, height = 10.0, mode = \"percent\", fill_color = \"#2040E0FF\", line_color = \"#000000FF\", line_thickness = 1.0, line_type = \"solid\")",
+    "layers": [
+      {
+        "type": "rectangle",
+        "mode": "relative",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "x": 0.3500000000000001,
+        "y": 0.36197916666666674,
+        "width": 0.15,
+        "height": 0.1380208333333333
+      },
+      {
+        "type": "ellipse",
+        "mode": "percent",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "x": 42.5,
+        "y": 43.098958333333336,
+        "width": 15.0,
+        "height": 13.802083333333329
+      },
+      {
+        "type": "line",
+        "mode": "pixel",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "x1": 500.0,
+        "y1": 400.0,
+        "x2": 350.00000000000006,
+        "y2": 289.58333333333337
+      },
+      {
+        "type": "arrow",
+        "mode": "relative",
+        "line_color": "#000000FF",
+        "line_thickness": 2,
+        "line_type": "solid",
+        "head_style": "filled",
+        "x1": 0.5,
+        "y1": 0.5,
+        "x2": 0.3500000000000001,
+        "y2": 0.36197916666666674
+      },
+      {
+        "type": "bezier",
+        "mode": "percent",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "points": [
+          [
+            35.00000000000001,
+            39.6484375
+          ],
+          [
+            40.0,
+            36.19791666666667
+          ],
+          [
+            45.0,
+            43.098958333333336
+          ],
+          [
+            50.0,
+            39.6484375
+          ]
+        ]
+      },
+      {
+        "type": "bezier_ring",
+        "mode": "pixel",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "points": [
+          [
+            350.00000000000006,
+            317.1875
+          ],
+          [
+            400.0,
+            289.58333333333337
+          ],
+          [
+            450.0,
+            344.7916666666667
+          ],
+          [
+            500.0,
+            317.1875
+          ]
+        ],
+        "points2": [
+          [
+            350.00000000000006,
+            372.3958333333333
+          ],
+          [
+            400.0,
+            344.7916666666667
+          ],
+          [
+            450.0,
+            400.0
+          ],
+          [
+            500.0,
+            372.3958333333333
+          ]
+        ]
+      },
+      {
+        "type": "polygon",
+        "mode": "relative",
+        "fill_color": "#FFD70040",
+        "line_color": "#000000FF",
+        "line_thickness": 1,
+        "line_type": "solid",
+        "points": [
+          [
+            0.05,
+            0.0625
+          ],
+          [
+            0.16979166666666667,
+            0.07552083333333334
+          ],
+          [
+            0.1197916666666667,
+            0.20052083333333337
+          ]
+        ]
+      },
+      {
+        "mode": "percent",
+        "size": 36.125000000000014,
+        "gap": 14.048611111111116,
+        "x": 49.43402777777779,
+        "y": 14.891493055555557,
+        "text": "中文 \"title\" \\ path [ok]",
+        "type": "text",
+        "locator": "right",
+        "fill_color": "#12345680"
+      },
+      {
+        "mode": "pixel",
+        "cells": [
+          [
+            "#2166ACFF",
+            null,
+            "#B2182BFF"
+          ],
+          [
+            "#2166ACFF",
+            "#FEFEFEFF",
+            "#D0747FFF"
+          ]
+        ],
+        "x": 100.0,
+        "width": 250.0,
+        "y": 480.0,
+        "source": {
+          "matrix": [
+            [
+              0.0,
+              null,
+              10.0
+            ],
+            [
+              -2.0,
+              5.0,
+              8.0
+            ]
+          ],
+          "colors": [
+            "#2166ACFF",
+            "#FFFFFFFF",
+            "#B2182BFF"
+          ],
+          "limits": [
+            0,
+            10
+          ]
+        },
+        "type": "free_heatmap",
+        "height": 160.0
+      },
+      {
+        "type": "arrow",
+        "mode": "relative",
+        "line_color": "#000000FF",
+        "line_thickness": 2,
+        "line_type": "solid",
+        "head_style": "filled",
+        "x1": 0.12,
+        "y1": 0.275,
+        "x2": 0.494,
+        "y2": 0.025
+      },
+      {
+        "mode": "pixel",
+        "line_type": "solid",
+        "x": 520.0,
+        "width": 120.0,
+        "line_thickness": 1,
+        "y": 420.0,
+        "type": "rectangle",
+        "height": 90.0,
+        "fill_color": "#E02020FF",
+        "line_color": "#000000FF"
+      },
+      {
+        "mode": "percent",
+        "line_type": "solid",
+        "x": 58.0,
+        "width": 10.0,
+        "line_thickness": 1,
+        "y": 58.125,
+        "type": "ellipse",
+        "height": 10.0,
+        "fill_color": "#2040E0FF",
+        "line_color": "#000000FF"
+      }
+    ],
+    "checks": {
+      "zorder_probe": {
+        "x": 580,
+        "y": 465,
+        "expected_rgb": [
+          32,
+          64,
+          224
+        ]
+      }
+    }
+  },
+  {
+    "name": "empty_list",
+    "code": "# No free shapes",
+    "layers": [],
+    "checks": {
+      "empty_list": true,
+      "expected_code": "# No free shapes"
+    }
+  },
+  {
+    "name": "heatmap_all_na",
+    "code": "+ free_heatmap(x = 10, y = 60, width = 25, height = 20, matrix = matrix(c(NA_real_, NA_real_, NA_real_, NA_real_), nrow = 2, byrow = TRUE), colors = c(\"#00000000\", \"#FFFFFFFF\"), limits = NULL, mode = \"percent\")",
+    "layers": [
+      {
+        "mode": "percent",
+        "cells": [
+          [
+            null,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ],
+        "x": 10,
+        "width": 25,
+        "y": 60,
+        "source": {
+          "matrix": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "colors": [
+            "#00000000",
+            "#FFFFFFFF"
+          ]
+        },
+        "type": "free_heatmap",
+        "height": 20
+      }
+    ]
+  },
+  {
+    "name": "heatmap_equal_limits",
+    "code": "+ free_heatmap(x = 10, y = 60, width = 25, height = 20, matrix = matrix(c(5.0, 5.0, NA_real_, 5.0), nrow = 2, byrow = TRUE), colors = c(\"#2166ACFF\", \"#FFFFFFFF\", \"#B2182BFF\"), limits = c(5, 5), mode = \"percent\")",
+    "layers": [
+      {
+        "mode": "percent",
+        "cells": [
+          [
+            "#FEFEFEFF",
+            "#FEFEFEFF"
+          ],
+          [
+            null,
+            "#FEFEFEFF"
+          ]
+        ],
+        "x": 10,
+        "width": 25,
+        "y": 60,
+        "source": {
+          "matrix": [
+            [
+              5.0,
+              5.0
+            ],
+            [
+              null,
+              5.0
+            ]
+          ],
+          "colors": [
+            "#2166ACFF",
+            "#FFFFFFFF",
+            "#B2182BFF"
+          ],
+          "limits": [
+            5,
+            5
+          ]
+        },
+        "type": "free_heatmap",
+        "height": 20
+      }
+    ]
+  },
+  {
+    "name": "heatmap_extreme_limits",
+    "code": "+ free_heatmap(x = 10, y = 60, width = 25, height = 20, matrix = matrix(c(-1.0E308, 0.0, 1.0E308, NA_real_, -9.0E307, 9.0E307), nrow = 2, byrow = TRUE), colors = c(\"#01234520\", \"#89ABCDEF\", \"#FEDCBA88\"), limits = c(-1E+308, 1E+308), mode = \"percent\")",
+    "layers": [
+      {
+        "mode": "percent",
+        "cells": [
+          [
+            "#01234520",
+            "#89ABCCEE",
+            "#FEDCBA88"
+          ],
+          [
+            null,
+            "#0E305235",
+            "#F2D7BB92"
+          ]
+        ],
+        "x": 10,
+        "width": 25,
+        "y": 60,
+        "source": {
+          "matrix": [
+            [
+              -1e+308,
+              0.0,
+              1e+308
+            ],
+            [
+              null,
+              -9e+307,
+              9e+307
+            ]
+          ],
+          "colors": [
+            "#01234520",
+            "#89ABCDEF",
+            "#FEDCBA88"
+          ],
+          "limits": [
+            -1e+308,
+            1e+308
+          ]
+        },
+        "type": "free_heatmap",
+        "height": 20
+      }
+    ]
+  },
+  {
+    "name": "heatmap_single_na",
+    "code": "+ free_heatmap(x = 10, y = 60, width = 25, height = 20, matrix = matrix(c(NA_real_), nrow = 1, byrow = TRUE), colors = c(\"#12345678\"), limits = NULL, mode = \"percent\")",
+    "layers": [
+      {
+        "mode": "percent",
+        "cells": [
+          [
+            null
+          ]
+        ],
+        "x": 10,
+        "width": 25,
+        "y": 60,
+        "source": {
+          "matrix": [
+            [
+              null
+            ]
+          ],
+          "colors": [
+            "#12345678"
+          ]
+        },
+        "type": "free_heatmap",
+        "height": 20
+      }
+    ]
+  }
+]

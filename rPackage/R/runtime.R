@@ -90,22 +90,74 @@ reg.finalizer(.runtime, .runtime_finalize, onexit = TRUE)
 
 .onUnload <- function(libpath) suppressMessages(quit_yytree())
 
+.resolve_egps_root <- function(path2egps) {
+  if (!is.character(path2egps) || length(path2egps) != 1L || is.na(path2egps) || !nzchar(path2egps))
+    stop("path2egps must be one installation directory.")
+  root <- normalizePath(path2egps, winslash = "/", mustWork = TRUE)
+  if (!dir.exists(root)) stop("path2egps must be an existing directory: ", root)
+  if (dir.exists(file.path(root, "dependency-egps"))) return(root)
+  bundle_resources <- file.path(root, "Contents", "Resources")
+  if (dir.exists(file.path(bundle_resources, "dependency-egps")))
+    return(normalizePath(bundle_resources, winslash = "/", mustWork = TRUE))
+  apps <- list.dirs(root, full.names = TRUE, recursive = FALSE)
+  apps <- apps[grepl("\\.app$", apps, ignore.case = TRUE)]
+  matches <- apps[dir.exists(file.path(apps, "Contents", "Resources", "dependency-egps"))]
+  if (length(matches) == 1L)
+    return(normalizePath(file.path(matches[[1L]], "Contents", "Resources"), winslash = "/", mustWork = TRUE))
+  if (length(matches) > 1L)
+    stop("Multiple macOS .app bundles with dependency-egps found under: ", root, ". Pass the specific .app path.")
+  stop("No dependency-egps JARs found at the supplied installation: ", root,
+       ". Point path2egps to the eGPS2 installation directory (or .app bundle on macOS).")
+}
+
+.resolve_java_runtime <- function(root, java_home = Sys.getenv("JAVA_HOME"), os_type = .Platform$OS.type) {
+  bin_name <- if (identical(os_type, "windows")) "java.exe" else "java"
+  candidates <- c(
+    file.path(root, "jre", "Contents", "Home"),
+    file.path(root, "jre")
+  )
+  if (is.character(java_home) && length(java_home) == 1L && !is.na(java_home) && nzchar(java_home)) {
+    candidates <- c(candidates, file.path(java_home, "Contents", "Home"), java_home)
+  }
+  for (candidate in candidates) {
+    if (!dir.exists(candidate)) next
+    home <- normalizePath(candidate, winslash = "/", mustWork = TRUE)
+    executable <- file.path(home, "bin", bin_name)
+    if (file.exists(executable)) {
+      if (!identical(os_type, "windows") && identical(.Platform$OS.type, "unix") && file.access(executable, 1L) != 0L)
+        stop("Java executable is not executable: ", executable, ". Run chmod +x on the bundled JRE binaries.")
+      return(list(java = home, executable = executable))
+    }
+  }
+  if (!dir.exists(file.path(root, "jre")) && !nzchar(java_home))
+    stop("No bundled Java or JAVA_HOME found.")
+  stop("Java executable not found under bundled jre or JAVA_HOME (expected bin/", bin_name, ").")
+}
+
+.read_egps_jvm_args <- function(root, os_type = .Platform$OS.type) {
+  argfile <- file.path(root, "eGPS2.args")
+  if (!file.exists(argfile)) return(character())
+  extra <- trimws(readLines(argfile, warn = FALSE))
+  extra <- extra[nzchar(extra) & !startsWith(extra, "#") & !grepl("^-X(mx|ss)|^-XX:(MaxHeapSize|ThreadStackSize)=", extra)]
+  if (!identical(os_type, "windows")) {
+    extra <- extra[!grepl("com\\.sun\\.java\\.swing\\.plaf\\.windows|sun\\.awt\\.windows", extra)]
+  }
+  sub("^(--add-(opens|exports)) ", "\\1=", extra)
+}
+
 config_yytree <- function(path2egps, max_memory_heap = "4g", max_memory_stack = "8m", restart = FALSE) {
   if (!is.character(path2egps) || length(path2egps) != 1 || is.na(path2egps)) stop("path2egps must be one installation directory.")
   if (!is.logical(restart) || length(restart) != 1 || is.na(restart)) stop("restart must be TRUE or FALSE.")
-  root <- normalizePath(path2egps, winslash = "/", mustWork = TRUE)
   if (!is.character(max_memory_heap) || length(max_memory_heap) != 1 || is.na(max_memory_heap) || !grepl("^[1-9][0-9]*[mMgG]$", max_memory_heap)) stop("max_memory_heap must be like '512m' or '4g'.")
   if (!is.character(max_memory_stack) || length(max_memory_stack) != 1 || is.na(max_memory_stack) || !grepl("^[1-9][0-9]*[kKmMgG]$", max_memory_stack)) stop("max_memory_stack must be like '512k' or '8m'.")
   max_memory_heap <- tolower(max_memory_heap)
   max_memory_stack <- tolower(max_memory_stack)
+  root <- .resolve_egps_root(path2egps)
   jars <- list.files(file.path(root, "dependency-egps"), "\\.jar$", full.names = TRUE)
   if (!length(jars)) stop("No dependency-egps JARs found at the supplied installation.")
-  java <- file.path(root, "jre")
-  if (!dir.exists(java)) java <- Sys.getenv("JAVA_HOME")
-  if (!nzchar(java)) stop("No bundled Java or JAVA_HOME found.")
-  java <- normalizePath(java, winslash = "/", mustWork = TRUE)
-  executable <- file.path(java, "bin", if (.Platform$OS.type == "windows") "java.exe" else "java")
-  if (!file.exists(executable)) stop("Java executable not found: ", executable)
+  runtime_java <- .resolve_java_runtime(root)
+  java <- runtime_java$java
+  executable <- runtime_java$executable
   if (exists("config", .runtime, inherits = FALSE) && !restart) {
     if (!identical(.runtime$config$root, root) || !identical(.runtime$config$java, java) ||
         !identical(.runtime$config$max_memory_heap, max_memory_heap) || !identical(.runtime$config$max_memory_stack, max_memory_stack)) stop("Use restart = TRUE to change Java configuration; existing windows will close.")
@@ -113,13 +165,8 @@ config_yytree <- function(path2egps, max_memory_heap = "4g", max_memory_stack = 
   }
   bridgejar <- system.file("java", "yytree-bridge.jar", package = "yytree")
   if (!nzchar(bridgejar)) stop("The yytree bridge JAR is missing; build and reinstall the package.")
-  args <- c(paste0("-Xmx", max_memory_heap), paste0("-Xss", max_memory_stack), "-Dfile.encoding=UTF-8")
-  argfile <- file.path(root, "eGPS2.args")
-  if (file.exists(argfile)) {
-    extra <- trimws(readLines(argfile, warn = FALSE))
-    extra <- extra[nzchar(extra) & !startsWith(extra, "#") & !grepl("^-X(mx|ss)|^-XX:(MaxHeapSize|ThreadStackSize)=", extra)]
-    args <- c(args, sub("^(--add-(opens|exports)) ", "\\1=", extra))
-  }
+  args <- c(paste0("-Xmx", max_memory_heap), paste0("-Xss", max_memory_stack), "-Dfile.encoding=UTF-8",
+            .read_egps_jvm_args(root))
   args <- c(args, "-cp", paste(c(bridgejar, jars), collapse = .Platform$path.sep), "api.rpython.yytree.YyTreeProcess")
   .runtime_start(list(root = root, java = java, max_memory_heap = max_memory_heap, max_memory_stack = max_memory_stack),
                  list(command = executable, args = args))

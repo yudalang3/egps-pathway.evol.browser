@@ -1,14 +1,13 @@
 #### 7. 节点交互：叶节点、内部节点与根节点的悬停信息
 ## 在新的 R / RStudio 会话中运行本文件，避免加载旧版本的 yytree。
 ## 整体运行后只打开一个窗口；后面的比较示例可按需单独执行。
-lib <- "C:/Users/yudal/Documents/project/eGPS2/jars/egps2_collections/egps-pathway.evol.browser/rPackage/library"
+lib <- file.path(getwd(), "rPackage", "library")
 library(yytree, lib.loc = lib)
 if (!"interact" %in% getNamespaceExports("yytree")) {
   stop("本地 yytree 尚未更新，请安装包含 interact() 的版本后，在新的 R 会话中运行。")
 }
 
-path2egps <- Sys.getenv("EGPS_HOME",
-  "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+path2egps <- Sys.getenv("EGPS_HOME")
 # 自动检查数据时可设置 YYTREE_EXAMPLES_NO_GUI=1；人工运行时无需设置。
 show_gui <- Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1"
 if (show_gui) {

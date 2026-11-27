@@ -34,7 +34,7 @@
 - `free_text` 含多行换行符 `\n` 的边界：当前 `FreeShapes.quote()` 会转义 `\n`，但 `FreeShapes.draw()` 使用 AWT `drawString()` 单行绘制，须在实验前明确限定为单行文本或先完成代码修复（见 [audit_checklist_zh.md](audit_checklist_zh.md) `BLK-05`）；
 - 未复制的 GUI 编辑不会进入 R 对象；重新 `print()` 后未保存编辑丢失；窗口 `Export` 与 R 端 `export()` 在对象尚未同步时输出对应各自状态。
 
-**已有入口与缺口说明**：[FreeShapeEditorTest.java](../rPackage/java/src/test/java/api/rpython/yytree/FreeShapeEditorTest.java) 已验证九类图元交互、吸附、`ViewCache` 不重绘底层树并生成 `roundtrip.json` 夹具；[test-free-shape-editor.R](../rPackage/tests/testthat/test-free-shape-editor.R) 当前仅包含 `free_arrow` 参数验证与 `free_heatmap` 源矩阵字段保留两项单元测试，**尚未消费 `roundtrip.json` 执行新会话 R 代码重放验收**，需在本稿实验阶段补建自动化重放验收脚本。
+**已有入口与验收状态**：[FreeShapeEditorTest.java](../rPackage/java/src/test/java/api/rpython/yytree/FreeShapeEditorTest.java) 已验证九类图元交互、三坐标模式并存、保留 `Snap To Point` 节点吸附、保留 `Forward`/`Backward` Z 序重排、空列表 `# No free shapes`（含 `Copy code` 禁用）、旧热图缺失 `source` 拒绝及 `ViewCache` 不重绘底层树，并输出 17 组夹具与 Java 参照图；[test-free-shape-editor.R](../rPackage/tests/testthat/test-free-shape-editor.R) 已纳入 1–2 层单元测试（随 `R CMD check` 执行）；[test_yytree_free_shapes_replay.R](../scripts/test_yytree_free_shapes_replay.R) 已在 Windows 与 Linux（WSL2 Ubuntu 22.04）完成干净 R 子进程三层重放验收（17/17 场景均满足几何容差 `<= 1e-12`、吸附容差 `<= 1e-9`、像素 `mean_diff = 0`、`max_diff = 0` 且 MD5 全等，日志见 [yytree-free-shapes-replay.json](../logs/yytree-free-shapes-replay.json) 与 [yytree-free-shapes-replay-linux.json](../logs/yytree-free-shapes-replay-linux.json)）。`free_text` 含 `\n` 多行渲染边界仍归口 `BLK-05` 单独确认，本次重放主夹具采用单行 Unicode 与转义字符串。
 
 ### 2.2 坐标、序列化与树数据
 
@@ -129,7 +129,7 @@ $$
 ## 5. 架构、跨平台分发、输出与归档
 
 - **运行时与缓存响应性**：复用 [test_yytree_lifecycle.R](../scripts/test_yytree_lifecycle.R) 验证重复配置、关窗重开、主动退出、崩溃自动恢复、R 异常退出进程清理及 R 对象保留。响应性分开测量 JVM 冷/热启动、首次布局、绘制、缩放/悬停、`ViewCache` 命中期间底层树零重绘（校验交互延迟）及代码生成耗时；记录堆/栈内存与输入规模（如 100 / 1,000 / 5,000 叶），不预设独立 JVM 必然更快或更省内存。
-- **跨平台安装与字体导出（P0 投稿前阻塞项）**：`yytree` 当前强依赖本地新版 eGPS2 安装目录与 Java 25+，历史导出验收仅覆盖 Windows。投稿前必须在 **Windows、Linux、macOS** 三平台分别完成独立安装测试、JDK 25 探测、消除本机硬编码路径、以及 [PdfExport.java](../rPackage/java/src/main/java/api/rpython/yytree/PdfExport.java) 字体映射（含 CJK/Unicode 回退）与 PDF/SVG/PPTX 结构及渲染一致性核验（参考 [历史验收记录](../docs/current/yytree-0.1.0-review.md) 与 [audit_checklist_zh.md](audit_checklist_zh.md) `BLK-02`）。同时须明确区隔 MTV-GUI（宿主导出器，7 格式）与 `yytree`（自研 `PdfExport`/`PptxExport` + Batik 1.20 SVG，3 格式）的导出验收范围。
+- **跨平台安装与字体导出（`BLK-02` 进展与边界）**：[runtime.R](../rPackage/R/runtime.R) 已支持 Windows/Linux 标准目录与 macOS `.app` 包（含 `Contents/Resources` 与 `jre/Contents/Home/bin/java`）路径解析及非 Windows 下 `eGPS2.args` 过滤；[PdfExport.java](../rPackage/java/src/main/java/api/rpython/yytree/PdfExport.java) 已改为跨平台递归扫描 TrueType 字体目录（含 `YYTREE_FONT_DIR` 覆盖）、强制未命中字体回退至已嵌入 TrueType 字体并支持缺失字形（如 CJK）自动代理回退，同时在文档中明确说明 iText 5.1.3 需 TrueType 轮廓字体（`.ttf`/TrueType `.ttc`）而非 CFF `.ttc`。对外 README、58 份双语示例与打包源码包均已清零作者本机路径。**当前已在 Windows 11 与 WSL2 Ubuntu 22.04 双平台完成独立安装、`R CMD check` (`Status: OK`)、生命周期、审计与 10 组 PDF/SVG/PPTX 导出结构/像素实测**（[validate_yytree_linux.sh](../scripts/validate_yytree_linux.sh)、[yytree-windows-exports.json](../logs/yytree-windows-exports.json)、[yytree-linux-exports.json](../logs/yytree-linux-exports.json)）；macOS 端已完成代码适配、mock 单测与 CI 模板（[yytree-cross-platform.yml](../.github/workflows/yytree-cross-platform.yml)），实机运行时待 macOS 宿主或 GitHub Actions `macos-latest` 核验。同时正文须明确区隔 MTV-GUI（宿主导出器，7 格式）与 `yytree`（自研 `PdfExport`/`PptxExport` + Batik 1.20 SVG，3 格式）的导出验收范围。
 - **归档与复现**：每次实验固定软件版本/提交哈希、eGPS2 依赖构建、输入数据与许可、操作脚本、环境信息、输出与判定标准。原始材料放 `orig_matrials/`，脚本放 `scripts/`，日志放 `logs/`，临时产物放 `temp/`；投稿前整理包含 GitHub Release / Zenodo 归档包与一键复现指引的最小可复现材料包。
 
 ## 6. 论文结构与候选图
@@ -145,4 +145,4 @@ $$
 
 九类图元全集、边界/失败用例（如空列表、多行文本、零枝长）、三平台安装与导出回归、全量性能基准与 eGPS 2.x 版本增量审计表可放入补充材料；改变核心结论的结果保留在主文。图号和数量为当前组织建议，非期刊配额。
 
-下一阶段优先完成 `BLK-02` 跨平台安装与字体验证、`BLK-03` 新会话 R 代码重放验收，同时锁定 4.3 节生物学案例，再开展跨工具任务比较与布局评价。论文主张以实测结果为依据。 [核查清单](audit_checklist_zh.md)
+`BLK-01`、`BLK-03` 已完成验收闭环，`BLK-02` 已完成 Windows/Linux 双平台实测与 macOS 代码/单测适配（待 macOS 实机/CI 最终核验）。下一阶段优先确定 `BLK-04`–`BLK-06` 边界与 4.3 节生物学案例，再开展跨工具任务比较与布局评价。论文主张以实测结果为依据。 [核查清单](audit_checklist_zh.md)

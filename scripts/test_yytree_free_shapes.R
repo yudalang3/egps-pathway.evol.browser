@@ -3,7 +3,9 @@ pkgload::load_all("rPackage", quiet = TRUE)
 fixtures <- jsonlite::fromJSON("temp/yytree-free-shapes/roundtrip.json", simplifyVector = FALSE)
 base_plot <- yytree("(A:1,B:2);", width = 1000, height = 800)
 for (fixture in fixtures) {
-  plot <- eval(parse(text = paste("base_plot", fixture$code)))
+  code <- trimws(fixture$code)
+  expr <- if (identical(code, "# No free shapes")) "base_plot" else paste("base_plot", code)
+  plot <- eval(parse(text = expr))
   actual <- jsonlite::fromJSON(yytree:::.scene_json(plot), simplifyVector = FALSE)$layers
   stopifnot(length(actual) == length(fixture$layers))
   for (i in seq_along(actual)) {

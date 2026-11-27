@@ -1,8 +1,10 @@
 # 23. 不可变组合与后续字段覆盖
 # 安装 yytree 后，在 R 或 RStudio 中独立运行本文件。
 library(yytree)
-# 设置 EGPS_HOME，或把默认路径替换为自己的 eGPS 安装目录。
-config_yytree(Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest"))
+# 运行前请将 EGPS_HOME 设为本机 eGPS2 安装目录（macOS 可直接指向 .app 包）。
+egps_home <- Sys.getenv("EGPS_HOME")
+if (!nzchar(egps_home)) stop('Set Sys.setenv(EGPS_HOME = "/path/to/eGPS2") before running this example.', call. = FALSE)
+config_yytree(egps_home)
 
 tree <- "(((Arabidopsis:1,Rice:1):1,Yeast:2):1,((Worm:1,Fly:1):1,(Zebrafish:2,(Frog:1,(Human:1,Mouse:1):1):1):1):1);"
 

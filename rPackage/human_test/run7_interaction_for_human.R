@@ -1,9 +1,9 @@
 #### 7. Interaction: inspect leaves, internal nodes and the root
 # Run in a fresh R session. Only the main preview opens automatically.
-lib <- "C:/Users/yudal/Documents/project/eGPS2/jars/egps2_collections/egps-pathway.evol.browser/rPackage/library"
+lib <- file.path(getwd(), "rPackage", "library")
 library(yytree, lib.loc = lib)
 if (!"interact" %in% getNamespaceExports("yytree")) stop("Update yytree and start a fresh R session.")
-path2egps <- Sys.getenv("EGPS_HOME", "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+path2egps <- Sys.getenv("EGPS_HOME")
 show_gui <- Sys.getenv("YYTREE_EXAMPLES_NO_GUI") != "1"
 if (show_gui) config_yytree(path2egps, max_memory_heap = "8g", max_memory_stack = "16m", restart = TRUE)
 

@@ -1,10 +1,12 @@
 param(
-    [string]$Egps = 'C:\Users\yudal\Documents\project\eGPS2\eGPS_v2_windows_x64_selfTest',
-    [string]$Jdk = 'C:\Users\yudal\Documents\project\eGPS2\RunningEnvPackages\jdk-25.0.4.1+1',
-    [string]$R = 'C:\R_envs\R-4.5.2\bin',
+    [string]$Egps = $env:EGPS_HOME,
+    [string]$Jdk = $env:JAVA_HOME,
+    [string]$R = $(if ($env:R_HOME) { Join-Path $env:R_HOME 'bin' } else { '' }),
+    [string]$Python = 'python',
     [switch]$Gui
 )
 $ErrorActionPreference = 'Stop'
+if ([string]::IsNullOrWhiteSpace($Egps)) { throw 'Supply -Egps <path/to/eGPS2> or set EGPS_HOME.' }
 $project = Split-Path -Parent $PSScriptRoot
 function Invoke-Checked([string]$Executable, [string[]]$Arguments) {
     & $Executable @Arguments
@@ -13,9 +15,9 @@ function Invoke-Checked([string]$Executable, [string[]]$Arguments) {
 $env:LC_ALL = 'English_United States.utf8'
 $env:LC_CTYPE = 'English_United States.utf8'
 $env:LANG = 'English_United States.utf8'
-$rscript = Join-Path $R 'Rscript.exe'
-$rexe = Join-Path $R 'R.exe'
-$java = Join-Path $Jdk 'bin\java.exe'
+$rscript = if ([string]::IsNullOrWhiteSpace($R)) { 'Rscript' } else { Join-Path $R 'Rscript.exe' }
+$rexe = if ([string]::IsNullOrWhiteSpace($R)) { 'R' } else { Join-Path $R 'R.exe' }
+$java = if ([string]::IsNullOrWhiteSpace($Jdk)) { 'java' } else { Join-Path $Jdk 'bin\java.exe' }
 $release = Join-Path $project 'temp\yytree-free-shapes-release'
 $library = Join-Path $project 'temp\yytree-library'
 $dist = Join-Path $project 'rPackage\dist'
@@ -27,7 +29,8 @@ try {
     Invoke-Checked $rscript @('--vanilla','scripts/test_yytree_unit.R')
     Invoke-Checked $rscript @('--vanilla','scripts/test_yytree_free_shapes.R')
     Invoke-Checked $rexe @('CMD','INSTALL',"--library=$library",'rPackage')
-    Invoke-Checked $rscript @('--vanilla','scripts/test_yytree_free_shapes_examples.R')
+    Invoke-Checked $rscript @('--vanilla','scripts/test_yytree_free_shapes_replay.R',$Egps,$library,$Python)
+    Invoke-Checked $rscript @('--vanilla','scripts/test_yytree_free_shapes_examples.R',$Egps)
     if ($Gui) {
         foreach ($scale in @('1','2')) {
             foreach ($test in @('FreeShapeEditorTest','YyTreePreviewFitTest','YyTreeHoverTest','YyTreeScaleControlTest','YyTreeParameterDialogTest')) {

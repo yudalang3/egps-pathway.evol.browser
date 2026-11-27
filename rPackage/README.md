@@ -28,12 +28,14 @@ help("print.yytree", package = "yytree") # Preview windows, fit, zoom and node i
 
 ## 直接加载本地开发版
 
-项目提供固定加载目录 `rPackage/library`。完整验收脚本成功后，自动把已验证的最新版更新到这里；日常使用无需自己安装 ZIP。在新的 R 会话中运行：
+项目提供固定加载目录 `rPackage/library`。完整验收脚本成功后，自动把已验证的最新版更新到这里；日常使用无需自己安装 ZIP。在新的 R 会话中（仓库根目录）运行：
 
 ```r
-lib <- "C:/Users/yudal/Documents/project/eGPS2/jars/egps2_collections/egps-pathway.evol.browser/rPackage/library"
+lib <- file.path(getwd(), "rPackage", "library")
 library(yytree, lib.loc = lib)
-config_yytree("C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest")
+egps_home <- Sys.getenv("EGPS_HOME")
+if (!nzchar(egps_home)) stop('Set Sys.setenv(EGPS_HOME = "/path/to/eGPS2") first.')
+config_yytree(egps_home)
 ```
 
 也可先运行 `.libPaths(c(lib, .libPaths()))`，再使用普通的 `library(yytree)`。这是项目内已经准备好的包加载库；它不会在加载时自动编译源码。Java 桥接更新后用 `quit_yytree()` 退出旧 JVM，重新安装包后再配置启动。生成的加载库不提交 Git，也不打进源码包。
@@ -46,26 +48,34 @@ config_yytree("C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTe
 
 预览工具栏依次提供 `Show Crosshair`、`Snap To Point`、`Fit frame`、`Width (%)`、`Height (%)`、`Add free shapes`。`Fit frame` 结束拖动、清除悬停并归零平移，按当前窗口重新完整显示，恢复随窗口自动适配，同时保留悬停开关。两个百分比输入框始终联动，支持小数、Enter／失焦确认及每次 1 个百分点的微调；输入后以可见区域中心等比缩放，滚轮仍以真实鼠标位置为锚点。两框与底部倍率固定以首次完整显示为 100%，调整窗口或 Fit frame 都不会改写基准；因此窗口大小变化后 Fit 的读数可能不是 100%，而输入 100 始终恢复首次显示尺寸。无效或越界输入不改变视图，允许范围见控件提示。工具栏在窄窗口中换行；重新 `print()` 为新预览建立新的基准。以上均为 GUI 状态，不改变 R 对象、逻辑画布或导出尺寸。
 
-## 安装与初始化
+## 安装与初始化（跨平台与审稿人复现指引）
 
-运行时通过 processx 管理独立 Java 子进程，不依赖 rJava。Windows 验收环境为 R 4.5.2、processx 3.8.6 和 eGPS 自带 Java 25。需要事先安装 eGPS；本包只附带新增的桥接 JAR，不包含 eGPS 核心依赖。
+运行时通过 `processx` 管理独立 Java 25+ 子进程，不依赖 `rJava`。需要事先下载并解压与本版本配套的 **eGPS2 发行包**（GitHub Release / Zenodo 归档包中已自带兼容的 `dependency-egps/`、Batik 1.20 与 Java 25 JRE）；本 R 包只附带新增的桥接 JAR（`inst/java/yytree-bridge.jar`），不包含 eGPS2 核心依赖，安装源码包时也不要求用户现场编译 Java。
 
 ```r
+# 1. 安装 CRAN 依赖（R >= 4.2）
 install.packages(c("processx", "jsonlite", "ape"))
-# Windows 二进制包
-install.packages("yytree_0.1.0.zip", repos = NULL, type = "win.binary")
-# 或源代码包；包内已经包含编译好的 Java 桥接，不要求用户现场编译 Java
-# install.packages("yytree_0.1.0.tar.gz", repos = NULL, type = "source")
 
+# 2. 安装 yytree（二选一：所有平台均可从源码包安装，Windows 也可安装二进制包）
+# 跨平台源码包（Windows / Linux / macOS）：
+install.packages("yytree_0.1.0.tar.gz", repos = NULL, type = "source")
+# 或 Windows 二进制包：
+# install.packages("yytree_0.1.0.zip", repos = NULL, type = "win.binary")
+
+# 3. 按操作系统指向解压后的 eGPS2 目录并初始化
 library(yytree)
+# Windows 示例：Sys.setenv(EGPS_HOME = "D:/software/eGPS_v2_windows_x64")
+# Linux   示例：Sys.setenv(EGPS_HOME = "/opt/eGPS_v2_ubuntu_x64")
+# macOS   示例：Sys.setenv(EGPS_HOME = "/Applications/eGPS_v2_macOS.app")
+#   （macOS 支持直接传入 .app 包、外层解压目录或 Contents/Resources 目录）
 config_yytree(
-  path2egps = "C:/Users/yudal/Documents/project/eGPS2/eGPS_v2_windows_x64_selfTest",
+  path2egps = Sys.getenv("EGPS_HOME"),
   max_memory_heap = "4g",
   max_memory_stack = "8m"
 )
 ```
 
-`library(yytree)` 不启动 JVM。配置时优先使用安装目录的 `jre`，也支持 `JAVA_HOME`。兼容的 Java 25 JRE 足以运行，只有重新编译桥接 JAR 才需要完整 JDK 25。
+`library(yytree)` 不启动 JVM。配置时优先使用 eGPS2 自带 `jre`（含 macOS `jre/Contents/Home/bin/java` 布局），未内置时回退 `JAVA_HOME`。兼容的 Java 25 JRE 足以运行，只有重新编译桥接 JAR 才需要完整 JDK 25。Linux/macOS 解压分发包后如遇可执行权限丢失，可对 `jre/bin/java`（或 `jre/Contents/Home/bin/java`）执行 `chmod +x`。
 
 `max_memory_heap` 控制对象数据的堆内存（`-Xmx`，默认 `4g`），`max_memory_stack` 控制各线程的调用栈（`-Xss`，默认 `8m`）。深链树的 `StackOverflowError` 应调整栈，而非增加堆；栈仍有有限深度上限。两个参数都直接传入 Java 启动命令，更改其中任一项需 `restart = TRUE`。旧的 `max_memory=` 参数已移除，改用 `max_memory_heap=`。
 
@@ -212,8 +222,8 @@ print(y)
 在仓库根目录运行：
 
 ```powershell
-./scripts/build_yytree_bridge.ps1 -Egps 'C:/path/to/egps' -Jdk 'C:/path/to/jdk-25'
-& 'C:/R_envs/R-4.5.2/bin/Rscript.exe' --vanilla -e 'testthat::test_local("rPackage")'
+./scripts/build_yytree_bridge.ps1 -Egps $env:EGPS_HOME -Jdk $env:JAVA_HOME
+Rscript --vanilla -e 'testthat::test_local("rPackage")'
 ```
 
 普通 R 测试不启动 JVM；集成脚本在独立 R 进程中验证七种布局、全部元件、窗口和性能。`scripts/test_yytree_lifecycle.R` 另验证 JVM 复用、关窗重开、主动退出、崩溃恢复、大数据通信及 R 退出清理。新画布不加载 VOICE、模块发现或 eGPS 主框架。
@@ -230,11 +240,11 @@ print(y)
 
 完全无名的树自动按叶节点顺序编号；部分缺名仍报错。`leaf_labels()` 后一次调用替换此前的标签设置，未指定字体时恢复 eGPS 默认字体。环形布局 3、4 的标签与 MTV 一致，沿叶端径向旋转，左半圆自动翻转以保持正向可读；布局 3 紧跟真实叶端，布局 4 紧跟延长线末端，间距考虑节点大小。`align` 保留在接口中，但不影响环形标签。拱形标签仍在树外的水平区域内按 `left`、`center`、`right` 对齐；拱形布局根据扣除标签和轨道后的可用宽高适配，窄高画布会在垂直方向留出空白。Swing 预览与 PNG 导出共用 MTV 高质量渲染设置，并开启图形及文字抗锯齿。
 
-## 0.1.0 export limitations / 导出限制
+## 0.1.0 export limitations & cross-platform fonts / 导出限制与跨平台字体
 
-PDF is the priority vector format in 0.1.0. All current drawing layers, including free_heatmap cells, are exported as vectors; mapped text fonts are embedded. Large vector heatmaps can produce larger files. This is verified on the current Windows font environment; other platforms require separate font verification.
+PDF is the priority vector format in 0.1.0. All current drawing layers, including `free_heatmap` cells, are exported as vectors; mapped TrueType fonts are embedded with `/ToUnicode` mappings. Large vector heatmaps can produce larger files. `PdfExport` recursively scans standard Windows, Linux (`/usr/share/fonts`, `/usr/local/share/fonts`, `~/.local/share/fonts`, `~/.fonts`), and macOS (`/System/Library/Fonts`, `/Library/Fonts`, `~/Library/Fonts`) font directories as well as an optional `YYTREE_FONT_DIR` environment variable (or `-Dyytree.font.dir=...`). Note that eGPS2's bundled iText 5.1.3 requires TrueType-outline fonts (`.ttf` or TrueType `.ttc`) rather than OpenType-CFF `.ttc` collections (such as default Linux `NotoSansCJK-*.ttc`); on Linux hosts exporting CJK labels to PDF, install a TrueType CJK font (for example `fonts-wqy-microhei`, `fonts-wqy-zenhei`, or a TrueType `NotoSansSC-Regular.ttf`) or point `YYTREE_FONT_DIR` to one. Export pipelines have been verified on Windows and Linux (Ubuntu 22.04); macOS `.app` runtime/font paths are unit-tested and awaiting native macOS/CI runtime verification.
 
-PDF 是 0.1.0 优先验收的矢量格式。现有绘图图层（包括自由热图单元格）均输出为矢量，映射的文字字体会嵌入。大型全矢量热图可能增加文件体积。目前在本机 Windows 字体环境验证，其他平台须单独验证字体。
+PDF 是 0.1.0 优先验收的矢量格式。现有绘图图层（包括自由热图单元格）均输出为矢量，映射的 TrueType 字体以 `/ToUnicode` 方式嵌入。大型全矢量热图可能增加文件体积。`PdfExport` 会递归扫描 Windows、Linux（`/usr/share/fonts`、`/usr/local/share/fonts`、`~/.local/share/fonts`、`~/.fonts`）与 macOS（`/System/Library/Fonts`、`/Library/Fonts`、`~/Library/Fonts`）字体目录，并支持通过环境变量 `YYTREE_FONT_DIR` 注入自定义 TrueType 字体目录。注意：eGPS2 内置的 iText 5.1.3 要求 TrueType 轮廓字体（`.ttf` 或 TrueType `.ttc`），不支持 CFF 轮廓 `.ttc`（如 Linux 常见 `NotoSansCJK-*.ttc`）；在 Linux 导出中文 PDF 时，请安装 TrueType 中文字体（如 `fonts-wqy-microhei`、`fonts-wqy-zenhei` 或 TrueType `NotoSansSC-Regular.ttf`）或配置 `YYTREE_FONT_DIR`。当前已完成 Windows 与 Linux (Ubuntu 22.04) 实测验证；macOS `.app` 路径与字体扫描已完成代码适配与单元测试，实机运行时待 macOS/CI 核验。
 
 PDF regression: run scripts/test_yytree_pdf_vector.R with the eGPS installation path, then scripts/check_yytree_pdf_vector.py using Python with pypdf. validate_yytree.ps1 includes both checks; override -PdfPython for another Python interpreter.
 

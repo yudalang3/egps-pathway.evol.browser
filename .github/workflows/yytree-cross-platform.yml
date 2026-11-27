@@ -1,0 +1,76 @@
+name: yytree Cross-Platform Check
+
+on:
+  push:
+    paths:
+      - 'rPackage/**'
+      - 'scripts/*yytree*'
+      - '.github/workflows/yytree-cross-platform.yml'
+  pull_request:
+    paths:
+      - 'rPackage/**'
+      - 'scripts/*yytree*'
+  workflow_dispatch:
+    inputs:
+      egps_windows_url:
+        description: 'Optional URL to eGPS2 Windows x64 archive for full integration checks'
+        required: false
+        default: ''
+      egps_linux_url:
+        description: 'Optional URL to eGPS2 Linux x64 archive for full integration checks'
+        required: false
+        default: ''
+      egps_macos_url:
+        description: 'Optional URL to eGPS2 macOS archive for full integration checks'
+        required: false
+        default: ''
+
+jobs:
+  r-cmd-check:
+    name: R CMD check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - name: Install R package dependencies
+        shell: Rscript {0}
+        run: |
+          install.packages(c("processx", "jsonlite", "ape", "testthat", "pkgload"),
+                           repos = "https://cloud.r-project.org")
+
+      - name: Build and check yytree source package
+        shell: bash
+        run: |
+          mkdir -p temp/ci-check
+          cd temp/ci-check
+          R CMD build ../../rPackage
+          TARBALL="$(ls -1 yytree_*.tar.gz | head -n 1)"
+          R CMD check --no-manual --no-build-vignettes "$TARBALL"
+          grep -q '^Status: OK$' yytree.Rcheck/00check.log
+
+      - name: Verify source archive excludes local scratch scripts and hardcoded paths
+        shell: bash
+        run: |
+          TARBALL="$(ls -1 temp/ci-check/yytree_*.tar.gz | head -n 1)"
+          ! tar -tzf "$TARBALL" | grep -q '/human_test/'
+          mkdir -p temp/ci-unpack
+          tar -xzf "$TARBALL" -C temp/ci-unpack
+          ! grep -rnE 'C:/Users/yudal|C:\\Users\\yudal|C:/R_envs' temp/ci-unpack
+
+      - name: Upload Rcheck log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rcheck-${{ matrix.os }}
+          path: temp/ci-check/yytree.Rcheck/00check.log

@@ -15,7 +15,7 @@ export(plot, file)
 \item{file}{One output path ending in .pdf, .svg or .pptx; existing files are overwritten.}
 }
 \details{
-Configure Java first with config_yytree(). Output uses the logical canvas dimensions and the R plot definition. Preview navigation and edits not copied back to R are excluded. PPTX uses the existing eGPS exporter and retains its limitations.
+Configure Java first with config_yytree(). Output uses the logical canvas dimensions and the R plot definition. Preview navigation and edits not copied back to R are excluded. PDF export recursively discovers TrueType fonts across standard Windows, Linux, and macOS font directories plus optional YYTREE_FONT_DIR (iText 5.1.3 requires TrueType .ttf or TrueType .ttc fonts for Unicode/CJK embedding). SVG uses the shared Batik 1.20 exporter; PPTX uses the local POI adaptation.
 }
 \value{
 The absolute output path, invisibly.

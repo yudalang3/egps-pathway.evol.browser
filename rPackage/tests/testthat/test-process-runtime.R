@@ -110,3 +110,70 @@ test_that("quit forcibly terminates an unresponsive subprocess after its grace p
   expect_false(process$is_alive())
   expect_lt(elapsed, 3)
 })
+
+test_that("cross-platform eGPS root and Java resolvers support Windows, Linux, and macOS .app bundles", {
+  base <- tempfile("egps-layouts-")
+  dir.create(base, recursive = TRUE)
+  on.exit(unlink(base, recursive = TRUE, force = TRUE), add = TRUE)
+
+  # Standard Windows / Linux layout
+  std <- file.path(base, "std")
+  dir.create(file.path(std, "dependency-egps"), recursive = TRUE)
+  dir.create(file.path(std, "jre", "bin"), recursive = TRUE)
+  file.create(file.path(std, "jre", "bin", "java.exe"))
+  file.create(file.path(std, "jre", "bin", "java"))
+  if (.Platform$OS.type == "unix") Sys.chmod(file.path(std, "jre", "bin", "java"), "0755")
+  expect_identical(yytree:::.resolve_egps_root(std), normalizePath(std, winslash = "/"))
+  win_java <- yytree:::.resolve_java_runtime(std, java_home = "", os_type = "windows")
+  expect_identical(win_java$executable, file.path(normalizePath(file.path(std, "jre"), winslash = "/"), "bin", "java.exe"))
+  lin_java <- yytree:::.resolve_java_runtime(std, java_home = "", os_type = "unix")
+  expect_identical(lin_java$executable, file.path(normalizePath(file.path(std, "jre"), winslash = "/"), "bin", "java"))
+
+  # macOS .app bundle layout (both outer archive folder, .app bundle, and Contents/Resources)
+  mac_outer <- file.path(base, "eGPS_v2_macOS_AArch64")
+  mac_app <- file.path(mac_outer, "eGPS_v2_macOS.app")
+  mac_res <- file.path(mac_app, "Contents", "Resources")
+  dir.create(file.path(mac_res, "dependency-egps"), recursive = TRUE)
+  dir.create(file.path(mac_res, "jre", "Contents", "Home", "bin"), recursive = TRUE)
+  mac_java_bin <- file.path(mac_res, "jre", "Contents", "Home", "bin", "java")
+  file.create(mac_java_bin)
+  if (.Platform$OS.type == "unix") Sys.chmod(mac_java_bin, "0755")
+  expected_res <- normalizePath(mac_res, winslash = "/")
+  expect_identical(yytree:::.resolve_egps_root(mac_outer), expected_res)
+  expect_identical(yytree:::.resolve_egps_root(mac_app), expected_res)
+  expect_identical(yytree:::.resolve_egps_root(mac_res), expected_res)
+  mac_java <- yytree:::.resolve_java_runtime(expected_res, java_home = "", os_type = "unix")
+  expect_identical(mac_java$java, normalizePath(file.path(mac_res, "jre", "Contents", "Home"), winslash = "/"))
+  expect_identical(mac_java$executable, file.path(mac_java$java, "bin", "java"))
+
+  # JAVA_HOME fallback (including macOS .jdk/Contents/Home)
+  no_jre <- file.path(base, "no-jre")
+  dir.create(file.path(no_jre, "dependency-egps"), recursive = TRUE)
+  jdk_bundle <- file.path(base, "temurin-25.jdk")
+  dir.create(file.path(jdk_bundle, "Contents", "Home", "bin"), recursive = TRUE)
+  jdk_bin <- file.path(jdk_bundle, "Contents", "Home", "bin", "java")
+  file.create(jdk_bin)
+  if (.Platform$OS.type == "unix") Sys.chmod(jdk_bin, "0755")
+  fallback_java <- yytree:::.resolve_java_runtime(no_jre, java_home = jdk_bundle, os_type = "unix")
+  expect_identical(fallback_java$java, normalizePath(file.path(jdk_bundle, "Contents", "Home"), winslash = "/"))
+  expect_error(yytree:::.resolve_java_runtime(no_jre, java_home = "", os_type = "unix"), "No bundled Java")
+
+  # Non-Windows JVM args filter out Windows-only java.desktop exports
+  writeLines(c(
+    "# comment",
+    "--add-exports java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED",
+    "--add-exports java.desktop/sun.awt.windows=ALL-UNNAMED",
+    "--add-exports java.desktop/sun.swing=ALL-UNNAMED",
+    "--add-opens java.desktop/java.awt=ALL-UNNAMED",
+    "-Xmx2g",
+    "-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize"
+  ), file.path(std, "eGPS2.args"))
+  win_args <- yytree:::.read_egps_jvm_args(std, os_type = "windows")
+  unix_args <- yytree:::.read_egps_jvm_args(std, os_type = "unix")
+  expect_true(any(grepl("sun.awt.windows", win_args, fixed = TRUE)))
+  expect_false(any(grepl("sun.awt.windows", unix_args, fixed = TRUE)))
+  expect_false(any(grepl("plaf.windows", unix_args, fixed = TRUE)))
+  expect_true("--add-exports=java.desktop/sun.swing=ALL-UNNAMED" %in% unix_args)
+  expect_true("--add-opens=java.desktop/java.awt=ALL-UNNAMED" %in% unix_args)
+  expect_false(any(grepl("^-Xmx", unix_args)))
+})

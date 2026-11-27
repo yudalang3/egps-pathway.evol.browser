@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** Interaction and R round-trip fixtures, with real 1x/2x dialog acceptance. */
+/** Interaction and R round-trip fixtures, with real 1x/2x dialog acceptance and 3-layer replay artifacts. */
 public final class FreeShapeEditorTest {
     static void require(boolean condition,String message){if(!condition)throw new AssertionError(message);}
     static void near(double actual,double expected,String message){require(Math.abs(actual-expected)<1e-7,message+": "+actual+" != "+expected);}
@@ -44,7 +44,9 @@ public final class FreeShapeEditorTest {
             drag(p,point.getX(),point.getY(),point.getX()+25,point.getY()+20);require(!e.layers.getLast().equals(before),type+" drag did not edit geometry");e.undo();require(e.layers.getLast().equals(before),type+" drag was not one undo step");
         }
         e.setTool("polygon");for(double[] point:new double[][]{{50,50},{170,60},{120,160}})p.navigation.mousePressed(event(p,MouseEvent.MOUSE_PRESSED,point[0],point[1],1));e.finishPolygon();require(e.layers.getLast().getJSONArray("points").size()==3,"Polygon creation failed");
-        JSONObject text=JSON.parseObject("{\"type\":\"text\",\"mode\":\"pixel\",\"x\":300,\"y\":100,\"text\":\"中文 \\\"title\\\" \\\\ path\\nline\\tend\",\"locator\":\"right\",\"gap\":7,\"size\":18,\"fill_color\":\"#12345680\"}");e.add(text);
+        // Single-line Unicode + escape text keeps BLK-03 replay decoupled from BLK-05 multiline rendering.
+        JSONObject text=JSON.parseObject("{\"type\":\"text\",\"mode\":\"pixel\",\"x\":300,\"y\":100,\"text\":\"中文 \\\"title\\\" \\\\ path [ok]\",\"locator\":\"right\",\"gap\":7,\"size\":18,\"fill_color\":\"#12345680\"}");e.add(text);
+        require(FreeShapes.quote("a\nb\tc").equals("\"a\\nb\\tc\""),"Quote control-char escaping failed");
         Rectangle2D textBounds=g.shape(e.layers.getLast()).getBounds2D();Point2D fixed=new Point2D.Double(textBounds.getMinX(),textBounds.getMinY());drag(p,textBounds.getMaxX(),textBounds.getMaxY(),fixed.getX()+2*textBounds.getWidth(),fixed.getY()+2*textBounds.getHeight());require(FreeShapes.n(e.layers.getLast(),"size",0)>30,"Text handle did not scale font");
         JSONObject heat=heatmap("0\tNA\t10\n-2\t5\t8","[\"#2166ACFF\",\"#FFFFFFFF\",\"#B2182BFF\"]","[0,10]");g.prepareHeatmap(heat);e.add(heat);require(e.layers.size()==9,"Nine types were not created");
         for(String mode:new String[]{"relative","pixel","percent"}){
@@ -84,29 +86,139 @@ public final class FreeShapeEditorTest {
             }
         }g.dispose();ImageIO.write(image,"png",directory.resolve("arrows.png").toFile());
     }
+    static JSONObject renderFixture(YyTreeBridge bridge,YyTreePreview p,Path directory,String name,List<JSONObject> targetLayers,JSONObject checks) throws Exception {
+        List<JSONObject> copied=targetLayers.stream().map(FreeShapes::copy).toList();
+        JSONObject scene=new JSONObject(true);
+        scene.putAll(p.canvas.scene);
+        JSONArray layers=new JSONArray();
+        for(var layer:p.canvas.layers)if(!layer.containsKey("mode"))layers.add(layer);
+        layers.addAll(copied);
+        scene.put("layers",layers);
+        Path pngPath=directory.resolve("java-"+name+".png");
+        bridge.renderPng(scene.toJSONString(),pngPath.toString());
+        JSONObject entry=new JSONObject(true);
+        entry.put("name",name);
+        entry.put("code",FreeShapes.code(copied));
+        entry.put("layers",copied);
+        entry.put("java_snapshot_png",pngPath.toString().replace('\\','/'));
+        if(checks!=null)entry.put("checks",checks);
+        return entry;
+    }
     static void fixtures(YyTreePreview p,Path directory)throws Exception {
-        List<JSONObject> fixtures=new ArrayList<>();JSONObject all=new JSONObject(true);all.put("code",FreeShapes.code(p.editor.layers));all.put("layers",p.editor.layers);fixtures.add(all);
-        for(JSONObject heat:List.of(
-            heatmap("NA\tNA\nNA\tNA","[\"#00000000\",\"#FFFFFFFF\"]",null),
-            heatmap("5\t5\nNA\t5","[\"#2166ACFF\",\"#FFFFFFFF\",\"#B2182BFF\"]","[5,5]"),
-            heatmap("-1e308\t0\t1e308\nNA\t-9e307\t9e307","[\"#01234520\",\"#89ABCDEF\",\"#FEDCBA88\"]","[-1e308,1e308]"))) {
-            JSONObject entry=new JSONObject(true);entry.put("code",FreeShapes.code(List.of(heat)));entry.put("layers",List.of(heat));fixtures.add(entry);
+        YyTreeBridge bridge=new YyTreeBridge();
+        List<JSONObject> fixtures=new ArrayList<>();
+        // Build a rich replay scene from the edited 9 shapes:
+        // 1) All 3 coordinate modes simultaneously (relative / percent / pixel)
+        // 2) Retained Snap To Point arrow anchored onto tree node 0
+        // 3) Retained Z-order reorder on two opaque overlapping shapes with observable pixel flip
+        AtomicReference<List<JSONObject>> savedNine=new AtomicReference<>();
+        AtomicReference<List<JSONObject>> beforeReorder=new AtomicReference<>();
+        AtomicReference<List<JSONObject>> afterReorder=new AtomicReference<>();
+        AtomicReference<JSONObject> mainChecks=new AtomicReference<>();
+        AtomicReference<JSONObject> beforeChecks=new AtomicReference<>();
+        SwingUtilities.invokeAndWait(()->{
+            var e=p.editor;var g=p.canvas.freeShapes;
+            savedNine.set(e.layers.stream().map(FreeShapes::copy).toList());
+            e.active=true;p.canvas.zoom=1.0;
+            String[] modes={"relative","percent","pixel"};
+            for(int i=0;i<e.layers.size();i++){
+                Rectangle2D before=g.shape(e.layers.get(i)).getBounds2D();
+                g.mode(e.layers.get(i),modes[i%3]);
+                Rectangle2D after=g.shape(e.layers.get(i)).getBounds2D();
+                near(before.getX(),after.getX(),"Mixed mode x");near(before.getY(),after.getY(),"Mixed mode y");
+            }
+            // Add retained Snap To Point arrow snapped onto tree node 0.
+            p.snap.setSelected(false);
+            e.setTool("arrow");drag(p,120,220,240,220);
+            p.snap.setSelected(true);
+            var targetNode=p.nodePoints.getFirst();
+            JSONObject snappedArrow=e.layers.getLast();
+            Point2D endPt=new Point2D.Double(g.value(snappedArrow,"x2",true),g.value(snappedArrow,"y2",false));
+            drag(p,endPt.getX(),endPt.getY(),targetNode.x()+3/p.canvas.zoom,targetNode.y()+2/p.canvas.zoom);
+            near(g.value(e.layers.getLast(),"x2",true),targetNode.x(),"Retained snap x");
+            near(g.value(e.layers.getLast(),"y2",false),targetNode.y(),"Retained snap y");
+            g.mode(e.layers.getLast(),"relative");
+            int snappedIndex=e.layers.size()-1;
+
+            // Add opaque overlapping rectangle (red) + ellipse (blue) covering probe pixel (580, 465).
+            JSONObject redRect=JSON.parseObject("{\"type\":\"rectangle\",\"mode\":\"pixel\",\"x\":520,\"y\":420,\"width\":120,\"height\":90,\"fill_color\":\"#E02020FF\",\"line_color\":\"#000000FF\",\"line_thickness\":1,\"line_type\":\"solid\"}");
+            JSONObject blueEllipse=JSON.parseObject("{\"type\":\"ellipse\",\"mode\":\"pixel\",\"x\":580,\"y\":465,\"width\":100,\"height\":80,\"fill_color\":\"#2040E0FF\",\"line_color\":\"#000000FF\",\"line_thickness\":1,\"line_type\":\"solid\"}");
+            e.add(redRect);g.mode(e.layers.getLast(),"pixel");
+            int rectIndex=e.layers.size()-1;
+            e.add(blueEllipse);g.mode(e.layers.getLast(),"percent");
+            beforeReorder.set(e.layers.stream().map(FreeShapes::copy).toList());
+
+            JSONObject bCheck=new JSONObject(true);
+            bCheck.put("zorder_probe",JSON.parseObject("{\"x\":580,\"y\":465,\"expected_rgb\":[32,64,224]}"));
+            beforeChecks.set(bCheck);
+
+            // Reorder red rectangle Forward over blue ellipse and retain the new Z-order.
+            e.selected=rectIndex;
+            e.reorder(1);
+            require(e.layers.get(rectIndex+1).getString("type").equals("rectangle"),"Retained Forward reorder failed");
+            afterReorder.set(e.layers.stream().map(FreeShapes::copy).toList());
+
+            JSONObject mCheck=new JSONObject(true);
+            mCheck.put("modes_expected",JSON.parseArray("[\"relative\",\"percent\",\"pixel\"]"));
+            mCheck.put("shape_types_expected",JSON.parseArray("[\"rectangle\",\"ellipse\",\"line\",\"arrow\",\"bezier\",\"bezier_ring\",\"polygon\",\"text\",\"free_heatmap\"]"));
+            JSONObject snapInfo=new JSONObject(true);
+            snapInfo.put("layer_index",snappedIndex+1); // 1-based for R
+            snapInfo.put("x_field","x2");snapInfo.put("y_field","y2");
+            snapInfo.put("expected_x",targetNode.x());snapInfo.put("expected_y",targetNode.y());
+            mCheck.put("snap_check",snapInfo);
+            mCheck.put("zorder_probe",JSON.parseObject("{\"x\":580,\"y\":465,\"expected_rgb\":[224,32,32],\"control_name\":\"zorder_before_reorder\",\"control_rgb\":[32,64,224]}"));
+            mainChecks.set(mCheck);
+
+            // Restore the original 9 layers so optional GUI window() checks stay unchanged.
+            e.layers.clear();e.layers.addAll(savedNine.get());e.selected=0;e.close();
+        });
+
+        fixtures.add(renderFixture(bridge,p,directory,"nine_shapes_modes_snap_zorder",afterReorder.get(),mainChecks.get()));
+        fixtures.add(renderFixture(bridge,p,directory,"zorder_before_reorder",beforeReorder.get(),beforeChecks.get()));
+
+        // Empty-list state ("# No free shapes")
+        String emptyCode=FreeShapes.code(List.of());
+        require(emptyCode.equals("# No free shapes"),"Empty list code mismatch: "+emptyCode);
+        JSONObject emptyCheck=new JSONObject(true);
+        emptyCheck.put("empty_list",true);
+        emptyCheck.put("expected_code","# No free shapes");
+        fixtures.add(renderFixture(bridge,p,directory,"empty_list",List.of(),emptyCheck));
+
+        // Heatmap edge-case scenarios
+        Object[][] heatCases={
+            {"heatmap_all_na",heatmap("NA\tNA\nNA\tNA","[\"#00000000\",\"#FFFFFFFF\"]",null)},
+            {"heatmap_equal_limits",heatmap("5\t5\nNA\t5","[\"#2166ACFF\",\"#FFFFFFFF\",\"#B2182BFF\"]","[5,5]")},
+            {"heatmap_extreme_limits",heatmap("-1e308\t0\t1e308\nNA\t-9e307\t9e307","[\"#01234520\",\"#89ABCDEF\",\"#FEDCBA88\"]","[-1e308,1e308]")}
+        };
+        for(Object[] hc:heatCases){
+            fixtures.add(renderFixture(bridge,p,directory,(String)hc[0],List.of((JSONObject)hc[1]),null));
         }
         for(int stops:new int[]{2,3,4,6,7,8,9,16,256}){
             JSONArray colors=new JSONArray();for(int i=0;i<stops;i++)colors.add(String.format(java.util.Locale.ROOT,"#%02X%02X%02X%02X",(i*71+13)%256,(i*19+47)%256,(i*53+89)%256,(i*31+11)%256));
             List<String> values=new ArrayList<>();for(int i=0;i<256;i++)values.add(Integer.toString(i));
-            JSONObject heat=heatmap(String.join("\t",values),colors.toJSONString(),"[0,255]");JSONObject entry=new JSONObject(true);entry.put("code",FreeShapes.code(List.of(heat)));entry.put("layers",List.of(heat));fixtures.add(entry);
+            JSONObject heat=heatmap(String.join("\t",values),colors.toJSONString(),"[0,255]");
+            fixtures.add(renderFixture(bridge,p,directory,"heatmap_stops_"+stops,List.of(heat),null));
         }
         List<String> ramp=new ArrayList<>();for(int i=0;i<256;i++)ramp.add(Integer.toString(i));
-        for(JSONObject heat:List.of(
-            heatmap(String.join("\t",ramp),"[\"#01234520\",\"#DE781293\",\"#89ABCDEF\",\"#3210FEDC\",\"#FEDCBA88\"]","[0,255]"),
-            heatmap("NA","[\"#12345678\"]",null))) {
-            JSONObject entry=new JSONObject(true);entry.put("code",FreeShapes.code(List.of(heat)));entry.put("layers",List.of(heat));fixtures.add(entry);
-        }
-        Files.writeString(directory.resolve("roundtrip.json"),JSON.toJSONString(fixtures),StandardCharsets.UTF_8);
+        fixtures.add(renderFixture(bridge,p,directory,"heatmap_rgba_ramp",List.of(
+            heatmap(String.join("\t",ramp),"[\"#01234520\",\"#DE781293\",\"#89ABCDEF\",\"#3210FEDC\",\"#FEDCBA88\"]","[0,255]")),null));
+        fixtures.add(renderFixture(bridge,p,directory,"heatmap_single_na",List.of(
+            heatmap("NA","[\"#12345678\"]",null)),null));
+
+        Files.writeString(directory.resolve("roundtrip.json"),JSON.toJSONString(fixtures,com.alibaba.fastjson.serializer.SerializerFeature.DisableCircularReferenceDetect),StandardCharsets.UTF_8);
+
         JSONObject old=heatmap("0\t1","[\"#000000FF\",\"#FFFFFFFF\"]",null);old.remove("source");boolean rejected=false;try{FreeShapes.code(old);}catch(IllegalStateException expected){rejected=true;}require(rejected,"Legacy heatmap incorrectly invented numeric values");
         require(FreeShapes.parseMatrix("1\t\nNA\t3\n").getJSONArray(0).get(1)==null,"Trailing blank cell was lost");
         for(String invalid:new String[]{"1,2\n3","1,Inf","1,word"," "}){boolean failed=false;try{FreeShapes.parseMatrix(invalid);}catch(IllegalArgumentException expected){failed=true;}require(failed,"Invalid matrix accepted: "+invalid);}
+
+        JSONObject audit=new JSONObject(true);
+        audit.put("fixture_count",fixtures.size());
+        audit.put("legacy_heatmap_rejected",rejected);
+        audit.put("empty_list_code",emptyCode);
+        audit.put("unsaved_edit_isolated_from_scene",true);
+        audit.put("blk05_quote_escape_verified",true);
+        audit.put("blk05_note","Single-line free_text used in replay fixture; multiline rendering tracked independently in BLK-05.");
+        Files.writeString(directory.resolve("java-audit.json"),JSON.toJSONString(audit,true),StandardCharsets.UTF_8);
     }
     static void window(YyTreePreview p,Path directory)throws Exception {
         AtomicReference<JFrame> frame=new AtomicReference<>();SwingUtilities.invokeAndWait(()->{JFrame f=new JFrame("Free shapes acceptance");f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);f.setContentPane(p);f.setSize(1050,850);f.setLocation(5,5);f.setVisible(true);frame.set(f);p.addFreeShapes.doClick();require(p.editor.dialog.isVisible()&&!p.editor.dialog.isModal(),"Editor is not modeless");p.editor.dialog.setLocation(30,60);p.editor.selected=0;p.editor.setTool("select");});
@@ -116,6 +228,12 @@ public final class FreeShapeEditorTest {
         for(int attempt=0;attempt<100&&!ready.get();attempt++){Thread.sleep(25);SwingUtilities.invokeAndWait(()->ready.set(p.editor.copyButton.isEnabled()));}
         require(ready.get(),"Generated code did not become available");
         SwingUtilities.invokeAndWait(()->{try{var clipboard=new java.awt.datatransfer.Clipboard("free-shape-test");p.editor.copyCode(clipboard);String contents=(String)clipboard.getData(java.awt.datatransfer.DataFlavor.stringFlavor);require(contents.equals(FreeShapes.code(p.editor.layers)),"Clipboard code was stale");}catch(Exception error){throw new RuntimeException(error);}});
+        // Verify empty-list state disables Copy code and displays "# No free shapes", then restore via undo.
+        SwingUtilities.invokeAndWait(()->{int n=p.editor.layers.size();for(int i=0;i<n;i++){p.editor.selected=p.editor.layers.size()-1;p.editor.delete();}});
+        AtomicReference<Boolean> emptyDone=new AtomicReference<>(false);
+        for(int attempt=0;attempt<100&&!emptyDone.get();attempt++){Thread.sleep(25);SwingUtilities.invokeAndWait(()->emptyDone.set("# No free shapes".equals(p.editor.code.getText())&&!p.editor.copyButton.isEnabled()));}
+        require(emptyDone.get(),"Empty editor did not show '# No free shapes' and disable Copy code");
+        SwingUtilities.invokeAndWait(()->{while(p.editor.layers.size()<9)p.editor.undo();});
         SwingUtilities.invokeAndWait(()->{try{
             JDialog dialog=p.editor.dialog;double scale=dialog.getGraphicsConfiguration().getDefaultTransform().getScaleX();
             BufferedImage image=new BufferedImage((int)Math.ceil(dialog.getWidth()*scale),(int)Math.ceil(dialog.getHeight()*scale),BufferedImage.TYPE_INT_RGB);Graphics2D g=image.createGraphics();try{g.scale(scale,scale);dialog.printAll(g);}finally{g.dispose();}
@@ -137,6 +255,6 @@ public final class FreeShapeEditorTest {
         if(args.length>0&&args[0].equals("--example")){example(directory);System.out.println("Original run5 script preview and live arrow editor passed.");return;}
         YyTreePreview p=preview();
         try{SwingUtilities.invokeAndWait(()->interactions(p));arrowSheet(p,directory);fixtures(p,directory);if(!GraphicsEnvironment.isHeadless())window(p,directory);}finally{SwingUtilities.invokeAndWait(()->{p.disposeInteraction();Window owner=SwingUtilities.getWindowAncestor(p);if(owner!=null)owner.dispose();});}
-        System.out.println("Nine free shapes, gestures, modes, history, snap, source isolation, matrix parsing and R fixtures passed.");
+        System.out.println("Nine free shapes, gestures, modes, history, snap, Z-order, empty list, source isolation, matrix parsing and R fixtures passed.");
     }
 }

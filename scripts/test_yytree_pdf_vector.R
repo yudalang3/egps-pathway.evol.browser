@@ -1,7 +1,11 @@
 args <- commandArgs(trailingOnly = TRUE)
-library(yytree, lib.loc = "rPackage/library")
-config_yytree(args[1])
-out <- "temp/yytree-pdf-vector"
+egps <- if (length(args) >= 1L && nzchar(args[1])) args[1] else Sys.getenv("EGPS_HOME")
+if (!nzchar(egps)) stop('Pass the eGPS2 path as argv[1] or set EGPS_HOME.', call. = FALSE)
+out <- if (length(args) >= 2L && nzchar(args[2])) args[2] else "temp/yytree-pdf-vector"
+lib_dir <- if (length(args) >= 3L && nzchar(args[3])) args[3] else if (dir.exists("rPackage/library/yytree")) "rPackage/library" else if (dir.exists("temp/yytree-library/yytree")) "temp/yytree-library" else NULL
+if (!is.null(lib_dir)) .libPaths(c(normalizePath(lib_dir, winslash = "/"), .libPaths()))
+library(yytree)
+config_yytree(egps)
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 tryCatch({
   tree <- "((中文:1,English:2):1,Long_leaf_label:3);"
